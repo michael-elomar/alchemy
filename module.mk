@@ -1,0 +1,136 @@
+###############################################################################
+## @file module.mk
+## @author Y.M. Morgan
+## @date 2012/04/17
+##
+## Build a module.
+###############################################################################
+
+# Bring back all LOCAL_XXX variables defined by LOCAL_MODULE
+$(call module-restore-locals,$(LOCAL_MODULE))
+
+# Do we need to copy build module to staging dir
+copy_to_staging := 0
+
+# Full path to build module
+LOCAL_BUILD_MODULE := $(call module-get-build-filename,$(LOCAL_MODULE))
+
+# Full path to staging module
+LOCAL_STAGING_MODULE := $(call module-get-staging-filename,$(LOCAL_MODULE))
+
+# Assemble the list of targets to create PRIVATE_ variables for.
+LOCAL_TARGETS := $(LOCAL_BUILD_MODULE) clean-$(LOCAL_MODULE)
+
+###############################################################################
+## Rule-specific variable definitions.
+###############################################################################
+
+$(LOCAL_TARGETS): PRIVATE_PATH := $(LOCAL_PATH)
+$(LOCAL_TARGETS): PRIVATE_MODULE := $(LOCAL_MODULE)
+$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES := $(LOCAL_BUILD_MODULE)
+$(LOCAL_TARGETS): PRIVATE_CLEAN_DIRS :=
+
+###############################################################################
+## General rules.
+###############################################################################
+
+# Short hand to build module
+.PHONY: $(LOCAL_MODULE)
+$(LOCAL_MODULE): $(LOCAL_BUILD_MODULE)
+
+# Clean module (several other rules with commands can be added using ::)
+.PHONY: clean-$(LOCAL_MODULE)
+clean-$(LOCAL_MODULE)::
+	@echo "Clean: $(PRIVATE_MODULE)"
+	$(Q)$(if $(PRIVATE_CLEAN_FILES),rm -f $(PRIVATE_CLEAN_FILES))
+	$(Q)$(if $(PRIVATE_CLEAN_DIRS),rm -rf $(PRIVATE_CLEAN_DIRS))
+
+###############################################################################
+## Static library.
+###############################################################################
+
+ifeq ("$(LOCAL_MODULE_CLASS)","STATIC_LIBRARY")
+
+include $(BUILD_SYSTEM)/binary-rules.mk
+
+$(LOCAL_BUILD_MODULE): $(all_objects)
+	$(transform-o-to-static-lib)
+
+copy_to_staging := 1
+
+endif
+
+###############################################################################
+## Shared library.
+###############################################################################
+
+ifeq ("$(LOCAL_MODULE_CLASS)","SHARED_LIBRARY")
+
+include $(BUILD_SYSTEM)/binary-rules.mk
+
+$(LOCAL_BUILD_MODULE): $(all_objects) $(all_libraries)
+	$(transform-o-to-shared-lib)
+
+copy_to_staging := 1
+
+endif
+
+###############################################################################
+## Executable.
+###############################################################################
+
+ifeq ("$(LOCAL_MODULE_CLASS)","EXECUTABLE")
+
+include $(BUILD_SYSTEM)/binary-rules.mk
+
+$(LOCAL_BUILD_MODULE): $(all_objects) $(all_libraries)
+	$(transform-o-to-executable)
+
+copy_to_staging := 1
+
+endif
+
+###############################################################################
+## Autotools.
+###############################################################################
+
+ifeq ("$(LOCAL_MODULE_CLASS)","AUTOTOOLS")
+
+include $(BUILD_SYSTEM)/autotools-rules.mk
+
+endif
+
+###############################################################################
+## Files to copy.
+###############################################################################
+
+ifneq ("$(LOCAL_COPY_FILES)","")
+
+# List of all destination files
+all_copy_files :=
+
+# Generate a rule to copy all files
+$(foreach __pair,$(LOCAL_COPY_FILES), \
+	$(eval __pair2 := $(subst :,$(space),$(__pair))) \
+	$(eval __src := $(addprefix $(LOCAL_PATH)/,$(word 1,$(__pair2)))) \
+	$(eval __dst := $(addprefix $(TARGET_OUT_STAGING)/,$(word 2,$(__pair2)))) \
+	$(eval all_copy_files += $(__dst)) \
+	$(eval $(call copy-one-file,$(__src),$(__dst))) \
+)
+
+# Add files to be copied as pre-requisites
+$(LOCAL_BUILD_MODULE): $(all_copy_files)
+
+# Add rule to delete copied files during clean
+clean-$(LOCAL_MODULE):: PRIVATE_CLEAN_FILES += $(all_copy_files)
+
+endif
+
+###############################################################################
+## Copy to staging dir
+###############################################################################
+
+ifeq ("$(copy_to_staging)","1")
+$(eval $(call copy-one-file,$(LOCAL_BUILD_MODULE),$(LOCAL_STAGING_MODULE)))
+endif
+
