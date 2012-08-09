@@ -123,12 +123,20 @@ AUTOTOOLS_CONFIGURE_ENV := \
 	CXXFLAGS="$(TARGET_GLOBAL_C_INCLUDES) $(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CPPFLAGS)" \
 	LDFLAGS="$(TARGET_GLOBAL_LDFLAGS) $(TARGET_GLOBAL_LDLIBS)" \
 	DYN_LDFLAGS="$(TARGET_GLOBAL_LDFLAGS_SHARED) $(TARGET_GLOBAL_LDLIBS_SHARED)" \
-	PKG_CONFIG_SYSROOT="$(TARGET_OUT_STAGING)" \
-	PKG_CONFIG="$(TARGET_OUT_STAGING)/usr/bin/pkg-config"
+
+#	PKG_CONFIG_SYSROOT="$(TARGET_OUT_STAGING)" \
+#	PKG_CONFIG="$(TARGET_OUT_STAGING)/usr/bin/pkg-config"
+
+# FIXME : put this somewehere else...
+ifeq ("$(TARGET_OS_FLAVOUR)","ANDROID")
+GNU_TARGET_NAME := arm-eabi
+else
+GNU_TARGET_NAME := arm-none-linux-gnueabi
+endif
 
 # Arguments to give to configure script
 AUTOTOOLS_CONFIGURE_ARGS := \
-	--host="arm-eabi" \
+	--host="${GNU_TARGET_NAME}" \
 	--prefix="$(TARGET_OUT_STAGING)/usr"
 
 # Environment to use when executing make
