@@ -74,7 +74,7 @@ __begin-diff = \
 __end-diff = \
 	if [ "$$(stat -c %s $${__tmpdiff})" != "0" ]; then \
 		echo "Configuration diff can be found in $${__tmpdiff}"; \
-		if [ "$1" == "1" ]; then exit 1; fi; \
+		if [ "$1" = "1" ]; then exit 1; fi; \
 	else \
 		rm -f $${__tmpdiff}; \
 	fi;
@@ -315,7 +315,7 @@ config-modules-%:
 		$(eval __mod := $*) \
 		$(eval __config := $(call __get_module-config,$(__mod))) \
 		$(eval __files := $(call __get_module-config-in-files,$(__mod))) \
-		if [ "$(__files)" == "" ]; then \
+		if [ "$(__files)" = "" ]; then \
 			echo "Nothing to configure for $(__mod)"; \
 		else \
 			__tmpconfigin=$$(mktemp); \
