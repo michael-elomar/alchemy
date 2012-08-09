@@ -88,7 +88,7 @@ endif
 ###############################################################################
 
 # Unpack + patch
-$(unpacked_file): $(archive_file) $(addprefix $(LOCAL_PATH)/,$(patches))
+$(unpacked_file): $(archive_file) $(addprefix $(LOCAL_PATH)/,$(patches)) $(all_external_libraries)
 	@echo "Unpacking $(call path-from-top,$<)"
 	@mkdir -p $(PRIVATE_UNPACK_DIR)
 	$(Q)$(call $(PRIVATE_CMD_UNPACK))

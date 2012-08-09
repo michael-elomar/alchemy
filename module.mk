@@ -21,6 +21,17 @@ LOCAL_STAGING_MODULE := $(call module-get-staging-filename,$(LOCAL_MODULE))
 # Assemble the list of targets to create PRIVATE_ variables for.
 LOCAL_TARGETS := $(LOCAL_BUILD_MODULE) clean-$(LOCAL_MODULE)
 
+# Add external libraries used by static libraries
+LOCAL_EXTERNAL_LIBRARIES += \
+	$(call module-get-depends,$(LOCAL_STATIC_LIBRARIES),EXTERNAL_LIBRARIES)
+LOCAL_EXTERNAL_LIBRARIES += \
+	$(call module-get-depends,$(LOCAL_WHOLE_STATIC_LIBRARIES),EXTERNAL_LIBRARIES)
+
+# List of external libraries that we need to depend on
+all_external_libraries := \
+	$(foreach lib,$(LOCAL_EXTERNAL_LIBRARIES), \
+		$(call module-get-build-filename,$(lib)))
+
 ###############################################################################
 ## Rule-specific variable definitions.
 ###############################################################################

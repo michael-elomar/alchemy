@@ -99,10 +99,6 @@ all_whole_static_libraries := \
 	$(foreach lib,$(LOCAL_WHOLE_STATIC_LIBRARIES), \
 		$(call module-get-staging-filename,$(lib)))
 
-all_external_libraries := \
-	$(foreach lib,$(LOCAL_EXTERNAL_LIBRARIES), \
-		$(call module-get-build-filename,$(lib)))
-
 # all_libraries is used for the dependencies.
 all_libraries := \
 	$(all_shared_libraries) \
