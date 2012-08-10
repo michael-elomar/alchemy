@@ -152,11 +152,20 @@ $(AUTOCONF_MERGE_FILE): $(__autoconf-list)
 # Main rules.
 ###############################################################################
 
+# All modules
+ALL_MODULES := \
+	$(foreach __mod,$(__modules),$(__mod))
+
+# All module to actually build
+ALL_BUILD_MODULES := \
+	$(foreach __mod,$(__modules), \
+		$(if $(CONFIG_BUILD_$(call get-define,$(__mod))),$(__mod)))
+
 .PHONY: all
-all: $(foreach __mod,$(__modules),$(__mod)) $(AUTOCONF_MERGE_FILE)
+all: $(ALL_BUILD_MODULES) $(AUTOCONF_MERGE_FILE)
 
 .PHONY: clean
-clean: $(foreach __mod,$(__modules),clean-$(__mod))
+clean: $(foreach __mod,$(ALL_MODULES),clean-$(__mod))
 	@rm -f $(AUTOCONF_MERGE_FILE)
 
 # Generate final tree
