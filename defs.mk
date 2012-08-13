@@ -248,6 +248,7 @@ modules-dump-database = \
 	) \
 	$(info --- end of modules list)
 
+# This will only dump dependencies
 modules-dump-database-depends = \
 	$(foreach __mod,$(__modules), \
 		$(info $(__mod):) \
@@ -263,14 +264,30 @@ module-add = \
 	$(if $(LOCAL_MODULE),$(empty), \
 		$(error $(LOCAL_PATH): LOCAL_MODULE is not defined)) \
 	$(eval __mod := $(LOCAL_MODULE)) \
+	$(if $(call is-module-registered,$(__mod)), \
+		$(eval __path := $(__modules.$(__mod).PATH)) \
+		$(error $(LOCAL_PATH): module '$(__mod)' already registered at $(__path)) \
+	) \
 	$(eval __modules += $(__mod)) \
 	$(foreach __local,$(modules-LOCALS), \
 		$(eval __modules.$(__mod).$(__local) := $(LOCAL_$(__local))) \
 	)
 
-#	$(if $(findstring $(__mod),$(__modules)), \
-#		$(eval __path := $(__modules.$(__mod).PATH)) \
-#		$(error $(LOCAL_PATH): module $(__mod) already registered at $(__path))) \
+###############################################################################
+## Check that a module is registered.
+## $1 : module to check.
+###############################################################################
+is-module-registered = \
+	$(strip $(foreach __mod,$(__modules), \
+		$(if $(call streq,$(__mod),$1),$(true)) \
+	))
+
+###############################################################################
+## Check that a module wil be built.
+## $1 : module to check.
+###############################################################################
+is-module-in-build-config = \
+	$(if $(CONFIG_BUILD_$(call get-define,$1)),$(true))
 
 ###############################################################################
 ## Restore the recorded LOCAL_XXX definitions for a given module. Called
@@ -297,6 +314,15 @@ modules-check-depends = \
 # Check dependency of a module
 # $1 : module name.
 __module-check-depends = \
+	$(foreach __lib,$(__modules.$1.depends), \
+		$(if $(call is-module-registered,$(__lib)),$(empty), \
+			$(eval __path := $(__modules.$1.PATH)) \
+			$(if $(call is-module-in-build-config,$1), \
+				$(error $(__path): module '$1' depends on unknown module '$(__lib)'), \
+				$(warning $(__path): module '$1' depends on unknown module '$(__lib)') \
+			) \
+		) \
+	) \
 	$(call __module-check-libs-class,$1,WHOLE_STATIC_LIBRARIES,STATIC_LIBRARY) \
 	$(call __module-check-libs-class,$1,STATIC_LIBRARIES,STATIC_LIBRARY) \
 	$(call __module-check-libs-class,$1,SHARED_LIBRARIES,SHARED_LIBRARY) \
@@ -315,7 +341,11 @@ __module-check-libs-class = \
 # $3 : class to check (STATIC_LIBRARY,SHARED_LIBRARY)
 __module-check-lib-class = \
 	$(if $(call strneq,$(__modules.$2.MODULE_CLASS),$3), \
-		$(warning module $1 : $2 is not of class $3) \
+		$(eval __path := $(__modules.$1.PATH)) \
+		$(if $(call is-module-in-build-config,$1), \
+			$(error $(__path): module '$1' depends on module '$2' which is not of class '$3'), \
+			$(warning $(__path): module '$1' depends on module '$2' which is not of class '$3') \
+		) \
 	)
 
 ###############################################################################

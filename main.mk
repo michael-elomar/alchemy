@@ -159,7 +159,7 @@ ALL_MODULES := \
 # All module to actually build
 ALL_BUILD_MODULES := \
 	$(foreach __mod,$(__modules), \
-		$(if $(CONFIG_BUILD_$(call get-define,$(__mod))),$(__mod)))
+		$(if $(call is-module-in-build-config,$(__mod)),$(__mod)))
 
 .PHONY: all
 all: $(ALL_BUILD_MODULES) $(AUTOCONF_MERGE_FILE)
