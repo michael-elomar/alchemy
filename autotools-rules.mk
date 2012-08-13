@@ -49,11 +49,12 @@ __default-make-install = \
 	+$(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) $(MAKE) -C $(PRIVATE_SRC_DIR) \
 		$(AUTOTOOLS_MAKE_ARGS) $(PRIVATE_MAKE_INSTALL_ARGS) install
 
-# Note : use '-' to continue even in case of error
+# Note force success for command in case "uninstall" is not supported or Makefile not present
 __default-clean = \
-	-[ -d $(PRIVATE_SRC_DIR) ] && \
+	([ -d $(PRIVATE_SRC_DIR) ] && \
 		$(AUTOTOOLS_MAKE_ENV) $(MAKE) -C $(PRIVATE_SRC_DIR) \
-			$(AUTOTOOLS_MAKE_ARGS) uninstall
+			$(AUTOTOOLS_MAKE_ARGS) uninstall) \
+		|| true
 
 __apply-patches = \
 	$(BUILD_SYSTEM)/apply-patches.sh $(PRIVATE_SRC_DIR) $(PRIVATE_PATH) $(PRIVATE_PATCHES)
