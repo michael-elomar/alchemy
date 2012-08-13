@@ -49,8 +49,11 @@ __default-make-install = \
 	+$(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) $(MAKE) -C $(PRIVATE_SRC_DIR) \
 		$(AUTOTOOLS_MAKE_ARGS) $(PRIVATE_MAKE_INSTALL_ARGS) install
 
+# Note : use '-' to continue even in case of error
 __default-clean = \
-	rm -rf $(PRIVATE_MODULE_BUILD_DIR)
+	-[ -d $(PRIVATE_SRC_DIR) ] && \
+		$(AUTOTOOLS_MAKE_ENV) $(MAKE) -C $(PRIVATE_SRC_DIR) \
+			$(AUTOTOOLS_MAKE_ARGS) uninstall
 
 __apply-patches = \
 	$(BUILD_SYSTEM)/apply-patches.sh $(PRIVATE_SRC_DIR) $(PRIVATE_PATH) $(PRIVATE_PATCHES)
@@ -125,6 +128,11 @@ $(LOCAL_BUILD_MODULE): $(installed_file)
 clean-$(LOCAL_MODULE)::
 	$(Q)$(call $(PRIVATE_CMD_CLEAN))
 	$(Q)$(if $(PRIVATE_CMD_POST_CLEAN), $(call $(PRIVATE_CMD_POST_CLEAN)))
+	$(Q)rm -f $(installed_file)
+	$(Q)rm -f $(built_file)
+	$(Q)rm -f $(configured_file)
+	$(Q)rm -f $(unpacked_file)
+	$(Q)rm -rf $(PRIVATE_MODULE_BUILD_DIR)
 
 ###############################################################################
 ## Rule-specific variable definitions.
