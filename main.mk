@@ -126,6 +126,9 @@ $(call modules-compute-depends)
 # Check dependencies
 $(call modules-check-depends)
 
+# Check variables of modules
+$(call modules-check-variables)
+
 # Now, really generate rules for modules.
 # This second pass allows to deal with exported values.
 $(foreach __mod,$(__modules), \
@@ -186,6 +189,10 @@ dump:
 .PHONY: dump-depends
 dump-depends:
 	$(call modules-dump-database-depends)
+
+# Dummy target to check internal variables
+.PHONY: check
+check:
 
 ###############################################################################
 # Display configuration.

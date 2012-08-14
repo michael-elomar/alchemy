@@ -141,7 +141,7 @@ modules-LOCALS += EXTERNAL_LIBRARIES
 modules-LOCALS += LIBRARIES
 
 # Additional include directories to pass into the C/C++ compilers
-# Format : -I<fullpath>
+# Format : <fullpath> (-I will be prepended automatically)
 modules-LOCALS += C_INCLUDES
 
 # Additional flags to pass into the C or C++ compiler
@@ -349,6 +349,42 @@ __module-check-lib-class = \
 	)
 
 ###############################################################################
+## Used to make some internal checks.
+###############################################################################
+
+# Check variables of all modules
+modules-check-variables = \
+	$(foreach __mod,$(__modules), \
+		$(call __module-check-variables,$(__mod)) \
+	)
+
+# Check variables of a module
+# $1 : module name.
+__module-check-variables = \
+	$(call __module-check-src-files,$1) \
+	$(call __module-check-c-includes,$1)
+
+# Check that all files listed in LOCAL_SRC_FILES exist
+# $1 : module name.
+__module-check-src-files = \
+	$(eval __path := $(__modules.$1.PATH)) \
+	$(foreach __file,$(__modules.$1.SRC_FILES), \
+		$(if $(wildcard $(__path)/$(__file)),$(empty), \
+			$(warning $(__path): module '$1' uses missing source file '$(__file)') \
+		) \
+	)
+
+# Check that all directory listed in LOCAL_C_INCLUDES exist
+__module-check-c-includes = \
+	$(eval __path := $(__modules.$1.PATH)) \
+	$(foreach __inc,$(__modules.$1.C_INCLUDES), \
+		$(eval __inc2 := $(patsubst -I%,%,$(__inc))) \
+		$(if $(wildcard $(__inc2)),$(empty), \
+			$(warning $(__path): module '$1' uses missing include '$(__inc2)') \
+		) \
+	)
+
+###############################################################################
 ## Used to compute all dependencies once all module information has been
 ## recorded.
 ###############################################################################
@@ -494,6 +530,15 @@ define generate-autoconf-file
 endef
 
 ###############################################################################
+## Normalize a list of includes. It adds -I if needed.
+## $1 : list of includes
+###############################################################################
+normalize-c-includes = \
+	$(strip $(foreach __inc,$1, \
+		$(addprefix -I,$(patsubst -I%,%,$(__inc))) \
+	))
+
+###############################################################################
 ## Print some banners.
 ## $1 : operation.
 ## $2 : module.
@@ -534,7 +579,8 @@ define transform-h-to-gch
 $(call print-banner1,"Precompile",$(PRIVATE_MODULE),$(call path-from-top,$<))
 $(call check-pwd-is-top-dir)
 $(Q)$(CCACHE) $(TARGET_GXX) \
-	$(TARGET_GLOBAL_C_INCLUDES) $(PRIVATE_C_INCLUDES) \
+	$(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES)) \
+	$(call normalize-c-includes,$(PRIVATE_C_INCLUDES)) \
 	$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CPPFLAGS) $(GXX_FLAGS_WARNINGS) \
 	$(PRIVATE_CFLAGS) $(PRIVATE_CPPFLAGS) \
 	$(TARGET_PCH_FLAGS) -MMD -MP -o $@ \
@@ -550,7 +596,8 @@ define transform-cpp-to-o
 $(call print-banner1,"$(PRIVATE_ARM_MODE) CPP",$(PRIVATE_MODULE),$(call path-from-top,$<))
 $(call check-pwd-is-top-dir)
 $(Q)$(CCACHE) $(TARGET_GXX) \
-	$(TARGET_GLOBAL_C_INCLUDES) $(PRIVATE_C_INCLUDES) \
+	$(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES)) \
+	$(call normalize-c-includes,$(PRIVATE_C_INCLUDES)) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARM_MODE)) \
 	$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CPPFLAGS) $(GXX_FLAGS_WARNINGS) \
 	$(PRIVATE_CFLAGS) $(PRIVATE_CPPFLAGS) \
@@ -567,7 +614,8 @@ $(call print-banner1,"$(PRIVATE_ARM_MODE) C",$(PRIVATE_MODULE),$(call path-from-
 $(call check-pwd-is-top-dir)
 @mkdir -p $(dir $@)
 $(Q)$(CCACHE) $(TARGET_GCC) \
-	$(TARGET_GLOBAL_C_INCLUDES) $(PRIVATE_C_INCLUDES) \
+	$(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES)) \
+	$(call normalize-c-includes,$(PRIVATE_C_INCLUDES)) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARM_MODE)) \
 	$(TARGET_GLOBAL_CFLAGS) $(GCC_FLAGS_WARNINGS) \
 	$(PRIVATE_CFLAGS) \
@@ -584,7 +632,8 @@ $(call print-banner1,"ASM",$(PRIVATE_MODULE),$(call path-from-top,$<))
 $(call check-pwd-is-top-dir)
 @mkdir -p $(dir $@)
 $(Q)$(CCACHE) $(TARGET_GCC) \
-	$(TARGET_GLOBAL_C_INCLUDES) $(PRIVATE_C_INCLUDES) \
+	$(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES)) \
+	$(call normalize-c-includes,$(PRIVATE_C_INCLUDES)) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARM_MODE)) \
 	$(TARGET_GLOBAL_CFLAGS) $(GCC_FLAGS_WARNINGS) \
 	$(PRIVATE_CFLAGS) \
