@@ -123,11 +123,11 @@ $(SCAN_TARGET):
 # Recompute all dependencies between modules
 $(call modules-compute-depends)
 
-# Check dependencies
-$(call modules-check-depends)
-
-# Check variables of modules
-$(call modules-check-variables)
+# Check dependencies and variables of modules (unless we want to configure something)
+ifeq ("$(findstring config,$(MAKECMDGOALS))","")
+  $(call modules-check-depends)
+  $(call modules-check-variables)
+endif
 
 # Now, really generate rules for modules.
 # This second pass allows to deal with exported values.
