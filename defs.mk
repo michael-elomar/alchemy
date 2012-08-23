@@ -593,12 +593,12 @@ endef
 
 define transform-cpp-to-o
 @mkdir -p $(dir $@)
-$(call print-banner1,"$(PRIVATE_ARM_MODE) CPP",$(PRIVATE_MODULE),$(call path-from-top,$<))
+$(call print-banner1,"$(PRIVATE_MODE) CPP",$(PRIVATE_MODULE),$(call path-from-top,$<))
 $(call check-pwd-is-top-dir)
 $(Q)$(CCACHE) $(TARGET_GXX) \
 	$(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(call normalize-c-includes,$(PRIVATE_C_INCLUDES)) \
-	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARM_MODE)) \
+	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_MODE)) \
 	$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CPPFLAGS) $(GXX_FLAGS_WARNINGS) \
 	$(PRIVATE_CFLAGS) $(PRIVATE_CPPFLAGS) \
 	-c -MMD -MP -o $@ \
@@ -610,13 +610,13 @@ endef
 ###############################################################################
 
 define transform-c-to-o
-$(call print-banner1,"$(PRIVATE_ARM_MODE) C",$(PRIVATE_MODULE),$(call path-from-top,$<))
+$(call print-banner1,"$(PRIVATE_MODE) C",$(PRIVATE_MODULE),$(call path-from-top,$<))
 $(call check-pwd-is-top-dir)
 @mkdir -p $(dir $@)
 $(Q)$(CCACHE) $(TARGET_GCC) \
 	$(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(call normalize-c-includes,$(PRIVATE_C_INCLUDES)) \
-	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARM_MODE)) \
+	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_MODE)) \
 	$(TARGET_GLOBAL_CFLAGS) $(GCC_FLAGS_WARNINGS) \
 	$(PRIVATE_CFLAGS) \
 	-c -MMD -MP -o $@ \
@@ -634,7 +634,7 @@ $(call check-pwd-is-top-dir)
 $(Q)$(CCACHE) $(TARGET_GCC) \
 	$(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(call normalize-c-includes,$(PRIVATE_C_INCLUDES)) \
-	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARM_MODE)) \
+	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_MODE)) \
 	$(TARGET_GLOBAL_CFLAGS) $(GCC_FLAGS_WARNINGS) \
 	$(PRIVATE_CFLAGS) \
 	-c -MMD -MP -o $@ \

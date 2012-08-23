@@ -255,13 +255,21 @@ endif
 ## Rule-specific variable definitions.
 ###############################################################################
 
+mode :=
+ifeq ("$(TARGET_ARCH)","ARM")
+mode := $(LOCAL_ARM_MODE)
+else ifeq ("$(TARGET_ARCH)","X86")
+mode := X86
+endif
+
+
 $(LOCAL_TARGETS): PRIVATE_CFLAGS := $(LOCAL_CFLAGS)
 $(LOCAL_TARGETS): PRIVATE_C_INCLUDES := $(LOCAL_C_INCLUDES)
 $(LOCAL_TARGETS): PRIVATE_CPPFLAGS := $(LOCAL_CPPFLAGS)
 $(LOCAL_TARGETS): PRIVATE_ARFLAGS := $(LOCAL_ARFLAGS)
 $(LOCAL_TARGETS): PRIVATE_LDFLAGS := $(LOCAL_LDFLAGS)
 $(LOCAL_TARGETS): PRIVATE_LDLIBS := $(LOCAL_LDLIBS)
-$(LOCAL_TARGETS): PRIVATE_ARM_MODE := $(LOCAL_ARM_MODE)
+$(LOCAL_TARGETS): PRIVATE_MODE := $(mode)
 $(LOCAL_TARGETS): PRIVATE_ALL_SHARED_LIBRARIES := $(all_shared_libraries)
 $(LOCAL_TARGETS): PRIVATE_ALL_STATIC_LIBRARIES := $(all_static_libraries)
 $(LOCAL_TARGETS): PRIVATE_ALL_WHOLE_STATIC_LIBRARIES := $(all_whole_static_libraries)
