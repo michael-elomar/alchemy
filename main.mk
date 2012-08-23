@@ -176,7 +176,7 @@ clean: $(foreach __mod,$(ALL_MODULES),clean-$(__mod))
 final: all
 	@echo "Generating final tree..."
 	@$(BUILD_SYSTEM)/make-final.py \
-		--strip="$(STRIP)" \
+		--strip="$(TARGET_STRIP)" \
 		$(TARGET_OUT_STAGING) $(TARGET_OUT_FINAL)
 	@echo "Done generating final tree"
 
