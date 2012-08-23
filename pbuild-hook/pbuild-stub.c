@@ -21,7 +21,7 @@ static struct pal_log_dyn_data *pal_log_dyn_head = NULL;
 
 /**
  * Register a dynamic level.
- * @param data : level data. No copy is done, so it shal resides in memory
+ * @param data : level data. No copy is done, so it shall reside in memory
  * until the end of the program. It is also modified when added in the linked
  * list.
  * @remarks : it is not thread safe so it shall only be called during init

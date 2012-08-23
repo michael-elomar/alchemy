@@ -52,7 +52,7 @@ if [ "${SYMBOLS}" != "" ]; then
 	echo "extern \"C\" {" >> ${OUT_SRC}
 	echo "" >> ${OUT_SRC}
 
-	# Shall be the same structure than in 'generic_log_dyn.c'
+	# Shall be the same structure than in 'pbuild-stub.c'
 	echo "struct pal_log_dyn_data {" >> ${OUT_SRC}
 	echo "    int* level;" >> ${OUT_SRC}
 	echo "    const char *ident;" >> ${OUT_SRC}
@@ -65,7 +65,7 @@ if [ "${SYMBOLS}" != "" ]; then
 	# Define levels and data structure
 	for x in ${SYMBOLS}; do
 		echo "int ${x} = 3;" >> ${OUT_SRC}
-		echo "struct pal_log_dyn_data ${x}_data =" >> ${OUT_SRC}
+		echo "static struct pal_log_dyn_data ${x}_data =" >> ${OUT_SRC}
 		echo "    {&${x}, \"${x#pal_log_dyn_level_}\", 0};" >> ${OUT_SRC}
 		echo "" >> ${OUT_SRC}
 	done
