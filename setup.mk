@@ -128,10 +128,14 @@ AUTOTOOLS_CONFIGURE_ENV := \
 #	PKG_CONFIG="$(TARGET_OUT_STAGING)/usr/bin/pkg-config"
 
 # FIXME : put this somewehere else...
-ifeq ("$(TARGET_OS_FLAVOUR)","ANDROID")
-GNU_TARGET_NAME := arm-eabi
+ifeq ("$(TARGET_ARCH)","ARM")
+  ifeq ("$(TARGET_OS_FLAVOUR)","ANDROID")
+    GNU_TARGET_NAME := arm-eabi
+  else
+    GNU_TARGET_NAME := arm-none-linux-gnueabi
+  endif
 else
-GNU_TARGET_NAME := arm-none-linux-gnueabi
+  GNU_TARGET_NAME := i386-linux-gnu
 endif
 
 # Arguments to give to configure script
