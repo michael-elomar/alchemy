@@ -120,6 +120,15 @@ $(SCAN_TARGET):
 # Module dependencies generation.
 ###############################################################################
 
+# All modules
+ALL_MODULES := \
+	$(foreach __mod,$(__modules),$(__mod))
+
+# All module to actually build
+ALL_BUILD_MODULES := \
+	$(foreach __mod,$(__modules), \
+		$(if $(call is-module-in-build-config,$(__mod)),$(__mod)))
+
 # Recompute all dependencies between modules
 $(call modules-compute-depends)
 
@@ -131,7 +140,7 @@ endif
 
 # Now, really generate rules for modules.
 # This second pass allows to deal with exported values.
-$(foreach __mod,$(__modules), \
+$(foreach __mod,$(ALL_MODULES), \
 	$(eval LOCAL_MODULE := $(__mod)) \
 	$(info Generating rules for module $(__mod)) \
 	$(eval include $(BUILD_SYSTEM)/module.mk) \
@@ -154,15 +163,6 @@ $(AUTOCONF_MERGE_FILE): $(__autoconf-list)
 ###############################################################################
 # Main rules.
 ###############################################################################
-
-# All modules
-ALL_MODULES := \
-	$(foreach __mod,$(__modules),$(__mod))
-
-# All module to actually build
-ALL_BUILD_MODULES := \
-	$(foreach __mod,$(__modules), \
-		$(if $(call is-module-in-build-config,$(__mod)),$(__mod)))
 
 .PHONY: all
 all: $(ALL_BUILD_MODULES) $(AUTOCONF_MERGE_FILE)
