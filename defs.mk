@@ -125,7 +125,7 @@ modules-LOCALS += SRC_FILES
 modules-LOCALS += STATIC_LIBRARIES
 
 # Static libraries that you want to include as a whole in your module
-# To generate a .so for ex
+# To generate a '.so' from a '.a' for ex
 # Names of modules in the build system, without path/prefix/suffix
 modules-LOCALS += WHOLE_STATIC_LIBRARIES
 
@@ -176,6 +176,9 @@ modules-LOCALS += PREREQUISITES
 
 # ParrotBuild compatibility hook required
 modules-LOCALS += PBUILD_HOOK
+
+# Force modules that depends on this one to use whole-statid library
+modules-LOCALS += FORCE_WHOLE_STATIC_LIBRARY
 
 # Autotools customization
 modules-LOCALS += AUTOTOOLS_VERSION
@@ -404,7 +407,10 @@ __module-update-depends = \
 	$(foreach __lib,$(__modules.$1.LIBRARIES), \
 		$(eval __class := $(__modules.$(__lib).MODULE_CLASS)) \
 		$(if $(call streq,$(__class),STATIC_LIBRARY), \
-			$(eval __modules.$1.STATIC_LIBRARIES += $(__lib)), \
+			$(if $(call streq,$(__modules.$(__lib).FORCE_WHOLE_STATIC_LIBRARY),1), \
+				$(eval __modules.$1.WHOLE_STATIC_LIBRARIES += $(__lib)), \
+				$(eval __modules.$1.STATIC_LIBRARIES += $(__lib)) \
+			), \
 			$(if $(call streq,$(__class),SHARED_LIBRARY), \
 				$(eval __modules.$1.SHARED_LIBRARIES += $(__lib)), \
 				$(eval __modules.$1.EXTERNAL_LIBRARIES += $(__lib)) \
