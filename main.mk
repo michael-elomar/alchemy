@@ -180,6 +180,14 @@ final: all
 		$(TARGET_OUT_STAGING) $(TARGET_OUT_FINAL)
 	@echo "Done generating final tree"
 
+# Generate final tree without stripping executables
+.PHONY: final-nostrip
+final-nostrip: all
+	@echo "Generating final tree (no stripping)..."
+	@$(BUILD_SYSTEM)/make-final.py \
+		$(TARGET_OUT_STAGING) $(TARGET_OUT_FINAL)
+	@echo "Done generating final tree (no stripping)"
+
 # Dump the module database for debuging the build system
 .PHONY: dump
 dump:

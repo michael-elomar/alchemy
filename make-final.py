@@ -77,7 +77,9 @@ def main():
 				os.makedirs(dstDirName, 0755)
 			# copy and strip executables
 			# FIXME: stripping kernel modules under android causes issues
-			if not srcFileName.endswith(".ko") and isExec(srcFileName):
+			if options.strip != None \
+				and not srcFileName.endswith(".ko") \
+				and isExec(srcFileName):
 				os.system("%s -o %s %s" % (options.strip, dstFileName, srcFileName))
 			else:
 				shutil.copy2(srcFileName, dstFileName)
@@ -108,8 +110,6 @@ def parseArgs():
 		parser.error("Too many parameters")
 	elif len(args) < 2:
 		parser.error("Not enough parameters")
-	if options.strip == None:
-		parser.error("Missing strip option")
 	return (options, args)
 
 #===============================================================================
