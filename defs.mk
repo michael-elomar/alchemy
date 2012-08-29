@@ -267,13 +267,21 @@ module-add = \
 	$(if $(LOCAL_MODULE),$(empty), \
 		$(error $(LOCAL_PATH): LOCAL_MODULE is not defined)) \
 	$(eval __mod := $(LOCAL_MODULE)) \
+	$(eval __add := 1) \
 	$(if $(call is-module-registered,$(__mod)), \
+		$(eval __add := 0) \
 		$(eval __path := $(__modules.$(__mod).PATH)) \
-		$(error $(LOCAL_PATH): module '$(__mod)' already registered at $(__path)) \
+		$(eval __class := $(__modules.$(__mod).MODULE_CLASS)) \
+		$(if $(call streq,$(__class),PREBUILT), \
+			$(warning $(LOCAL_PATH): module '$(__mod)' is already prebuilt), \
+			$(error $(LOCAL_PATH): module '$(__mod)' already registered at $(__path)) \
+		) \
 	) \
-	$(eval __modules += $(__mod)) \
-	$(foreach __local,$(modules-LOCALS), \
-		$(eval __modules.$(__mod).$(__local) := $(LOCAL_$(__local))) \
+	$(if $(call streq,$(__add),1), \
+		$(eval __modules += $(__mod)) \
+		$(foreach __local,$(modules-LOCALS), \
+			$(eval __modules.$(__mod).$(__local) := $(LOCAL_$(__local))) \
+		) \
 	)
 
 ###############################################################################
