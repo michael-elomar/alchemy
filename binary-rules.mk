@@ -79,6 +79,11 @@ all_objects := \
 # Get all static libraries this module depends on
 LOCAL_STATIC_LIBRARIES += \
 	$(call module-get-depends,$(LOCAL_STATIC_LIBRARIES),STATIC_LIBRARIES)
+LOCAL_STATIC_LIBRARIES += \
+	$(call module-get-depends,$(LOCAL_WHOLE_STATIC_LIBRARIES),STATIC_LIBRARIES)
+
+LOCAL_WHOLE_STATIC_LIBRARIES += \
+	$(call module-get-depends,$(LOCAL_STATIC_LIBRARIES),WHOLE_STATIC_LIBRARIES)
 LOCAL_WHOLE_STATIC_LIBRARIES += \
 	$(call module-get-depends,$(LOCAL_WHOLE_STATIC_LIBRARIES),WHOLE_STATIC_LIBRARIES)
 
