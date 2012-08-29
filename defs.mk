@@ -683,12 +683,13 @@ $(Q)$(TARGET_GXX) \
 	-shared \
 	-Wl,-soname -Wl,$(notdir $@) \
 	-Wl,--no-undefined \
+	-Wl,--as-needed \
 	$(PRIVATE_LDFLAGS) \
 	$(PRIVATE_ALL_OBJECTS) \
 	-Wl,--whole-archive \
 	$(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES) \
 	-Wl,--no-whole-archive \
-	-Wl,--as-needed \
+	-Wl,--start-group \
 	$(PRIVATE_ALL_STATIC_LIBRARIES) \
 	$(PRIVATE_ALL_SHARED_LIBRARIES) \
 	$(call link-hook,$(PRIVATE_MODULE),$(PRIVATE_PATH),$@, \
@@ -697,6 +698,7 @@ $(Q)$(TARGET_GXX) \
 		$(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES)) \
 	-o $@ \
 	$(PRIVATE_LDLIBS) \
+	-Wl,--end-group \
 	$(TARGET_GLOBAL_LDLIBS_SHARED)
 endef
 
@@ -713,12 +715,13 @@ $(Q)$(TARGET_GXX) \
 	-Wl,-Map -Wl,$(basename $@).map \
 	-Wl,-rpath-link=$(TARGET_OUT_STAGING)/lib \
 	-Wl,-rpath-link=$(TARGET_OUT_STAGING)/usr/lib \
+	-Wl,--as-needed \
 	$(PRIVATE_LDFLAGS) \
 	$(PRIVATE_ALL_OBJECTS) \
 	-Wl,--whole-archive \
 	$(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES) \
 	-Wl,--no-whole-archive \
-	-Wl,--as-needed \
+	-Wl,--start-group \
 	$(PRIVATE_ALL_STATIC_LIBRARIES) \
 	$(PRIVATE_ALL_SHARED_LIBRARIES) \
 	$(call link-hook,$(PRIVATE_MODULE),$(PRIVATE_PATH),$@, \
@@ -727,6 +730,7 @@ $(Q)$(TARGET_GXX) \
 		$(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES)) \
 	-o $@ \
 	$(PRIVATE_LDLIBS) \
+	-Wl,--end-group \
 	$(TARGET_GLOBAL_LDLIBS)
 endef
 
