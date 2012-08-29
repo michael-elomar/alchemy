@@ -49,6 +49,7 @@ TARGET_GLOBAL_CFLAGS_THUMB ?=
 
 TARGET_PCH_FLAGS ?=
 TARGET_DEFAULT_ARM_MODE ?= THUMB
+TARGET_FORCE_STATIC_LIBRARIES ?= 0
 
 ###############################################################################
 ## Host/Target OS.
@@ -67,6 +68,10 @@ ifeq ("$(TARGET_OS)","LINUX")
   TARGET_STATIC_LIB_SUFFIX := .a
   TARGET_SHARED_LIB_SUFFIX := .so
   TARGET_EXE_SUFFIX :=
+else ifeq ("$(TARGET_OS)","ECOS")
+  TARGET_STATIC_LIB_SUFFIX := .a
+  TARGET_SHARED_LIB_SUFFIX := .so.a
+  TARGET_EXE_SUFFIX := .elf
 else
   $(error Unsupported target OS : $(TARGET_OS))
 endif

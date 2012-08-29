@@ -76,8 +76,12 @@ BUILD_PREBUILT := $(BUILD_SYSTEM)/prebuilt.mk
 # Shall be defined before including user makefiles
 AUTOCONF_MERGE_FILE := $(TARGET_OUT_BUILD)/autoconf-merge.h
 
-ifeq ("$(TARGET_OS_FLAVOUR)","ANDROID")
-include $(BUILD_SYSTEM)/toolchains/bionic.mk
+ifeq ("$(TARGET_OS)","LINUX")
+  ifeq ("$(TARGET_OS_FLAVOUR)","ANDROID")
+    include $(BUILD_SYSTEM)/toolchains/bionic.mk
+  endif
+else ifeq ("$(TARGET_OS)","ECOS")
+  include $(BUILD_SYSTEM)/toolchains/ecos.mk
 endif
 
 ###############################################################################
