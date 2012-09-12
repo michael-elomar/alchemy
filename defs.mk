@@ -67,6 +67,11 @@ streq = $(if $(filter-out xx,x$(subst $1,,$2)$(subst $2,,$1)x),$(false),$(true))
 # $2 : second string.
 strneq = $(call not,$(call streq,$1,$2))
 
+# Check that a version is at least the one given.
+# $1 : version.
+# $2 : minimum version.
+check-version = $(call strneq,0,$(shell expr $1 \>= $2))
+
 ###############################################################################
 ## Use some colors if requested.
 ###############################################################################
@@ -580,19 +585,19 @@ print-banner2 = \
 link-hook = \
 	$(if $(__modules.$1.PBUILD_HOOK), \
 		$(shell $(BUILD_SYSTEM)/pbuild-hook/pbuild-link-hook.sh \
-			"$(TARGET_NM)" "$(TARGET_GCC) $(TARGET_GLOBAL_CFLAGS)" $1 $2 $3 $4 \
+			"$(TARGET_NM)" "$(TARGET_CC) $(TARGET_GLOBAL_CFLAGS)" $1 $2 $3 $4 \
 		) \
 	)
 
 ###############################################################################
-## Commands for running gcc to generate a precompiled file.
+## Commands to generate a precompiled file.
 ###############################################################################
 
 define transform-h-to-gch
 @mkdir -p $(dir $@)
 $(call print-banner1,"Precompile",$(PRIVATE_MODULE),$(call path-from-top,$<))
 $(call check-pwd-is-top-dir)
-$(Q)$(CCACHE) $(TARGET_GXX) \
+$(Q)$(CCACHE) $(TARGET_CXX) \
 	$(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(call normalize-c-includes,$(PRIVATE_C_INCLUDES)) \
 	$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CPPFLAGS) $(GXX_FLAGS_WARNINGS) \
@@ -602,14 +607,14 @@ $(Q)$(CCACHE) $(TARGET_GXX) \
 endef
 
 ###############################################################################
-## Commands for running gcc to compile a C++ file.
+## Commands to compile a C++ file.
 ###############################################################################
 
 define transform-cpp-to-o
 @mkdir -p $(dir $@)
 $(call print-banner1,"$(PRIVATE_MODE) CPP",$(PRIVATE_MODULE),$(call path-from-top,$<))
 $(call check-pwd-is-top-dir)
-$(Q)$(CCACHE) $(TARGET_GXX) \
+$(Q)$(CCACHE) $(TARGET_CXX) \
 	$(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(call normalize-c-includes,$(PRIVATE_C_INCLUDES)) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_MODE)) \
@@ -620,14 +625,14 @@ $(Q)$(CCACHE) $(TARGET_GXX) \
 endef
 
 ###############################################################################
-## Commands for running gcc to compile a C file.
+## Commands to compile a C file.
 ###############################################################################
 
 define transform-c-to-o
 $(call print-banner1,"$(PRIVATE_MODE) C",$(PRIVATE_MODULE),$(call path-from-top,$<))
 $(call check-pwd-is-top-dir)
 @mkdir -p $(dir $@)
-$(Q)$(CCACHE) $(TARGET_GCC) \
+$(Q)$(CCACHE) $(TARGET_CC) \
 	$(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(call normalize-c-includes,$(PRIVATE_C_INCLUDES)) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_MODE)) \
@@ -638,14 +643,14 @@ $(Q)$(CCACHE) $(TARGET_GCC) \
 endef
 
 ###############################################################################
-## Commands for running gcc to compile a S file.
+## Commands to compile a S file.
 ###############################################################################
 
 define transform-s-to-o
 $(call print-banner1,"ASM",$(PRIVATE_MODULE),$(call path-from-top,$<))
 $(call check-pwd-is-top-dir)
 @mkdir -p $(dir $@)
-$(Q)$(CCACHE) $(TARGET_GCC) \
+$(Q)$(CCACHE) $(TARGET_CC) \
 	$(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(call normalize-c-includes,$(PRIVATE_C_INCLUDES)) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_MODE)) \
@@ -670,14 +675,14 @@ $(Q)$(TARGET_AR) $(TARGET_GLOBAL_ARFLAGS) $(PRIVATE_ARFLAGS) $@ $(PRIVATE_ALL_OB
 endef
 
 ###############################################################################
-## Commands for running gcc to link a shared library.
+## Commands to link a shared library.
 ###############################################################################
 
 define transform-o-to-shared-lib
 @mkdir -p $(dir $@)
 $(call print-banner2,"SharedLib",$(PRIVATE_MODULE),$(call path-from-top,$@))
 $(call check-pwd-is-top-dir)
-$(Q)$(TARGET_GXX) \
+$(Q)$(TARGET_CXX) \
 	$(TARGET_GLOBAL_LDFLAGS_SHARED) \
 	-Wl,-Map -Wl,$(basename $@).map \
 	-shared \
@@ -703,14 +708,14 @@ $(Q)$(TARGET_GXX) \
 endef
 
 ###############################################################################
-## Commands for running gcc to link an executable.
+## Commands to link an executable.
 ###############################################################################
 
 define transform-o-to-executable
 @mkdir -p $(dir $@)
 $(call print-banner2,"Executable",$(PRIVATE_MODULE),$(call path-from-top,$@))
 $(call check-pwd-is-top-dir)
-$(Q)$(TARGET_GXX) \
+$(Q)$(TARGET_CXX) \
 	$(TARGET_GLOBAL_LDFLAGS) \
 	-Wl,-Map -Wl,$(basename $@).map \
 	-Wl,-rpath-link=$(TARGET_OUT_STAGING)/lib \

@@ -85,6 +85,21 @@ else ifeq ("$(TARGET_OS)","ECOS")
 endif
 
 ###############################################################################
+# Display configuration.
+###############################################################################
+msg = $(info $(CLR_CYAN)$1$(CLR_DEFAULT))
+$(info ----------------------------------------------------------------------)
+$(call msg,+ HOST_OS = $(HOST_OS))
+$(call msg,+ TARGET_OS = $(TARGET_OS))
+$(call msg,+ TARGET_ARCH = $(TARGET_ARCH))
+$(call msg,+ TARGET_OUT_BUILD = $(TARGET_OUT_BUILD))
+$(call msg,+ TARGET_OUT_STAGING = $(TARGET_OUT_STAGING))
+$(call msg,+ TARGET_OUT_FINAL = $(TARGET_OUT_FINAL))
+$(call msg,+ TARGET_CC_PATH = $(TARGET_CC_PATH))
+$(call msg,+ TARGET_CC_VERSION = $(TARGET_CC_VERSION))
+$(info ----------------------------------------------------------------------)
+
+###############################################################################
 ## Makefile scan and includes.
 ###############################################################################
 
@@ -209,19 +224,4 @@ dump-depends:
 # Dummy target to check internal variables
 .PHONY: check
 check:
-
-###############################################################################
-# Display configuration.
-###############################################################################
-msg = $(info $(CLR_CYAN)$1$(CLR_DEFAULT))
-$(info ----------------------------------------------------------------------)
-$(call msg, + HOST_OS = $(HOST_OS))
-$(call msg, + TARGET_OS = $(TARGET_OS))
-$(call msg, + TARGET_ARCH = $(TARGET_ARCH))
-$(call msg, + TARGET_OUT_BUILD = $(TARGET_OUT_BUILD))
-$(call msg, + TARGET_OUT_STAGING = $(TARGET_OUT_STAGING))
-$(call msg, + TARGET_OUT_FINAL = $(TARGET_OUT_FINAL))
-$(call msg, + TARGET_GCC_PATH = $(TARGET_GCC_PATH))
-$(call msg, + TARGET_GCC_VERSION = $(TARGET_GCC_VERSION))
-$(info ----------------------------------------------------------------------)
 

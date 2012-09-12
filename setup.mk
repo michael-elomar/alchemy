@@ -16,8 +16,8 @@ endif
 ###############################################################################
 ## Tools for target.
 ###############################################################################
-TARGET_GCC ?= $(TARGET_CROSS)gcc
-TARGET_GXX ?= $(TARGET_CROSS)g++
+TARGET_CC ?= $(TARGET_CROSS)gcc
+TARGET_CXX ?= $(TARGET_CROSS)g++
 TARGET_AR ?= $(TARGET_CROSS)ar
 TARGET_LD ?= $(TARGET_CROSS)ld
 TARGET_NM ?= $(TARGET_CROSS)nm
@@ -26,8 +26,8 @@ TARGET_STRIP ?= $(TARGET_CROSS)strip
 ###############################################################################
 ## Tools for host.
 ###############################################################################
-HOST_GCC ?= gcc
-HOST_GXX ?= g++
+HOST_CC ?= gcc
+HOST_CXX ?= g++
 HOST_AR ?= ar
 HOST_LD ?= ld
 HOST_NM ?= nm
@@ -122,7 +122,7 @@ AUTOTOOLS_CONFIGURE_ENV := \
 	RANLIB="$(TARGET_CROSS)ranlib" \
 	STRIP="$(TARGET_STRIP)" \
 	OBJCOPY="$(TARGET_CROSS)objcopy" \
-	CC_FOR_BUILD="$(HOST_GCC)" \
+	CC_FOR_BUILD="$(HOST_CC)" \
 	CPPFLAGS="$(TARGET_GLOBAL_C_INCLUDES) $(TARGET_GLOBAL_CFLAGS)" \
 	CFLAGS="$(TARGET_GLOBAL_C_INCLUDES) $(TARGET_GLOBAL_CFLAGS)" \
 	CXXFLAGS="$(TARGET_GLOBAL_C_INCLUDES) $(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CPPFLAGS)" \
@@ -168,13 +168,13 @@ endif
 unexport TARGET_ARCH
 
 ###############################################################################
-## Determine gcc path and version.
+## Determine compiler path and version.
 ###############################################################################
 
-TARGET_GCC_PATH := $(shell which $(TARGET_GCC))
+TARGET_CC_PATH := $(shell which $(TARGET_CC))
 
 ifneq ("$(USE_CLANG)","1")
-TARGET_GCC_VERSION := $(shell $(TARGET_GCC) --version | head -1 | sed "s/.*\([0-9]\.[0-9]\.[0-9]\).*/\1/")
+TARGET_CC_VERSION := $(shell $(TARGET_CC) --version | head -1 | sed "s/.*\([0-9]\.[0-9]\.[0-9]\).*/\1/")
 else
-TARGET_GCC_VERSION := 0.0.0
+TARGET_CC_VERSION := $(shell $(TARGET_CC) --version | head -1 | sed "s/.*\([0-9]\.[0-9]\).*/\1/")
 endif

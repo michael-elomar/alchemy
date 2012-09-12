@@ -7,7 +7,7 @@ fi
 
 # Get parameters
 NM=$1
-GCC=$2
+CC=$2
 MODULE_NAME=$3
 MODULE_PATH=$4
 OUT_DIR=$(dirname $5)
@@ -99,7 +99,7 @@ fi
 ###############################################################################
 
 # Compile the file, generate the .o
-${GCC} -o ${OUT_OBJ} -c ${OUT_SRC}
+${CC} -o ${OUT_OBJ} -c ${OUT_SRC}
 
 # Print it so it will be added in the link
 echo ${OUT_OBJ}
