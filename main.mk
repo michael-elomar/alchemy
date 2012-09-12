@@ -62,8 +62,8 @@ include $(BUILD_SYSTEM)/defs.mk
 # Setup warnings flags
 include $(BUILD_SYSTEM)/warnings.mk
 
-# Load configuration
-include $(BUILD_SYSTEM)/config.mk
+# Setup configuration definitions
+include $(BUILD_SYSTEM)/config-defs.mk
 
 # Names of makefiles that can be included by user Makefiles
 CLEAR_VARS := $(BUILD_SYSTEM)/clearvars.mk
@@ -144,11 +144,12 @@ endif
 
 # Now, really generate rules for modules.
 # This second pass allows to deal with exported values.
+ifeq ("$(findstring config,$(MAKECMDGOALS))","")
 $(foreach __mod,$(ALL_MODULES), \
 	$(eval LOCAL_MODULE := $(__mod)) \
-	$(info Generating rules for module $(__mod)) \
 	$(eval include $(BUILD_SYSTEM)/module.mk) \
 )
+endif
 
 ###############################################################################
 # Rule to merge autoconf.h files.
@@ -163,6 +164,9 @@ $(AUTOCONF_MERGE_FILE): $(__autoconf-list)
 	@mkdir -p $(dir $@)
 	@rm -f $@
 	@for f in $^; do cat $$f >> $@; done
+
+# Confifuration rules (once module database is built)
+include $(BUILD_SYSTEM)/config-rules.mk
 
 ###############################################################################
 # Main rules.
