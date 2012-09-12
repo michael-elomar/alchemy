@@ -600,7 +600,7 @@ $(call check-pwd-is-top-dir)
 $(Q)$(CCACHE) $(TARGET_CXX) \
 	$(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(call normalize-c-includes,$(PRIVATE_C_INCLUDES)) \
-	$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CPPFLAGS) $(GXX_FLAGS_WARNINGS) \
+	$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CPPFLAGS) $(WARNINGS_CPPFLAGS) \
 	$(PRIVATE_CFLAGS) $(PRIVATE_CPPFLAGS) \
 	$(TARGET_PCH_FLAGS) -MMD -MP -o $@ \
 	$(call path-from-top,$<)
@@ -618,7 +618,7 @@ $(Q)$(CCACHE) $(TARGET_CXX) \
 	$(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(call normalize-c-includes,$(PRIVATE_C_INCLUDES)) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_MODE)) \
-	$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CPPFLAGS) $(GXX_FLAGS_WARNINGS) \
+	$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CPPFLAGS) $(WARNINGS_CPPFLAGS) \
 	$(PRIVATE_CFLAGS) $(PRIVATE_CPPFLAGS) \
 	-c -MMD -MP -o $@ \
 	$(call path-from-top,$<)
@@ -636,7 +636,7 @@ $(Q)$(CCACHE) $(TARGET_CC) \
 	$(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(call normalize-c-includes,$(PRIVATE_C_INCLUDES)) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_MODE)) \
-	$(TARGET_GLOBAL_CFLAGS) $(GCC_FLAGS_WARNINGS) \
+	$(TARGET_GLOBAL_CFLAGS) $(WARNINGS_CFLAGS) \
 	$(PRIVATE_CFLAGS) \
 	-c -MMD -MP -o $@ \
 	$(call path-from-top,$<)
@@ -654,7 +654,7 @@ $(Q)$(CCACHE) $(TARGET_CC) \
 	$(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(call normalize-c-includes,$(PRIVATE_C_INCLUDES)) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_MODE)) \
-	$(TARGET_GLOBAL_CFLAGS) $(GCC_FLAGS_WARNINGS) \
+	$(TARGET_GLOBAL_CFLAGS) $(WARNINGS_CFLAGS) \
 	$(PRIVATE_CFLAGS) \
 	-c -MMD -MP -o $@ \
 	$(call path-from-top,$<)
