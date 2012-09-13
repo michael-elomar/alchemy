@@ -582,7 +582,7 @@ print-banner2 = \
 ## It returns additional object files to add in link.
 ###############################################################################
 link-hook = \
-	$(if $(__modules.$1.PBUILD_HOOK), \
+	$(if $(PRIVATE_PBUILD_HOOK), \
 		$(shell $(BUILD_SYSTEM)/pbuild-hook/pbuild-link-hook.sh \
 			"$(TARGET_NM)" "$(TARGET_CC) $(TARGET_GLOBAL_CFLAGS)" $1 $2 $3 $4 \
 		) \
