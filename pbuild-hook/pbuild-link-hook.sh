@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Check argument count, do NOT display anything on stdout
-if [ "$#" -lt 5 ]; then
+if [ $# -lt 5 ]; then
 	exit 0
 fi
 
