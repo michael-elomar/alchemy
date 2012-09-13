@@ -293,8 +293,8 @@ module-add = \
 ## Check that a module is registered.
 ## $1 : module to check.
 ###############################################################################
-is-module-registered = \
-	$(strip $(foreach __mod,$(__modules), \
+is-module-registered = $(strip \
+	$(foreach __mod,$(__modules), \
 		$(if $(call streq,$(__mod),$1),$(true)) \
 	))
 
@@ -302,8 +302,12 @@ is-module-registered = \
 ## Check that a module wil be built.
 ## $1 : module to check.
 ###############################################################################
-is-module-in-build-config = \
-	$(if $(CONFIG_BUILD_$(call get-define,$1)),$(true))
+is-module-in-build-config = $(strip \
+	$(eval __var := CONFIG_BUILD_$(call get-define,$1)) \
+	$(if $(call streq,$(origin $(__var)),undefined), \
+		$(false), \
+		$(if $($(__var)),$(true)) \
+	))
 
 ###############################################################################
 ## Restore the recorded LOCAL_XXX definitions for a given module. Called
