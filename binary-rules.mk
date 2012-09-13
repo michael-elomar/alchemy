@@ -77,38 +77,34 @@ all_objects := \
 	$(S_objects)
 
 # Get all static libraries this module depends on
-LOCAL_STATIC_LIBRARIES += \
-	$(call module-get-depends,$(LOCAL_STATIC_LIBRARIES),STATIC_LIBRARIES)
-LOCAL_STATIC_LIBRARIES += \
-	$(call module-get-depends,$(LOCAL_WHOLE_STATIC_LIBRARIES),STATIC_LIBRARIES)
+LOCAL_STATIC_LIBRARIES := \
+	$(call module-get-static-depends,$(LOCAL_MODULE),STATIC_LIBRARIES)
 
-LOCAL_WHOLE_STATIC_LIBRARIES += \
-	$(call module-get-depends,$(LOCAL_STATIC_LIBRARIES),WHOLE_STATIC_LIBRARIES)
-LOCAL_WHOLE_STATIC_LIBRARIES += \
-	$(call module-get-depends,$(LOCAL_WHOLE_STATIC_LIBRARIES),WHOLE_STATIC_LIBRARIES)
+LOCAL_WHOLE_STATIC_LIBRARIES := \
+	$(call module-get-static-depends,$(LOCAL_MODULE),WHOLE_STATIC_LIBRARIES)
 
-# Also get shared libraries used by static libraries
-LOCAL_SHARED_LIBRARIES += \
-	$(call module-get-depends,$(LOCAL_STATIC_LIBRARIES),SHARED_LIBRARIES)
-LOCAL_SHARED_LIBRARIES += \
-	$(call module-get-depends,$(LOCAL_WHOLE_STATIC_LIBRARIES),SHARED_LIBRARIES)
+# Get shared libraries used by static libraries
+LOCAL_SHARED_LIBRARIES := \
+	$(call module-get-static-depends,$(LOCAL_MODULE),SHARED_LIBRARIES)
 
 # Get path
-all_shared_libraries := \
-	$(foreach lib,$(LOCAL_SHARED_LIBRARIES), \
-		$(call module-get-staging-filename,$(lib)))
 all_static_libraries := \
 	$(foreach lib,$(LOCAL_STATIC_LIBRARIES), \
 		$(call module-get-staging-filename,$(lib)))
+
 all_whole_static_libraries := \
 	$(foreach lib,$(LOCAL_WHOLE_STATIC_LIBRARIES), \
 		$(call module-get-staging-filename,$(lib)))
 
+all_shared_libraries := \
+	$(foreach lib,$(LOCAL_SHARED_LIBRARIES), \
+		$(call module-get-staging-filename,$(lib)))
+
 # all_libraries is used for the dependencies.
 all_libraries := \
-	$(all_shared_libraries) \
 	$(all_static_libraries) \
 	$(all_whole_static_libraries) \
+	$(all_shared_libraries) \
 	$(all_external_libraries)
 
 ###############################################################################
@@ -116,8 +112,7 @@ all_libraries := \
 ###############################################################################
 
 # Get all modules we depend on
-all_depends := $(call module-get-all-dependencies,$(LOCAL_MODULE))
-all_depends := $(filter-out $(LOCAL_MODULE),$(all_depends))
+all_depends := $(call module-get-all-depends,$(LOCAL_MODULE))
 
 # Get list of exported stuff by our dependencies
 imported_CFLAGS        := $(call module-get-listed-export,$(all_depends),CFLAGS)

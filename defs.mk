@@ -327,7 +327,7 @@ modules-check-depends = \
 		$(call __module-check-depends,$(__mod)) \
 	)
 
-# Check dependency of a module
+# Check dependencies of a module
 # $1 : module name.
 __module-check-depends = \
 	$(foreach __lib,$(__modules.$1.depends), \
@@ -413,7 +413,7 @@ modules-compute-depends = \
 		$(call __module-compute-depends,$(__mod)) \
 	)
 
-# Update dependecies of a single module.
+# Update dependencies of a single module.
 # It updates XXX_LIBRARIES based on LIBRARIES and actual dependency class.
 # $1 : module name.
 __module-update-depends = \
@@ -478,35 +478,34 @@ module-get-listed-autoconf = \
 ## Dependency management
 ###############################################################################
 
-# Return list all the <local-type> modules $1 depends on transitively.
-# $1 : list of module names.
-# $2 : local module type (e.g. SHARED_LIBRARIES).
-module-get-depends = $(strip $(call __modules-get-closure,$1,$2))
+uniq2 = $(strip \
+	$(if $1, \
+		$(eval __f := $(call first,$1)) \
+		$(eval __r := $(call rest,$1)) \
+		$(if $(filter $(__f),$(__r)),$(empty),$(__f)) \
+		$(call uniq2,$(__r)) \
+	))
 
-# Return list of all the modules $1 depends on transitively.
-# $1: list of module names.
-module-get-all-dependencies = \
-	$(strip $(call __modules-get-closure,$1,depends))
+module-get-static-depends = \
+	$(call uniq2,$(call __module-get-static-depends,$1,$2))
 
-# Recursively get dependency of a modules
-__modules-get-closure = \
-	$(eval __closure_deps := $(empty)) \
-	$(eval __closure_wq := $(strip $1)) \
-	$(eval __closure_field := $(strip $2)) \
-	$(if $(__closure_wq), $(call __modules-closure)) \
-	$(strip $(__closure_deps))
+__module-get-static-depends = \
+	$(__modules.$1.$2) \
+	$(foreach __mod,$(__modules.$1.STATIC_LIBRARIES), \
+		$(call __module-get-static-depends,$(__mod),$2) \
+	) \
+	$(foreach __mod,$(__modules.$1.WHOLE_STATIC_LIBRARIES), \
+		$(call __module-get-static-depends,$(__mod),$2) \
+	)
 
-# Used internally by modules-get-all-dependencies. Note the tricky use of
-# conditional recursion to work around the fact that the GNU Make language does
-# not have any conditional looping construct like 'while'.
-__modules-closure = \
-	$(eval __closure_mod := $(call first,$(__closure_wq))) \
-	$(eval __closure_wq  := $(call rest,$(__closure_wq))) \
-	$(eval __closure_val := $(__modules.$(__closure_mod).$(__closure_field))) \
-	$(eval __closure_new := $(filter-out $(__closure_deps),$(__closure_val))) \
-	$(eval __closure_deps += $(__closure_new)) \
-	$(eval __closure_wq  := $(strip $(__closure_wq) $(__closure_new))) \
-	$(if $(__closure_wq),$(call __modules-closure))
+module-get-all-depends = \
+	$(call uniq2,$(call __module-get-all-depends,$1))
+
+__module-get-all-depends = \
+	$(__modules.$1.depends) \
+	$(foreach __mod,$(__modules.$1.depends), \
+		$(call __module-get-all-depends,$(__mod)) \
+	)
 
 ###############################################################################
 ## Get path of module main target file (in build or staging directory).
@@ -694,7 +693,6 @@ $(Q)$(TARGET_CXX) \
 	-Wl,--whole-archive \
 	$(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES) \
 	-Wl,--no-whole-archive \
-	-Wl,--start-group \
 	$(PRIVATE_ALL_STATIC_LIBRARIES) \
 	$(PRIVATE_ALL_SHARED_LIBRARIES) \
 	$(call link-hook,$(PRIVATE_MODULE),$(PRIVATE_PATH),$@, \
@@ -703,7 +701,6 @@ $(Q)$(TARGET_CXX) \
 		$(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES)) \
 	-o $@ \
 	$(PRIVATE_LDLIBS) \
-	-Wl,--end-group \
 	$(TARGET_GLOBAL_LDLIBS_SHARED)
 endef
 
@@ -726,7 +723,6 @@ $(Q)$(TARGET_CXX) \
 	-Wl,--whole-archive \
 	$(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES) \
 	-Wl,--no-whole-archive \
-	-Wl,--start-group \
 	$(PRIVATE_ALL_STATIC_LIBRARIES) \
 	$(PRIVATE_ALL_SHARED_LIBRARIES) \
 	$(call link-hook,$(PRIVATE_MODULE),$(PRIVATE_PATH),$@, \
@@ -735,7 +731,6 @@ $(Q)$(TARGET_CXX) \
 		$(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES)) \
 	-o $@ \
 	$(PRIVATE_LDLIBS) \
-	-Wl,--end-group \
 	$(TARGET_GLOBAL_LDLIBS)
 endef
 
