@@ -152,15 +152,15 @@ all_prerequisites := \
 # All autoconf files are prerequisites
 all_prerequisites += $(all_autoconf)
 
-# User makefile is also a prerequisite
-all_prerequisites += $(LOCAL_PATH)/$(USER_MAKEFILE_NAME)
-
 # External libraries are also prerequisites
 all_prerequisites += $(all_external_libraries)
 
 # Notify that we build with dependencies
 LOCAL_CFLAGS += $(foreach __mod,$(all_depends), \
 	-DBUILD_$(call get-define,$(__mod)))
+
+# User makefile is an internal dependencies
+all_internal_depends := $(LOCAL_PATH)/$(USER_MAKEFILE_NAME)
 
 ###############################################################################
 ## Actual rules.
@@ -210,9 +210,13 @@ clean-$(LOCAL_MODULE):: PRIVATE_CLEAN_DIRS += $(build_dir)
 $(LOCAL_MODULE): $(LOCAL_BUILD_MODULE) $(LOCAL_STAGING_MODULE)
 
 # Make sure all prerequisites files are generated first
+# But do NOT force recompilation (order only)
 ifneq ("$(all_prerequisites)","")
-$(all_objects): $(all_prerequisites)
+$(all_objects): | $(all_prerequisites)
 endif
+
+# Force recompilation if internal dependecies are changes
+$(all_objects): $(all_internal_depends)
 
 ###############################################################################
 ## autoconf.h file generation.
@@ -240,9 +244,13 @@ gch_file := $(build_dir)/$(LOCAL_PRECOMPILED_FILE).gch
 $(all_objects): $(gch_file)
 
 # Make sure all prerequisites files are generated first
+# But do NOT force recompilation (order only)
 ifneq ("$(all_prerequisites)","")
-$(gch_file): $(all_prerequisites)
+$(gch_file): | $(all_prerequisites)
 endif
+
+# Force recompilation if internal dependecies are changes
+$(gch_file): $(all_internal_depends)
 
 # Generate the precompiled file
 $(gch_file): $(LOCAL_PATH)/$(LOCAL_PRECOMPILED_FILE)
