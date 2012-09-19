@@ -691,6 +691,7 @@ $(Q)$(TARGET_CXX) \
 	-shared \
 	-Wl,-soname -Wl,$(notdir $@) \
 	-Wl,--no-undefined \
+	-Wl,--gc-sections \
 	-Wl,--as-needed \
 	$(PRIVATE_LDFLAGS) \
 	$(PRIVATE_ALL_OBJECTS) \
@@ -721,6 +722,7 @@ $(Q)$(TARGET_CXX) \
 	-Wl,-Map -Wl,$(basename $@).map \
 	-Wl,-rpath-link=$(TARGET_OUT_STAGING)/lib \
 	-Wl,-rpath-link=$(TARGET_OUT_STAGING)/usr/lib \
+	-Wl,--gc-sections \
 	-Wl,--as-needed \
 	$(PRIVATE_LDFLAGS) \
 	$(PRIVATE_ALL_OBJECTS) \
