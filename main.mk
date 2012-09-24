@@ -197,6 +197,12 @@ all: $(ALL_BUILD_MODULES) $(AUTOCONF_MERGE_FILE)
 clean: $(foreach __mod,$(ALL_MODULES),clean-$(__mod))
 	@rm -f $(AUTOCONF_MERGE_FILE)
 
+.PHONY: clobber
+clobber:
+	@rm -rf $(TARGET_OUT_BUILD)
+	@rm -rf $(TARGET_OUT_STAGING)
+	@rm -rf $(TARGET_OUT_FINAL)
+
 # Generate final tree
 .PHONY: final
 final: all
