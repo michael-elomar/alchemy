@@ -45,7 +45,7 @@ __default-make-install = \
 	$(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) $(MAKE) -C $(PRIVATE_SRC_DIR) \
 		$(AUTOTOOLS_MAKE_ARGS) $(PRIVATE_MAKE_INSTALL_ARGS) install
 
-# Note force success for command in case "uninstall" is not supported or Makefile not present
+# Force success for command in case "uninstall" is not supported or Makefile not present
 __default-clean = \
 	([ -d $(PRIVATE_SRC_DIR) ] && \
 		$(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) $(MAKE) -C $(PRIVATE_SRC_DIR) \
