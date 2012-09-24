@@ -108,13 +108,16 @@ $(info ----------------------------------------------------------------------)
 
 # Makefile with the list of all makefiles available and include them
 SCAN_TARGET := scan
+CLOBBER_TARGET := clobber
 USER_MAKEFILE_NAME := atom.mk
 USER_MAKEFILES:=$(TARGET_OUT_BUILD)/makefiles.mk
 
 # Include makefile containing all available makefile
 # If it does not exists, it will trigger its creation
 ifeq ("$(findstring $(SCAN_TARGET),$(MAKECMDGOALS))","")
+ifeq ("$(findstring $(CLOBBER_TARGET),$(MAKECMDGOALS))","")
   include $(USER_MAKEFILES)
+endif
 endif
 
 # Create a file that will contain all user makefiles available
