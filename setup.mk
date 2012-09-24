@@ -51,6 +51,9 @@ TARGET_PCH_FLAGS ?=
 TARGET_DEFAULT_ARM_MODE ?= THUMB
 TARGET_FORCE_STATIC_LIBRARIES ?= 0
 
+# Global prerequisites (shall be used only by os makefile)
+TARGET_GLOBAL_PREREQUISITES :=
+
 ###############################################################################
 ## Host/Target OS.
 ###############################################################################

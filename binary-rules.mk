@@ -145,6 +145,7 @@ LOCAL_CFLAGS += $(addprefix -include ,$(all_autoconf))
 
 # List of all prerequisites (ours + dependencies)
 all_prerequisites := \
+	$(TARGET_GLOBAL_PREREQUISITES) \
 	$(LOCAL_PREREQUISITES) \
 	$(LOCAL_EXPORT_PREREQUISITES) \
 	$(imported_PREREQUISITES)

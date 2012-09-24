@@ -25,6 +25,13 @@ src_dir := $(unpack_dir)/$(LOCAL_AUTOTOOLS_DIR)
 # Patched to apply
 patches := $(strip $(LOCAL_AUTOTOOLS_PATCHES))
 
+# List of all prerequisites (ours + dependencies)
+all_prerequisites := \
+	$(TARGET_GLOBAL_PREREQUISITES) \
+	$(LOCAL_PREREQUISITES) \
+	$(LOCAL_EXPORT_PREREQUISITES) \
+	 $(all_external_libraries)
+
 ###############################################################################
 ## Default commands
 ###############################################################################
@@ -89,8 +96,12 @@ endif
 ## warning: jobserver unavailable: using -j1.  Add `+' to parent make rule.
 ###############################################################################
 
+# Make sure all prerequisites files are generated first
+# But do NOT force recompilation (order only)
+$(unpacked_file): | $(all_prerequisites)
+
 # Unpack + patch
-$(unpacked_file): $(archive_file) $(addprefix $(LOCAL_PATH)/,$(patches)) $(all_external_libraries)
+$(unpacked_file): $(archive_file) $(addprefix $(LOCAL_PATH)/,$(patches))
 	@echo "Unpacking $(call path-from-top,$<)"
 	@mkdir -p $(PRIVATE_UNPACK_DIR)
 	+$(Q)$(call $(PRIVATE_CMD_UNPACK))
