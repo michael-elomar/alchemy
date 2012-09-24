@@ -10,7 +10,7 @@
 build_dir := $(TARGET_OUT_BUILD)/$(LOCAL_MODULE)
 
 # Prepend some directories in include list
-LOCAL_C_INCLUDES := -I$(build_dir) -I$(LOCAL_PATH) $(LOCAL_C_INCLUDES)
+LOCAL_C_INCLUDES := $(build_dir) $(LOCAL_PATH) $(LOCAL_C_INCLUDES)
 
 ###############################################################################
 ## ARM specific checks.

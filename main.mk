@@ -59,6 +59,9 @@ include $(BUILD_SYSTEM)/setup.mk
 # Setup macros definitions
 include $(BUILD_SYSTEM)/defs.mk
 
+# Setup autotools definitions (shall be after inclusion of defs.mk)
+include $(BUILD_SYSTEM)/autotools-setup.mk
+
 # Setup warnings flags
 include $(BUILD_SYSTEM)/warnings.mk
 

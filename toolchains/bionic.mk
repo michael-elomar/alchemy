@@ -28,26 +28,27 @@ include $(BUILD_PREBUILT)
 include $(CLEAR_VARS)
 LOCAL_MODULE := libaudio
 LOCAL_EXPORT_LDLIBS := -laudio
-LOCAL_EXPORT_C_INCLUDES := -I$(RAPTOR_DIR)/hardware/parrot/libaudio/include
-LOCAL_EXPORT_C_INCLUDES += -I$(RAPTOR_DIR)/hardware/libhardware_legacy/include
+LOCAL_EXPORT_C_INCLUDES := \
+	$(RAPTOR_DIR)/hardware/parrot/libaudio/include \
+	$(RAPTOR_DIR)/hardware/libhardware_legacy/include
 include $(BUILD_PREBUILT)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := alsa-lib
 LOCAL_MODULE_CLASS := PREBUILT
 LOCAL_EXPORT_LDLIBS := -lasound
-LOCAL_EXPORT_C_INCLUDES := -I$(RAPTOR_DIR)/external/alsa-lib/include
+LOCAL_EXPORT_C_INCLUDES := $(RAPTOR_DIR)/external/alsa-lib/include
 include $(BUILD_PREBUILT)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := libcrypto
 LOCAL_EXPORT_LDLIBS := -lcrypto
-LOCAL_EXPORT_C_INCLUDES := -I$(RAPTOR_DIR)/external/openssl/include
+LOCAL_EXPORT_C_INCLUDES := $(RAPTOR_DIR)/external/openssl/include
 include $(BUILD_PREBUILT)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := libssl
 LOCAL_EXPORT_LDLIBS := -lssl
-LOCAL_EXPORT_C_INCLUDES := -I$(RAPTOR_DIR)/external/openssl/include
+LOCAL_EXPORT_C_INCLUDES := $(RAPTOR_DIR)/external/openssl/include
 include $(BUILD_PREBUILT)
 
