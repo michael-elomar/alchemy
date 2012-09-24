@@ -37,16 +37,12 @@ __default-configure = \
 		$(AUTOTOOLS_CONFIGURE_ENV) $(PRIVATE_CONFIGURE_ENV) ./configure \
 		$(AUTOTOOLS_CONFIGURE_ARGS) $(PRIVATE_CONFIGURE_ARGS)
 
-# Note : use '+' to make sure sub-make is properly managed, this avoid the message :
-# warning: jobserver unavailable: using -j1.  Add `+' to parent make rule.
 __default-make-build = \
-	+$(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_BUILD_ENV) $(MAKE) -C $(PRIVATE_SRC_DIR) \
+	$(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_BUILD_ENV) $(MAKE) -C $(PRIVATE_SRC_DIR) \
 		$(AUTOTOOLS_MAKE_ARGS) $(PRIVATE_MAKE_BUILD_ARGS)
 
-# Note : use '+' to make sure sub-make is properly managed, this avoid the message :
-# warning: jobserver unavailable: using -j1.  Add `+' to parent make rule.
 __default-make-install = \
-	+$(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) $(MAKE) -C $(PRIVATE_SRC_DIR) \
+	$(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) $(MAKE) -C $(PRIVATE_SRC_DIR) \
 		$(AUTOTOOLS_MAKE_ARGS) $(PRIVATE_MAKE_INSTALL_ARGS) install
 
 # Note force success for command in case "uninstall" is not supported or Makefile not present
@@ -89,36 +85,38 @@ endif
 
 ###############################################################################
 ## Rules.
+## Note : use '+' to make sure sub-make is properly managed, this avoid the message :
+## warning: jobserver unavailable: using -j1.  Add `+' to parent make rule.
 ###############################################################################
 
 # Unpack + patch
 $(unpacked_file): $(archive_file) $(addprefix $(LOCAL_PATH)/,$(patches)) $(all_external_libraries)
 	@echo "Unpacking $(call path-from-top,$<)"
 	@mkdir -p $(PRIVATE_UNPACK_DIR)
-	$(Q)$(call $(PRIVATE_CMD_UNPACK))
-	$(Q)$(if $(PRIVATE_PATCHES), $(call __apply-patches))
-	$(Q)$(if $(PRIVATE_CMD_POST_UNPACK), $(call $(PRIVATE_CMD_POST_UNPACK)))
+	+$(Q)$(call $(PRIVATE_CMD_UNPACK))
+	+$(Q)$(if $(PRIVATE_PATCHES), $(call __apply-patches))
+	+$(Q)$(if $(PRIVATE_CMD_POST_UNPACK), $(call $(PRIVATE_CMD_POST_UNPACK)))
 	@touch $@
 
 # Configuration
 $(configured_file): $(unpacked_file)
 	@echo "Configuring $(PRIVATE_MODULE)"
-	$(Q)$(call $(PRIVATE_CMD_CONFIGURE))
-	$(Q)$(if $(PRIVATE_CMD_POST_CONFIGURE), $(call $(PRIVATE_CMD_POST_CONFIGURE)))
+	+$(Q)$(call $(PRIVATE_CMD_CONFIGURE))
+	+$(Q)$(if $(PRIVATE_CMD_POST_CONFIGURE), $(call $(PRIVATE_CMD_POST_CONFIGURE)))
 	@touch $@
 
 # Build
 $(built_file): $(configured_file)
 	@echo "Building $(PRIVATE_MODULE)"
-	$(Q)$(call $(PRIVATE_CMD_BUILD))
-	$(Q)$(if $(PRIVATE_CMD_POST_BUILD), $(call $(PRIVATE_CMD_POST_BUILD)))
+	+$(Q)$(call $(PRIVATE_CMD_BUILD))
+	+$(Q)$(if $(PRIVATE_CMD_POST_BUILD), $(call $(PRIVATE_CMD_POST_BUILD)))
 	@touch $@
 
 # Installation
 $(installed_file): $(built_file)
 	@echo "Installing $(PRIVATE_MODULE)"
-	$(Q)$(call $(PRIVATE_CMD_INSTALL))
-	$(Q)$(if $(PRIVATE_CMD_POST_INSTALL), $(call $(PRIVATE_CMD_POST_INSTALL)))
+	+$(Q)$(call $(PRIVATE_CMD_INSTALL))
+	+$(Q)$(if $(PRIVATE_CMD_POST_INSTALL), $(call $(PRIVATE_CMD_POST_INSTALL)))
 	@touch $@
 
 # Done
@@ -127,8 +125,8 @@ $(LOCAL_BUILD_MODULE): $(installed_file)
 
 # clean- targets additional commands
 clean-$(LOCAL_MODULE)::
-	$(Q)$(call $(PRIVATE_CMD_CLEAN))
-	$(Q)$(if $(PRIVATE_CMD_POST_CLEAN), $(call $(PRIVATE_CMD_POST_CLEAN)))
+	+$(Q)$(call $(PRIVATE_CMD_CLEAN))
+	+$(Q)$(if $(PRIVATE_CMD_POST_CLEAN), $(call $(PRIVATE_CMD_POST_CLEAN)))
 	$(Q)rm -f $(installed_file)
 	$(Q)rm -f $(built_file)
 	$(Q)rm -f $(configured_file)
