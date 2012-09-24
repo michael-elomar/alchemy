@@ -26,7 +26,7 @@ USE_CCACHE := 0
 # Quiet command if V is 0
 ifeq ("$(V)","0")
   Q := @
-#  MAKEFLAGS += -s --no-print-directory
+  MAKEFLAGS += -s --no-print-directory
 endif
 
 # This is the default target.  It must be the first declared target.
