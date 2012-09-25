@@ -16,6 +16,13 @@ SHELL := /bin/sh
 # Turns off suffix rules built into make
 .SUFFIXES:
 
+# Turns off the RCS / SCCS implicit rules of GNU Make
+% : RCS/%,v
+% : RCS/%
+% : %,v
+% : s.%
+% : SCCS/s.%
+
 # Overridable settings
 V := 0
 W := 0
