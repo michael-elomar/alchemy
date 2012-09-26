@@ -75,14 +75,26 @@ def main():
 			dstDirName = os.path.split(dstFileName)[0]
 			if not os.path.exists(dstDirName):
 				os.makedirs(dstDirName, 0755)
+
+			# check if we need to do something
+			doAction = False
+			if not os.path.exists(dstFileName):
+				doAction = True
+			else:
+				srcStat = os.stat(srcFileName)
+				dstStat = os.stat(dstFileName)
+				if srcStat.st_mtime > dstStat.st_mtime:
+					doAction = True
+
 			# copy and strip executables
 			# FIXME: stripping kernel modules under android causes issues
-			if options.strip != None \
-				and not srcFileName.endswith(".ko") \
-				and isExec(srcFileName):
-				os.system("%s -o %s %s" % (options.strip, dstFileName, srcFileName))
-			else:
-				shutil.copy2(srcFileName, dstFileName)
+			if doAction:
+				if options.strip != None \
+					and not srcFileName.endswith(".ko") \
+					and isExec(srcFileName):
+					os.system("%s -o %s %s" % (options.strip, dstFileName, srcFileName))
+				else:
+					shutil.copy2(srcFileName, dstFileName)
 
 #===============================================================================
 # Setup option parser and parse command line.
