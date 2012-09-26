@@ -96,7 +96,7 @@ else
 endif
 
 ###############################################################################
-## Update flags to use staging directory.
+## Update flags
 ###############################################################################
 
 # Make sure that staging dir are found first in case we want to override something
@@ -105,6 +105,11 @@ TARGET_GLOBAL_C_INCLUDES := \
 	$(TARGET_OUT_STAGING)/usr/include \
 	$(TARGET_GLOBAL_C_INCLUDES)
 
+# TODO : is it really the place and where to do it ?
+TARGET_GLOBAL_CFLAGS += -DNEW_BUILD -D_POSIX_SOURCE
+TARGET_GLOBAL_CPPFLAGS += -D__STDC_LIMIT_MACROS
+
+# Add staging dirs to linker as well
 TARGET_GLOBAL_LDFLAGS += -L$(TARGET_OUT_STAGING)/lib
 TARGET_GLOBAL_LDFLAGS += -L$(TARGET_OUT_STAGING)/usr/lib
 TARGET_GLOBAL_LDFLAGS_SHARED += -L$(TARGET_OUT_STAGING)/lib
