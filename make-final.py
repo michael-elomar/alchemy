@@ -50,9 +50,34 @@ def main():
 	logging.info("staging-dir : %s", stagingDir)
 	logging.info("final-dir : %s", finalDir)
 
+	# do we need to output a makefile ?
+	makefile = None
+	if len(args) >= 3:
+		logging.info("makefile : %s", args[2])
+		makefile = open(args[2], "w")
+
 	# check that staging directory exists
 	if not os.path.isdir(stagingDir):
 		logging.error("%s is not a directory", stagingDir)
+
+	# Makefile banner
+	# The .SUFFIXES is important to remove all impicit rules.
+	# There is one which is really, really nasty :
+	#   a file x is updated from a file x.sh automatically
+	# Guess what happen when you have both in a folder :
+	#  the executable is replace by the script if older...
+	if makefile != None:
+		makefile.write("# GENERATED FILE, DO NOT MODIFY\n\n")
+		makefile.write(".SUFFIXES:\n\n")
+		if options.strip != None:
+			makefile.write("STRIP := %s\n" % options.strip)
+		makefile.write("PWD := $(shell pwd)\n")
+		makefile.write("ALL :=\n")
+		makefile.write("ifneq (\"$(V)\",\"1\")\n")
+		makefile.write("  Q := @\n")
+		makefile.write("endif\n")
+		makefile.write(".PHONY: all\n")
+		makefile.write("all: do-all\n\n")
 
 	# browse staging directory
 	for (dirPath, dirNames, fileNames) in os.walk(stagingDir):
@@ -76,31 +101,52 @@ def main():
 			if not os.path.exists(dstDirName):
 				os.makedirs(dstDirName, 0755)
 
-			# check if we need to do something
-			doAction = False
-			if not os.path.exists(dstFileName):
-				doAction = True
-			else:
-				srcStat = os.stat(srcFileName)
-				dstStat = os.stat(dstFileName)
-				if srcStat.st_mtime > dstStat.st_mtime:
-					doAction = True
-
-			# copy and strip executables
+			# do we need to strip ?
 			# FIXME: stripping kernel modules under android causes issues
-			if doAction:
-				if options.strip != None \
-					and not srcFileName.endswith(".ko") \
-					and isExec(srcFileName):
-					os.system("%s -o %s %s" % (options.strip, dstFileName, srcFileName))
+			doStrip = False
+			if options.strip != None \
+				and not srcFileName.endswith(".ko") \
+				and isExec(srcFileName):
+				doStrip = True
+
+			# go
+			if makefile != None:
+				makefile.write("ALL += %s\n" % dstFileName)
+				makefile.write("%s: %s\n" % (dstFileName, srcFileName))
+				makefile.write("\t@mkdir -p $(dir $@)\n")
+				makefile.write("\t@echo Alchemy install: $(patsubst $(PWD)/%,%,$@)\n")
+				if doStrip:
+					makefile.write("\t$(Q)$(STRIP) -o $@ $<\n")
 				else:
-					shutil.copy2(srcFileName, dstFileName)
+					makefile.write("\t$(Q)cp -af $< $@\n")
+				makefile.write("\n")
+			else:
+				# check if we need to do something
+				doAction = False
+				if not os.path.exists(dstFileName):
+					doAction = True
+				else:
+					srcStat = os.stat(srcFileName)
+					dstStat = os.stat(dstFileName)
+					if srcStat.st_mtime > dstStat.st_mtime:
+						doAction = True
+
+				# copy and strip executables
+				if doAction:
+					if doStrip:
+						os.system("%s -o %s %s" % (options.strip, dstFileName, srcFileName))
+					else:
+						shutil.copy2(srcFileName, dstFileName)
+
+	if makefile != None:
+		makefile.write(".PHONY: do-all\n")
+		makefile.write("do-all: $(ALL)\n\n")
 
 #===============================================================================
 # Setup option parser and parse command line.
 #===============================================================================
 def parseArgs():
-	usage = "usage: %prog [options] <staging-dir> <final-dir>"
+	usage = "usage: %prog [options] <staging-dir> <final-dir> [<makefile>]"
 	parser = optparse.OptionParser(usage = usage)
 	parser.add_option("--strip",
 		dest="strip",
@@ -118,7 +164,7 @@ def parseArgs():
 		help="verbose output (more verbose if specified twice)")
 
 	(options, args) = parser.parse_args()
-	if len(args) > 2:
+	if len(args) > 3:
 		parser.error("Too many parameters")
 	elif len(args) < 2:
 		parser.error("Not enough parameters")
