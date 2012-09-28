@@ -279,6 +279,15 @@ $(foreach __mod,$(LOCAL_STATIC_LIBRARIES) $(LOCAL_WHOLE_STATIC_LIBRARIES), \
 	) \
 )
 
+# TODO : remove this when al libraries have removed their dependencies toward
+# config.h and autoconf.h
+# force unsigned char always (default on arm, but not on PC_Linux)
+ifneq ("$(strip $(LOCAL_PBUILD_HOOK))","")
+  LOCAL_C_INCLUDES += $(BUILD_SYSTEM)/pbuild-hook
+  LOCAL_CFLAGS += -funsigned-char
+endif
+
+
 $(LOCAL_TARGETS): PRIVATE_CFLAGS := $(LOCAL_CFLAGS)
 $(LOCAL_TARGETS): PRIVATE_C_INCLUDES := $(LOCAL_C_INCLUDES)
 $(LOCAL_TARGETS): PRIVATE_CPPFLAGS := $(LOCAL_CPPFLAGS)
