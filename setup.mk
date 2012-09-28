@@ -106,7 +106,7 @@ TARGET_GLOBAL_C_INCLUDES := \
 	$(TARGET_GLOBAL_C_INCLUDES)
 
 # TODO : is it really the place and where to do it ?
-TARGET_GLOBAL_CFLAGS += -DNEW_BUILD -D_POSIX_SOURCE
+TARGET_GLOBAL_CFLAGS += -DNEW_BUILD
 TARGET_GLOBAL_CPPFLAGS += -D__STDC_LIMIT_MACROS
 
 # Add staging dirs to linker as well
