@@ -28,10 +28,14 @@ WARNINGS_COMMON_FLAGS += -Wno-unused -Wno-unused-parameter -Wunused-value -Wunus
 #WARNINGS_COMMON_FLAGS += -Wswitch-default
 #WARNINGS_COMMON_FLAGS += -Wwrite-strings
 #WARNINGS_COMMON_FLAGS += -Wundef
-#WARNINGS_COMMON_FLAGS += -Wpointer-arith
-#WARNINGS_COMMON_FLAGS += -Wformat-nonliteral
-#WARNINGS_COMMON_FLAGS += -Wformat-security
-#WARNINGS_COMMON_FLAGS += -Winit-self
+WARNINGS_COMMON_FLAGS += -Wpointer-arith
+WARNINGS_COMMON_FLAGS += -Wformat-nonliteral
+WARNINGS_COMMON_FLAGS += -Wformat-security
+WARNINGS_COMMON_FLAGS += -Winit-self
+
+# android specifies -Wstrict-aliasing=2
+# it generates too many false positive, use level 3 (default with -Wall or -Wstrict-aliasing)
+WARNINGS_COMMON_FLAGS += -Wstrict-aliasing=3
 
 # Too many false positives with clang compiler
 ifneq ("$(USE_CLANG)","1")
@@ -57,8 +61,15 @@ endif
 ###############################################################################
 
 # C specific
+
 #WARNINGS_CFLAGS += -Wmissing-declarations
 #WARNINGS_CFLAGS += -Wmissing-prototypes
+
+# ecos forces it, remove it, not useful only problems found are :
+# 'function declaration is not a prototype'
+# if void is missing in function with no parameters
+WARNINGS_CFLAGS += -Wno-strict-prototypes
+
 
 # gcc >= 4.5.0
 ifneq ("$(USE_CLANG)","1")
@@ -68,8 +79,15 @@ endif
 endif
 
 # c++ specific
+
+# Too many warnings for the moment
 #WARNINGS_CPPFLAGS += -Wctor-dtor-privacy
+WARNINGS_CPPFLAGS += -Wno-ctor-dtor-privacy
+
+# Too many warnings for the moment
 #WARNINGS_CPPFLAGS += -Wnon-virtual-dtor
+WARNINGS_CPPFLAGS += -Wno-non-virtual-dtor
+
 WARNINGS_CPPFLAGS += -Wreorder
 WARNINGS_CPPFLAGS += -Woverloaded-virtual
 
