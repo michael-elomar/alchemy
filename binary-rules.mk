@@ -12,6 +12,14 @@ build_dir := $(TARGET_OUT_BUILD)/$(LOCAL_MODULE)
 # Prepend some directories in include list
 LOCAL_C_INCLUDES := $(build_dir) $(LOCAL_PATH) $(LOCAL_C_INCLUDES)
 
+# TODO : remove this when al libraries have removed their dependencies toward
+# config.h and autoconf.h
+# force unsigned char always (default on arm, but not on PC_Linux)
+ifneq ("$(strip $(LOCAL_PBUILD_HOOK))","")
+  LOCAL_C_INCLUDES += $(BUILD_SYSTEM)/pbuild-hook
+  LOCAL_CFLAGS += -funsigned-char
+endif
+
 ###############################################################################
 ## ARM specific checks.
 ###############################################################################
@@ -278,15 +286,6 @@ $(foreach __mod,$(LOCAL_STATIC_LIBRARIES) $(LOCAL_WHOLE_STATIC_LIBRARIES), \
 		$(eval LOCAL_PBUILD_HOOK := 1) \
 	) \
 )
-
-# TODO : remove this when al libraries have removed their dependencies toward
-# config.h and autoconf.h
-# force unsigned char always (default on arm, but not on PC_Linux)
-ifneq ("$(strip $(LOCAL_PBUILD_HOOK))","")
-  LOCAL_C_INCLUDES += $(BUILD_SYSTEM)/pbuild-hook
-  LOCAL_CFLAGS += -funsigned-char
-endif
-
 
 $(LOCAL_TARGETS): PRIVATE_CFLAGS := $(LOCAL_CFLAGS)
 $(LOCAL_TARGETS): PRIVATE_C_INCLUDES := $(LOCAL_C_INCLUDES)
