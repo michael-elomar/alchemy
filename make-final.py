@@ -106,7 +106,8 @@ def main():
 			doStrip = False
 			if options.strip != None \
 				and not srcFileName.endswith(".ko") \
-				and isExec(srcFileName):
+				and isExec(srcFileName) \
+				and not os.path.islink(srcFileName):
 				doStrip = True
 
 			# go
