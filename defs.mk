@@ -744,11 +744,11 @@ endef
 ## Commands for copying files.
 ###############################################################################
 
-# Copy a single file from one place to another, preserving permissions and
+# Copy a single file from one place to another, preserving permissions/links and
 # overwriting any existing file.
 define do-copy-file
 @mkdir -p $(dir $@)
-$(Q)cp -fp $< $@
+$(Q)cp -fa $< $@
 endef
 
 # Define a rule to copy a file.  For use via $(eval).
