@@ -8,6 +8,7 @@
 # 
 
 import sys, os, logging
+import subprocess
 import optparse
 import shutil
 
@@ -20,6 +21,13 @@ EXCLUDE_DIRS = ["include", "man"]
 
 # Extension to exclude
 EXCLUDE_FILTERS = [".a", ".la"]
+
+#==============================================================================
+# Execute a command and get its output
+#==============================================================================
+def executeCmd(cmd):
+	p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell = True)
+	return p.communicate()[0].rstrip("\n").split("\n")
 
 #===============================================================================
 # Determine if a file is an executable.
@@ -35,6 +43,24 @@ def isExec(filePath):
 	except IOError as ex:
 		logging.error("Unable to open %s ([err=%d] %s)",
 			filePath, ex.errno, ex.strerror)
+	return result
+
+#===============================================================================
+# Determine if a file can be stripped.
+# Required under android because soslim crashes when trying to strip
+# static executables compiled with eglibc.
+#===============================================================================
+def canStrip(filePath):
+	result = False
+	try:
+		# get error output from nm command to check for 'no symbols'
+		p = subprocess.Popen("nm %s" % filePath,
+			stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell = True)
+		res = p.communicate()[1].rstrip("\n").split("\n")
+		result = (len(res) == 0 or res[0].find("no symbols") < 0)
+	except IOError as ex:
+		# assume not strippable if nm failed
+		result = False
 	return result
 
 #===============================================================================
@@ -107,31 +133,62 @@ def main():
 			if options.strip != None \
 				and not srcFileName.endswith(".ko") \
 				and isExec(srcFileName) \
+				and canStrip(srcFileName) \
 				and not os.path.islink(srcFileName):
 				doStrip = True
 
+			# check if we need to do something
+			doAction = False
+			if not os.path.exists(dstFileName):
+				doAction = True
+			elif os.path.islink(srcFileName):
+				print("%s is a link" % srcFileName)
+				doAction = True
+			else:
+				srcStat = os.stat(srcFileName)
+				dstStat = os.stat(dstFileName)
+				if srcStat.st_mtime > dstStat.st_mtime:
+					doAction = True
+
+			# nothing to do if destination is already OK
+			if doAction == False:
+				continue
+
 			# go
 			if makefile != None:
+				# if source file contains ':' or '=' it doesn't work great
+				# prerequisite shall be escaped
+				# target can not contain at all  any ':' or '=' so replace with '_'
+				# in command do not use target name as it will be wrong
+				# consequence is that target will never actually exists and commands
+				# will always be executed
+				patched = True
+				if srcFileName.find(":") >= 0:
+					srcFileName = srcFileName.replace(":", "\\:")
+					srcFileName = srcFileName.replace("=", "\\=")
+					dstFileName = dstFileName.replace(":", "_")
+					dstFileName = dstFileName.replace("=", "_")
+
+				# register destination in ALL variable
 				makefile.write("ALL += %s\n" % dstFileName)
+
+				# rule
 				makefile.write("%s: %s\n" % (dstFileName, srcFileName))
-				makefile.write("\t@mkdir -p $(dir $@)\n")
-				makefile.write("\t@echo Alchemy install: $(patsubst $(PWD)/%,%,$@)\n")
+
+				# define variables with real src and dst (in case it was patched above)
+				makefile.write("\t$(eval __src := $<)\n")
+				makefile.write("\t$(eval __dst := $(patsubst %s/%%,%s/%%,$<))\n" % \
+					(stagingDir, finalDir))
+
+				# commands
+				makefile.write("\t@mkdir -p $(dir $(__dst))\n")
+				makefile.write("\t@echo Alchemy install: $(patsubst $(PWD)/%,%,$(__dst))\n")
 				if doStrip:
-					makefile.write("\t$(Q)$(STRIP) -o $@ $<\n")
+					makefile.write("\t$(Q)$(STRIP) -o $(__dst) $(__src)\n")
 				else:
-					makefile.write("\t$(Q)cp -af $< $@\n")
+					makefile.write("\t$(Q)cp -af $(__src) $(__dst)\n")
 				makefile.write("\n")
 			else:
-				# check if we need to do something
-				doAction = False
-				if not os.path.exists(dstFileName):
-					doAction = True
-				else:
-					srcStat = os.stat(srcFileName)
-					dstStat = os.stat(dstFileName)
-					if srcStat.st_mtime > dstStat.st_mtime:
-						doAction = True
-
 				# copy and strip executables
 				if doAction:
 					if doStrip:
