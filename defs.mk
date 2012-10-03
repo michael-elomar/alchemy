@@ -748,7 +748,7 @@ endef
 # overwriting any existing file.
 define do-copy-file
 @mkdir -p $(dir $@)
-$(Q)cp -fa $< $@
+$(Q)cp -af $< $@
 endef
 
 # Define a rule to copy a file.  For use via $(eval).
