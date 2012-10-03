@@ -34,10 +34,12 @@ all_external_libraries := \
 ## Rule-specific variable definitions.
 ###############################################################################
 
+# Use += and not := for clean variables so that then can be modified in user
+# makefiles prior to rule generation
 $(LOCAL_TARGETS): PRIVATE_PATH := $(LOCAL_PATH)
 $(LOCAL_TARGETS): PRIVATE_MODULE := $(LOCAL_MODULE)
-$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES := $(LOCAL_BUILD_MODULE)
-$(LOCAL_TARGETS): PRIVATE_CLEAN_DIRS :=
+$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(LOCAL_BUILD_MODULE)
+$(LOCAL_TARGETS): PRIVATE_CLEAN_DIRS +=
 
 ###############################################################################
 ## General rules.
