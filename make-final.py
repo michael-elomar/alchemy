@@ -142,7 +142,6 @@ def main():
 			if not os.path.exists(dstFileName):
 				doAction = True
 			elif os.path.islink(srcFileName):
-				print("%s is a link" % srcFileName)
 				doAction = True
 			else:
 				srcStat = os.stat(srcFileName)
