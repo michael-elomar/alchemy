@@ -185,6 +185,10 @@ modules-LOCALS += PBUILD_HOOK
 # Force modules that depends on this one to use whole-statid library
 modules-LOCALS += FORCE_WHOLE_STATIC_LIBRARY
 
+# Files and diorectories to delete during a clean
+modules-LOCALS += CLEAN_FILES
+modules-LOCALS += CLEAN_DIRS
+
 # Autotools customization
 modules-LOCALS += AUTOTOOLS_VERSION
 modules-LOCALS += AUTOTOOLS_ARCHIVE
