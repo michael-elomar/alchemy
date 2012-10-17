@@ -26,7 +26,6 @@ SHELL := /bin/sh
 # Overridable settings
 V := 0
 W := 0
-DEBUG := 0
 USE_CLANG := 0
 USE_CCACHE := 0
 USE_SCAN_CACHE := 0
@@ -115,12 +114,9 @@ $(info ----------------------------------------------------------------------)
 ###############################################################################
 
 # Makefile with the list of all makefiles available and include them
-SCAN_TARGET := scan
-CLOBBER_TARGET := clobber
 USER_MAKEFILE_NAME := atom.mk
 USER_MAKEFILES_CACHE := $(TARGET_OUT_BUILD)/makefiles.mk
 USER_MAKEFILES :=
-
 
 ifneq ("$(USE_SCAN_CACHE)","1")
 
@@ -138,8 +134,8 @@ else
 
 # Include makefile containing all available makefile
 # If it does not exists, it will trigger its creation
-ifeq ("$(findstring $(SCAN_TARGET),$(MAKECMDGOALS))","")
-ifeq ("$(findstring $(CLOBBER_TARGET),$(MAKECMDGOALS))","")
+ifeq ("$(call is-in-make-goals scan","")
+ifeq ("$(call is-in-make-goals clobber","")
   -include $(USER_MAKEFILES_CACHE)
 endif
 endif
@@ -154,6 +150,7 @@ define create-user-makefiles-cache
 	echo "Scanning $(TOP_DIR) for makefiles..."; \
 	for f in `find $(TOP_DIR) -name $(USER_MAKEFILE_NAME)`; do \
 		echo "$$f"; \
+		echo "USER_MAKEFILES += $$f" >> $(USER_MAKEFILES_CACHE); \
 		echo "include $$f" >> $(USER_MAKEFILES_CACHE); \
 	done;
 endef
@@ -163,8 +160,8 @@ $(USER_MAKEFILES_CACHE):
 	@$(create-user-makefiles-cache)
 
 # Rule to force creation of list of makefiles
-.PHONY: $(SCAN_TARGET)
-$(SCAN_TARGET):
+.PHONY: scan
+scan:
 	@$(create-user-makefiles-file)
 
 ###############################################################################
@@ -184,14 +181,14 @@ ALL_BUILD_MODULES := \
 $(call modules-compute-depends)
 
 # Check dependencies and variables of modules (unless we want to configure something)
-ifeq ("$(findstring config,$(MAKECMDGOALS))","")
+ifeq ("$(CONFIG_IN_MAKE_GOALS)","0")
   $(call modules-check-depends)
   $(call modules-check-variables)
 endif
 
-# Now, really generate rules for modules.
+# Now, really generate rules for modules (skip this step if we are just configuring something.
 # This second pass allows to deal with exported values.
-ifeq ("$(findstring config,$(MAKECMDGOALS))","")
+ifeq ("$(CONFIG_IN_MAKE_GOALS)","0")
 $(foreach __mod,$(ALL_MODULES), \
 	$(eval LOCAL_MODULE := $(__mod)) \
 	$(eval include $(BUILD_SYSTEM)/module.mk) \

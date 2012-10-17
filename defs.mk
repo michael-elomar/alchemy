@@ -294,7 +294,16 @@ module-add = \
 	)
 
 ###############################################################################
-## Check that a module is registered.
+## Check if a target is given in make goals.
+## $1 : goal to check
+###############################################################################
+is-in-make-goals = $(strip \
+	$(foreach __g,$(MAKECMDGOALS), \
+		$(if $(call streq,$(__g),$1),$(true)) \
+	))
+
+###############################################################################
+## Check if a module is registered.
 ## $1 : module to check.
 ###############################################################################
 is-module-registered = $(strip \
@@ -303,7 +312,7 @@ is-module-registered = $(strip \
 	))
 
 ###############################################################################
-## Check that a module wil be built.
+## Check if a module will be built.
 ## $1 : module to check.
 ###############################################################################
 is-module-in-build-config = $(strip \

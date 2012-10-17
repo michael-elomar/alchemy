@@ -18,15 +18,25 @@ config-check: config-check-global config-check-modules
 .PHONY: config-update
 config-update: config-update-global config-update-modules
 
+# Avoid checking connfig if we want to configure something
+ifeq ("$(CONFIG_IN_MAKE_GOALS)","0")
+$(CONFIG_GLOBAL_FILE): __config-check-global
+endif
+
 ###############################################################################
 ## Global configuration rules.
 ###############################################################################
 
 # Check the global configuration
 .PHONY: config-check-global
-config-check-global:
+config-check-global: __config-check-global
+	@echo "Global config is up to date";
+
+# Internal version with no message
+.PHONY: __config-check-global
+__config-check-global:
 	@( \
-		$(call __begin-diff) \
+		$(call __begin-diff,$(TARGET_CONFIG_DIR)/.global.config.diff) \
 		__tmpconfigin=$$(mktemp); \
 		$(eval __config := $(CONFIG_GLOBAL_FILE)) \
 		$(call __generate-config-in-global,$${__tmpconfigin}) \
@@ -34,7 +44,6 @@ config-check-global:
 		rm -f $${__tmpconfigin}; \
 		$(call __end-diff,1) \
 	)
-	@echo "Global config is up to date";
 
 # Update the global configuration by selecting new option at their default value
 .PHONY: config-update-global

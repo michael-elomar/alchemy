@@ -16,6 +16,12 @@ CONFIG_ORIG_DIR := $(TARGET_CONFIG_DIR)
 CONFIG_GLOBAL_FILE := $(CONFIG_ORIG_DIR)/global.config
 -include $(CONFIG_GLOBAL_FILE)
 
+# Determine if a config something is requested
+CONFIG_IN_MAKE_GOALS := 0
+ifneq ("$(findstring config-,$(MAKECMDGOALS))","")
+CONFIG_IN_MAKE_GOALS := 1
+endif
+
 ###############################################################################
 ## Get the name of the configuration file of a module.
 ## $1 : module name.
@@ -34,9 +40,11 @@ __get_module-config-in-files = \
 
 ###############################################################################
 ## Begin the update/check operation by creating a temp diff file.
+## $1 : file to use as a diff file, or empty to generate one
 ###############################################################################
 define __begin-diff
-	__tmpdiff=$$(mktemp);
+	if [ "$1" = "" ]; then __tmpdiff=$$(mktemp); else __tmpdiff=$1; fi; \
+	truncate -s 0 $${__tmpdiff};
 endef
 
 ###############################################################################
@@ -99,7 +107,7 @@ endef
 define __load-config-internal
   $(eval __config := $(call __get_module-config,$1))
   -include $(__config)
-  ifeq ("$(findstring config,$(MAKECMDGOALS))","")
+  ifeq ("$(CONFIG_IN_MAKE_GOALS)","0")
     $(__config): __config-check-modules-$1
   endif
 endef
