@@ -29,6 +29,7 @@ W := 0
 DEBUG := 0
 USE_CLANG := 0
 USE_CCACHE := 0
+USE_SCAN_CACHE := 0
 
 # Quiet command if V is 0
 ifeq ("$(V)","0")
@@ -117,31 +118,49 @@ $(info ----------------------------------------------------------------------)
 SCAN_TARGET := scan
 CLOBBER_TARGET := clobber
 USER_MAKEFILE_NAME := atom.mk
-USER_MAKEFILES:=$(TARGET_OUT_BUILD)/makefiles.mk
+USER_MAKEFILES_CACHE := $(TARGET_OUT_BUILD)/makefiles.mk
+USER_MAKEFILES :=
+
+
+ifneq ("$(USE_SCAN_CACHE)","1")
+
+# Delete cache and include scanned files
+$(shell rm -f $(USER_MAKEFILES_CACHE))
+$(info Scanning $(TOP_DIR) for makefiles...)
+USER_MAKEFILES := $(shell find $(TOP_DIR) -name $(USER_MAKEFILE_NAME))
+include $(USER_MAKEFILES)
+ifeq ("$(V)","1")
+$(foreach __f,$(USER_MAKEFILES),$(info $(__f)))
+endif
+$(info ...done)
+
+else
 
 # Include makefile containing all available makefile
 # If it does not exists, it will trigger its creation
 ifeq ("$(findstring $(SCAN_TARGET),$(MAKECMDGOALS))","")
 ifeq ("$(findstring $(CLOBBER_TARGET),$(MAKECMDGOALS))","")
-  include $(USER_MAKEFILES)
+  -include $(USER_MAKEFILES_CACHE)
 endif
 endif
 
+endif
+
 # Create a file that will contain all user makefiles available
-define create-user-makefiles-file
-	rm -f $(USER_MAKEFILES); \
-	mkdir -p $(dir $(USER_MAKEFILES)); \
-	touch $(USER_MAKEFILES); \
+define create-user-makefiles-cache
+	rm -f $(USER_MAKEFILES_CACHE); \
+	mkdir -p $(dir $(USER_MAKEFILES_CACHE)); \
+	touch $(USER_MAKEFILES_CACHE); \
 	echo "Scanning $(TOP_DIR) for makefiles..."; \
 	for f in `find $(TOP_DIR) -name $(USER_MAKEFILE_NAME)`; do \
 		echo "$$f"; \
-		echo "include $$f" >> $(USER_MAKEFILES); \
+		echo "include $$f" >> $(USER_MAKEFILES_CACHE); \
 	done;
 endef
 
 # Rule that will trigger creation of list of makefiles when needed
-$(USER_MAKEFILES):
-	@$(create-user-makefiles-file)
+$(USER_MAKEFILES_CACHE):
+	@$(create-user-makefiles-cache)
 
 # Rule to force creation of list of makefiles
 .PHONY: $(SCAN_TARGET)
