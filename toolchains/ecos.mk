@@ -1,8 +1,0 @@
-
-LOCAL_PATH := $(call my-dir)
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := alsa-lib
-LOCAL_MODULE_CLASS := PREBUILT
-include $(BUILD_PREBUILT)
-

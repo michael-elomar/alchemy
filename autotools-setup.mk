@@ -38,8 +38,10 @@ ifeq ("$(TARGET_ARCH)","ARM")
   else
     GNU_TARGET_NAME := arm-none-linux-gnueabi
   endif
-else
+else ifeq ("$(TARGET_ARCH)","X86")
   GNU_TARGET_NAME := i386-linux-gnu
+else ifeq ("$(TARGET_ARCH)","X64")
+  GNU_TARGET_NAME := x86_64-linux-gnu
 endif
 
 # Arguments to give to configure script

@@ -66,6 +66,17 @@ include $(BUILD_SYSTEM)/setup.mk
 # Setup macros definitions
 include $(BUILD_SYSTEM)/defs.mk
 
+# Target/os specific setup
+ifeq ("$(TARGET_OS)","LINUX")
+  ifeq ("$(TARGET_OS_FLAVOUR)","ANDROID")
+    include $(BUILD_SYSTEM)/toolchains/bionic-setup.mk
+  else ifeq ("$(TARGET_OS_FLAVOUR)","NATIVE")
+    include $(BUILD_SYSTEM)/toolchains/native-setup.mk
+  endif
+else ifeq ("$(TARGET_OS)","ECOS")
+  include $(BUILD_SYSTEM)/toolchains/ecos-setup.mk
+endif
+
 # Setup autotools definitions (shall be after inclusion of defs.mk)
 include $(BUILD_SYSTEM)/autotools-setup.mk
 
@@ -86,14 +97,6 @@ BUILD_PREBUILT := $(BUILD_SYSTEM)/prebuilt.mk
 # Shall be defined before including user makefiles
 AUTOCONF_MERGE_FILE := $(TARGET_OUT_BUILD)/autoconf-merge.h
 
-ifeq ("$(TARGET_OS)","LINUX")
-  ifeq ("$(TARGET_OS_FLAVOUR)","ANDROID")
-    include $(BUILD_SYSTEM)/toolchains/bionic.mk
-  endif
-else ifeq ("$(TARGET_OS)","ECOS")
-  include $(BUILD_SYSTEM)/toolchains/ecos.mk
-endif
-
 ###############################################################################
 # Display configuration.
 ###############################################################################
@@ -112,6 +115,17 @@ $(info ----------------------------------------------------------------------)
 ###############################################################################
 ## Makefile scan and includes.
 ###############################################################################
+
+# Target/os specific packages
+ifeq ("$(TARGET_OS)","LINUX")
+  ifeq ("$(TARGET_OS_FLAVOUR)","ANDROID")
+    include $(BUILD_SYSTEM)/toolchains/bionic-packages.mk
+  else ifeq ("$(TARGET_OS_FLAVOUR)","NATIVE")
+    include $(BUILD_SYSTEM)/toolchains/native-packages.mk
+  endif
+else ifeq ("$(TARGET_OS)","ECOS")
+  include $(BUILD_SYSTEM)/toolchains/ecos-packages.mk
+endif
 
 # Makefile with the list of all makefiles available and include them
 USER_MAKEFILE_NAME := atom.mk

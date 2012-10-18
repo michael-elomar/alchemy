@@ -34,6 +34,24 @@ HOST_NM ?= nm
 HOST_STRIP ?= strip
 
 ###############################################################################
+## Target configuration.
+###############################################################################
+
+TARGET_ARCH ?= X86
+TARGET_CPU ?=
+TARGET_OS ?= LINUX
+TARGET_OS_FLAVOUR ?= NATIVE
+TARGET_PRODUCT ?= $(TARGET_OS)-$(TARGET_OS_FLAVOUR)
+TARGET_PRODUCT_VARIANT ?= $(TARGET_ARCH)
+
+TARGET_OUT ?= $(TOP_DIR)/Alchemy-out/$(TARGET_PRODUCT)-$(TARGET_PRODUCT_VARIANT)
+TARGET_OUT_BUILD ?= $(TARGET_OUT)/build
+TARGET_OUT_STAGING ?= $(TARGET_OUT)/staging
+TARGET_OUT_FINAL ?= $(TARGET_OUT)/final
+
+TARGET_CONFIG_DIR ?= $(TOP_DIR)/Alchemy-config/$(TARGET_PRODUCT)-$(TARGET_PRODUCT_VARIANT)
+
+###############################################################################
 # Target global variables.
 ###############################################################################
 TARGET_GLOBAL_C_INCLUDES ?=
