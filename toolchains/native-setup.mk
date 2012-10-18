@@ -8,7 +8,7 @@
 
 # Update flags based on architecture
 # 64-bit requires -fPIC to build shared libraries
-ifeq ("$(TARGET_ARCH)","X64")
+ifeq ("$(TARGET_ARCH)","x64")
   TARGET_GLOBAL_CFLAGS += -m64 -fPIC
   TARGET_GLOBAL_LDFLAGS += -m64
   TARGET_GLOBAL_LDFLAGS_SHARED += -m64

@@ -23,17 +23,17 @@ endif
 ###############################################################################
 ## ARM specific checks.
 ###############################################################################
-ifeq ("$(TARGET_ARCH)","ARM")
+ifeq ("$(TARGET_ARCH)","arm")
 
 # Make sure LOCAL_ARM_MODE is valid
 # If not set, use default mode
 # Convert to upper case for further use
-LOCAL_ARM_MODE := $(call upcase,$(strip $(LOCAL_ARM_MODE)))
+LOCAL_ARM_MODE := $(strip $(LOCAL_ARM_MODE))
 ifeq ("$(LOCAL_ARM_MODE)","")
   LOCAL_ARM_MODE := $(TARGET_DEFAULT_ARM_MODE)
 endif
-ifneq ("$(LOCAL_ARM_MODE)","ARM")
-ifneq ("$(LOCAL_ARM_MODE)","THUMB")
+ifneq ("$(LOCAL_ARM_MODE)","arm")
+ifneq ("$(LOCAL_ARM_MODE)","thumb")
   $(error $(LOCAL_PATH): LOCAL_ARM_MODE is not valid : $(LOCAL_ARM_MODE))
 endif
 endif
@@ -274,10 +274,10 @@ endif
 
 # Mode to display
 mode :=
-ifeq ("$(TARGET_ARCH)","ARM")
-mode := $(LOCAL_ARM_MODE)
-else ifeq ("$(TARGET_ARCH)","X86")
-mode := X86
+ifeq ("$(TARGET_ARCH)","arm")
+  mode := $(LOCAL_ARM_MODE)
+else
+  mode := $(TARGET_ARCH)
 endif
 
 # Force pbuild hook if a static library needs it

@@ -37,10 +37,10 @@ HOST_STRIP ?= strip
 ## Target configuration.
 ###############################################################################
 
-TARGET_ARCH ?= X86
+TARGET_ARCH ?= x86
 TARGET_CPU ?=
-TARGET_OS ?= LINUX
-TARGET_OS_FLAVOUR ?= NATIVE
+TARGET_OS ?= linux
+TARGET_OS_FLAVOUR ?= native
 TARGET_PRODUCT ?= $(TARGET_OS)-$(TARGET_OS_FLAVOUR)
 TARGET_PRODUCT_VARIANT ?= $(TARGET_ARCH)
 
@@ -66,7 +66,7 @@ TARGET_GLOBAL_CFLAGS_ARM ?=
 TARGET_GLOBAL_CFLAGS_THUMB ?=
 
 TARGET_PCH_FLAGS ?=
-TARGET_DEFAULT_ARM_MODE ?= THUMB
+TARGET_DEFAULT_ARM_MODE ?= thumb
 TARGET_FORCE_STATIC_LIBRARIES ?= 0
 
 # Global prerequisites (shall be used only by os makefile)
@@ -77,7 +77,7 @@ TARGET_GLOBAL_PREREQUISITES :=
 ###############################################################################
 
 # Host OS
-HOST_OS := LINUX
+HOST_OS := linux
 
 # Target OS
 ifndef TARGET_OS
@@ -85,11 +85,11 @@ ifndef TARGET_OS
 endif
 
 # Binary suffixes
-ifeq ("$(TARGET_OS)","LINUX")
+ifeq ("$(TARGET_OS)","linux")
   TARGET_STATIC_LIB_SUFFIX := .a
   TARGET_SHARED_LIB_SUFFIX := .so
   TARGET_EXE_SUFFIX :=
-else ifeq ("$(TARGET_OS)","ECOS")
+else ifeq ("$(TARGET_OS)","ecos")
   TARGET_STATIC_LIB_SUFFIX := .a
   TARGET_SHARED_LIB_SUFFIX := .so.a
   TARGET_EXE_SUFFIX := .elf

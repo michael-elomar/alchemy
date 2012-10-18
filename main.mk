@@ -67,13 +67,13 @@ include $(BUILD_SYSTEM)/setup.mk
 include $(BUILD_SYSTEM)/defs.mk
 
 # Target/os specific setup
-ifeq ("$(TARGET_OS)","LINUX")
-  ifeq ("$(TARGET_OS_FLAVOUR)","ANDROID")
+ifeq ("$(TARGET_OS)","linux")
+  ifeq ("$(TARGET_OS_FLAVOUR)","android")
     include $(BUILD_SYSTEM)/toolchains/bionic-setup.mk
-  else ifeq ("$(TARGET_OS_FLAVOUR)","NATIVE")
+  else ifeq ("$(TARGET_OS_FLAVOUR)","native")
     include $(BUILD_SYSTEM)/toolchains/native-setup.mk
   endif
-else ifeq ("$(TARGET_OS)","ECOS")
+else ifeq ("$(TARGET_OS)","ecos")
   include $(BUILD_SYSTEM)/toolchains/ecos-setup.mk
 endif
 
@@ -117,13 +117,13 @@ $(info ----------------------------------------------------------------------)
 ###############################################################################
 
 # Target/os specific packages
-ifeq ("$(TARGET_OS)","LINUX")
-  ifeq ("$(TARGET_OS_FLAVOUR)","ANDROID")
+ifeq ("$(TARGET_OS)","linux")
+  ifeq ("$(TARGET_OS_FLAVOUR)","android")
     include $(BUILD_SYSTEM)/toolchains/bionic-packages.mk
-  else ifeq ("$(TARGET_OS_FLAVOUR)","NATIVE")
+  else ifeq ("$(TARGET_OS_FLAVOUR)","native")
     include $(BUILD_SYSTEM)/toolchains/native-packages.mk
   endif
-else ifeq ("$(TARGET_OS)","ECOS")
+else ifeq ("$(TARGET_OS)","ecos")
   include $(BUILD_SYSTEM)/toolchains/ecos-packages.mk
 endif
 
