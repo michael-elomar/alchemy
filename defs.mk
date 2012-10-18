@@ -628,7 +628,7 @@ endef
 
 define transform-cpp-to-o
 @mkdir -p $(dir $@)
-$(call print-banner1,"$(PRIVATE_MODE) CPP",$(PRIVATE_MODULE),$(call path-from-top,$<))
+$(call print-banner1,"$(PRIVATE_MODE) C++",$(PRIVATE_MODULE),$(call path-from-top,$<))
 $(call check-pwd-is-top-dir)
 $(Q)$(CCACHE) $(TARGET_CXX) \
 	$(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES)) \
@@ -663,7 +663,7 @@ endef
 ###############################################################################
 
 define transform-s-to-o
-$(call print-banner1,"ASM",$(PRIVATE_MODULE),$(call path-from-top,$<))
+$(call print-banner1,"Asm",$(PRIVATE_MODULE),$(call path-from-top,$<))
 $(call check-pwd-is-top-dir)
 @mkdir -p $(dir $@)
 $(Q)$(CCACHE) $(TARGET_CC) \
