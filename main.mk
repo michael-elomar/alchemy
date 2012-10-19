@@ -237,11 +237,12 @@ include $(BUILD_SYSTEM)/config-rules.mk
 
 .PHONY: all
 all: $(ALL_BUILD_MODULES)
-	@echo "Done!"
+	@echo "Done building all"
 
 .PHONY: clean
 clean: $(foreach __mod,$(ALL_MODULES),clean-$(__mod))
 	@rm -f $(AUTOCONF_MERGE_FILE)
+	@echo "Done cleaning"
 
 .PHONY: clobber
 clobber:
@@ -282,4 +283,27 @@ check:
 
 # Graph of build dependencies
 include $(BUILD_SYSTEM)/build-graph.mk
+
+###############################################################################
+# Under native linux target, copy wrapper scripts
+###############################################################################
+
+ifeq ("$(TARGET_OS)","linux")
+ifeq ("$(TARGET_OS_FLAVOUR)","native")
+
+NATIVE_WRAPPER_SCRIPT := native-wrapper.sh
+
+$(eval $(call copy-one-file, \
+	$(BUILD_SYSTEM)/$(NATIVE_WRAPPER_SCRIPT), \
+	$(TARGET_OUT_STAGING)/$(NATIVE_WRAPPER_SCRIPT)))
+$(eval $(call copy-one-file, \
+	$(BUILD_SYSTEM)/$(NATIVE_WRAPPER_SCRIPT), \
+	$(TARGET_OUT_FINAL)/$(NATIVE_WRAPPER_SCRIPT)))
+
+all: $(TARGET_OUT_STAGING)/$(NATIVE_WRAPPER_SCRIPT)
+final: $(TARGET_OUT_FINAL)/$(NATIVE_WRAPPER_SCRIPT)
+final-nostrip: $(TARGET_OUT_FINAL)/$(NATIVE_WRAPPER_SCRIPT)
+
+endif
+endif
 
