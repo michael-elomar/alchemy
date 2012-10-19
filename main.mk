@@ -146,7 +146,7 @@ include $(USER_MAKEFILES)
 ifeq ("$(V)","1")
 $(foreach __f,$(USER_MAKEFILES),$(info $(__f)))
 endif
-$(info ...done)
+$(info Found $(words $(USER_MAKEFILES)) makefiles)
 
 else
 
@@ -225,6 +225,7 @@ $(AUTOCONF_MERGE_FILE): $(__autoconf-list)
 	@echo "Generating autoconf-merge.h"
 	@mkdir -p $(dir $@)
 	@rm -f $@
+	@touch $@
 	@for f in $^; do cat $$f >> $@; done
 
 # Confifuration rules (once module database is built)
@@ -235,7 +236,8 @@ include $(BUILD_SYSTEM)/config-rules.mk
 ###############################################################################
 
 .PHONY: all
-all: $(ALL_BUILD_MODULES) $(AUTOCONF_MERGE_FILE)
+all: $(ALL_BUILD_MODULES)
+	@echo "Done!"
 
 .PHONY: clean
 clean: $(foreach __mod,$(ALL_MODULES),clean-$(__mod))

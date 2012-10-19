@@ -18,9 +18,12 @@ config-check: config-check-global config-check-modules
 .PHONY: config-update
 config-update: config-update-global config-update-modules
 
-# Avoid checking connfig if we want to configure something
+# Avoid checking connfig if we want to configure something or if configuration
+# directory does not exist at all
 ifeq ("$(CONFIG_IN_MAKE_GOALS)","0")
+ifeq ("$(CONFIG_DIR_AVAILABLE)","1")
 $(CONFIG_GLOBAL_FILE): __config-check-global
+endif
 endif
 
 ###############################################################################

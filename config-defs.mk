@@ -19,7 +19,14 @@ CONFIG_GLOBAL_FILE := $(CONFIG_ORIG_DIR)/global.config
 # Determine if a config something is requested
 CONFIG_IN_MAKE_GOALS := 0
 ifneq ("$(findstring config-,$(MAKECMDGOALS))","")
-CONFIG_IN_MAKE_GOALS := 1
+  CONFIG_IN_MAKE_GOALS := 1
+endif
+
+# Remember if the config directory is present or not
+ifeq ("$(wildcard $(TARGET_CONFIG_DIR))","")
+  CONFIG_DIR_AVAILABLE := 0
+else
+  CONFIG_DIR_AVAILABLE := 1
 endif
 
 ###############################################################################

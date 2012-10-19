@@ -317,9 +317,11 @@ is-module-registered = $(strip \
 ###############################################################################
 is-module-in-build-config = $(strip \
 	$(eval __var := CONFIG_BUILD_$(call get-define,$1)) \
-	$(if $(call streq,$(origin $(__var)),undefined), \
-		$(false), \
-		$(if $($(__var)),$(true)) \
+	$(if $(call streq,$(CONFIG_DIR_AVAILABLE),0),$(true), \
+		$(if $(call streq,$(origin $(__var)),undefined), \
+			$(false), \
+			$(if $($(__var)),$(true)) \
+		) \
 	))
 
 ###############################################################################
