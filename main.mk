@@ -39,6 +39,10 @@ endif
 # This is the default target.  It must be the first declared target.
 all:
 
+# Used to force goals to build.
+.PHONY: .FORCE
+.FORCE:
+
 ###############################################################################
 ## The folowing 2 macros can NOT be put in defs.mk as it will be included
 ## only after.
@@ -273,4 +277,7 @@ dump-depends:
 # Dummy target to check internal variables
 .PHONY: check
 check:
+
+# Graph of build dependencies
+include $(BUILD_SYSTEM)/build-graph.mk
 
