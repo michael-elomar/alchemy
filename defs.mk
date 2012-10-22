@@ -121,6 +121,11 @@ modules-LOCALS += MODULE
 # Override the name of what will be generated
 modules-LOCALS += MODULE_FILENAME
 
+# List of 'done' files indicating internal steps already done and that does not need
+# to be executed next time unless a force is requested
+# Name is relative to build directory
+modules-LOCALS += DONE_FILES
+
 # Source files to compile
 # All files are relative to LOCAL_PATH
 modules-LOCALS += SRC_FILES

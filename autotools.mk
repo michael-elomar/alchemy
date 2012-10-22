@@ -12,8 +12,7 @@ ifeq ("$(LOCAL_DESTDIR)","")
 LOCAL_DESTDIR := usr
 endif
 
-ifeq ("$(LOCAL_MODULE_FILENAME)","")
 LOCAL_MODULE_FILENAME := $(LOCAL_MODULE).done
-endif
+LOCAL_DONE_FILES := $(LOCAL_MODULE).done
 
 $(local-add-module)

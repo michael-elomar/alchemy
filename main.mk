@@ -26,6 +26,7 @@ SHELL := /bin/sh
 # Overridable settings
 V := 0
 W := 0
+F := 0
 USE_CLANG := 0
 USE_CCACHE := 0
 USE_SCAN_CACHE := 0

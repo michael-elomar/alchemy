@@ -51,6 +51,14 @@ TARGET_OUT_FINAL ?= $(TARGET_OUT)/final
 
 TARGET_CONFIG_DIR ?= $(TOP_DIR)/Alchemy-config/$(TARGET_PRODUCT)-$(TARGET_PRODUCT_VARIANT)
 
+# Default : force external checks of module that have sub-makefiles
+# (autotools, linux kernel...)
+# make F=1 enable fast checking (so no force)
+TARGET_FORCE_EXTERNAL_CHECKS ?= 1
+ifeq ("$(F)","1")
+  TARGET_FORCE_EXTERNAL_CHECKS := 0
+endif
+
 ###############################################################################
 # Target global variables.
 ###############################################################################

@@ -32,6 +32,12 @@ all_prerequisites := \
 	$(LOCAL_EXPORT_PREREQUISITES) \
 	 $(all_external_libraries)
 
+# Delete some aditionnal 'done' files if a force of external checks is requested
+ifeq ("$(TARGET_FORCE_EXTERNAL_CHECKS)","1")
+$(shell rm -f $(built_file))
+$(shell rm -f $(installed_file))
+endif
+
 ###############################################################################
 ## Default commands
 ###############################################################################

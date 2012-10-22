@@ -8,6 +8,10 @@
 ## Variable used for autotools.
 ###############################################################################
 
+# Get path to 'install' binary so we can override it in configure environement
+# (we add the -p option to preserve timestamp of installed files)
+AUTOTOOLS_INSTALL_BIN := $(shell which install)
+
 # Environment to use when executing configure script
 AUTOTOOLS_CONFIGURE_ENV := \
 	AR="$(TARGET_CROSS)ar" \
@@ -18,6 +22,7 @@ AUTOTOOLS_CONFIGURE_ENV := \
 	GCC="$(TARGET_CROSS)gcc" \
 	CXX="$(TARGET_CROSS)g++" \
 	CPP="$(TARGET_CROSS)cpp" \
+	INSTALL="$(AUTOTOOLS_INSTALL_BIN) -p" \
 	RANLIB="$(TARGET_CROSS)ranlib" \
 	STRIP="$(TARGET_STRIP)" \
 	OBJCOPY="$(TARGET_CROSS)objcopy" \

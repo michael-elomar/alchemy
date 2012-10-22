@@ -31,6 +31,41 @@ all_external_libraries := \
 		$(call module-get-build-filename,$(lib)))
 
 ###############################################################################
+## External checks : module built externaly may have other dependencies.
+###############################################################################
+
+# Update list of 'done' files with module file name
+# Using sort ensure there is no duplicates in the list
+ifeq ("$(patsubst %.done,1,$(LOCAL_MODULE_FILENAME))","1")
+  LOCAL_DONE_FILES := $(sort $(LOCAL_DONE_FILES) $(LOCAL_MODULE_FILENAME))
+endif
+
+# Macro to delete one 'done' file
+# $1 : file to delete
+ifeq ("$(V)","1")
+delete-one-done-file = \
+	$(info Deleting $(call path-from-top,$1)) \
+	$(shell rm -f $1)
+else
+delete-one-done-file = \
+	$(shell rm -f $1)
+endif
+
+# Macro to delete all 'done' files registered in module
+# Also check if the module file name is a 'done' file
+delete-all-done-files = \
+	$(foreach __f,$(LOCAL_DONE_FILES),\
+		$(call delete-one-done-file, \
+			$(call module-get-build-dir,$(LOCAL_MODULE))/$(__f) \
+		) \
+	) \
+
+# If a full check of module built externally is requested, delete 'done' files
+ifeq ("$(TARGET_FORCE_EXTERNAL_CHECKS)","1")
+$(delete-all-done-files)
+endif
+
+###############################################################################
 ## Rule-specific variable definitions.
 ###############################################################################
 
