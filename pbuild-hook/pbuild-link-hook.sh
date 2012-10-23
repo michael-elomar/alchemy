@@ -5,6 +5,9 @@ if [ $# -lt 5 ]; then
 	exit 0
 fi
 
+# Get full path to this script
+SCRIPT_PATH=`(cd $(dirname $0) && pwd)`
+
 # Get parameters
 NM=$1
 CC=$2
@@ -54,7 +57,7 @@ if [ "${SYMBOLS}" != "" ]; then
 
 	# Shall be the same structure than in 'pbuild-stub.c'
 	echo "struct pal_log_dyn_data {" >> ${OUT_SRC}
-	echo "    int* level;" >> ${OUT_SRC}
+	echo "    int *level;" >> ${OUT_SRC}
 	echo "    const char *ident;" >> ${OUT_SRC}
 	echo "    struct pal_log_dyn_data *next;" >> ${OUT_SRC}
 	echo "};" >> ${OUT_SRC}
@@ -73,7 +76,7 @@ if [ "${SYMBOLS}" != "" ]; then
 	echo "}" >> ${OUT_SRC}
 	echo "" >> ${OUT_SRC}
 
-	# Use a global class object in anonymous namespace to to load time registration
+	# Use a global class object in anonymous namespace to do load time registration
 	echo "namespace {" >> ${OUT_SRC}
 	echo "" >> ${OUT_SRC}
 
@@ -91,6 +94,55 @@ if [ "${SYMBOLS}" != "" ]; then
 	echo "" >> ${OUT_SRC}
 
 	echo "}" >> ${OUT_SRC}
+	echo "" >> ${OUT_SRC}
+
+fi
+
+###############################################################################
+## Library describe
+###############################################################################
+LIB_DESC=$(cd ${MODULE_PATH} && ${SCRIPT_PATH}/describe.sh)
+
+if [ "${LIB_DESC}" != "" ]; then
+	# Definition shall be in extern "C" block
+	echo "extern \"C\" {" >> ${OUT_SRC}
+	echo "" >> ${OUT_SRC}
+
+	# Shall be the same structure than in 'pbuild-stub.c'
+	echo "struct pal_lib_desc_data {" >> ${OUT_SRC}
+	echo "    const char *lib;" >> ${OUT_SRC}
+	echo "    const char *desc;" >> ${OUT_SRC}
+	echo "    struct pal_lib_desc_data *next;" >> ${OUT_SRC}
+	echo "};" >> ${OUT_SRC}
+	echo "" >> ${OUT_SRC}
+	echo "void pal_lib_desc_add(struct pal_lib_desc_data *data);" >> ${OUT_SRC}
+	echo "" >> ${OUT_SRC}
+
+	# Data structure
+	echo "static struct pal_lib_desc_data lib_desc_data =" >> ${OUT_SRC}
+	echo "    {\"${MODULE_NAME}\", \"${LIB_DESC}\"};" >> ${OUT_SRC}
+	echo "" >> ${OUT_SRC}
+
+	echo "}" >> ${OUT_SRC}
+	echo "" >> ${OUT_SRC}
+
+	# Use a global class object in anonymous namespace to do load time registration
+	echo "namespace {" >> ${OUT_SRC}
+	echo "" >> ${OUT_SRC}
+
+	echo "class pal_lib_desc_init {" >> ${OUT_SRC}
+	echo "public:" >> ${OUT_SRC}
+
+	# Register levels in constructor
+	echo "    pal_lib_desc_init() {" >> ${OUT_SRC}
+	echo "        pal_lib_desc_add(&lib_desc_data);" >> ${OUT_SRC}
+	echo "    }" >> ${OUT_SRC}
+
+	echo "} pal_lib_desc_init_obj;" >> ${OUT_SRC}
+	echo "" >> ${OUT_SRC}
+
+	echo "}" >> ${OUT_SRC}
+	echo "" >> ${OUT_SRC}
 
 fi
 
