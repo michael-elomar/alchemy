@@ -62,7 +62,7 @@ AUTOTOOLS_MAKE_ARGS :=
 
 # Quiet flags
 ifeq ("$(V)","0")
-  AUTOTOOLS_CONFIGURE_ARGS += --quiet
+  AUTOTOOLS_CONFIGURE_ARGS += --quiet --enable-silent-rules
   AUTOTOOLS_MAKE_ENV += LIBTOOLFLAGS="--quiet"
   AUTOTOOLS_MAKE_ARGS += -s --no-print-directory
 endif
