@@ -144,22 +144,31 @@ $(shell rm -f $(USER_MAKEFILES_CACHE))
 $(info Scanning $(TOP_DIR) for makefiles...)
 USER_MAKEFILES := $(shell find $(TOP_DIR) -name $(USER_MAKEFILE_NAME))
 include $(USER_MAKEFILES)
-ifeq ("$(V)","1")
-$(foreach __f,$(USER_MAKEFILES),$(info $(__f)))
-endif
-$(info Found $(words $(USER_MAKEFILES)) makefiles)
 
 else
 
+# Force not checking config if cache is not present. This is to avoid some
+# warnings due to the fact that no module could be registered
+# Another parsing of Alchemy will anyway  be triggered after generation of the cache
+ifeq ("$(wildcard $(USER_MAKEFILES_CACHE))","")
+  CONFIG_DIR_AVAILABLE := 0
+endif
+
 # Include makefile containing all available makefile
 # If it does not exists, it will trigger its creation
-ifeq ("$(call is-in-make-goals scan","")
-ifeq ("$(call is-in-make-goals clobber","")
+ifeq ("$(call is-in-make-goals,scan)","")
+ifeq ("$(call is-in-make-goals,clobber)","")
   -include $(USER_MAKEFILES_CACHE)
 endif
 endif
 
 endif
+
+# Summary of what we found
+ifeq ("$(V)","1")
+$(foreach __f,$(USER_MAKEFILES),$(info $(__f)))
+endif
+$(info Found $(words $(USER_MAKEFILES)) makefiles)
 
 # Create a file that will contain all user makefiles available
 define create-user-makefiles-cache
