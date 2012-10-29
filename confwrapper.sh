@@ -1,9 +1,18 @@
 #!/bin/sh
 
 export KCONFIG_NOTIMESTAMP=1
-readonly SCRIPT_PATH=`(cd $(dirname $0) && pwd)`
-readonly CONF_BIN="${SCRIPT_PATH}/conf"
-readonly QCONF_BIN="${SCRIPT_PATH}/qconf"
+readonly SCRIPT_PATH=$(cd $(dirname $0) && pwd)
+
+# 32-bit or 64-bit ?
+file ${SHELL} | grep '64-bit' 2> /dev/null 1>&2
+if [ "$?" = "0" ]; then
+	readonly ARCH=x64
+else
+	readonly ARCH=x86
+fi
+
+readonly CONF_BIN="${SCRIPT_PATH}/kconfig/bin-linux-${ARCH}/conf"
+readonly QCONF_BIN="${SCRIPT_PATH}/kconfig/bin-linux-${ARCH}/qconf"
 
 tmpConfigDir=""
 tmpConfigFile=""
@@ -84,35 +93,6 @@ endConf()
 	rm -rf "${tmpConfigDir}"
 	LOGD "Deleted temp directory : ${tmpConfigDir}"
 }
-
-#===============================================================================
-# Begin the update/check operation by creating a temp diff file.
-#===============================================================================
-#beginDiff()
-#{
-#	tmpDiffFile=$(mktemp)
-#	LOGD "Created temp file : ${tmpDiffFile}"
-#}
-
-#===============================================================================
-# End the update/check operation.
-# doExit : True to exit, False to continue.
-#===============================================================================
-#endDiff()
-#{
-#	local doExit=$1
-#	
-#	# Get size of diff file, print message if not empty
-#	local size=$(stat -c %s ${tmpDiffFile})
-#	LOGD "Diff size is ${size}"
-#	if [ "${size}" != "0" ]; then
-#		echo "Config diff can be found in ${tmpDiffFile}";
-#		if [ "${doExit}" = "1" ]; then exit 1; fi;
-#	else
-#		rm -f ${tmpDiffFile}
-#		LOGD "Deleted temp file : ${tmpDiffFile}"
-#	fi
-#}
 
 #===============================================================================
 # Execute qconf/conf.
@@ -245,7 +225,7 @@ parseOptions()
 {
 	# Parse given options
 	while getopts qvh opt; do
-		case $opt in
+		case ${opt} in
 			q) optQuiet=1;;
 			v) optVerbose=$((${optVerbose} + 1));;
 			h) optHelp=1;;

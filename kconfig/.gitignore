@@ -1,0 +1,10 @@
+
+# Build dir
+build-*/
+
+# Generated files
+parser/zconf.hash.c
+parser/zconf.lex.c
+parser/zconf.tab.c
+qconf.moc
+
