@@ -30,6 +30,12 @@ all_external_libraries := \
 	$(foreach lib,$(LOCAL_EXTERNAL_LIBRARIES), \
 		$(call module-get-build-filename,$(lib)))
 
+# If configuring something, skip parsing dependencies
+skip_include_deps := 0
+ifeq ("$(CONFIG_IN_MAKE_GOALS)","1")
+  skip_include_deps := 1
+endif
+
 ###############################################################################
 ## External checks : module built externaly may have other dependencies.
 ###############################################################################

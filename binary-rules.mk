@@ -179,21 +179,27 @@ all_internal_depends := $(LOCAL_PATH)/$(USER_MAKEFILE_NAME)
 ifneq ("$(strip $(cpp_objects))","")
 $(cpp_objects): $(build_dir)/obj/%.o: $(LOCAL_PATH)/%.cpp
 	$(transform-cpp-to-o)
+ifneq ("$(skip_include_deps)","1")
 -include $(cpp_objects:%.o=%.d)
+endif
 endif
 
 # cxx files
 ifneq ("$(strip $(cxx_objects))","")
 $(cxx_objects): $(build_dir)/obj/%.o: $(LOCAL_PATH)/%.cxx
 	$(transform-cpp-to-o)
+ifneq ("$(skip_include_deps)","1")
 -include $(cxx_objects:%.o=%.d)
+endif
 endif
 
 # c files
 ifneq ("$(strip $(c_objects))","")
 $(c_objects): $(build_dir)/obj/%.o: $(LOCAL_PATH)/%.c
 	$(transform-c-to-o)
+ifneq ("$(skip_include_deps)","1")
 -include $(c_objects:%.o=%.d)
+endif
 endif
 
 # s files
@@ -208,7 +214,9 @@ endif
 ifneq ("$(strip $(S_objects))","")
 $(S_objects): $(build_dir)/obj/%.o: $(LOCAL_PATH)/%.S
 	$(transform-s-to-o)
+ifneq ("$(skip_include_deps)","1")
 -include $(S_objects:%.o=%.d)
+endif
 endif
 
 # Additionnal clean
@@ -264,7 +272,9 @@ $(gch_file): $(all_internal_depends)
 # Generate the precompiled file
 $(gch_file): $(LOCAL_PATH)/$(LOCAL_PRECOMPILED_FILE)
 	$(transform-h-to-gch)
+ifneq ("$(skip_include_deps)","1")
 -include $(gch_file:%.gch=%.d)
+endif
 
 endif
 
