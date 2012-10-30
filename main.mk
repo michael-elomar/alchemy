@@ -37,6 +37,11 @@ ifeq ("$(V)","0")
   MAKEFLAGS += -s --no-print-directory
 endif
 
+# In fast mode, use scan cache as well
+ifeq ("$(F)","1")
+  USE_SCAN_CACHE := 1
+endif
+
 # This is the default target.  It must be the first declared target.
 all:
 
@@ -137,13 +142,26 @@ USER_MAKEFILE_NAME := atom.mk
 USER_MAKEFILES_CACHE := $(TARGET_OUT_BUILD)/makefiles.mk
 USER_MAKEFILES :=
 
+# Create a file that will contain all user makefiles available
+# Redirect everything to stderr so we can use it in a $(shell ...) below
+define create-user-makefiles-cache
+	( \
+		rm -f $(USER_MAKEFILES_CACHE); \
+		mkdir -p $$(dirname $(USER_MAKEFILES_CACHE)); \
+		touch $(USER_MAKEFILES_CACHE); \
+		echo "Scanning $(TOP_DIR) for makefiles..."; \
+		for f in `find $(TOP_DIR) -name $(USER_MAKEFILE_NAME)`; do \
+			echo "USER_MAKEFILES += $$f" >> $(USER_MAKEFILES_CACHE); \
+			echo "include $$f" >> $(USER_MAKEFILES_CACHE); \
+		done; \
+	) >&2;
+endef
+
 ifneq ("$(USE_SCAN_CACHE)","1")
 
-# Delete cache and include scanned files
-$(shell rm -f $(USER_MAKEFILES_CACHE))
-$(info Scanning $(TOP_DIR) for makefiles...)
-USER_MAKEFILES := $(shell find $(TOP_DIR) -name $(USER_MAKEFILE_NAME))
-include $(USER_MAKEFILES)
+# Force regeneration of cache and include scanned files
+$(shell $(create-user-makefiles-cache))
+include $(USER_MAKEFILES_CACHE)
 
 else
 
@@ -169,19 +187,6 @@ ifeq ("$(V)","1")
 $(foreach __f,$(USER_MAKEFILES),$(info $(__f)))
 endif
 $(info Found $(words $(USER_MAKEFILES)) makefiles)
-
-# Create a file that will contain all user makefiles available
-define create-user-makefiles-cache
-	rm -f $(USER_MAKEFILES_CACHE); \
-	mkdir -p $(dir $(USER_MAKEFILES_CACHE)); \
-	touch $(USER_MAKEFILES_CACHE); \
-	echo "Scanning $(TOP_DIR) for makefiles..."; \
-	for f in `find $(TOP_DIR) -name $(USER_MAKEFILE_NAME)`; do \
-		echo "$$f"; \
-		echo "USER_MAKEFILES += $$f" >> $(USER_MAKEFILES_CACHE); \
-		echo "include $$f" >> $(USER_MAKEFILES_CACHE); \
-	done;
-endef
 
 # Rule that will trigger creation of list of makefiles when needed
 $(USER_MAKEFILES_CACHE):
