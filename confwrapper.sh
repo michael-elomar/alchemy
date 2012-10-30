@@ -136,7 +136,7 @@ updateConfigInternal()
 
 	# Update config in silence
 	beginConf "${configFileCurrent}"
-	(yes "" | execConf "${CONF_BIN}" "${configInFile}" "-o") > /dev/null
+	(yes "" | execConf "${CONF_BIN}" "${configInFile}" "--oldconfig") > /dev/null
 	endConf "${configFileUpdate}"
 }
 
