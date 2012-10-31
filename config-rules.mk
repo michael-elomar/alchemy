@@ -147,3 +147,17 @@ config-modules-%:
 		fi; \
 	)
 
+###############################################################################
+## Full configuration rules.
+###############################################################################
+
+# Display the full configuration
+.PHONY: config-full
+config-full:
+	@( \
+		__tmpconfigin=$$(mktemp); \
+		$(eval __config := $(CONFIG_ORIG_DIR)/full.config) \
+		$(call __generate-config-in-full,$${__tmpconfigin}) \
+		$(CONFWRAPPER) config $${__tmpconfigin} $(__config); \
+		rm -f $${__tmpconfigin}; \
+	)

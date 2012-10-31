@@ -88,6 +88,41 @@ define __generate-config-in-global
 endef
 
 ###############################################################################
+## Generate Config.in for full configuration.
+## $1 : destination file.
+###############################################################################
+define __generate-config-in-full
+	rm -f $1; \
+	mkdir -p $(dir $1); \
+	touch $1; \
+	( \
+	$(foreach __mod,$(sort $(__modules)), \
+		$(eval __build := BUILD_$(call get-define,$(__mod))) \
+		$(eval __files := $(call __get_module-config-in-files,$(__mod))) \
+		echo "## START MODULE $(__mod)"; \
+		$(if $(strip $(__files)), \
+			echo "menuconfig $(__build)";, \
+			echo "config $(__build)"; \
+		) \
+		echo "  bool '$(__mod)'"; \
+		echo "  default y"; \
+		echo "  help"; \
+		echo "    Build $(__mod)"; \
+		echo ""; \
+		$(if $(strip $(__files)), \
+			echo "if $(__build)"; \
+			$(foreach __f,$(__files), \
+				echo "source $(call fullpath,$(__f))"; \
+			) \
+			echo "endif"; \
+		) \
+		echo "## END MODULE $(__mod)"; \
+		echo ""; \
+	) \
+	) >> $1;
+endef
+
+###############################################################################
 ## Generate Config.in for one module.
 ## $1 : destination file.
 ## $2 : module name.
