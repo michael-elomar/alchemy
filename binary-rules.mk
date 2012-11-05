@@ -6,9 +6,6 @@
 ## Generate rules for building an executable or library.
 ###############################################################################
 
-# Intermediate/Build directory
-build_dir := $(TARGET_OUT_BUILD)/$(LOCAL_MODULE)
-
 # Prepend some directories in include list
 LOCAL_C_INCLUDES := $(build_dir) $(LOCAL_PATH) $(LOCAL_C_INCLUDES)
 
@@ -219,10 +216,6 @@ ifneq ("$(skip_include_deps)","1")
 endif
 endif
 
-# Additionnal clean
-clean-$(LOCAL_MODULE):: PRIVATE_CLEAN_FILES += $(LOCAL_STAGING_MODULE)
-clean-$(LOCAL_MODULE):: PRIVATE_CLEAN_DIRS += $(build_dir)
-
 # Additional module dependencies
 $(LOCAL_MODULE): $(LOCAL_BUILD_MODULE) $(LOCAL_STAGING_MODULE)
 
@@ -235,18 +228,11 @@ endif
 # Force recompilation if internal dependecies are changes
 $(all_objects): $(all_internal_depends)
 
-###############################################################################
-## autoconf.h file generation.
-###############################################################################
-
-autoconf_file := $(call module-get-autoconf,$(LOCAL_MODULE))
-ifneq ("$(autoconf_file)","")
-
-# autoconf.h file depends on module config
-$(autoconf_file): $(call __get_module-config,$(LOCAL_MODULE))
-	@$(call generate-autoconf-file,$<,$@)
-
-endif
+# Clean objects
+$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(build_dir)/$(LOCAL_MODULE).map
+$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(LOCAL_STAGING_MODULE)
+$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(all_objects)
+$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(all_objects:%.o=%.d)
 
 ###############################################################################
 ## Precompiled headers.
@@ -275,6 +261,10 @@ $(gch_file): $(LOCAL_PATH)/$(LOCAL_PRECOMPILED_FILE)
 ifneq ("$(skip_include_deps)","1")
 -include $(gch_file:%.gch=%.d)
 endif
+
+# Clean precompiled header
+$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(gch_file)
+$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(gch_file:%.gch=%.d)
 
 endif
 

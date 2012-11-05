@@ -12,6 +12,9 @@ $(call module-restore-locals,$(LOCAL_MODULE))
 # Do we need to copy build module to staging dir
 copy_to_staging := 0
 
+# Intermediate/Build directory
+build_dir := $(TARGET_OUT_BUILD)/$(LOCAL_MODULE)
+
 # Full path to build module
 LOCAL_BUILD_MODULE := $(call module-get-build-filename,$(LOCAL_MODULE))
 
@@ -19,7 +22,7 @@ LOCAL_BUILD_MODULE := $(call module-get-build-filename,$(LOCAL_MODULE))
 LOCAL_STAGING_MODULE := $(call module-get-staging-filename,$(LOCAL_MODULE))
 
 # Assemble the list of targets to create PRIVATE_ variables for.
-LOCAL_TARGETS := $(LOCAL_BUILD_MODULE) clean-$(LOCAL_MODULE)
+LOCAL_TARGETS := $(LOCAL_BUILD_MODULE) clean-$(LOCAL_MODULE) dirclean-$(LOCAL_MODULE)
 
 # Get external libraries used by static libraries
 LOCAL_EXTERNAL_LIBRARIES := \
@@ -48,14 +51,13 @@ endif
 
 # Macro to delete one 'done' file
 # $1 : file to delete
-ifeq ("$(V)","1")
 delete-one-done-file = \
-	$(info Deleting $(call path-from-top,$1)) \
-	$(shell rm -f $1)
-else
-delete-one-done-file = \
-	$(shell rm -f $1)
-endif
+	$(if $(wildcard $1), \
+		$(if $(call strneq,$(V),0), \
+			$(info Deleting $(call path-from-top,$1)) \
+		) \
+		$(shell rm -f $1) \
+	)
 
 # Macro to delete all 'done' files registered in module
 # Also check if the module file name is a 'done' file
@@ -64,7 +66,7 @@ delete-all-done-files = \
 		$(call delete-one-done-file, \
 			$(call module-get-build-dir,$(LOCAL_MODULE))/$(__f) \
 		) \
-	) \
+	)
 
 # If a full check of module built externally is requested, delete 'done' files
 ifeq ("$(TARGET_FORCE_EXTERNAL_CHECKS)","1")
@@ -77,6 +79,7 @@ endif
 
 $(LOCAL_TARGETS): PRIVATE_PATH := $(LOCAL_PATH)
 $(LOCAL_TARGETS): PRIVATE_MODULE := $(LOCAL_MODULE)
+$(LOCAL_TARGETS): PRIVATE_BUILD_DIR := $(build_dir)
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES := $(LOCAL_CLEAN_FILES) $(LOCAL_BUILD_MODULE)
 $(LOCAL_TARGETS): PRIVATE_CLEAN_DIRS := $(LOCAL_CLEAN_DIRS)
 
@@ -88,12 +91,37 @@ $(LOCAL_TARGETS): PRIVATE_CLEAN_DIRS := $(LOCAL_CLEAN_DIRS)
 .PHONY: $(LOCAL_MODULE)
 $(LOCAL_MODULE): $(LOCAL_BUILD_MODULE)
 
-# Clean module (several other rules with commands can be added using ::)
+# Clean module
 .PHONY: clean-$(LOCAL_MODULE)
-clean-$(LOCAL_MODULE)::
+clean-$(LOCAL_MODULE): clean-common-$(LOCAL_MODULE)
+
+# Common part, delete registered files and directories
+.PHONY: clean-common-$(LOCAL_MODULE)
+clean-common-$(LOCAL_MODULE):
 	@echo "Clean: $(PRIVATE_MODULE)"
 	$(Q)$(if $(PRIVATE_CLEAN_FILES),rm -f $(PRIVATE_CLEAN_FILES))
 	$(Q)$(if $(PRIVATE_CLEAN_DIRS),rm -rf $(PRIVATE_CLEAN_DIRS))
+
+# Clean + delete the build directory
+.PHONY: dirclean-$(LOCAL_MODULE)
+dirclean-$(LOCAL_MODULE): clean-$(LOCAL_MODULE)
+	$(Q)rm -rf $(PRIVATE_BUILD_DIR)
+
+###############################################################################
+## autoconf.h file generation.
+###############################################################################
+
+autoconf_file := $(call module-get-autoconf,$(LOCAL_MODULE))
+ifneq ("$(autoconf_file)","")
+
+# autoconf.h file depends on module config
+$(autoconf_file): $(call __get-module-config,$(LOCAL_MODULE))
+	@$(call generate-autoconf-file,$<,$@)
+
+# Don't forget to clean autoconf.h file
+$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(autoconf_file)
+
+endif
 
 ###############################################################################
 ## Static library.
@@ -184,7 +212,7 @@ $(foreach __pair,$(LOCAL_COPY_FILES), \
 $(LOCAL_BUILD_MODULE): $(all_copy_files)
 
 # Add rule to delete copied files during clean
-clean-$(LOCAL_MODULE):: PRIVATE_CLEAN_FILES += $(all_copy_files)
+clean-$(LOCAL_MODULE): PRIVATE_CLEAN_FILES += $(all_copy_files)
 
 endif
 

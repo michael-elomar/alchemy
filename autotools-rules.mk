@@ -7,17 +7,17 @@
 ###############################################################################
 
 # Name of files indicating steps done
-module_build_dir := $(call module-get-build-dir,$(LOCAL_MODULE))
-unpacked_file := $(module_build_dir)/$(LOCAL_MODULE).unpacked
-configured_file := $(module_build_dir)/$(LOCAL_MODULE).configured
-built_file := $(module_build_dir)/$(LOCAL_MODULE).built
-installed_file := $(module_build_dir)/$(LOCAL_MODULE).installed
+build_dir := $(call module-get-build-dir,$(LOCAL_MODULE))
+unpacked_file := $(build_dir)/$(LOCAL_MODULE).unpacked
+configured_file := $(build_dir)/$(LOCAL_MODULE).configured
+built_file := $(build_dir)/$(LOCAL_MODULE).built
+installed_file := $(build_dir)/$(LOCAL_MODULE).installed
 
 # Archive file
 archive_file := $(LOCAL_PATH)/$(LOCAL_AUTOTOOLS_ARCHIVE)
 
 # Where to unpack
-unpack_dir := $(module_build_dir)
+unpack_dir := $(build_dir)
 
 # Where the source will actually be found once unpacked
 src_dir := $(unpack_dir)/$(LOCAL_AUTOTOOLS_DIR)
@@ -58,12 +58,17 @@ __default-make-install = \
 	$(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) $(MAKE) -C $(PRIVATE_SRC_DIR) \
 		$(AUTOTOOLS_MAKE_ARGS) $(PRIVATE_MAKE_INSTALL_ARGS) install
 
-# Force success for command in case "uninstall" is not supported or Makefile not present
+# Force success for command in case "uninstall" or "clean" is not supported
+# or Makefile not present
 __default-clean = \
-	([ -d $(PRIVATE_SRC_DIR) ] && \
-		$(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) $(MAKE) -C $(PRIVATE_SRC_DIR) \
-			$(AUTOTOOLS_MAKE_ARGS) uninstall) \
-		|| true
+	if [ -d $(PRIVATE_SRC_DIR) ]; then \
+		$(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) $(MAKE) \
+			-C $(PRIVATE_SRC_DIR) $(AUTOTOOLS_MAKE_ARGS) $(PRIVATE_MAKE_INSTALL_ARGS) \
+			uninstall || true; \
+		$(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) $(MAKE) \
+			-C $(PRIVATE_SRC_DIR) $(AUTOTOOLS_MAKE_ARGS) \
+			clean || true; \
+	fi;
 
 __apply-patches = \
 	$(BUILD_SYSTEM)/apply-patches.sh $(PRIVATE_SRC_DIR) $(PRIVATE_PATH) $(PRIVATE_PATCHES)
@@ -141,20 +146,20 @@ $(LOCAL_BUILD_MODULE): $(installed_file)
 	@touch $@
 
 # clean- targets additional commands
-clean-$(LOCAL_MODULE)::
+clean-$(LOCAL_MODULE):
 	+$(Q)$(call $(PRIVATE_CMD_CLEAN))
 	+$(Q)$(if $(PRIVATE_CMD_POST_CLEAN), $(call $(PRIVATE_CMD_POST_CLEAN)))
-	$(Q)rm -f $(installed_file)
-	$(Q)rm -f $(built_file)
-	$(Q)rm -f $(configured_file)
-	$(Q)rm -f $(unpacked_file)
-	$(Q)rm -rf $(PRIVATE_MODULE_BUILD_DIR)
 
 ###############################################################################
 ## Rule-specific variable definitions.
 ###############################################################################
 
-$(LOCAL_TARGETS): PRIVATE_MODULE_BUILD_DIR := $(module_build_dir)
+# clean- targets additional variables
+# To NOT put build dir in PRIVATE_CLEAN_DIRS
+# we need to call some makefiles during our custom clean
+$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(installed_file)
+$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(built_file)
+
 $(LOCAL_TARGETS): PRIVATE_ARCHIVE := $(archive_file)
 $(LOCAL_TARGETS): PRIVATE_UNPACK_DIR := $(unpack_dir)
 $(LOCAL_TARGETS): PRIVATE_SRC_DIR := $(src_dir)
