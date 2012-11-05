@@ -17,29 +17,30 @@ SHELL := /bin/sh
 .SUFFIXES:
 
 # Turns off the RCS / SCCS implicit rules of GNU Make
-% : RCS/%,v
-% : RCS/%
-% : %,v
-% : s.%
-% : SCCS/s.%
+%: RCS/%,v
+%: RCS/%
+%: %,v
+%: s.%
+%: SCCS/s.%
 
 # Overridable settings
-V := 0
-W := 0
-F := 0
-USE_CLANG := 0
-USE_CCACHE := 0
-USE_SCAN_CACHE := 0
+V ?= 0
+W ?= 0
+F ?= 0
+USE_CLANG ?= 0
+USE_CCACHE ?= 0
+USE_SCAN_CACHE ?= 0
+USE_COLORS ?= 0
 
 # Quiet command if V is 0
 ifeq ("$(V)","0")
   Q := @
-  MAKEFLAGS += -s --no-print-directory
+  MAKEFLAGS += --no-print-directory
 endif
 
 # In fast mode, use scan cache as well
-ifeq ("$(F)","1")
-  USE_SCAN_CACHE := 1
+ifneq ("$(F)","0")
+  override USE_SCAN_CACHE := 1
 endif
 
 # This is the default target.  It must be the first declared target.
@@ -56,7 +57,7 @@ all:
 
 # Get full path.
 # $1 : path to extend.
-fullpath = $(shell readlink -m -n $1)
+fullpath = $(strip $(shell readlink -m -n $1))
 
 # Figure out where we are
 # It returns the full path without trailing '/'
@@ -70,11 +71,29 @@ my-dir = $(call fullpath,$(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST)))))
 TOP_DIR := $(shell pwd)
 BUILD_SYSTEM := $(call my-dir)
 
+# Set this variable to 1 to skip a lot of things like dependencies check and
+# config check. Usefull if user only want some internal query or configure
+# something.
+SKIP_DEPS_AND_CHECKS := 0
+
 # Setup configuration
 include $(BUILD_SYSTEM)/setup.mk
 
 # Setup macros definitions
 include $(BUILD_SYSTEM)/defs.mk
+
+# Skip some steps for some make goals
+__clean-targets := clean dirclean clobber
+__query-targets := scan help help-modules dump dump-depends build-graph
+ifneq ("$(call is-in-make-goals,$(__clean-targets) $(__query-targets))","")
+  SKIP_DEPS_AND_CHECKS := 1
+endif
+ifneq ("$(findstring clean-,$(MAKECMDGOALS))","")
+  SKIP_DEPS_AND_CHECKS := 1
+endif
+ifneq ("$(findstring dirclean-,$(MAKECMDGOALS))","")
+  SKIP_DEPS_AND_CHECKS := 1
+endif
 
 # Target/os specific setup
 ifeq ("$(TARGET_OS)","linux")
@@ -108,7 +127,7 @@ BUILD_PREBUILT := $(BUILD_SYSTEM)/prebuilt.mk
 AUTOCONF_MERGE_FILE := $(TARGET_OUT_BUILD)/autoconf-merge.h
 
 ###############################################################################
-# Display configuration.
+## Display configuration.
 ###############################################################################
 msg = $(info $(CLR_CYAN)$1$(CLR_DEFAULT))
 $(info ----------------------------------------------------------------------)
@@ -142,6 +161,17 @@ USER_MAKEFILE_NAME := atom.mk
 USER_MAKEFILES_CACHE := $(TARGET_OUT_BUILD)/makefiles.mk
 USER_MAKEFILES :=
 
+# Command to find files
+find-cmd = $(BUILD_SYSTEM)/findfiles.py \
+	--prune=.git \
+	--prune=.repo \
+	--prune=raptor \
+	--prune=Alchemy-out \
+	--prune=$(TARGET_OUT) \
+	$(foreach __d,$(TARGET_SCAN_PRUNE_DIRS),--prune=$(__d)) \
+	$(TOP_DIR) \
+	$(USER_MAKEFILE_NAME)
+
 # Create a file that will contain all user makefiles available
 # Redirect everything to stderr so we can use it in a $(shell ...) below
 define create-user-makefiles-cache
@@ -150,7 +180,7 @@ define create-user-makefiles-cache
 		mkdir -p $$(dirname $(USER_MAKEFILES_CACHE)); \
 		touch $(USER_MAKEFILES_CACHE); \
 		echo "Scanning $(TOP_DIR) for makefiles..."; \
-		for f in `find $(TOP_DIR) -name $(USER_MAKEFILE_NAME)`; do \
+		for f in `$(find-cmd)`; do \
 			echo "USER_MAKEFILES += $$f" >> $(USER_MAKEFILES_CACHE); \
 			echo "include $$f" >> $(USER_MAKEFILES_CACHE); \
 		done; \
@@ -167,23 +197,21 @@ else
 
 # Force not checking config if cache is not present. This is to avoid some
 # warnings due to the fact that no module could be registered
-# Another parsing of Alchemy will anyway  be triggered after generation of the cache
+# Another parsing of Alchemy will anyway be triggered after generation of the cache
 ifeq ("$(wildcard $(USER_MAKEFILES_CACHE))","")
   CONFIG_DIR_AVAILABLE := 0
 endif
 
 # Include makefile containing all available makefile
 # If it does not exists, it will trigger its creation
-ifeq ("$(call is-in-make-goals,scan)","")
-ifeq ("$(call is-in-make-goals,clobber)","")
+ifeq ("$(call is-in-make-goals,scan clobber)","")
   -include $(USER_MAKEFILES_CACHE)
-endif
 endif
 
 endif
 
 # Summary of what we found
-ifeq ("$(V)","1")
+ifneq ("$(V)","0")
 $(foreach __f,$(USER_MAKEFILES),$(info $(__f)))
 endif
 $(info Found $(words $(USER_MAKEFILES)) makefiles)
@@ -198,30 +226,31 @@ scan:
 	@$(create-user-makefiles-file)
 
 ###############################################################################
-# Module dependencies generation.
+## Module dependencies generation.
 ###############################################################################
 
 # All modules
 ALL_MODULES := \
-	$(foreach __mod,$(__modules),$(__mod))
+	$(foreach __mod,$(sort $(__modules)),$(__mod))
 
-# All module to actually build
+# All modules to actually build
 ALL_BUILD_MODULES := \
-	$(foreach __mod,$(__modules), \
+	$(foreach __mod,$(sort $(__modules)), \
 		$(if $(call is-module-in-build-config,$(__mod)),$(__mod)))
 
 # Recompute all dependencies between modules
 $(call modules-compute-depends)
 
-# Check dependencies and variables of modules (unless we want to configure something)
-ifeq ("$(CONFIG_IN_MAKE_GOALS)","0")
+# Check dependencies and variables of modules
+ifeq ("$(SKIP_DEPS_AND_CHECKS)","0")
   $(call modules-check-depends)
   $(call modules-check-variables)
 endif
 
-# Now, really generate rules for modules (skip this step if we are just configuring something.
+# Now, really generate rules for modules.
 # This second pass allows to deal with exported values.
-ifeq ("$(CONFIG_IN_MAKE_GOALS)","0")
+# Completely skip this for simple queries
+ifeq ("$(call is-in-make-goals,$(__query-targets))","")
 $(foreach __mod,$(ALL_MODULES), \
 	$(eval LOCAL_MODULE := $(__mod)) \
 	$(eval include $(BUILD_SYSTEM)/module.mk) \
@@ -229,11 +258,14 @@ $(foreach __mod,$(ALL_MODULES), \
 endif
 
 ###############################################################################
-# Rule to merge autoconf.h files.
+## Rule to merge autoconf.h files.
 ###############################################################################
 
 # List of all available autoconf.h files
-__autoconf-list := $(foreach __mod,$(__modules),$(call module-get-autoconf,$(__mod)))
+__autoconf-list := $(strip \
+	$(foreach __mod,$(sort $(__modules)), \
+		$(call module-get-autoconf,$(__mod)) \
+	))
 
 # Concatenate all in one
 $(AUTOCONF_MERGE_FILE): $(__autoconf-list)
@@ -243,11 +275,11 @@ $(AUTOCONF_MERGE_FILE): $(__autoconf-list)
 	@touch $@
 	@for f in $^; do cat $$f >> $@; done
 
-# Confifuration rules (once module database is built)
+# Configuration rules (once module database is built)
 include $(BUILD_SYSTEM)/config-rules.mk
 
 ###############################################################################
-# Main rules.
+## Main rules.
 ###############################################################################
 
 .PHONY: all
@@ -257,10 +289,18 @@ all: $(ALL_BUILD_MODULES)
 .PHONY: clean
 clean: $(foreach __mod,$(ALL_MODULES),clean-$(__mod))
 	@rm -f $(AUTOCONF_MERGE_FILE)
+	@rm -f $(USER_MAKEFILES_CACHE)
 	@echo "Done cleaning"
+
+.PHONY: dirclean
+dirclean: $(foreach __mod,$(ALL_MODULES),dirclean-$(__mod))
+	@rm -f $(AUTOCONF_MERGE_FILE)
+	@rm -f $(USER_MAKEFILES_CACHE)
+	@echo "Done cleaning directories"
 
 .PHONY: clobber
 clobber:
+	@echo "Deleting build, staging and final directories..."
 	@rm -rf $(TARGET_OUT_BUILD)
 	@rm -rf $(TARGET_OUT_STAGING)
 	@rm -rf $(TARGET_OUT_FINAL)
@@ -269,7 +309,7 @@ clobber:
 .PHONY: final
 final: all
 	@echo "Generating final tree..."
-	@$(BUILD_SYSTEM)/make-final.py \
+	@$(BUILD_SYSTEM)/makefinal.py \
 		--strip="$(TARGET_STRIP)" \
 		$(TARGET_OUT_STAGING) $(TARGET_OUT_FINAL)
 	@echo "Done generating final tree"
@@ -278,7 +318,7 @@ final: all
 .PHONY: final-nostrip
 final-nostrip: all
 	@echo "Generating final tree (no stripping)..."
-	@$(BUILD_SYSTEM)/make-final.py \
+	@$(BUILD_SYSTEM)/makefinal.py \
 		$(TARGET_OUT_STAGING) $(TARGET_OUT_FINAL)
 	@echo "Done generating final tree (no stripping)"
 
@@ -300,7 +340,57 @@ check:
 include $(BUILD_SYSTEM)/build-graph.mk
 
 ###############################################################################
-# Under native linux target, copy wrapper scripts
+## Help rule.
+###############################################################################
+.PHONY: help
+help:
+	@echo "Main targets:"
+	@echo "  all     : build everything."
+	@echo "  clean   : clean all modules."
+	@echo "  dirclean: clean all modules and delete build directories".
+	@echo "  clobber : delete output directory (build, staging, final)."
+	@echo "  scan    : force a rescan of workspace in case the makefile cache is used."
+	@echo "  final   : generate the final tree from the staging directory."
+	@echo ""
+	@echo "Module targets:"
+	@echo "  <module>         : build specified module."
+	@echo "  clean-<module>   : clean specified module."
+	@echo "  dirclean-<module>: clean specified module and delete its build directory."
+	@echo ""
+	@echo "Main configuration targets:"
+	@echo "  config       : configure the build as well as modules."
+	@echo "  config-check : check all config files."
+	@echo "  config-update: update all config files with new options."
+	@echo ""
+	@echo "Module configuration targets:"
+	@echo "  config-<module>       : configure the specified module."
+	@echo "  config-check-<module> : check the specified module config file."
+	@echo "  config-update-<module>: update the specified module config file new options."
+	@echo ""
+	@echo "Other available frontends for configuration:"
+	@echo "  xconfig   : use qconf (Qt), default."
+	@echo "  menuconfig: use mconf (ncurses)."
+	@echo "  nconf     : use nconf (ncurses, basic)."
+	@echo ""
+	@echo "Other targets:"
+	@echo "  help        : display this help message."
+	@echo "  help-modules: display the list of registered modules."
+	@echo "  dump        : dump the full module database."
+	@echo "  dump-depends: dump dependencies of module database."
+	@echo "  build-graph : create a graph of build dependencies."
+	@echo ""
+	@echo "Usefull variables:"
+	@echo "  V: set to 1 to activate verbose mode."
+	@echo "  F: set to 1 to activate fast mode (modules built externally not checked)."
+	@echo "  W: set to 1 to activate more warnings."
+
+.PHONY: help-modules
+help-modules:
+	@echo "List of registered modules:"
+	@echo "$(sort $(__modules))"
+
+###############################################################################
+## Under native linux target, copy wrapper scripts
 ###############################################################################
 
 ifeq ("$(TARGET_OS)","linux")

@@ -33,9 +33,9 @@ all_external_libraries := \
 	$(foreach lib,$(LOCAL_EXTERNAL_LIBRARIES), \
 		$(call module-get-build-filename,$(lib)))
 
-# If configuring something, skip parsing dependencies
+# Skip parsing dependencies if requested
 skip_include_deps := 0
-ifeq ("$(CONFIG_IN_MAKE_GOALS)","1")
+ifneq ("$(SKIP_DEPS_AND_CHECKS)","0")
   skip_include_deps := 1
 endif
 

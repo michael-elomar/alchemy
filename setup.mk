@@ -55,9 +55,12 @@ TARGET_CONFIG_DIR ?= $(TOP_DIR)/Alchemy-config/$(TARGET_PRODUCT)-$(TARGET_PRODUC
 # (autotools, linux kernel...)
 # make F=1 enable fast checking (so no force)
 TARGET_FORCE_EXTERNAL_CHECKS ?= 1
-ifeq ("$(F)","1")
+ifneq ("$(F)","0")
   TARGET_FORCE_EXTERNAL_CHECKS := 0
 endif
+
+# Extra directories to skip during makefile scan
+TARGET_SCAN_PRUNE_DIRS ?=
 
 ###############################################################################
 # Target global variables.

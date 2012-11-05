@@ -247,8 +247,8 @@ modules-fields := \
 ## Dump all module information. Only use this for debugging.
 ###############################################################################
 modules-dump-database = \
-	$(info Modules: $(__modules)) \
-	$(foreach __mod,$(__modules), \
+	$(info Modules: $(sort $(__modules))) \
+	$(foreach __mod,$(sort $(__modules)), \
 		$(info $(space4)$(__mod):) \
 		$(foreach __field,$(modules-fields), \
 			$(eval __fieldval := $(strip $(__modules.$(__mod).$(__field)))) \
@@ -267,7 +267,7 @@ modules-dump-database = \
 
 # This will only dump dependencies
 modules-dump-database-depends = \
-	$(foreach __mod,$(__modules), \
+	$(foreach __mod,$(sort $(__modules)), \
 		$(info $(__mod):) \
 		$(info $(space4)$(strip $(__modules.$(__mod).depends))) \
 	)
@@ -300,11 +300,13 @@ module-add = \
 
 ###############################################################################
 ## Check if a target is given in make goals.
-## $1 : goal to check
+## $1 : list of targets to check
 ###############################################################################
 is-in-make-goals = $(strip \
-	$(foreach __g,$(MAKECMDGOALS), \
-		$(if $(call streq,$(__g),$1),$(true)) \
+	$(foreach __t,$1, \
+		$(foreach __g,$(MAKECMDGOALS), \
+			$(if $(call streq,$(__g),$(__t)),$(true)) \
+		) \
 	))
 
 ###############################################################################
@@ -321,7 +323,7 @@ is-module-registered = $(strip \
 ## $1 : module to check.
 ###############################################################################
 is-module-in-build-config = $(strip \
-	$(eval __var := CONFIG_BUILD_$(call get-define,$1)) \
+	$(eval __var := CONFIG_ALCHEMY_BUILD_$(call get-define,$1)) \
 	$(if $(call streq,$(CONFIG_DIR_AVAILABLE),0),$(true), \
 		$(if $(call streq,$(origin $(__var)),undefined), \
 			$(false), \

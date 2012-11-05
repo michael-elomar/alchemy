@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# @file make-final.py
+# @file makefinal.py
 # @author Y.M. Morgan
 # @date 2012/07/09
 #
@@ -121,7 +121,7 @@ def writeMakefileHeader(options):
 		options.makefile.write("STRIP := %s\n" % options.strip)
 	options.makefile.write("PWD := $(shell pwd)\n")
 	options.makefile.write("ALL :=\n")
-	options.makefile.write("ifneq (\"$(V)\",\"1\")\n")
+	options.makefile.write("ifeq (\"$(V)\",\"0\")\n")
 	options.makefile.write("  Q := @\n")
 	options.makefile.write("endif\n")
 	options.makefile.write(".PHONY: all\n")
