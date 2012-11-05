@@ -31,9 +31,11 @@ AUTOTOOLS_CONFIGURE_ENV := \
 	CFLAGS="$(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES)) $(TARGET_GLOBAL_CFLAGS)" \
 	CXXFLAGS="$(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES)) $(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CPPFLAGS)" \
 	LDFLAGS="$(TARGET_GLOBAL_LDFLAGS) $(TARGET_GLOBAL_LDLIBS)" \
-	DYN_LDFLAGS="$(TARGET_GLOBAL_LDFLAGS_SHARED) $(TARGET_GLOBAL_LDLIBS_SHARED)"
+	DYN_LDFLAGS="$(TARGET_GLOBAL_LDFLAGS_SHARED) $(TARGET_GLOBAL_LDLIBS_SHARED)" \
+	PKG_CONFIG_PATH="$(TARGET_OUT_STAGING)/usr/lib/pkgconfig" \
+	PKG_CONFIG_LIBDIR="$(TARGET_OUT_STAGING)/usr/lib/pkgconfig" \
+	PKG_CONFIG_SYSROOT="$(TARGET_OUT_STAGING)"
 
-#	PKG_CONFIG_SYSROOT="$(TARGET_OUT_STAGING)" \
 #	PKG_CONFIG="$(TARGET_OUT_STAGING)/usr/bin/pkg-config"
 
 # FIXME : put this somewehere else...
@@ -53,6 +55,13 @@ endif
 AUTOTOOLS_CONFIGURE_ARGS := \
 	--host="${GNU_TARGET_NAME}" \
 	--prefix="$(TARGET_OUT_STAGING)/usr"
+
+# Give build name to avoid warning during configure excution
+__build-name := $(shell $(HOST_CC) -dumpmachine)
+ifneq ("$(__build-name)","")
+AUTOTOOLS_CONFIGURE_ARGS += \
+	--build="$(__build-name)"
+endif
 
 # Environment to use when executing make
 AUTOTOOLS_MAKE_ENV :=
