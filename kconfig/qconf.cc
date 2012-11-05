@@ -434,7 +434,7 @@ void ConfigList::updateSelection(void)
 	if (!menu)
 		return;
 	type = menu->prompt ? menu->prompt->type : P_UNKNOWN;
-	if (mode == menuMode && type == P_MENU)
+	if (mode == menuMode /*&& type == P_MENU*/ /* YMM */)
 		emit menuSelected(menu);
 }
 
@@ -555,8 +555,8 @@ void ConfigList::setRootMenu(struct menu *menu)
 	if (rootEntry == menu)
 		return;
 	type = menu && menu->prompt ? menu->prompt->type : P_UNKNOWN;
-	if (type != P_MENU)
-		return;
+	/*if (type != P_MENU)
+		return;*/ /* YMM */
 	updateMenuList(this, 0);
 	rootEntry = menu;
 	updateListAll();

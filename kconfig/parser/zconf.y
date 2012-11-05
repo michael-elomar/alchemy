@@ -487,6 +487,7 @@ word_opt: /* empty */			{ $$ = NULL; }
 void conf_parse(const char *name)
 {
 	struct symbol *sym;
+	char *title; /* YMM */
 	int i;
 
 	zconf_initscan(name);
@@ -496,7 +497,8 @@ void conf_parse(const char *name)
 	modules_sym = sym_lookup(NULL, 0);
 	modules_sym->type = S_BOOLEAN;
 	modules_sym->flags |= SYMBOL_AUTO;
-	rootmenu.prompt = menu_add_prompt(P_MENU, "Linux Kernel Configuration", NULL);
+	title = getenv("KCONFIG_TITLE"); /* YMM */
+	rootmenu.prompt = menu_add_prompt(P_MENU, title ? title : "Linux Kernel Configuration", NULL);
 
 	if (getenv("ZCONF_DEBUG"))
 		zconfdebug = 1;

@@ -45,7 +45,12 @@ BIN_DIR := bin-$(TARGET_OS)-$(TARGET_ARCH)
 ###############################################################################
 
 LIBS := parser lxdialog
-PROGS := conf qconf mconf nconf
+PROGS := conf mconf nconf
+
+qconf_PKG := QtCore QtGui Qt3Support
+ifeq ("$(shell pkg-config --exists $(qconf_PKG); echo $$?)","0")
+PROGS += qconf
+endif
 
 parser_SRC := parser/zconf.c
 parser_CFLAGS := -Iparser
@@ -64,11 +69,13 @@ nconf_SRC := nconf.c nconf.gui.c
 nconf_LIB := parser
 nconf_LDFLAGS := -lmenu -lpanel -lncurses
 
+ifneq ("$(findstring qconf,$(PROGS))","")
 qconf_SRC := qconf.cc
 qconf_LIB := parser
-qconf_CFLAGS := $(shell pkg-config QtCore QtGui Qt3Support --cflags)
-qconf_LDFLAGS := $(shell pkg-config QtCore QtGui Qt3Support --libs)
+qconf_CFLAGS := $(shell pkg-config $(qconf_PKG) --cflags)
+qconf_LDFLAGS := $(shell pkg-config $(qconf_PKG) --libs)
 qconf_MOC := $(shell pkg-config QtCore --variable=moc_location)
+endif
 
 ###############################################################################
 ## Rules.
@@ -106,6 +113,7 @@ $(1)-clean:
 	rm -f $(BUILD_DIR)/$(1)$(2)
 	rm -f $(BIN_DIR)/$(1)$(2)
 	rm -f $($(1)_obj)
+	rm -f $($(1)_obj:%.o=%.d)
 endef
 
 # $1 : lib
@@ -164,4 +172,3 @@ qconf.cc: qconf.moc
 
 qconf.moc: qconf.h
 	$(qconf_MOC) -i $< -o $@
-
