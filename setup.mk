@@ -145,7 +145,7 @@ TARGET_GLOBAL_LDFLAGS_SHARED += -L$(TARGET_OUT_STAGING)/usr/lib
 
 ###############################################################################
 ## Default rules of makefile add TARGET_ARCH in CFLAGS.
-## As it is not the way we se it, prevent export of this variable
+## As it is not the way we use it, prevent export of this variable
 ###############################################################################
 unexport TARGET_ARCH
 

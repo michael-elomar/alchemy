@@ -12,7 +12,7 @@ build_dir := $(TARGET_OUT_BUILD)/$(LOCAL_MODULE)
 # Prepend some directories in include list
 LOCAL_C_INCLUDES := $(build_dir) $(LOCAL_PATH) $(LOCAL_C_INCLUDES)
 
-# TODO : remove this when al libraries have removed their dependencies toward
+# TODO : remove this when all libraries have removed their dependencies toward
 # config.h and autoconf.h
 # force unsigned char always (default on arm, but not on PC_Linux)
 ifneq ("$(strip $(LOCAL_PBUILD_HOOK))","")

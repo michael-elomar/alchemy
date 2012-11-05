@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# This script assume it is copied in the staging or final dir
-# folders bin, usr/bin, lib, /usr/lib are subdirectories there
+# This script assumes it is copied in the staging or final dir
+# Folders bin, usr/bin, lib, /usr/lib are subdirectories there
 
 # Get full path to this script (either when executed or sourced)
-SCRIPT_PATH=`(cd $(dirname ${BASH_SOURCE}) && pwd)`
+SCRIPT_PATH=$(cd $(dirname ${BASH_SOURCE}) && pwd))
 
 # Restore previous variables
 if [ "${OLD_PATH}" != "" ]; then
@@ -24,7 +24,7 @@ export PATH=${SCRIPT_PATH}/bin:${SCRIPT_PATH}/usr/bin:${PATH}
 # Update library path
 export LD_LIBRARY_PATH=${SCRIPT_PATH}/lib:${SCRIPT_PATH}/usr/lib:${LD_LIBRARY_PATH}
 
-# execute given command line (only of not sourced)
+# execute given command line (only if not sourced)
 if [ "${BASH_SOURCE}" = "$0" ]; then
 	$@
 fi

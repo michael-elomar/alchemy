@@ -76,7 +76,7 @@ check-version = $(call strneq,0,$(shell expr $1 \>= $2))
 ## Use some colors if requested.
 ###############################################################################
 
-# Forcing using /bin/echo ensure -e option exists and do what is expected
+# Forcing using /bin/echo ensures -e option exists and do what is expected
 ifeq ("$(USE_COLORS)","1")
   CLR_DEFAULT := $(shell /bin/echo -e "\033[00m")
   CLR_RED     := $(shell /bin/echo -e "\033[31m")
@@ -190,7 +190,7 @@ modules-LOCALS += PBUILD_HOOK
 # Force modules that depends on this one to use whole-statid library
 modules-LOCALS += FORCE_WHOLE_STATIC_LIBRARY
 
-# Files and diorectories to delete during a clean
+# Files and directories to delete during a clean
 modules-LOCALS += CLEAN_FILES
 modules-LOCALS += CLEAN_DIRS
 
