@@ -91,11 +91,12 @@ def doCopyByMakefile(dstFileName, srcFileName, doStrip, options):
 	options.makefile.write("\t$(eval __dst := $(patsubst %s/%%,%s/%%,$<))\n" % \
 		(options.stagingDir, options.finalDir))
 
-	# commands
+	# commands, see doCopy for more info
 	options.makefile.write("\t@mkdir -p $(dir $(__dst))\n")
 	options.makefile.write("\t@echo Alchemy install: $(patsubst $(PWD)/%,%,$(__dst))\n")
 	if doStrip:
 		options.makefile.write("\t$(Q)$(STRIP) -o $(__dst) $(__src)\n")
+		options.makefile.write("\t$(Q)chmod $(stat --printf '%a' $(__src)) $(__dst)")
 	else:
 		options.makefile.write("\t$(Q)cp -af $(__src) $(__dst)\n")
 	options.makefile.write("\n")
@@ -104,8 +105,10 @@ def doCopyByMakefile(dstFileName, srcFileName, doStrip, options):
 #===============================================================================
 def doCopy(dstFileName, srcFileName, doStrip, options):
 	# copy and strip executables
+	# make sure we restore permission bits after strip operation
 	if doStrip:
 		os.system("%s -o %s %s" % (options.strip, dstFileName, srcFileName))
+		os.system("chmod $(stat --printf '%a' %s) %s" % (srcFileName, dstFileName))
 	else:
 		os.system("cp -af %s %s" % (srcFileName, dstFileName))
 
