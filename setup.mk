@@ -73,8 +73,8 @@ TARGET_GLOBAL_LDFLAGS ?=
 TARGET_GLOBAL_LDFLAGS_SHARED ?=
 TARGET_GLOBAL_LDLIBS ?=
 TARGET_GLOBAL_LDLIBS_SHARED ?=
-TARGET_GLOBAL_CFLAGS_ARM ?=
-TARGET_GLOBAL_CFLAGS_THUMB ?=
+TARGET_GLOBAL_CFLAGS_arm ?=
+TARGET_GLOBAL_CFLAGS_thumb ?=
 
 TARGET_PCH_FLAGS ?=
 TARGET_DEFAULT_ARM_MODE ?= thumb
@@ -145,6 +145,10 @@ TARGET_GLOBAL_LDFLAGS += -L$(TARGET_OUT_STAGING)/lib
 TARGET_GLOBAL_LDFLAGS += -L$(TARGET_OUT_STAGING)/usr/lib
 TARGET_GLOBAL_LDFLAGS_SHARED += -L$(TARGET_OUT_STAGING)/lib
 TARGET_GLOBAL_LDFLAGS_SHARED += -L$(TARGET_OUT_STAGING)/usr/lib
+
+# Make sure the architecture specifi flags is defined
+# For arm/thumb it is done above
+TARGET_GLOBAL_CFLAGS_$(TARGET_ARCH) ?=
 
 ###############################################################################
 ## Default rules of makefile add TARGET_ARCH in CFLAGS.

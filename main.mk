@@ -46,6 +46,9 @@ endif
 # This is the default target.  It must be the first declared target.
 all:
 
+# To avoid undefined use of variable, force our default goal
+MAKECMDGOALS ?= all
+
 # Used to force goals to build.
 .PHONY: .FORCE
 .FORCE:
