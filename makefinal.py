@@ -4,8 +4,8 @@
 # @author Y.M. Morgan
 # @date 2012/07/09
 #
-# Generate the final directory by copying files from staging directories
-# 
+# Generate the final directory by copying files from staging directory
+#
 
 import sys, os, logging
 import subprocess
@@ -16,10 +16,13 @@ import optparse
 #===============================================================================
 
 # Directories to exclude
-EXCLUDE_DIRS = ["include", "man"]
+EXCLUDE_DIRS = ["include", "man", "pkgconfig", "doc", "aclocal", "info", "locale"]
 
 # Extension to exclude
-EXCLUDE_FILTERS = [".a", ".la"]
+EXCLUDE_FILTERS = [".a", ".la", ".py", ".pyc", ".pyo"]
+
+# Files to exclude
+EXCLUDE_FILES = ["Image", "zImage", "bzImage", "uImage", "kernel.plf"]
 
 #==============================================================================
 # Execute a command and get its output
@@ -168,6 +171,10 @@ def main():
 					os.path.relpath(os.path.join(dirPath, dirName), options.stagingDir))
 				dirNames.remove(dirName)
 		for fileName in fileNames:
+			if fileName in EXCLUDE_FILES:
+				logging.debug("Exclude file : %s",
+					os.path.relpath(os.path.join(dirPath, fileName), options.stagingDir))
+				continue
 			# skip some extensions
 			srcFileName = os.path.join(dirPath, fileName)
 			relPath = os.path.relpath(srcFileName, options.stagingDir)
