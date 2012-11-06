@@ -33,6 +33,13 @@ all_external_libraries := \
 	$(foreach lib,$(LOCAL_EXTERNAL_LIBRARIES), \
 		$(call module-get-build-filename,$(lib)))
 
+# List of all prerequisites (ours + dependencies)
+all_prerequisites := \
+	$(TARGET_GLOBAL_PREREQUISITES) \
+	$(LOCAL_PREREQUISITES) \
+	$(LOCAL_EXPORT_PREREQUISITES) \
+	$(all_external_libraries)
+
 # Skip parsing dependencies if requested
 skip_include_deps := 0
 ifneq ("$(SKIP_DEPS_AND_CHECKS)","0")
@@ -215,6 +222,14 @@ $(LOCAL_BUILD_MODULE): $(all_copy_files)
 clean-$(LOCAL_MODULE): PRIVATE_CLEAN_FILES += $(all_copy_files)
 
 endif
+
+###############################################################################
+## Prerequisites.
+###############################################################################
+
+# Make sure all prerequisites files are generated first
+# But do NOT force recompilation (order only)
+$(LOCAL_BUILD_MODULE): | $(all_prerequisites)
 
 ###############################################################################
 ## Copy to staging dir

@@ -148,18 +148,11 @@ all_autoconf := \
 # Force their inclusion (space after -include and before comma is important)
 LOCAL_CFLAGS += $(addprefix -include ,$(all_autoconf))
 
-# List of all prerequisites (ours + dependencies)
-all_prerequisites := \
-	$(TARGET_GLOBAL_PREREQUISITES) \
-	$(LOCAL_PREREQUISITES) \
-	$(LOCAL_EXPORT_PREREQUISITES) \
-	$(imported_PREREQUISITES)
+# Inport prerequisites
+all_prerequisites += $(imported_PREREQUISITES)
 
 # All autoconf files are prerequisites
 all_prerequisites += $(all_autoconf)
-
-# External libraries are also prerequisites
-all_prerequisites += $(all_external_libraries)
 
 # Notify that we build with dependencies
 LOCAL_CFLAGS += $(foreach __mod,$(all_depends), \

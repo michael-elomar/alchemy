@@ -25,13 +25,6 @@ src_dir := $(unpack_dir)/$(LOCAL_AUTOTOOLS_DIR)
 # Patched to apply
 patches := $(strip $(LOCAL_AUTOTOOLS_PATCHES))
 
-# List of all prerequisites (ours + dependencies)
-all_prerequisites := \
-	$(TARGET_GLOBAL_PREREQUISITES) \
-	$(LOCAL_PREREQUISITES) \
-	$(LOCAL_EXPORT_PREREQUISITES) \
-	 $(all_external_libraries)
-
 # Delete some aditionnal 'done' files if a force of external checks is requested
 ifeq ("$(TARGET_FORCE_EXTERNAL_CHECKS)","1")
 $(shell rm -f $(built_file))
