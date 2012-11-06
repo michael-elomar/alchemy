@@ -13,17 +13,32 @@ configured_file := $(build_dir)/$(LOCAL_MODULE).configured
 built_file := $(build_dir)/$(LOCAL_MODULE).built
 installed_file := $(build_dir)/$(LOCAL_MODULE).installed
 
-# Archive file
-archive_file := $(LOCAL_PATH)/$(LOCAL_AUTOTOOLS_ARCHIVE)
+# Archive file (optional)
+ifneq ("$(strip $(LOCAL_AUTOTOOLS_ARCHIVE))","")
+  archive_file := $(LOCAL_PATH)/$(LOCAL_AUTOTOOLS_ARCHIVE)
+else
+  archive_file :=
+endif
 
 # Where to unpack
 unpack_dir := $(build_dir)
 
 # Where the source will actually be found once unpacked
-src_dir := $(unpack_dir)/$(LOCAL_AUTOTOOLS_DIR)
+ifneq ("$(archive_file)","")
+  src_dir := $(unpack_dir)/$(LOCAL_AUTOTOOLS_DIR)
+else
+  src_dir := $(LOCAL_PATH)
+endif
 
 # Patched to apply
 patches := $(strip $(LOCAL_AUTOTOOLS_PATCHES))
+
+# Where the package will be configured and built
+ifneq ("$(archive_file)","")
+  obj_dir := $(src_dir)
+else
+  obj_dir := $(build_dir)/obj
+endif
 
 # Delete some aditionnal 'done' files if a force of external checks is requested
 ifeq ("$(TARGET_FORCE_EXTERNAL_CHECKS)","1")
@@ -39,27 +54,27 @@ __default-unpack = \
 	tar -C $(PRIVATE_UNPACK_DIR) -xf $(PRIVATE_ARCHIVE)
 
 __default-configure = \
-	cd $(PRIVATE_SRC_DIR) && \
-		$(AUTOTOOLS_CONFIGURE_ENV) $(PRIVATE_CONFIGURE_ENV) ./configure \
+	cd $(PRIVATE_OBJ_DIR) && \
+		$(AUTOTOOLS_CONFIGURE_ENV) $(PRIVATE_CONFIGURE_ENV) $(PRIVATE_SRC_DIR)/configure \
 		$(AUTOTOOLS_CONFIGURE_ARGS) $(PRIVATE_CONFIGURE_ARGS)
 
 __default-make-build = \
-	$(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_BUILD_ENV) $(MAKE) -C $(PRIVATE_SRC_DIR) \
+	$(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_BUILD_ENV) $(MAKE) -C $(PRIVATE_OBJ_DIR) \
 		$(AUTOTOOLS_MAKE_ARGS) $(PRIVATE_MAKE_BUILD_ARGS)
 
 __default-make-install = \
-	$(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) $(MAKE) -C $(PRIVATE_SRC_DIR) \
+	$(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) $(MAKE) -C $(PRIVATE_OBJ_DIR) \
 		$(AUTOTOOLS_MAKE_ARGS) $(PRIVATE_MAKE_INSTALL_ARGS) install
 
 # Force success for command in case "uninstall" or "clean" is not supported
 # or Makefile not present
 __default-clean = \
-	if [ -d $(PRIVATE_SRC_DIR) ]; then \
+	if [ -d $(PRIVATE_OBJ_DIR) ]; then \
 		$(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) $(MAKE) \
-			-C $(PRIVATE_SRC_DIR) $(AUTOTOOLS_MAKE_ARGS) $(PRIVATE_MAKE_INSTALL_ARGS) \
+			-C $(PRIVATE_OBJ_DIR) $(AUTOTOOLS_MAKE_ARGS) $(PRIVATE_MAKE_INSTALL_ARGS) \
 			uninstall || true; \
 		$(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) $(MAKE) \
-			-C $(PRIVATE_SRC_DIR) $(AUTOTOOLS_MAKE_ARGS) \
+			-C $(PRIVATE_OBJ_DIR) $(AUTOTOOLS_MAKE_ARGS) \
 			clean || true; \
 	fi;
 
@@ -106,25 +121,32 @@ $(unpacked_file): | $(all_prerequisites)
 
 # Unpack + patch
 $(unpacked_file): $(archive_file) $(addprefix $(LOCAL_PATH)/,$(patches))
+ifneq ("$(archive_file)","")
 	@echo "Unpacking $(call path-from-top,$<)"
 	@mkdir -p $(PRIVATE_UNPACK_DIR)
 	+$(Q)$(call $(PRIVATE_CMD_UNPACK))
 	+$(Q)$(if $(PRIVATE_PATCHES), $(call __apply-patches))
 	+$(Q)$(if $(PRIVATE_CMD_POST_UNPACK), $(call $(PRIVATE_CMD_POST_UNPACK)))
+endif
+	@mkdir -p $(dir $@)
 	@touch $@
 
 # Configuration
 $(configured_file): $(unpacked_file)
 	@echo "Configuring $(PRIVATE_MODULE)"
+	@mkdir -p $(PRIVATE_OBJ_DIR)
 	+$(Q)$(call $(PRIVATE_CMD_CONFIGURE))
 	+$(Q)$(if $(PRIVATE_CMD_POST_CONFIGURE), $(call $(PRIVATE_CMD_POST_CONFIGURE)))
+	@mkdir -p $(dir $@)
 	@touch $@
 
 # Build
 $(built_file): $(configured_file)
 	@echo "Building $(PRIVATE_MODULE)"
+	@mkdir -p $(PRIVATE_OBJ_DIR)
 	+$(Q)$(call $(PRIVATE_CMD_BUILD))
 	+$(Q)$(if $(PRIVATE_CMD_POST_BUILD), $(call $(PRIVATE_CMD_POST_BUILD)))
+	@mkdir -p $(dir $@)
 	@touch $@
 
 # Installation
@@ -132,10 +154,12 @@ $(installed_file): $(built_file)
 	@echo "Installing $(PRIVATE_MODULE)"
 	+$(Q)$(call $(PRIVATE_CMD_INSTALL))
 	+$(Q)$(if $(PRIVATE_CMD_POST_INSTALL), $(call $(PRIVATE_CMD_POST_INSTALL)))
+	@mkdir -p $(dir $@)
 	@touch $@
 
 # Done
 $(LOCAL_BUILD_MODULE): $(installed_file)
+	@mkdir -p $(dir $@)
 	@touch $@
 
 # clean- targets additional commands
@@ -156,6 +180,7 @@ $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(built_file)
 $(LOCAL_TARGETS): PRIVATE_ARCHIVE := $(archive_file)
 $(LOCAL_TARGETS): PRIVATE_UNPACK_DIR := $(unpack_dir)
 $(LOCAL_TARGETS): PRIVATE_SRC_DIR := $(src_dir)
+$(LOCAL_TARGETS): PRIVATE_OBJ_DIR := $(obj_dir)
 $(LOCAL_TARGETS): PRIVATE_PATCHES := $(patches)
 $(LOCAL_TARGETS): PRIVATE_CONFIGURE_ENV  := $(LOCAL_AUTOTOOLS_CONFIGURE_ENV)
 $(LOCAL_TARGETS): PRIVATE_CONFIGURE_ARGS  := $(LOCAL_AUTOTOOLS_CONFIGURE_ARGS)
