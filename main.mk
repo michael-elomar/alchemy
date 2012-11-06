@@ -79,16 +79,33 @@ BUILD_SYSTEM := $(call my-dir)
 # something.
 SKIP_DEPS_AND_CHECKS := 0
 
+# Set this variable to 1 to skip deps and chekc of external modules built
+# outside this build system (basically it force remaking them by removing
+# their .done file).
+SKIP_EXT_DEPS_AND_CHECKS := 0
+
 # Setup configuration
 include $(BUILD_SYSTEM)/setup.mk
 
 # Setup macros definitions
 include $(BUILD_SYSTEM)/defs.mk
 
+###############################################################################
+# Optimizations for some goals.
+###############################################################################
+
+# Skip external checks in fast mode
+ifneq ("$(F)","0")
+  SKIP_EXT_DEPS_AND_CHECKS := 1
+endif
+
 # Skip some steps for some make goals
 __clean-targets := clean dirclean clobber
 __query-targets := scan help help-modules dump dump-depends build-graph
-ifneq ("$(call is-in-make-goals,$(__clean-targets) $(__query-targets))","")
+__config-targets := config xconfig menuconfig nconfig
+__fs-targets := final final-nostrip
+__skip_targets := $(__clean-targets) $(__query-targets) $(__config-targets) $(__fs-targets)
+ifneq ("$(call is-targets-in-make-goals,$(__skip_targets))","")
   SKIP_DEPS_AND_CHECKS := 1
 endif
 ifneq ("$(findstring clean-,$(MAKECMDGOALS))","")
@@ -97,6 +114,18 @@ endif
 ifneq ("$(findstring dirclean-,$(MAKECMDGOALS))","")
   SKIP_DEPS_AND_CHECKS := 1
 endif
+ifneq ("$(findstring config-,$(MAKECMDGOALS))","")
+  SKIP_DEPS_AND_CHECKS := 1
+endif
+
+# No reason to do external checks if we are skipping our own deps and checks...
+ifneq ("$(SKIP_DEPS_AND_CHECKS)","0")
+  SKIP_EXT_DEPS_AND_CHECKS := 1
+endif
+
+###############################################################################
+## Setup part2 (may use optimization flags from above).
+###############################################################################
 
 # Target/os specific setup
 ifeq ("$(TARGET_OS)","linux")
@@ -205,9 +234,9 @@ ifeq ("$(wildcard $(USER_MAKEFILES_CACHE))","")
   CONFIG_DIR_AVAILABLE := 0
 endif
 
-# Include makefile containing all available makefile
+# Include makefile containing all available makefiles
 # If it does not exists, it will trigger its creation
-ifeq ("$(call is-in-make-goals,scan clobber)","")
+ifeq ("$(call is-targets-in-make-goals,scan clobber)","")
   -include $(USER_MAKEFILES_CACHE)
 endif
 
@@ -250,13 +279,30 @@ ifeq ("$(SKIP_DEPS_AND_CHECKS)","0")
   $(call modules-check-variables)
 endif
 
+# Configuration rules (once module database is built)
+include $(BUILD_SYSTEM)/config-rules.mk
+
 # Now, really generate rules for modules.
 # This second pass allows to deal with exported values.
-# Completely skip this for simple queries
-ifeq ("$(call is-in-make-goals,$(__query-targets))","")
+
+# Completely skip this for simple queries or clobber.
+# In fast mode, if a module is specified in goals, only include this one.
+# TODO: considere a mode to also check its dependencies.
+ifeq ("$(call is-targets-in-make-goals,$(__query-targets) clobber)","")
+$(eval __doskip := 0)
+$(if $(call strneq,$(F),0), \
+	$(foreach __mod,$(ALL_MODULES), \
+		$(if $(call is-module-in-make-goals,$(__mod)),$(eval __doskip := 1)) \
+	) \
+)
 $(foreach __mod,$(ALL_MODULES), \
 	$(eval LOCAL_MODULE := $(__mod)) \
-	$(eval include $(BUILD_SYSTEM)/module.mk) \
+	$(if $(call streq,$(__doskip),0), \
+		$(eval include $(BUILD_SYSTEM)/module.mk), \
+		$(if $(call is-module-in-make-goals,$(__mod)), \
+			$(eval include $(BUILD_SYSTEM)/module.mk), \
+		) \
+	) \
 )
 endif
 
@@ -277,9 +323,6 @@ $(AUTOCONF_MERGE_FILE): $(__autoconf-list)
 	@rm -f $@
 	@touch $@
 	@for f in $^; do cat $$f >> $@; done
-
-# Configuration rules (once module database is built)
-include $(BUILD_SYSTEM)/config-rules.mk
 
 ###############################################################################
 ## Main rules.
@@ -385,7 +428,8 @@ help:
 	@echo "Usefull variables:"
 	@echo "  V: set to 1 to activate verbose mode."
 	@echo "  F: set to 1 to activate fast mode (modules built externally not checked)."
-	@echo "  W: set to 1 to activate more warnings."
+	@echo "     It will also not check dependencies if a module is given in a goal."
+	@echo "  W: set to 1 to activate more compilation warnings."
 
 .PHONY: help-modules
 help-modules:

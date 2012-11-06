@@ -46,6 +46,16 @@ ifneq ("$(SKIP_DEPS_AND_CHECKS)","0")
   skip_include_deps := 1
 endif
 
+# Skip external checks if requested
+skip_ext_checks := 1
+ifeq ("$(SKIP_EXT_DEPS_AND_CHECKS)","0")
+  skip_ext_checks := 0
+endif
+# If we are explicitely building this module, do not skip external checks
+ifneq ("$(call is-module-in-make-goals,$(LOCAL_MODULE))","")
+  skip_ext_checks := 0
+endif
+
 ###############################################################################
 ## External checks : module built externaly may have other dependencies.
 ###############################################################################
@@ -75,8 +85,8 @@ delete-all-done-files = \
 		) \
 	)
 
-# If a full check of module built externally is requested, delete 'done' files
-ifeq ("$(TARGET_FORCE_EXTERNAL_CHECKS)","1")
+# If not skipping checks of of module built externally, delete 'done' files
+ifeq ("$(skip_ext_checks)","0")
 $(delete-all-done-files)
 endif
 

@@ -299,15 +299,23 @@ module-add = \
 	)
 
 ###############################################################################
-## Check if a target is given in make goals.
+## Check if a list of targets is given in make goals.
 ## $1 : list of targets to check
 ###############################################################################
-is-in-make-goals = $(strip \
+is-targets-in-make-goals = $(strip \
 	$(foreach __t,$1, \
 		$(foreach __g,$(MAKECMDGOALS), \
 			$(if $(call streq,$(__g),$(__t)),$(true)) \
 		) \
 	))
+
+###############################################################################
+## Check if a module is given in make goals
+## It consider its clean/dirclean as well.
+## $1 : module to check.
+###############################################################################
+is-module-in-make-goals = $(strip \
+	$(call is-targets-in-make-goals,$1 clean-$1 dirclean-$1))
 
 ###############################################################################
 ## Check if a module is registered.
@@ -555,7 +563,7 @@ module-get-staging-filename = \
 ## Remove CONFIG_ in commented lines.
 ## Put lines begining with '#' between '/*' '*/'.
 ## Replace 'key=value' by '#define key value'.
-## Replace leading ' y' by ' 1'.
+## Replace trailing ' y' by ' 1'.
 ## Remove leading and trailing quotes from string.
 ## Replace '\"' by '"'.
 ###############################################################################

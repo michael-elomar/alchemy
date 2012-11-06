@@ -15,14 +15,6 @@ CONFIG_ORIG_DIR := $(TARGET_CONFIG_DIR)
 # File where global configuration is stored
 CONFIG_GLOBAL_FILE := $(CONFIG_ORIG_DIR)/global.config
 
-# If a config something is requested, skip some steps
-__config-targets := config xconfig menuconfig nconfig
-ifneq ("$(findstring config-,$(MAKECMDGOALS))","")
-  SKIP_DEPS_AND_CHECKS := 1
-else ifneq ("$(call is-in-make-goals,$(__config-targets))","")
-  SKIP_DEPS_AND_CHECKS := 1
-endif
-
 # Remember if the config directory is present or not
 ifeq ("$(wildcard $(TARGET_CONFIG_DIR))","")
   CONFIG_DIR_AVAILABLE := 0
@@ -100,7 +92,7 @@ __generate-config-args = $(strip \
 ###############################################################################
 
 # Avoid checking module config if we are requested to skip it
-# In other cases, try to include config but do not fail if not possible
+# In this case, do not fail if it can not be found
 define __load-config-internal
   $(eval __config := $(call __get-module-config,$1))
   ifeq ("$(SKIP_DEPS_AND_CHECKS)","0")

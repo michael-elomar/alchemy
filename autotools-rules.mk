@@ -40,10 +40,10 @@ else
   obj_dir := $(build_dir)/obj
 endif
 
-# Delete some aditionnal 'done' files if a force of external checks is requested
-ifeq ("$(TARGET_FORCE_EXTERNAL_CHECKS)","1")
-$(shell rm -f $(built_file))
-$(shell rm -f $(installed_file))
+# Delete some aditionnal 'done' files if a skip of external checks is not done
+ifeq ("$(skip_ext_checks)","0")
+$(call delete-one-done-file,$(built_file))
+$(call delete-one-done-file,$(installed_file))
 endif
 
 ###############################################################################
