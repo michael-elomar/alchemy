@@ -310,7 +310,7 @@ clobber:
 
 # Generate final tree
 .PHONY: final
-final: all
+final:
 	@echo "Generating final tree..."
 	@$(BUILD_SYSTEM)/makefinal.py \
 		--strip="$(TARGET_STRIP)" \
@@ -319,7 +319,7 @@ final: all
 
 # Generate final tree without stripping executables
 .PHONY: final-nostrip
-final-nostrip: all
+final-nostrip:
 	@echo "Generating final tree (no stripping)..."
 	@$(BUILD_SYSTEM)/makefinal.py \
 		$(TARGET_OUT_STAGING) $(TARGET_OUT_FINAL)
