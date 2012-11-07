@@ -306,6 +306,12 @@ $(foreach __mod,$(ALL_MODULES), \
 )
 endif
 
+# Once all modules have been parsed, make sure nobody will reference LOCAL_XXX
+# variables anymore. In commands, PRIVATE_XXX variables shall be used.
+$(foreach __var,$(modules-LOCALS), \
+	$(eval override LOCAL_$(__var) = $$(error Do NOT use LOCAL_$(__var) in commands)) \
+)
+
 ###############################################################################
 ## Rule to merge autoconf.h files.
 ###############################################################################
