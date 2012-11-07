@@ -16,7 +16,7 @@ import optparse
 #===============================================================================
 
 # Directories to exclude
-EXCLUDE_DIRS = ["include", "man", "pkgconfig", "doc", "aclocal", "info", "locale"]
+EXCLUDE_DIRS = ["linux-headers", "include", "man", "pkgconfig", "doc", "aclocal", "info", "locale"]
 
 # Extension to exclude
 EXCLUDE_FILTERS = [".a", ".la", ".py", ".pyc", ".pyo"]
