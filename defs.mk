@@ -512,16 +512,15 @@ module-get-listed-autoconf = \
 ## Dependency management
 ###############################################################################
 
-uniq2 = $(strip \
-	$(if $1, \
-		$(eval __f := $(call first,$1)) \
-		$(eval __r := $(call rest,$1)) \
-		$(if $(filter $(__f),$(__r)),$(empty),$(__f)) \
-		$(call uniq2,$(__r)) \
-	))
+uniq2 = \
+	$(eval __r := $1) \
+	$(foreach __f,$1, \
+		$(eval __r := $(call rest,$(__r))) \
+		$(if $(filter $(__f),$(__r)),,$(__f)) \
+	)
 
-module-get-static-depends = \
-	$(call uniq2,$(call __module-get-static-depends,$1,$2))
+module-get-static-depends = $(strip \
+	$(call uniq2,$(call __module-get-static-depends,$1,$2)))
 
 __module-get-static-depends = \
 	$(__modules.$1.$2) \
@@ -532,8 +531,8 @@ __module-get-static-depends = \
 		$(call __module-get-static-depends,$(__mod),$2) \
 	)
 
-module-get-all-depends = \
-	$(call uniq2,$(call __module-get-all-depends,$1))
+module-get-all-depends = $(strip \
+	$(call uniq2,$(call __module-get-all-depends,$1)))
 
 __module-get-all-depends = \
 	$(__modules.$1.depends) \
