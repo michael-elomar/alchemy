@@ -17,7 +17,7 @@ plf:
 	@echo "Plf image: start"
 	$(Q) rm -f $(PRODUCT_PLF)
 	$(Q) $(MK_KERNEL_PLF) \
-		$(TARGET_CONFIG_DIR)/boot.cfg \
+		"ignore-boot.cfg" \
 		$(TARGET_OUT_STAGING)/zImage \
 		$(TARGET_OUT_BUILD)/linux/.config \
 		$(TARGET_OUT)/kernel.plf
