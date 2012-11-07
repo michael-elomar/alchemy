@@ -195,11 +195,7 @@ USER_MAKEFILES :=
 
 # Command to find files
 find-cmd = $(BUILD_SYSTEM)/findfiles.py \
-	--prune=.git \
-	--prune=.repo \
-	--prune=raptor \
-	--prune=Alchemy-out \
-	--prune=$(TARGET_OUT) \
+	--prune=.git --prune=.repo --prune=$(TARGET_OUT) \
 	$(foreach __d,$(TARGET_SCAN_PRUNE_DIRS),--prune=$(__d)) \
 	$(TOP_DIR) \
 	$(USER_MAKEFILE_NAME)
