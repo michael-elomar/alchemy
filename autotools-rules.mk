@@ -7,7 +7,6 @@
 ###############################################################################
 
 # Name of files indicating steps done
-build_dir := $(call module-get-build-dir,$(LOCAL_MODULE))
 unpacked_file := $(build_dir)/$(LOCAL_MODULE).unpacked
 configured_file := $(build_dir)/$(LOCAL_MODULE).configured
 built_file := $(build_dir)/$(LOCAL_MODULE).built
