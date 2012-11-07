@@ -391,6 +391,9 @@ check:
 # Graph of build dependencies
 include $(BUILD_SYSTEM)/build-graph.mk
 
+# Plf generation
+include $(BUILD_SYSTEM)/plf.mk
+
 ###############################################################################
 ## Help rule.
 ###############################################################################
