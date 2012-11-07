@@ -280,6 +280,11 @@ include $(BUILD_SYSTEM)/config-rules.mk
 # If not in force mode (F=1), if a module is specified in goals, only include this one.
 # TODO: considere a mode to also check its dependencies.
 ifeq ("$(call is-targets-in-make-goals,$(__query-targets) clobber)","")
+
+ifneq ("$(V)","0")
+$(info Generating rules: start)
+endif
+
 $(eval __doskip := 0)
 $(if $(call streq,$(F),0), \
 	$(foreach __mod,$(ALL_MODULES), \
@@ -295,6 +300,11 @@ $(foreach __mod,$(ALL_MODULES), \
 		) \
 	) \
 )
+
+ifneq ("$(V)","0")
+$(info Generating rules: done)
+endif
+
 endif
 
 # Once all modules have been parsed, make sure nobody will reference LOCAL_XXX
