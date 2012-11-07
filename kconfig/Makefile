@@ -54,6 +54,7 @@ endif
 
 parser_SRC := parser/zconf.c
 parser_CFLAGS := -Iparser
+parser_GEN := parser/zconf.lex.c parser/zconf.hash.c parser/zconf.tab.c
 
 conf_SRC := conf.c
 conf_LIB := parser
@@ -75,6 +76,7 @@ qconf_LIB := parser
 qconf_CFLAGS := $(shell pkg-config $(qconf_PKG) --cflags)
 qconf_LDFLAGS := $(shell pkg-config $(qconf_PKG) --libs)
 qconf_MOC := $(shell pkg-config QtCore --variable=moc_location)
+qconf_GEN := qconf.moc
 endif
 
 ###############################################################################
@@ -114,6 +116,7 @@ $(1)-clean:
 	rm -f $(BIN_DIR)/$(1)$(2)
 	rm -f $($(1)_obj)
 	rm -f $($(1)_obj:%.o=%.d)
+	$(if $($(1)_GEN),rm -f $($(1)_GEN))
 endef
 
 # $1 : lib
