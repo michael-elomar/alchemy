@@ -287,11 +287,11 @@ endif
 
 $(eval __doskip := 0)
 $(if $(call streq,$(F),0), \
-	$(foreach __mod,$(ALL_MODULES), \
+	$(foreach __mod,$(ALL_BUILD_MODULES), \
 		$(if $(call is-module-in-make-goals,$(__mod)),$(eval __doskip := 1)) \
 	) \
 )
-$(foreach __mod,$(ALL_MODULES), \
+$(foreach __mod,$(ALL_BUILD_MODULES), \
 	$(eval LOCAL_MODULE := $(__mod)) \
 	$(if $(call streq,$(__doskip),0), \
 		$(eval include $(BUILD_SYSTEM)/module.mk), \
