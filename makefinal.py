@@ -173,6 +173,17 @@ def main():
 				logging.debug("Exclude directory : %s",
 					os.path.relpath(os.path.join(dirPath, dirName), options.stagingDir))
 				dirNames.remove(dirName)
+
+		# create directories (usefull for empty directories)
+		for dirName in dirNames:
+			srcDirName = os.path.join(dirPath, dirName)
+			relPath = os.path.relpath(srcDirName, options.stagingDir)
+			dstDirName = os.path.join(options.finalDir, relPath)
+			logging.info("Directory : %s", relPath)
+			if not os.path.exists(dstDirName):
+				os.makedirs(dstDirName, 0755)
+
+		# copy files
 		for fileName in fileNames:
 			if fileName in EXCLUDE_FILES:
 				logging.debug("Exclude file : %s",
