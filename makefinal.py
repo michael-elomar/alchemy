@@ -96,7 +96,7 @@ def doCopyByMakefile(dstFileName, srcFileName, doStrip, options):
 	options.makefile.write("\t@echo Alchemy install: $(patsubst $(PWD)/%,%,$(__dst))\n")
 	if doStrip:
 		options.makefile.write("\t$(Q)$(STRIP) -o $(__dst) $(__src)\n")
-		options.makefile.write("\t$(Q)chmod $(stat --printf '%%a' $(__src)) $(__dst)")
+		options.makefile.write("\t$(Q)chmod $$(stat --printf '%a' $(__src)) $(__dst)")
 	else:
 		options.makefile.write("\t$(Q)cp -af $(__src) $(__dst)\n")
 	options.makefile.write("\n")
