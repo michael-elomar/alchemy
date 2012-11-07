@@ -9,6 +9,10 @@
 # Bring back all LOCAL_XXX variables defined by LOCAL_MODULE
 $(call module-restore-locals,$(LOCAL_MODULE))
 
+ifneq ("$(V)","0")
+$(info Generating rules for $(LOCAL_MODULE))
+endif
+
 # Do we need to copy build module to staging dir
 copy_to_staging := 0
 

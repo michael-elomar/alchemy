@@ -54,6 +54,14 @@ TARGET_CONFIG_DIR ?= $(TOP_DIR)/Alchemy-config/$(TARGET_PRODUCT)-$(TARGET_PRODUC
 # Extra directories to skip during makefile scan
 TARGET_SCAN_PRUNE_DIRS ?=
 
+# Default : do NOT force external checks of module that have sub-makefiles
+# (autotools, linux kernel...)
+# make F=1 enable force checking
+TARGET_FORCE_EXTERNAL_CHECKS ?= 0
+ifneq ("$(F)","0")
+  TARGET_FORCE_EXTERNAL_CHECKS := 1
+endif
+
 ###############################################################################
 # Target global variables.
 ###############################################################################

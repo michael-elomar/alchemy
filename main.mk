@@ -38,15 +38,10 @@ ifeq ("$(V)","0")
   MAKEFLAGS += --no-print-directory
 endif
 
-# In fast mode, use scan cache as well
-ifneq ("$(F)","0")
-  override USE_SCAN_CACHE := 1
-endif
-
 # This is the default target.  It must be the first declared target.
 all:
 
-# To avoid undefined use of variable, force our default goal
+# To avoid use of undefined variable, force our default goal
 MAKECMDGOALS ?= all
 
 # Used to force goals to build.
@@ -79,7 +74,7 @@ BUILD_SYSTEM := $(call my-dir)
 # something.
 SKIP_DEPS_AND_CHECKS := 0
 
-# Set this variable to 1 to skip deps and chekc of external modules built
+# Set this variable to 1 to skip deps and checks of external modules built
 # outside this build system (basically it force remaking them by removing
 # their .done file).
 SKIP_EXT_DEPS_AND_CHECKS := 0
@@ -94,8 +89,8 @@ include $(BUILD_SYSTEM)/defs.mk
 # Optimizations for some goals.
 ###############################################################################
 
-# Skip external checks in fast mode
-ifneq ("$(F)","0")
+# Skip external checks if requested
+ifeq ("$(TARGET_FORCE_EXTERNAL_CHECKS)","0")
   SKIP_EXT_DEPS_AND_CHECKS := 1
 endif
 
@@ -281,12 +276,12 @@ include $(BUILD_SYSTEM)/config-rules.mk
 # Now, really generate rules for modules.
 # This second pass allows to deal with exported values.
 
-# Completely skip this for simple queries or clobber.
-# In fast mode, if a module is specified in goals, only include this one.
+# Completely skip this for simple queries/config or clobber.
+# If not in force mode (F=1), if a module is specified in goals, only include this one.
 # TODO: considere a mode to also check its dependencies.
 ifeq ("$(call is-targets-in-make-goals,$(__query-targets) clobber)","")
 $(eval __doskip := 0)
-$(if $(call strneq,$(F),0), \
+$(if $(call streq,$(F),0), \
 	$(foreach __mod,$(ALL_MODULES), \
 		$(if $(call is-module-in-make-goals,$(__mod)),$(eval __doskip := 1)) \
 	) \
@@ -434,8 +429,7 @@ help:
 	@echo ""
 	@echo "Usefull variables:"
 	@echo "  V: set to 1 to activate verbose mode."
-	@echo "  F: set to 1 to activate fast mode (modules built externally not checked)."
-	@echo "     It will also not check dependencies if a module is given in a goal."
+	@echo "  F: set to 1 to activate force mode (modules built externally will be re-checked)."
 	@echo "  W: set to 1 to activate more compilation warnings."
 
 .PHONY: help-modules
