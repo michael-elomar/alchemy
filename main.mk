@@ -49,7 +49,7 @@ MAKECMDGOALS ?= all
 .FORCE:
 
 ###############################################################################
-## The folowing 2 macros can NOT be put in defs.mk as it will be included
+## The following 2 macros can NOT be put in defs.mk as it will be included
 ## only after.
 ###############################################################################
 
@@ -70,7 +70,7 @@ TOP_DIR := $(shell pwd)
 BUILD_SYSTEM := $(call my-dir)
 
 # Set this variable to 1 to skip a lot of things like dependencies check and
-# config check. Usefull if user only want some internal query or configure
+# config check. Useful if user only want some internal query or configure
 # something.
 SKIP_DEPS_AND_CHECKS := 0
 
@@ -330,13 +330,13 @@ all: $(ALL_BUILD_MODULES)
 	@echo "Done building all"
 
 .PHONY: clean
-clean: $(foreach __mod,$(ALL_MODULES),clean-$(__mod))
+clean: $(foreach __mod,$(ALL_BUILD_MODULES),clean-$(__mod))
 	@rm -f $(AUTOCONF_MERGE_FILE)
 	@rm -f $(USER_MAKEFILES_CACHE)
 	@echo "Done cleaning"
 
 .PHONY: dirclean
-dirclean: $(foreach __mod,$(ALL_MODULES),dirclean-$(__mod))
+dirclean: $(foreach __mod,$(ALL_BUILD_MODULES),dirclean-$(__mod))
 	@rm -f $(AUTOCONF_MERGE_FILE)
 	@rm -f $(USER_MAKEFILES_CACHE)
 	@echo "Done cleaning directories"
