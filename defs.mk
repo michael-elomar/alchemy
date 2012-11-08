@@ -72,6 +72,15 @@ strneq = $(call not,$(call streq,$1,$2))
 # $2 : minimum version.
 check-version = $(call strneq,0,$(shell expr $1 \>= $2))
 
+# Make sure an item appears only once in a list, keeping only the last reference.
+# $1 : input list.
+uniq2 = \
+	$(eval __r := $1) \
+	$(foreach __f,$1, \
+		$(eval __r := $(call rest,$(__r))) \
+		$(if $(filter $(__f),$(__r)),,$(__f)) \
+	)
+
 ###############################################################################
 ## Use some colors if requested.
 ###############################################################################
@@ -572,13 +581,6 @@ __module-compute-depends-all-internal = \
 	$(__modules.$1.depends) \
 	$(foreach __mod,$(__modules.$1.depends), \
 		$(call __module-compute-depends-all,$(__mod)) \
-	)
-
-uniq2 = \
-	$(eval __r := $1) \
-	$(foreach __f,$1, \
-		$(eval __r := $(call rest,$(__r))) \
-		$(if $(filter $(__f),$(__r)),,$(__f)) \
 	)
 
 ###############################################################################

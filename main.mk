@@ -270,39 +270,48 @@ ifeq ("$(SKIP_DEPS_AND_CHECKS)","0")
   $(call modules-check-variables)
 endif
 
+###############################################################################
+## Module rules generation.
+###############################################################################
+
 # Configuration rules (once module database is built)
 include $(BUILD_SYSTEM)/config-rules.mk
 
 # Now, really generate rules for modules.
-# This second pass allows to deal with exported values.
 
-# Completely skip this for simple queries/config or clobber.
-# If not in force mode (F=1), if a module is specified in goals, only include this one.
-# TODO: considere a mode to also check its dependencies.
+# Completely skip this for simple queries or clobber.
+# If a module is specified in goals, only include this one and its dependencies.
 ifeq ("$(call is-targets-in-make-goals,$(__query-targets) clobber)","")
 
 ifneq ("$(V)","0")
-$(info Generating rules: start)
+  $(info Generating rules: start)
 endif
 
-$(eval __doskip := 0)
-$(if $(call streq,$(F),0), \
-	$(foreach __mod,$(ALL_BUILD_MODULES), \
-		$(if $(call is-module-in-make-goals,$(__mod)),$(eval __doskip := 1)) \
+# Determine the list of modules to really include
+__dofilter := 0
+__modlist := $(empty)
+$(foreach __mod,$(ALL_BUILD_MODULES), \
+	$(if $(call is-module-in-make-goals,$(__mod)), \
+		$(eval __dofilter := 1) \
+		$(eval __modlist += $(__mod) $(call module-get-all-depends,$(__mod))) \
 	) \
 )
-$(foreach __mod,$(ALL_BUILD_MODULES), \
+
+# Update module list, based on filtering, make sure items are only once in the list
+ifeq ("$(__dofilter)","0")
+  __modlist := $(ALL_BUILD_MODULES)
+else
+  __modlist := $(call uniq2,$(__modlist))
+endif
+
+# Now, generate rules of selected modules
+$(foreach __mod,$(__modlist), \
 	$(eval LOCAL_MODULE := $(__mod)) \
-	$(if $(call streq,$(__doskip),0), \
-		$(eval include $(BUILD_SYSTEM)/module.mk), \
-		$(if $(call is-module-in-make-goals,$(__mod)), \
-			$(eval include $(BUILD_SYSTEM)/module.mk), \
-		) \
-	) \
+	$(eval include $(BUILD_SYSTEM)/module.mk) \
 )
 
 ifneq ("$(V)","0")
-$(info Generating rules: done)
+  $(info Generating rules: done)
 endif
 
 endif
