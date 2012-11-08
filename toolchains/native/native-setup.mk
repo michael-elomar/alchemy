@@ -6,6 +6,9 @@
 ## This file contains additional setup for native linux.
 ###############################################################################
 
+# Use empty cross compilation flag by default
+TARGET_CROSS ?=
+
 # Update flags based on architecture
 # 64-bit requires -fPIC to build shared libraries
 ifeq ("$(TARGET_ARCH)","x64")
@@ -18,6 +21,7 @@ else
   TARGET_GLOBAL_LDFLAGS_SHARED += -m32
 endif
 
+# Assume everybody will want this
 TARGET_GLOBAL_LDLIBS += -lpthread -lrt
 TARGET_GLOBAL_LDLIBS_SHARED += -lpthread -lrt
 

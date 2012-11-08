@@ -14,26 +14,6 @@ $(error Top directory contains space characters)
 endif
 
 ###############################################################################
-## Tools for target.
-###############################################################################
-TARGET_CC ?= $(TARGET_CROSS)gcc
-TARGET_CXX ?= $(TARGET_CROSS)g++
-TARGET_AR ?= $(TARGET_CROSS)ar
-TARGET_LD ?= $(TARGET_CROSS)ld
-TARGET_NM ?= $(TARGET_CROSS)nm
-TARGET_STRIP ?= $(TARGET_CROSS)strip
-
-###############################################################################
-## Tools for host.
-###############################################################################
-HOST_CC ?= gcc
-HOST_CXX ?= g++
-HOST_AR ?= ar
-HOST_LD ?= ld
-HOST_NM ?= nm
-HOST_STRIP ?= strip
-
-###############################################################################
 ## Target configuration.
 ###############################################################################
 
@@ -41,6 +21,7 @@ TARGET_ARCH ?= x86
 TARGET_CPU ?=
 TARGET_OS ?= linux
 TARGET_OS_FLAVOUR ?= native
+TARGET_LIBC ?=
 TARGET_PRODUCT ?= $(TARGET_OS)-$(TARGET_OS_FLAVOUR)
 TARGET_PRODUCT_VARIANT ?= $(TARGET_ARCH)
 
@@ -50,6 +31,9 @@ TARGET_OUT_STAGING ?= $(TARGET_OUT)/staging
 TARGET_OUT_FINAL ?= $(TARGET_OUT)/final
 
 TARGET_CONFIG_DIR ?= $(TOP_DIR)/Alchemy-config/$(TARGET_PRODUCT)-$(TARGET_PRODUCT_VARIANT)
+
+TARGET_DEFAULT_ARM_MODE ?= thumb
+TARGET_FORCE_STATIC_LIBRARIES ?= 0
 
 # Extra directories to skip during makefile scan
 TARGET_SCAN_PRUNE_DIRS ?=
@@ -62,26 +46,23 @@ ifneq ("$(F)","0")
   TARGET_FORCE_EXTERNAL_CHECKS := 1
 endif
 
-###############################################################################
-# Target global variables.
-###############################################################################
-TARGET_GLOBAL_C_INCLUDES ?=
-TARGET_GLOBAL_CFLAGS ?=
-TARGET_GLOBAL_CPPFLAGS ?=
-TARGET_GLOBAL_ARFLAGS ?= rcs
-TARGET_GLOBAL_LDFLAGS ?=
-TARGET_GLOBAL_LDFLAGS_SHARED ?=
-TARGET_GLOBAL_LDLIBS ?=
-TARGET_GLOBAL_LDLIBS_SHARED ?=
-TARGET_GLOBAL_CFLAGS_arm ?=
-TARGET_GLOBAL_CFLAGS_thumb ?=
-
-TARGET_PCH_FLAGS ?=
-TARGET_DEFAULT_ARM_MODE ?= thumb
-TARGET_FORCE_STATIC_LIBRARIES ?= 0
-
 # Global prerequisites (shall be used only by os makefile)
 TARGET_GLOBAL_PREREQUISITES :=
+
+###############################################################################
+## Toolchain setup.
+###############################################################################
+include $(BUILD_SYSTEM)/toolchains/toolchains-setup.mk
+
+###############################################################################
+## Tools for host.
+###############################################################################
+HOST_CC ?= gcc
+HOST_CXX ?= g++
+HOST_AR ?= ar
+HOST_LD ?= ld
+HOST_NM ?= nm
+HOST_STRIP ?= strip
 
 ###############################################################################
 ## Host/Target OS.
@@ -125,7 +106,7 @@ else
 endif
 
 ###############################################################################
-## Update flags
+## Update flags.
 ###############################################################################
 
 # Make sure that staging dir are found first in case we want to override something
@@ -146,7 +127,7 @@ TARGET_GLOBAL_LDFLAGS += -L$(TARGET_OUT_STAGING)/usr/lib
 TARGET_GLOBAL_LDFLAGS_SHARED += -L$(TARGET_OUT_STAGING)/lib
 TARGET_GLOBAL_LDFLAGS_SHARED += -L$(TARGET_OUT_STAGING)/usr/lib
 
-# Make sure the architecture specifi flags is defined
+# Make sure the architecture specific flags is defined
 # For arm/thumb it is done above
 TARGET_GLOBAL_CFLAGS_$(TARGET_ARCH) ?=
 

@@ -122,17 +122,6 @@ endif
 ## Setup part2 (may use optimization flags from above).
 ###############################################################################
 
-# Target/os specific setup
-ifeq ("$(TARGET_OS)","linux")
-  ifeq ("$(TARGET_OS_FLAVOUR)","android")
-    include $(BUILD_SYSTEM)/toolchains/bionic-setup.mk
-  else ifeq ("$(TARGET_OS_FLAVOUR)","native")
-    include $(BUILD_SYSTEM)/toolchains/native-setup.mk
-  endif
-else ifeq ("$(TARGET_OS)","ecos")
-  include $(BUILD_SYSTEM)/toolchains/ecos-setup.mk
-endif
-
 # Setup autotools definitions (shall be after inclusion of defs.mk)
 include $(BUILD_SYSTEM)/autotools-setup.mk
 
@@ -173,15 +162,7 @@ $(info ----------------------------------------------------------------------)
 ###############################################################################
 
 # Target/os specific packages
-ifeq ("$(TARGET_OS)","linux")
-  ifeq ("$(TARGET_OS_FLAVOUR)","android")
-    include $(BUILD_SYSTEM)/toolchains/bionic-packages.mk
-  else ifeq ("$(TARGET_OS_FLAVOUR)","native")
-    include $(BUILD_SYSTEM)/toolchains/native-packages.mk
-  endif
-else ifeq ("$(TARGET_OS)","ecos")
-  include $(BUILD_SYSTEM)/toolchains/ecos-packages.mk
-endif
+include $(BUILD_SYSTEM)/toolchains/toolchains-packages.mk
 
 # Makefile with the list of all makefiles available and include them
 USER_MAKEFILE_NAME := atom.mk
@@ -328,7 +309,7 @@ $(foreach __var,$(modules-LOCALS), \
 
 # List of all available autoconf.h files
 __autoconf-list := $(strip \
-	$(foreach __mod,$(sort $(__modules)), \
+	$(foreach __mod,$(sort $(ALL_BUILD_MODULES)), \
 		$(call module-get-autoconf,$(__mod)) \
 	))
 

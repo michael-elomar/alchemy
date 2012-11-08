@@ -1,8 +1,8 @@
 ###############################################################################
-## @file bionic-setup.mk
+## @file eglibc-setup.mk
 ## @author Y.M. Morgan
-## @date 2012/10/18
+## @date 2012/11/05
 ##
-## This file contains additional setup for bionic (android).
+## This file contains package definition specific to eglibc.
 ###############################################################################
 

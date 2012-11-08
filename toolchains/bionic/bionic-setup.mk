@@ -1,8 +1,10 @@
 ###############################################################################
-## @file ecos-setup.mk
+## @file bionic-setup.mk
 ## @author Y.M. Morgan
 ## @date 2012/10/18
 ##
-## This file contains additional setup for ecos.
+## This file contains additional setup for bionic (android).
 ###############################################################################
 
+# Flags shall be given through environment as thery are very, very android
+# specific and hard to extract.
