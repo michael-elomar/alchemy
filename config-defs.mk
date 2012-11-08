@@ -7,7 +7,7 @@
 ###############################################################################
 
 # Tools
-CONFWRAPPER := $(BUILD_SYSTEM)/confwrapper.py
+CONFWRAPPER := $(BUILD_SYSTEM)/scripts/confwrapper.py
 
 # Directory where original configurations are stored
 CONFIG_ORIG_DIR := $(TARGET_CONFIG_DIR)

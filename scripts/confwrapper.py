@@ -31,7 +31,7 @@ ARG_FIELD_SEP = ":"
 TEMP_SUFFIX = ".alchemy"
 
 # Path to kconfig binaries
-KCONFIG_BIN_DIR = os.path.join(SCRIPT_PATH, "kconfig/bin-linux-" + ARCH)
+KCONFIG_BIN_DIR = os.path.join(SCRIPT_PATH, "../kconfig/bin-linux-" + ARCH)
 
 # Title we wand to display (also saved in config files)
 KCONFIG_TITLE = "Alchemy Configuration"

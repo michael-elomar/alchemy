@@ -78,7 +78,7 @@ __default-clean = \
 	fi;
 
 __apply-patches = \
-	$(BUILD_SYSTEM)/apply-patches.sh $(PRIVATE_SRC_DIR) $(PRIVATE_PATH) $(PRIVATE_PATCHES)
+	$(BUILD_SYSTEM)/scripts/apply-patches.sh $(PRIVATE_SRC_DIR) $(PRIVATE_PATH) $(PRIVATE_PATCHES)
 
 ###############################################################################
 ###############################################################################

@@ -189,7 +189,7 @@ USER_MAKEFILES_CACHE := $(TARGET_OUT_BUILD)/makefiles.mk
 USER_MAKEFILES :=
 
 # Command to find files
-find-cmd = $(BUILD_SYSTEM)/findfiles.py \
+find-cmd = $(BUILD_SYSTEM)/scripts/findfiles.py \
 	--prune=.git --prune=.repo --prune=$(TARGET_OUT) \
 	$(foreach __d,$(TARGET_SCAN_PRUNE_DIRS),--prune=$(__d)) \
 	$(TOP_DIR) \
@@ -372,7 +372,7 @@ clobber:
 final:
 	@echo "Generating final tree..."
 	@rm -rf $(TARGET_OUT_FINAL)
-	@$(BUILD_SYSTEM)/makefinal.py \
+	@$(BUILD_SYSTEM)/scripts/makefinal.py \
 		--strip="$(TARGET_STRIP)" \
 		$(TARGET_OUT_STAGING) $(TARGET_OUT_FINAL)
 	@echo "Done generating final tree"
@@ -382,7 +382,7 @@ final:
 final-nostrip:
 	@echo "Generating final tree (no stripping)..."
 	@rm -rf $(TARGET_OUT_FINAL)
-	@$(BUILD_SYSTEM)/makefinal.py \
+	@$(BUILD_SYSTEM)/scripts/makefinal.py \
 		$(TARGET_OUT_STAGING) $(TARGET_OUT_FINAL)
 	@echo "Done generating final tree (no stripping)"
 
@@ -466,10 +466,10 @@ ifeq ("$(TARGET_OS_FLAVOUR)","native")
 NATIVE_WRAPPER_SCRIPT := native-wrapper.sh
 
 $(eval $(call copy-one-file, \
-	$(BUILD_SYSTEM)/$(NATIVE_WRAPPER_SCRIPT), \
+	$(BUILD_SYSTEM)/scripts/$(NATIVE_WRAPPER_SCRIPT), \
 	$(TARGET_OUT_STAGING)/$(NATIVE_WRAPPER_SCRIPT)))
 $(eval $(call copy-one-file, \
-	$(BUILD_SYSTEM)/$(NATIVE_WRAPPER_SCRIPT), \
+	$(BUILD_SYSTEM)/scripts/$(NATIVE_WRAPPER_SCRIPT), \
 	$(TARGET_OUT_FINAL)/$(NATIVE_WRAPPER_SCRIPT)))
 
 all: $(TARGET_OUT_STAGING)/$(NATIVE_WRAPPER_SCRIPT)
