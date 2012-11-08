@@ -238,38 +238,62 @@ modules-LOCALS += STAGING_MODULE
 modules-LOCALS += DESTDIR
 modules-LOCALS += TARGETS
 
+# The list of fields related to dependency
+modules-fields-depends := \
+	depends \
+	depends.EXTERNAL_LIBRARIES \
+	depends.STATIC_LIBRARIES \
+	depends.WHOLE_STATIC_LIBRARIES \
+	depends.SHARED_LIBRARIES \
+	depends.all
+
 # the list of managed fields per module
 modules-fields := \
-	depends \
+	$(modules-fields-depends) \
 	$(modules-LOCALS)
 
 ###############################################################################
 ## Dump all module information. Only use this for debugging.
 ###############################################################################
 modules-dump-database = \
+	$(info --------------------) \
 	$(info Modules: $(sort $(__modules))) \
 	$(foreach __mod,$(sort $(__modules)), \
-		$(info $(space4)$(__mod):) \
+		$(info --------------------) \
+		$(info $(__mod):) \
 		$(foreach __field,$(modules-fields), \
 			$(eval __fieldval := $(strip $(__modules.$(__mod).$(__field)))) \
-			$(if $(__fieldval), \
-				$(if $(filter 1,$(words $(__fieldval))), \
-					$(info $(space4)$(space4)$(__field): $(__fieldval)), \
-					$(info $(space4)$(space4)$(__field): ) \
-					$(foreach __fielditem,$(__fieldval), \
-						$(info $(space4)$(space4)$(space4)$(__fielditem)) \
-					) \
-				) \
-			) \
+			$(call __dump-field,$(__field),$(__fieldval)) \
 		) \
 	) \
-	$(info --- end of modules list)
+	$(info --------------------)
 
 # This will only dump dependencies
 modules-dump-database-depends = \
+	$(info --------------------) \
+	$(info Modules: $(sort $(__modules))) \
 	$(foreach __mod,$(sort $(__modules)), \
+		$(info --------------------) \
 		$(info $(__mod):) \
-		$(info $(space4)$(strip $(__modules.$(__mod).depends))) \
+		$(foreach __field,$(modules-fields-depends), \
+			$(eval __fieldval := $(strip $(__modules.$(__mod).$(__field)))) \
+			$(call __dump-field,$(__field),$(__fieldval)) \
+		) \
+	) \
+	$(info --------------------)
+
+# Dump a field if not empty
+# $1 : field name
+# $2 : field value
+__dump-field = \
+	$(if $2, \
+		$(if $(filter 1,$(words $2)), \
+			$(info $(space4)$1: $2), \
+			$(info $(space4)$1: ) \
+			$(foreach __fielditem,$2, \
+				$(info $(space4)$(space4)$(__fielditem)) \
+			) \
+		) \
 	)
 
 ###############################################################################
@@ -440,17 +464,31 @@ __module-check-c-includes = \
 ###############################################################################
 
 # Compute dependencies of all modules
+# Do direct dependencies first, then full
+# The dummy assignment is to discard output generated internally
 modules-compute-depends = \
 	$(foreach __mod,$(__modules), \
 		$(eval __modules.$(__mod).depends := $(empty)) \
-		$(call __module-update-depends,$(__mod)) \
-		$(call __module-compute-depends,$(__mod)) \
+		$(eval __modules.$(__mod).depends.EXTERNAL_LIBRARIES := $(empty)) \
+		$(eval __modules.$(__mod).depends.STATIC_LIBRARIES := $(empty)) \
+		$(eval __modules.$(__mod).depends.WHOLE_STATIC_LIBRARIES := $(empty)) \
+		$(eval __modules.$(__mod).depends.SHARED_LIBRARIES := $(empty)) \
+		$(eval __modules.$(__mod).depends.all := $(empty)) \
+		$(call __module-update-depends-direct,$(__mod)) \
+		$(call __module-compute-depends-direct,$(__mod)) \
+	) \
+	$(foreach __mod,$(__modules), \
+		$(eval __dummy := $(call __module-compute-depends-static,$(__mod),EXTERNAL_LIBRARIES)) \
+		$(eval __dummy := $(call __module-compute-depends-static,$(__mod),STATIC_LIBRARIES)) \
+		$(eval __dummy := $(call __module-compute-depends-static,$(__mod),WHOLE_STATIC_LIBRARIES)) \
+		$(eval __dummy := $(call __module-compute-depends-static,$(__mod),SHARED_LIBRARIES)) \
+		$(eval __dummy := $(call __module-compute-depends-all,$(__mod))) \
 	)
 
-# Update dependencies of a single module.
+# Update direct dependencies of a single module.
 # It updates XXX_LIBRARIES based on LIBRARIES and actual dependency class.
 # $1 : module name.
-__module-update-depends = \
+__module-update-depends-direct = \
 	$(foreach __lib,$(__modules.$1.LIBRARIES), \
 		$(eval __class := $(__modules.$(__lib).MODULE_CLASS)) \
 		$(if $(call streq,$(__class),STATIC_LIBRARY), \
@@ -465,19 +503,83 @@ __module-update-depends = \
 		) \
 	)
 
-# Compute dependencies of a single module
+# Compute direct dependencies of a single module
 # $1 : module name.
-__module-compute-depends = \
-	$(call __module-add-depends,$1,$(__modules.$1.STATIC_LIBRARIES)) \
-	$(call __module-add-depends,$1,$(__modules.$1.WHOLE_STATIC_LIBRARIES)) \
-	$(call __module-add-depends,$1,$(__modules.$1.SHARED_LIBRARIES)) \
-	$(call __module-add-depends,$1,$(__modules.$1.EXTERNAL_LIBRARIES))
+__module-compute-depends-direct = \
+	$(call __module-add-depends-direct,$1,$(__modules.$1.STATIC_LIBRARIES)) \
+	$(call __module-add-depends-direct,$1,$(__modules.$1.WHOLE_STATIC_LIBRARIES)) \
+	$(call __module-add-depends-direct,$1,$(__modules.$1.SHARED_LIBRARIES)) \
+	$(call __module-add-depends-direct,$1,$(__modules.$1.EXTERNAL_LIBRARIES))
 
-# Add dependencies to a module
+# Add direct dependencies to a module
 # $1 : module name.
 # $2 : list of modules to add in dependency list.
-__module-add-depends = \
+__module-add-depends-direct = \
 	$(eval __modules.$1.depends += $(filter-out $(__modules.$1.depends),$2))
+
+# Compute dependencies due to static libraries.
+# $1 : module name.
+# $2 : class of library to compute dependencies.
+# Note : it recursively descends into static libraries to get their dependencies.
+# Internally we use a 'local' variable that will hold the name of the variable
+# in which we will store the result (a kind of pointer)
+# It is prefixed by the name of the module because there is no 'stack' but a
+# single namespace.
+# Note : the result is ordered in way compatible to link. It means that if
+# a library A depends on library B, B will be after A. This order is guaranteed
+# even if the recursion and dependency is tricky as long as there is no cycle.
+# TODO: detect cycles, for now it will loop indefinitely.
+__module-compute-depends-static = \
+	$(eval $1.__var := __modules.$1.depends.$2) \
+	$(if $($($1.__var)),$($($1.__var)), \
+		$(eval $($1.__var) := $(strip \
+			$(call uniq2,$(call __module-compute-depends-static-internal,$1,$2))) \
+		) \
+		$($($1.__var)) \
+	)
+
+# Internal macro called by __module-compute-depends-static to do the recursion
+# by calling again __module-compute-depends-static.
+# $1 : module name.
+# $2 : class of library to compute dependencies.
+__module-compute-depends-static-internal = \
+	$(__modules.$1.$2) \
+	$(foreach __mod,$(__modules.$1.STATIC_LIBRARIES), \
+		$(call __module-compute-depends-static,$(__mod),$2) \
+	) \
+	$(foreach __mod,$(__modules.$1.WHOLE_STATIC_LIBRARIES), \
+		$(call __module-compute-depends-static,$(__mod),$2) \
+	)
+
+# Compute all dependencies of a module.
+# $1 : module name.
+# Note : it recursively descends into libraries to get their dependencies.
+# See above the way we use 'local' variable.
+__module-compute-depends-all = \
+	$(eval $1.__var := __modules.$1.depends.all) \
+	$(if $($($1.__var)),$($($1.__var)), \
+		$(eval $($1.__var) := $(strip \
+			$(call uniq2,$(call __module-compute-depends-all-internal,$1))) \
+		) \
+		$($($1.__var)) \
+	)
+
+# Internal macro called by __module-compute-depends-all to do the recursion
+# by calling again __module-compute-depends-all.
+# $1 : module name.
+# $2 : class of library to compute dependencies.
+__module-compute-depends-all-internal = \
+	$(__modules.$1.depends) \
+	$(foreach __mod,$(__modules.$1.depends), \
+		$(call __module-compute-depends-all,$(__mod)) \
+	)
+
+uniq2 = \
+	$(eval __r := $1) \
+	$(foreach __f,$1, \
+		$(eval __r := $(call rest,$(__r))) \
+		$(if $(filter $(__f),$(__r)),,$(__f)) \
+	)
 
 ###############################################################################
 ## Automatic extraction from dependencies of a module.
@@ -509,36 +611,14 @@ module-get-listed-autoconf = \
 	))
 
 ###############################################################################
-## Dependency management
+## Dependency helpers.
 ###############################################################################
 
-uniq2 = \
-	$(eval __r := $1) \
-	$(foreach __f,$1, \
-		$(eval __r := $(call rest,$(__r))) \
-		$(if $(filter $(__f),$(__r)),,$(__f)) \
-	)
+module-get-static-depends = \
+	$(__modules.$1.depends.$2)
 
-module-get-static-depends = $(strip \
-	$(call uniq2,$(call __module-get-static-depends,$1,$2)))
-
-__module-get-static-depends = \
-	$(__modules.$1.$2) \
-	$(foreach __mod,$(__modules.$1.STATIC_LIBRARIES), \
-		$(call __module-get-static-depends,$(__mod),$2) \
-	) \
-	$(foreach __mod,$(__modules.$1.WHOLE_STATIC_LIBRARIES), \
-		$(call __module-get-static-depends,$(__mod),$2) \
-	)
-
-module-get-all-depends = $(strip \
-	$(call uniq2,$(call __module-get-all-depends,$1)))
-
-__module-get-all-depends = \
-	$(__modules.$1.depends) \
-	$(foreach __mod,$(__modules.$1.depends), \
-		$(call __module-get-all-depends,$(__mod)) \
-	)
+module-get-all-depends = \
+	$(__modules.$1.depends.all)
 
 ###############################################################################
 ## Get path of module main target file (in build or staging directory).
