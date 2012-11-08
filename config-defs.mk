@@ -81,10 +81,13 @@ __generate-config-module-args = $(strip \
 
 ###############################################################################
 ## Generate arguments suitable for an action on a full config.
+## Do not include prebuilt module, it has no real sense.
 ###############################################################################
 __generate-config-args = $(strip \
 	$(foreach __mod,$(sort $(__modules)), \
-		$(call __generate-config-module-args,$(__mod)) \
+		$(if $(call strneq,$(__modules.$(__mod).MODULE_CLASS),PREBUILT), \
+			$(call __generate-config-module-args,$(__mod)) \
+		) \
 	))
 
 ###############################################################################
