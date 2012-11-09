@@ -7,7 +7,7 @@
 ###############################################################################
 
 # Determine arguments
-MAKEFINAL_SCRIPT := $(BUILD_SYSTEM)/scripts/makefinal.py -v
+MAKEFINAL_SCRIPT := $(BUILD_SYSTEM)/scripts/makefinal.py
 MAKEFINAL_ARGS := 
 
 ifneq ("$(TARGET_SKEL)","")
