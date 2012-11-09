@@ -1,0 +1,11 @@
+diff --git a/overparrot/Parrot.mk b/overparrot/Parrot.mk
+index 756902a..ca54656 100644
+--- a/overparrot/Parrot.mk
++++ b/overparrot/Parrot.mk
+@@ -14,4 +14,6 @@ LOCAL_CFLAGS += $(HORN_VOLUMES_CFLAGS) \
+ 	$(PAL_CFLAGS) \
+ 	$(HSTILIB_CFLAGS)
+ 
++LOCAL_ADDITIONAL_DEPENDENCIES += $(HSTILIB_GENERATED_DONE_FILE)
++
+ LOCAL_SHARED_LIBRARIES += libhornaudiovolume

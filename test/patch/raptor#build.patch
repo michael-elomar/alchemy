@@ -1,0 +1,31 @@
+diff --git a/core/definitions.mk b/core/definitions.mk
+index 363ad33..adcad62 100644
+--- a/core/definitions.mk
++++ b/core/definitions.mk
+@@ -1327,7 +1327,7 @@ define transform-classes.jar-to-dex
+ @echo "target Dex: $(PRIVATE_MODULE)"
+ @mkdir -p $(dir $@)
+ $(hide) $(DX) \
+-    $(if $(findstring windows,$(HOST_OS)),,-JXms16M -JXmx1536M) \
++    $(if $(findstring windows,$(HOST_OS)),,-JXms16M -JXmx2048M) \
+     --dex --output=$@ \
+     $(if $(NO_OPTIMIZE_DX), \
+         --no-optimize) \
+diff --git a/core/main.mk b/core/main.mk
+index 266dd28..d1b1583 100644
+--- a/core/main.mk
++++ b/core/main.mk
+@@ -12,6 +12,13 @@ endif
+ # this turns off the suffix rules built into make
+ .SUFFIXES:
+ 
++# Turns off the RCS / SCCS implicit rules of GNU Make
++% : RCS/%,v
++% : RCS/%
++% : %,v
++% : s.%
++% : SCCS/s.%
++
+ # If a rule fails, delete $@.
+ .DELETE_ON_ERROR:
+ 

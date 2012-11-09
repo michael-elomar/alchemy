@@ -1,0 +1,30 @@
+diff --git a/Build/Config/ConfigBluesModules.in b/Build/Config/ConfigBluesModules.in
+index 1ee4e36..e2c73fb 100644
+--- a/Build/Config/ConfigBluesModules.in
++++ b/Build/Config/ConfigBluesModules.in
+@@ -252,7 +252,6 @@ endif # BLUES_SUPPORT_BNEP_BLOCK
+ config BLUES_SUPPORT_LOW_POWER_BLOCK
+ 	bool "Support of the Low Power Management"
+ 	default n
+-	select PAL_GPIO_DRIVER
+ 	help
+ 		If defined, all low power mode related functions will be enabled.
+ 		Works only on eCos platforms!
+diff --git a/Sources/Common/System/BLM_Config.h b/Sources/Common/System/BLM_Config.h
+index fe0b810..8a2686c 100644
+--- a/Sources/Common/System/BLM_Config.h
++++ b/Sources/Common/System/BLM_Config.h
+@@ -12,7 +12,12 @@
+ #ifndef __BLM_CONFIG_H__
+ #define __BLM_CONFIG_H__
+ 
+-#include "config.h"		//Include project configuration file
++#ifdef ALCHEMY_BUILD
++#  include "blues-config.h"
++#else // !ALCHEMY_BUILD
++#  include "config.h"		//Include project configuration file
++#endif // !ALCHEMY_BUILD
++
+ /**
+  * @defgroup BluesSettings Blues settings
+  *

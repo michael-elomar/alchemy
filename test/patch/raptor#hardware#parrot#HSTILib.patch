@@ -1,0 +1,64 @@
+diff --git a/Build/Android/Android.mk b/Build/Android/Android.mk
+index 7f06be4..6c7f379 100644
+--- a/Build/Android/Android.mk
++++ b/Build/Android/Android.mk
+@@ -66,4 +66,6 @@ LOCAL_SRC_FILES:=  \
+ LOCAL_CFLAGS :=  $(HSTILIB_CFLAGS) \
+ 				 $(PAL_CFLAGS) 
+ 
++LOCAL_ADDITIONAL_DEPENDENCIES += $(HSTILIB_GENERATED_DONE_FILE)
++
+ include $(BUILD_STATIC_LIBRARY)
+diff --git a/Build/Android/HSTILIB_Flags.mk b/Build/Android/HSTILIB_Flags.mk
+index dc75fc8..a46ca2b 100644
+--- a/Build/Android/HSTILIB_Flags.mk
++++ b/Build/Android/HSTILIB_Flags.mk
+@@ -1,29 +1,30 @@
+ HSTILIB_INCLUDES := \
+ 	hardware/parrot/HSTILib/inc \
+     hardware/parrot/HSTILib/src \
+-	hardware/parrot/Horn/FULL_HSTI_Generated \
+ 	hardware/parrot/HSTILib/Build/Android/ \
+ 
++# TODO : try to not hardcode the alchemy output path
++ifeq ("$(BUILD_USE_ALCHEMY)","true")
++
++HSTILIB_GENERATED_DONE_FILE := \
++	$(TARGET_OUT_INTERMEDIATES)/hsti-generator.done
++
++HSTILIB_INCLUDES += \
++	$(TARGET_OUT_INTERMEDIATES)/alchemy/build/hsti-generator/full
++
++else
++
++# lucie will do it before calling us
++HSTILIB_GENERATED_DONE_FILE :=
++
++HSTILIB_INCLUDES += \
++	hardware/parrot/Horn/FULL_HSTI_Generated
++
++endif
+ 
+ HSTILIB_CFLAGS := \
+ 	-DHSTI_OSAL_PAL \
+ 	-DHSTI_CHAR_UNSAFE \
+ 	-DHSTI_USE_CONFIG \
+ 	-DHSTI_NO_POSIX_OPENPT \
+-	-DHSTI_USE_UART_POSIX 
+-	
+-
+-
+-
+-#-DPOS_ANDROID \
+-#	-DPOS_LINUX \
+-#	-D_XOPEN_SOURCE=600 \
+-#	-DSUP_U32_IS_ATOMIC \
+-#	-fvisibility=default \
+-#	-DANDROID_MAJOR=2 \
+-#	-DANDROID_MINOR=3 \
+-#	-D_POSIX_SOURCE \
+-#	-DOS_LINUX \
+-#	-DPFILE=__FILE__\
+-#	-DPAL_NORTPRIO  \
+-#	-DPOS_HAVE_THREAD_CANCEL
++	-DHSTI_USE_UART_POSIX

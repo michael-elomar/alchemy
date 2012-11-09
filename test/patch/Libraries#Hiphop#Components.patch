@@ -1,0 +1,289 @@
+diff --git a/HSTIGenerator/ATSpec_ParseXml.py b/HSTIGenerator/ATSpec_ParseXml.py
+index c0f44a7..9f496af 100755
+--- a/HSTIGenerator/ATSpec_ParseXml.py
++++ b/HSTIGenerator/ATSpec_ParseXml.py
+@@ -171,15 +171,13 @@ class SpecData(object):
+ 		f = open(filepath, "r")
+ 		self.depsList.append(os.path.abspath(filepath))
+ 		# get define values
+-		while(True):
+-			line = f.readline()
+-			if len(line)==0:
+-				break
+-			res = re.match("#define ([A-Za-z0-9_]+) (.*)", line)
+-			if (res):
+-				self.autoconfDict[res.group(1)] = res.group(2)
+-			elif line[1] != '*'  and line != "#define AUTOCONF_INCLUDED\n":
+-				Log.C("cannot understand %s" % line)
++		for line in f:
++			if len(line) > 1:
++				res = re.match("#define ([A-Za-z0-9_]+) (.*)", line)
++				if (res):
++					self.autoconfDict[res.group(1)] = res.group(2)
++				elif line[1] != '*'  and line != "#define AUTOCONF_INCLUDED\n":
++					Log.C("cannot understand %s" % line)
+ 		f.close()
+ 		
+ 		# resolve recursive define
+diff --git a/HSTIGenerator/Ck5050ini_Generate.py b/HSTIGenerator/Ck5050ini_Generate.py
+index a4478cf..60c4b8b 100755
+--- a/HSTIGenerator/Ck5050ini_Generate.py
++++ b/HSTIGenerator/Ck5050ini_Generate.py
+@@ -215,15 +215,13 @@ def parseAutoconf(filepath):
+     f = open(filepath, "r")
+     depsList.append(os.path.abspath(filepath))
+     # get define values
+-    while(True):
+-        line = f.readline()
+-        if len(line)==0:
+-            break
+-        res = re.match("#define ([A-Za-z0-9_]+) (.*)", line)
+-        if (res):
+-            autoconfDict[res.group(1)] = res.group(2)
+-        elif line[1] != '*'  and line != "#define AUTOCONF_INCLUDED\n":
+-            print "cannot understand %s" % line
++    for line in f:
++        if len(line) > 1:
++            res = re.match("#define ([A-Za-z0-9_]+) (.*)", line)
++            if (res):
++                autoconfDict[res.group(1)] = res.group(2)
++            elif line[1] != '*'  and line != "#define AUTOCONF_INCLUDED\n":
++                print "cannot understand %s" % line
+     f.close()
+         
+ def replaceAutoconfDefine(regRes):
+diff --git a/HSTIGenerator/Makefile b/HSTIGenerator/Makefile
+index 0b2d274..aeb5ca5 100755
+--- a/HSTIGenerator/Makefile
++++ b/HSTIGenerator/Makefile
+@@ -26,6 +26,11 @@
+ #   softat-ini-header  : generate header for softat ini.
+ ###############################################################################
+ 
++# Setup optional variables
++HSTI_MULTI_TARGET ?=
++HSTI_EXTRA_ATSPEC_DIR ?=
++HSTI_EXTRA_ATPARAM_FILE ?=
++
+ # default target : display error message
+ all:
+ 	@echo "Please call this Makefile with an explicit target"
+@@ -93,9 +98,6 @@ ifndef NO_COPY_HEADERS
+ 	fi
+ 
+ # do some cleanup, copy headers by preserving their timestamp
+-	@echo "--------------------------------------------------------------------"
+-	@echo "Copying ATParams headers..."
+-	@echo "--------------------------------------------------------------------"
+ 	@rm -rf $(dir $(HSTI_ATPARAMS_GENERATED))
+ 	@mkdir -p $(dir $(HSTI_ATPARAMS_GENERATED))
+ 	@cp -af $(HEADERS) $(dir $(HSTI_ATPARAMS_GENERATED))
+diff --git a/SoftAT/Build/ConfigCK5050Set.in b/SoftAT/Build/ConfigCK5050Set.in
+index c6656f3..0799b53 100644
+--- a/SoftAT/Build/ConfigCK5050Set.in
++++ b/SoftAT/Build/ConfigCK5050Set.in
+@@ -1,6 +1,44 @@
+ 
+ ####################################### CK5050 Software SUPPORT ######################################
+ menu "CK5050 Software Support"
++
++
++	config BUILD_BLUES
++		bool
++		default y
++
++	config BUILD_TANGO
++		bool
++		default y
++
++	config BUILD_TAMTAM
++		bool
++		default y
++
++	config BUILD_TALA
++		bool
++		default y
++
++	config BUILD_DISCO
++		bool
++		default y
++
++	config BUILD_DISCO_WITH_USB
++		bool
++		default y
++
++	config BUILD_CONCERTOS
++		bool
++		default y
++
++	config BUILD_TANGO
++		bool
++		default y
++
++	config BUILD_RAP
++		bool
++		default y
++
+ 	# hidden options depending on selected packages
+ 	config CK5050_SUPPORT_BLUETOOTH
+ 		bool
+@@ -241,7 +279,6 @@ menu "CK5050 Software Support"
+ 				default y
+ 	
+ 			config CK5050_SUPPORT_PAN
+-				select CK5050_ENABLE_BNEP_BLOCK
+ 				bool "CK5050_SUPPORT_PAN"
+ 				default y
+ 			if CK5050_SUPPORT_PAN
+@@ -299,13 +336,10 @@ menu "CK5050 Software Support"
+ 	
+ 				if CK5050_SUPPORT_NETWORK_DEVICE
+ 					config CK5050_SUPPORT_NADI_DONGLE_3G
+-						depends on PAL_PPP_DRIVER
+-						depends on BUILD_MODMAN
+ 						bool "Dongle 3G"
+ 						default n
+ 
+ 					config CK5050_SUPPORT_NADI_DUN
+-						depends on PAL_PPP_DRIVER
+ 						bool "DUN"
+ 						default n
+ 						if CK5050_SUPPORT_NADI_DUN
+@@ -325,7 +359,6 @@ menu "CK5050 Software Support"
+ 							"Management and configuration for RNDIS Host network interface."
+ 
+ 					config CK5050_SUPPORT_NADI_GSM_MODEM
+-						depends on BUILD_REGGAE
+ 						bool "Gsm Modem"
+ 						default n
+ 
+@@ -352,7 +385,6 @@ menu "CK5050 Software Support"
+ 
+ 		menu "Network Interface"
+ 			config CK5050_SUPPORT_NETWORK_INTERFACE
+-			depends on BUILD_TINYXML
+ 				bool "CK5050_SUPPORT_NETWORK_INTERFACE"
+ 				default n
+ 				help
+@@ -458,7 +490,6 @@ menu "CK5050 Software Support"
+         config CK5050_SUPPORT_DEVI_IPOD
+             bool "CK5050_SUPPORT_DEVI_IPOD"
+             default y
+-            select BUILD_ACID
+             help
+                 "If activated, the host will be notified of plugged apple devices.
+                 WARNING : This must be activated if you register IPod sources in Concertos."
+@@ -482,7 +513,6 @@ menu "CK5050 Software Support"
+         config CK5050_SUPPORT_DEVI_OTHER
+             bool "CK5050_SUPPORT_DEVI_OTHER"
+             default y
+-            select PAL_JUBA_CLIENT_SERVICE
+             help
+                 "If activated, the host will be notified of plugged devices other than IPods (such as USB keys, SD cards, etc ...)."
+ 
+@@ -492,7 +522,6 @@ menu "CK5050 Software Support"
+ 
+     	config CK5050_SUPPORT_UPNP
+             bool "CK5050_SUPPORT_UPNP"
+-            depends on BUILD_UPNP
+ 	        select SOFTAT_USE_ASYNCHRONOUS_FILE_LISTING
+             help
+                 "Allow to browse Upnp servers, and then to perform downloads and streaming from them. To enable it check Libraries/Connectivity/Upnp library.
+diff --git a/SoftAT/Export/config.h b/SoftAT/Export/config.h
+index 3101052..aed5584 100644
+--- a/SoftAT/Export/config.h
++++ b/SoftAT/Export/config.h
+@@ -14,6 +14,25 @@
+ #ifndef __CONFIG_H__
+ #define __CONFIG_H__
+ 
++#ifdef ALCHEMY_BUILD
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++// add parrot os headers
++#include "parrotOS_define_c.h"
++#include "parrotOS_supervis.h"
++#include "parrotOS_uart_rt.h"
++#include "parrotOS_log.h"
++
++#ifdef __cplusplus
++}
++#endif
++
++#include "blues-config.h"
++
++#else // !ALCHEMY_BUILD
++
+ //==================================================================================================
+ // Common Definitions.
+ //==================================================================================================
+@@ -182,5 +201,7 @@ extern "C" {
+ }
+ #endif // __cplusplus
+ 
++#endif // !ALCHEMY_BUILD
++
+ #endif // __CONFIG_H__
+ 
+diff --git a/SoftAT/Sources/HSTI/HSTI_Config.h b/SoftAT/Sources/HSTI/HSTI_Config.h
+index 558cc33..f83741f 100644
+--- a/SoftAT/Sources/HSTI/HSTI_Config.h
++++ b/SoftAT/Sources/HSTI/HSTI_Config.h
+@@ -9,6 +9,8 @@
+ #ifndef _HSTI_CONFIG_H_INCLUDED_
+ #define _HSTI_CONFIG_H_INCLUDED_
+ 
++#ifndef ALCHEMY_BUILD
++
+ //==================================================================================================
+ //==================================================================================================
+ #include "config.h"
+@@ -107,5 +109,7 @@ extern void SYST_DBG_AssertFail(const char * file, int line, const char * expr);
+ 
+ #endif // !HSTI_SUPPORT_LOG_PAL
+ 
++#endif // !ALCHEMY_BUILD
++
+ #endif // _HSTI_CONFIG_H_INCLUDED_
+ 
+diff --git a/SoftAT/Sources/HSTI/HSTI_Main.c b/SoftAT/Sources/HSTI/HSTI_Main.c
+index 698830f..966e7bc 100644
+--- a/SoftAT/Sources/HSTI/HSTI_Main.c
++++ b/SoftAT/Sources/HSTI/HSTI_Main.c
+@@ -21,6 +21,12 @@
+ #include "BLI/HFP/BLI_Hfp_API.h"
+ #include "HSTI/HSTI_Priv.h"
+ 
++// To Avoid cyclic dependencies between SoftAT and HSTILib,
++// the CmdProc custom table is included and compiled here
++#ifdef ALCHEMY_BUILD
++#  include "HSTI_CmdProc.c"
++#endif // ALCHEMY_BUILD
++
+ //////////////////////////////////////////////////////////////////////////
+ // External Variables
+ //////////////////////////////////////////////////////////////////////////
+diff --git a/SoftAT/Sources/HSTI/Requests/ReqNADI/HSTI_ReqNADI.hpp b/SoftAT/Sources/HSTI/Requests/ReqNADI/HSTI_ReqNADI.hpp
+index 04e95c9..ca37694 100644
+--- a/SoftAT/Sources/HSTI/Requests/ReqNADI/HSTI_ReqNADI.hpp
++++ b/SoftAT/Sources/HSTI/Requests/ReqNADI/HSTI_ReqNADI.hpp
+@@ -291,7 +291,7 @@ HSTI_INLINE HSTI_BOOL HSTI_ReqNADI_Send_Async_GERR(HSTI_EVT_CTX_STRUCT *pEvtCtx,
+ #endif
+ }
+ 
+-HSTI_INLINE HSTI_BOOL HSTI_ReqNADI_Send_Async_GERR_STR(HSTI_EVT_CTX_STRUCT *pEvtCtx, HSTI_DEVICE_ID nadId, HSTI_NADIDEVICE_ERR Error , CHAR *Report)
++HSTI_INLINE HSTI_BOOL HSTI_ReqNADI_Send_Async_GERR_STR(HSTI_EVT_CTX_STRUCT *pEvtCtx, HSTI_DEVICE_ID nadId, HSTI_NADIDEVICE_ERR Error , HSTI_STR Report)
+ {
+ #ifdef CK5050_SUPPORT_NETWORK_DEVICE
+ 	return HSTI_EvtAPI_Target_Send_Async_GERR_STR(pEvtCtx, nadId, Error, Report);
+@@ -300,7 +300,7 @@ HSTI_INLINE HSTI_BOOL HSTI_ReqNADI_Send_Async_GERR_STR(HSTI_EVT_CTX_STRUCT *pEvt
+ #endif
+ }
+ 
+-HSTI_INLINE HSTI_BOOL HSTI_ReqNADI_Send_Async_GERR_STR(HSTI_EVT_CTX_STRUCT *pEvtCtx, int Id, HSTI_NADIDEVICE_ERR Error , CHAR *Report)
++HSTI_INLINE HSTI_BOOL HSTI_ReqNADI_Send_Async_GERR_STR(HSTI_EVT_CTX_STRUCT *pEvtCtx, int Id, HSTI_NADIDEVICE_ERR Error , HSTI_STR Report)
+ {
+ #ifdef CK5050_SUPPORT_NETWORK_DEVICE
+ 	HSTI_DEVICE_ID nadId = Create_GDeviceID(Id);

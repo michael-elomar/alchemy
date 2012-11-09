@@ -1,0 +1,38 @@
+diff --git a/Sources/HWMngt/Bluetooth/HWMngt_BTDongle.c b/Sources/HWMngt/Bluetooth/HWMngt_BTDongle.c
+index 4230ca2..f73c70d 100644
+--- a/Sources/HWMngt/Bluetooth/HWMngt_BTDongle.c
++++ b/Sources/HWMngt/Bluetooth/HWMngt_BTDongle.c
+@@ -15,7 +15,6 @@
+ // Common Header Files.
+ //////////////////////////////////////////////////////////////////////////////
+ 
+-#include "config.h"
+ #include "parrotOS.h"
+ #include "parrotos-utils.h"
+ #include "Uart.h"
+diff --git a/Sources/HWMngt/Bluetooth/HWMngt_BTInfineon.c b/Sources/HWMngt/Bluetooth/HWMngt_BTInfineon.c
+index 818f273..870d93f 100644
+--- a/Sources/HWMngt/Bluetooth/HWMngt_BTInfineon.c
++++ b/Sources/HWMngt/Bluetooth/HWMngt_BTInfineon.c
+@@ -15,7 +15,7 @@
+ // Common Header Files.
+ //////////////////////////////////////////////////////////////////////////////
+ 
+-#include "config.h"
++#include "parrotOS.h"
+ #include "Uart.h"
+ #include "SYST_HWMngt.h"
+ #include "Bt_HCI_Specific.h"
+diff --git a/Sources/HWMngt/Bluetooth/HWMngt_BTMarvell.c b/Sources/HWMngt/Bluetooth/HWMngt_BTMarvell.c
+index 0e8a484..eb146b1 100644
+--- a/Sources/HWMngt/Bluetooth/HWMngt_BTMarvell.c
++++ b/Sources/HWMngt/Bluetooth/HWMngt_BTMarvell.c
+@@ -15,7 +15,7 @@
+ // Common Header Files.
+ //////////////////////////////////////////////////////////////////////////////
+ 
+-#include "config.h"
++#include "parrotOS.h"
+ #include "Uart.h"
+ #include "SYST_HWMngt.h"
+ #include "Bt_HCI_Specific.h"

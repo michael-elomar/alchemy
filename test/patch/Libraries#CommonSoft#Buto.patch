@@ -1,0 +1,56 @@
+diff --git a/include/buto/Errors.h b/include/buto/Errors.h
+index 2729869..53c71c2 100644
+--- a/include/buto/Errors.h
++++ b/include/buto/Errors.h
+@@ -59,11 +59,12 @@ enum {
+     DEAD_OBJECT         = -EPIPE,
+     FAILED_TRANSACTION  = 0x80000002,
+     JPARKS_BROKE_IT     = -EPIPE,
+-    BAD_INDEX           = -E2BIG,
++    /*BAD_INDEX           = -E2BIG,*/
+     NOT_ENOUGH_DATA     = 0x80000003,
+     WOULD_BLOCK         = 0x80000004,
+     TIMED_OUT           = 0x80000005,
+     UNKNOWN_TRANSACTION = 0x80000006,
++    BAD_INDEX           = 0x80000007, /*-E2BIG YMM*/
+ };
+ 
+ // Restore define; enumeration is in "buto" namespace, so the value defined
+diff --git a/src/stubs.c b/src/stubs.c
+index 01771dc..db03827 100644
+--- a/src/stubs.c
++++ b/src/stubs.c
+@@ -3,14 +3,32 @@
+ #include <stdint.h>
+ #include <assert.h>
+ 
++#ifdef ANDROID
++
++extern uint32_t __atomic_inc(volatile int32_t *p);
++extern uint32_t __atomic_dec(volatile int32_t *p);
++
+ uint32_t buto_atomic_inc(int32_t *p) { 
+-	return __sync_fetch_and_add(p, 1);
++	return __atomic_inc(p);
+ }
+ 
+ uint32_t buto_atomic_dec(int32_t *p) { 
++	return __atomic_dec(p);
++}
++
++#else // !ANDROID
++
++
++uint32_t buto_atomic_inc(int32_t *p) {
++	return __sync_fetch_and_add(p, 1);
++}
++
++uint32_t buto_atomic_dec(int32_t *p) {
+ 	return __sync_fetch_and_sub(p, 1);
+ }
+ 
++#endif // !ANDROID
++
+ void buto_printAssert(const char *cond, const char *tag, const char *fmt, ...)     {
+ 	va_list va;
+ 	va_start(va, fmt);

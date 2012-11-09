@@ -1,0 +1,549 @@
+diff --git a/core/include/internal/pal_init.h b/core/include/internal/pal_init.h
+index 6853bb8..768a017 100644
+--- a/core/include/internal/pal_init.h
++++ b/core/include/internal/pal_init.h
+@@ -1 +1 @@
+-int pal_init_common(void);
++int pal_init_common(void (*user_startup)(void));
+diff --git a/core/include/posix/parrotOS_sys_types.h b/core/include/posix/parrotOS_sys_types.h
+index 572f5af..737339b 100644
+--- a/core/include/posix/parrotOS_sys_types.h
++++ b/core/include/posix/parrotOS_sys_types.h
+@@ -5,6 +5,7 @@
+ extern int posix_argc;
+ extern char **posix_argv;
+ extern int sup_core_init(void);
++extern int sup_core_init2(int, char**, void (*)(void), int);
+ 
+ /* system cause a lot's of problem because;avoid to use it !!! */
+ int sup_posix_system(const char *command) ATTRIBUTE_DEPRECATED;
+diff --git a/core/src/common/common_init.c b/core/src/common/common_init.c
+index 9c1725a..77ff1e6 100644
+--- a/core/src/common/common_init.c
++++ b/core/src/common/common_init.c
+@@ -3,7 +3,7 @@
+ 
+ #include "pal_debug.h"
+ 
+-int pal_init_common(void)
++int pal_init_common(void (*user_startup)(void))
+ {
+ 	int ret = 0;
+ 
+@@ -13,7 +13,8 @@ int pal_init_common(void)
+ 	sup_thread_wtd_init();
+ 
+     /* let's user init it's thread */
+-    sup_system_startup();
++    if(user_startup)
++        (*user_startup)();
+ 
+     POS_DEBUG("posix starting app\n");
+ 	return ret;
+diff --git a/core/src/ecos/ecos_main.c b/core/src/ecos/ecos_main.c
+index 8206851..d193dc1 100644
+--- a/core/src/ecos/ecos_main.c
++++ b/core/src/ecos/ecos_main.c
+@@ -2,11 +2,15 @@
+ #include "pal_thread_internal.h"
+ #include "pal_init.h"
+ 
++#ifndef ALCHEMY_BUILD
++
+ void cyg_user_start(void)
+ {
+ 	sup_system_fs_init();
+ 
+ 	pal_priority_init();
+ 
+-	pal_init_common();
++	pal_init_common(&sup_system_startup);
+ }
++
++#endif // ALCHEMY_BUILD
+diff --git a/core/src/generic/backtrace.c b/core/src/generic/backtrace.c
+index a588c80..4fdf374 100644
+--- a/core/src/generic/backtrace.c
++++ b/core/src/generic/backtrace.c
+@@ -8,10 +8,289 @@
+ ***************************************************************************
+ */
+ 
++#define _GNU_SOURCE
+ #include <stdlib.h>
++#include <stdio.h>
++#include <string.h>
+ 
+ #include "parrotOS.h"
+ 
++/* stack frame */
++struct backtrace_frame {
++	void *pc;			/* frame pc */
++	char *bin;			/* binary file */
++	char *file;			/* source file + line number */
++	char *func;			/* function name */
++};
++
++/* backtrace stack */
++struct backtrace_stack {
++	struct backtrace_frame *frames;
++	size_t count;
++};
++
++#ifdef OS_LINUX
++
++#include <sys/wait.h>
++
++struct map_info {
++	unsigned int start;
++	unsigned int end;
++	char *name;
++	struct map_info *next;
++};
++
++/* Find the containing map info for the pc */
++static struct map_info *find_mapinfo(struct map_info *head,
++				     unsigned int address)
++{
++	struct map_info *mi = head;
++
++	while (mi) {
++		if ((address >= mi->start) && (address < mi->end))
++			return mi;
++		mi = mi->next;
++	}
++
++	return NULL;
++}
++
++/**
++ * TODO : handle 64-bit...
++ * address           perms offset  dev   inode   pathname
++ * 00400000-004e0000 r-xp 00000000 08:01 262151  /bin/bash
++ * 40000000-40013000 r-xp 00000000 03:0c 4165    /lib/ld-2.2.4.so
++ * 7f8789838000-7f8789844000 r-xp 00000000 08:01 790833  /lib/x86_64-linux-gnu/libnss_files-2.15.so
++ */
++static struct map_info *parse_maps_line(const char *line, size_t length)
++{
++	struct map_info *mi;
++	const char *name;
++
++	if (!line)
++		return NULL;
++
++	/* skip incomplete lines */
++	if (length < 50)
++		return NULL;
++
++	/* skip lines without execute permissions */
++	if (line[20] != 'x')
++		return NULL;
++
++	/* allocate mapinfo */
++	mi = calloc(1, sizeof(struct map_info));
++	if (!mi)
++		return NULL;
++
++	/* get name after spaces */
++	name = line + 49;
++	while (*name == ' ' && *name != '\0')
++		name++;
++
++	mi->start = strtoul(line, NULL, 16);
++	mi->end = strtoul(line + 9, NULL, 16);
++	mi->name = strdup(name);
++
++	return mi;
++}
++
++static int read_proc_maps(struct backtrace_stack *stack)
++{
++	struct map_info *head, *mi, *tmp;
++	size_t i;
++	char line[1024];
++	size_t length;
++	FILE *fp;
++
++	head = NULL;
++
++	/* parse /proc/self/maps */
++	fp = fopen("/proc/self/maps", "r");
++	if (!fp)
++		return -errno;
++
++	/* read lines and populate map infos list */
++	while (fgets(line, 1024, fp)) {
++		/* remove final '\n' from line */
++		length = strlen(line);
++		if (length > 0 && line[length - 1] == '\n') {
++			line[length - 1] = '\0';
++			length--;
++		}
++
++		/* parse line */
++		mi = parse_maps_line(line, length);
++		if (!mi)
++			continue;
++
++		/* add map info to list */
++		mi->next = head;
++		head = mi;
++	}
++	fclose(fp);
++
++	/* get maping */
++	for (i = 0; i < stack->count; i++) {
++		mi = find_mapinfo(head, (unsigned int)stack->frames[i].pc);
++		if (mi) {
++			/* only calculate the relative offset for
++			 * shared libraries */
++			if (strstr(mi->name, ".so")) {
++				stack->frames[i].pc = (void *)(
++					(uintptr_t)stack->frames[i].pc - mi->start);
++			}
++
++			stack->frames[i].bin = strdup(mi->name);
++		}
++	}
++
++	/* free map info list */
++	mi = head;
++	while (mi) {
++		tmp = mi->next;
++		free(mi->name);
++		free(mi);
++		mi = tmp;
++	}
++
++	return 0;
++}
++
++#define ADDR2LINE_BUFF_SIZE 256
++static int addr2line(struct backtrace_frame *frame)
++{
++	int ret;
++	__pid_t pid;
++	int pfds[2];
++	int status;
++	char *argv[7];
++	char *eol, *pos;
++	char buffer[ADDR2LINE_BUFF_SIZE];
++	size_t i, len, nblines;
++
++	/* build command argument */
++	argv[0] = strdup("/usr/bin/addr2line");
++	argv[1] = strdup("-f");
++	argv[2] = strdup("-C");
++	argv[3] = strdup("-e");
++	argv[4] = strdup(frame->bin);
++	ret = asprintf(&argv[5], "0x%08x", (unsigned int)frame->pc);
++	if (ret < 0)
++		goto error;
++
++	argv[6] = NULL;
++
++	/* create a pipe */
++	ret = pipe(pfds);
++	if (ret < 0)
++		goto error;
++
++	/* fork process */
++	pid = fork();
++	if (pid == 0) {
++		/* child process */
++
++		/* duplicate pipe's writing end into stdout */
++		dup2(pfds[1], STDOUT_FILENO);
++
++		close(pfds[1]);
++		close(pfds[0]);
++
++		/* start execution */
++		execv(argv[0], argv);
++		_exit(127);
++	}
++	/* parent process */
++
++	/* close write pipe*/
++	close(pfds[1]);
++
++	/* check fork succeed */
++	if (pid < 0) {
++		close(pfds[0]);
++		goto error;
++	}
++
++	len = 0;
++	nblines = 0;
++	while (1) {
++
++		/* read from pipe in blocking mode */
++		do {
++			ret = read(pfds[0], &buffer[len],
++				   sizeof(buffer) - len - 1);
++		} while (ret < 0 && errno == EINTR);
++
++		/* stop reading on error or end of file */
++		if (ret == 0 || ret < 0)
++			break;
++
++		len += ret;
++		buffer[len] = '\0';
++
++		pos = buffer;
++		while (1) {
++			/* find end of lines */
++			eol = strchr(pos, '\n');
++			if (!eol)
++				break;
++
++			*eol = '\0';
++
++			/* addr2line generates 2 lines per address
++			 * function name
++			 * file name */
++
++			if (nblines % 2 == 0) {
++				if (strcmp(pos, "??") == 0) {
++					asprintf(&frame->func, "0x%08x",
++					(unsigned int)frame->pc);
++				} else {
++					frame->func = strdup(pos);
++				}
++			} else {
++				if (strcmp(pos, "??:0") != 0)
++					frame->file = strdup(pos);
++			}
++
++			nblines++;
++			*eol = '\n';
++			pos = eol + 1;
++		}
++
++		len -=  pos - buffer;
++		if (len > 0)
++			memmove(buffer, pos, len - (pos - buffer));
++	}
++
++	/* close read pipe */
++	close(pfds[0]);
++
++	/* wait end of pid */
++	waitpid(pid, &status, 0);
++	ret = frame->func ? 0 : -ENOENT;
++
++error:
++	/* free args*/
++	for (i = 0; i < sizeof(argv) / sizeof(argv[0]); i++)
++		free(argv[i]);
++	return ret;
++}
++
++#else
++
++static int read_proc_maps(struct backtrace_stack *stack)
++{
++	return 0;
++}
++
++static int addr2line(struct backtrace_frame *frame)
++{
++	return 0;
++}
++
++#endif // OS_LINUX
+ 
+ #define PAL_CALLSTACK_MAXDEPTH 20
+ 
+@@ -96,13 +375,56 @@ int pal_backtrace(void **buffer, int size)
+ 
+ void pal_backtrace_display(int max)
+ {
++	struct backtrace_stack stack;
+ 	int count = pal_backtrace(backtrace_buffer, max);
+-	int i;
++	size_t i;
++
++	stack.count = count - PAL_CALLSTACK_SKIP;
++	stack.frames = calloc(stack.count, sizeof(struct backtrace_frame));
++	if (!stack.frames) {
++		return;
++	}
++
++	for (i = 0; i < stack.count; i++)
++		stack.frames[i].pc = backtrace_buffer[PAL_CALLSTACK_SKIP + i];
++
++	/* read proc maps and filled up binary file for each frames */
++	read_proc_maps(&stack);
++
++#if defined(__arm__)
++	/* on arm (cross platform) target do not resolve address function name
++	 * addr2line is not in target and binary is generally stripped !*/
++#else
++	/* try to resolve address function name */
++	for (i = 0; i < stack.count; i++)
++		addr2line(&stack.frames[i]);
++#endif
+ 
+ 	/* + 1 for skipping this function */
+-	for (i = PAL_CALLSTACK_SKIP + 1; i < count; i++) {
+-		PLOGC(PAL_ASSERT, "\t%p\n", backtrace_buffer[i]);
++	for (i = 1; i < stack.count; i++) {
++		char *bin_name = NULL;
++
++		/* binary name without path */
++		if (stack.frames[i].bin) {
++			bin_name = strrchr(stack.frames[i].bin, '/');
++			if (bin_name)
++				bin_name++;
++		}
++
++		PLOGC(PAL_ASSERT, "  #%02d  pc 0x%08x %s %s %s",
++			  i-1, (unsigned int)stack.frames[i].pc,
++			  bin_name ? bin_name : "",
++			  stack.frames[i].func ? stack.frames[i].func : "",
++			  stack.frames[i].file ? stack.frames[i].file : "");
++	}
++
++	/* free backtrace */
++	for (i = 0; i < stack.count; i++) {
++		free(stack.frames[i].func);
++		free(stack.frames[i].file);
++		free(stack.frames[i].bin);
+ 	}
++	free(stack.frames);
+ }
+ 
+ void pal_assert(const char *__assertion, const char *__file,
+@@ -112,8 +434,8 @@ void pal_assert(const char *__assertion, const char *__file,
+ 	sup_log_level(SUP_CRITICAL);
+ 	sup_log_flags(SUP_FLAGS_SYNC_DIAG|SUP_FLAGS_FLUSH|SUP_FLAGS_NO_OVERFLOW|
+ 			SUP_FLAGS_TID);
+-	pal_backtrace_display(100);
+ 	PLOGC(PAL_ASSERT, "%s:%d: %s: Assertion `%s' failed.\n", __file, __line, __function, __assertion);
++	pal_backtrace_display(100);
+ 	sup_log_flush();
+ #ifdef OS_QNX
+ 	sleep(1);
+diff --git a/core/src/posix/posix_main.c b/core/src/posix/posix_main.c
+index bb2dc91..48235f6 100644
+--- a/core/src/posix/posix_main.c
++++ b/core/src/posix/posix_main.c
+@@ -26,7 +26,7 @@
+ 
+ int posix_argc;
+ char **posix_argv;
+-#ifdef PAL_POSIX_CUSTOM_INIT
++#if defined(PAL_POSIX_CUSTOM_INIT) || defined(ALCHEMY_BUILD)
+ static SUP_THREAD_HANDLE thr_handle;
+ static SUP_THREAD thr;
+ #endif
+@@ -48,7 +48,7 @@ SUP_THREAD_HANDLE sup_thread_current(void)
+ }
+ #endif
+ 
+-static int sup_init_internal(void)
++static int sup_init_internal(void (*user_startup)(void))
+ {
+     static int init;
+     int ret;
+@@ -85,7 +85,7 @@ static int sup_init_internal(void)
+ 	p6intram_remap();
+     POS_DEBUG("posix init done\n");
+ 
+-	ret = pal_init_common();
++	ret = pal_init_common(user_startup);
+ 	if (ret)
+ 		goto exit;
+ 
+@@ -98,26 +98,35 @@ exit:
+     return ret;
+ }
+ 
+-#ifdef PAL_POSIX_CUSTOM_INIT
++#if defined(PAL_POSIX_CUSTOM_INIT) || defined(ALCHEMY_BUILD)
+ static void timer_thread_cb(void *data)
+ {
+     sup_timer_thread(NULL);
+ }
+ 
+-int sup_core_init(void)
++int sup_core_init2(int argc, char *argv[], void (*user_startup)(void), int mode)
+ {
+     int ret;
++    posix_argc = argc;
++    posix_argv = argv;
+ 
+-    ret = sup_init_internal();
++    ret = sup_init_internal(user_startup);
+     if (ret)
+         goto exit;
+ 
+ #ifndef POS_NO_THREAD
+-    ret = sup_thread_create(&thr_handle, &thr, 0, timer_thread_cb, NULL, 0, "PAL_TIMER");
+-    if (ret)
+-        goto exit;
+-
+-    ret = sup_thread_resume(thr_handle);
++    if (mode == 0) {
++        /* create a dedicated thread for timers */
++        ret = sup_thread_create(&thr_handle, &thr, 0, timer_thread_cb, NULL, 0, "PAL_TIMER");
++        if (ret)
++            goto exit;
++
++        ret = sup_thread_resume(thr_handle);
++    } else {
++        /* use the main thread for timer */
++        sup_timer_thread(NULL);
++        POS_ASSERT(0);
++    }
+ #else
+ 	ret = 0;
+ #endif
+@@ -125,13 +134,19 @@ exit:
+     return ret;
+ }
+ #else
++
++int sup_core_init(void)
++{
++	return sup_core_init2(0, NULL, NULL, 0);
++}
++
+ int main(int argc, char *argv[])
+ {
+     int ret;
+     posix_argc = argc;
+     posix_argv = argv;
+ 
+-    ret = sup_init_internal();
++    ret = sup_init_internal(&sup_system_startup);
+     if (ret == 0)
+         sup_timer_thread(NULL);
+ 
+diff --git a/core/src/posix/posix_system.c b/core/src/posix/posix_system.c
+index 50235cb..cb1d1b1 100644
+--- a/core/src/posix/posix_system.c
++++ b/core/src/posix/posix_system.c
+@@ -35,7 +35,7 @@
+ #include <paths.h>
+ #include <sys/wait.h>
+ 
+-#ifndef PAL_POSIX_CUSTOM_INIT
++#if !defined(PAL_POSIX_CUSTOM_INIT) || defined(ALCHEMY_BUILD)
+ 
+ #ifdef POS_ANDROID
+ extern int  __fork(void);
+diff --git a/core/src/posix/posix_thread.c b/core/src/posix/posix_thread.c
+index 9c08ee5..280a01c 100644
+--- a/core/src/posix/posix_thread.c
++++ b/core/src/posix/posix_thread.c
+@@ -43,7 +43,7 @@
+ #endif
+ 
+ 
+-#if defined(POS_ANDROID) && defined(PAL_POSIX_CUSTOM_INIT)
++#if defined(POS_ANDROID) && defined(PAL_POSIX_CUSTOM_INIT) && !defined(ALCHEMY_BUILD)
+ /* no thread cancel because it need a signal (global resource) */
+ #else
+ #define POS_HAVE_THREAD_CANCEL 1

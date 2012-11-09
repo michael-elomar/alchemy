@@ -1,0 +1,29 @@
+diff --git a/BoardConfig.mk b/BoardConfig.mk
+index 41e42dc..1162306 100644
+--- a/BoardConfig.mk
++++ b/BoardConfig.mk
+@@ -76,3 +76,9 @@ ALSA_DEFAULT_SAMPLE_RATE := 48000
+ # This define enables the compilation of OpenCore's command line TestApps
+ #BUILD_PV_TEST_APPS :=1
+ 
++# For alchemy build
++BUILD_USE_ALCHEMY := true
++# Not really clean... but appart getting everything under raptor root dir I don't see...
++ALCHEMY_WORKSPACE_DIR := $(realpath $(TOPDIR)..)
++ALCHEMY_DIR := $(ALCHEMY_WORKSPACE_DIR)/Alchemy
++ALCHEMY_CONFIG_DIR := $(ALCHEMY_WORKSPACE_DIR)/Alchemy-config/fc6100-hiphop
+diff --git a/fc6100android.mk b/fc6100android.mk
+index 37b979d..d88567b 100644
+--- a/fc6100android.mk
++++ b/fc6100android.mk
+@@ -183,6 +183,10 @@ PRODUCT_COPY_FILES += device/parrot/common/config/apns.xml:system/etc/apns-conf.
+ PRODUCT_PACKAGES += \
+         libomap_mm_library_jni
+ 
++# Parrot library build outside android
++PRODUCT_PACKAGES += \
++	alchemy_build
++
+ # These are the hardware-specific features
+ PRODUCT_COPY_FILES += \
+     device/parrot/common/config/apns.xml:system/etc/apns-conf.xml \
