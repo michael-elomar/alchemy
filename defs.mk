@@ -362,13 +362,18 @@ is-module-registered = $(strip \
 ###############################################################################
 ## Check if a module will be built.
 ## $1 : module to check.
+## Prebuild modules are considered as in the config (even if they are not
+## actually in it).
+## If no configuration directory present, always return true.
 ###############################################################################
 is-module-in-build-config = $(strip \
-	$(eval __var := CONFIG_ALCHEMY_BUILD_$(call get-define,$1)) \
-	$(if $(call streq,$(CONFIG_DIR_AVAILABLE),0),$(true), \
-		$(if $(call streq,$(origin $(__var)),undefined), \
-			$(false), \
-			$(if $($(__var)),$(true)) \
+	$(if $(call streq,$(__modules.$1.MODULE_CLASS),PREBUILT),$(true), \
+		$(eval __var := CONFIG_ALCHEMY_BUILD_$(call get-define,$1)) \
+		$(if $(call streq,$(CONFIG_DIR_AVAILABLE),0),$(true), \
+			$(if $(call streq,$(origin $(__var)),undefined), \
+				$(false), \
+				$(if $($(__var)),$(true)) \
+			) \
 		) \
 	))
 
