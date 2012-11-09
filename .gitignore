@@ -1,0 +1,13 @@
+
+# eclipse files
+.cproject
+.pyproject
+.project
+
+# backup files
+*~
+*.swp
+
+# diff files from config
+test/config/*/*.diff
+
