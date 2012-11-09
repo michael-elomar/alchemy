@@ -105,7 +105,7 @@ export TARGET_OUT="${TOP_DIR}/Alchemy-out/${TARGET_PRODUCT}-${TARGET_PRODUCT_VAR
 export TARGET_OUT_BUILD="${TARGET_OUT}/build"
 export TARGET_OUT_STAGING="${TARGET_OUT}/staging"
 export TARGET_OUT_FINAL="${TARGET_OUT}/final"
-export TARGET_CONFIG_DIR="${TOP_DIR}/Alchemy-config/${TARGET_PRODUCT}-${TARGET_PRODUCT_VARIANT}"
+export TARGET_CONFIG_DIR="${TOP_DIR}/Alchemy/test/config/${TARGET_PRODUCT}-${TARGET_PRODUCT_VARIANT}"
 export TARGET_SCAN_PRUNE_DIRS="Alchemy-out"
 
 export TARGET_STRIP="${RAPTOR_DIR}/out/host/linux-x86/bin/soslim --strip --shady --quiet"
