@@ -25,12 +25,13 @@ fi
 
 # Search new files
 echo "Searching new files"
-filelist=" $(find -name atom.mk \
-  -o -name blues-config.h \
-  -o -name blues-stub.c \
-  -o -name ConfigHSTIGenerator.in \
-  -o -name svox-stub.c \
-  -o -name pal_main.c) \
+filelist=" $(find -path ./Alchemy -prune \
+  -o -name atom.mk -print \
+  -o -name blues-config.h -print \
+  -o -name blues-stub.c -print \
+  -o -name ConfigHSTIGenerator.in -print \
+  -o -name svox-stub.c -print \
+  -o -name pal_main.c -print) \
   Alchemy-build-*.sh \
 "
 
