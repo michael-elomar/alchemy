@@ -1,5 +1,5 @@
 diff --git a/BoardConfig.mk b/BoardConfig.mk
-index 41e42dc..1162306 100644
+index 41e42dc..01edce0 100644
 --- a/BoardConfig.mk
 +++ b/BoardConfig.mk
 @@ -76,3 +76,9 @@ ALSA_DEFAULT_SAMPLE_RATE := 48000
@@ -11,7 +11,7 @@ index 41e42dc..1162306 100644
 +# Not really clean... but appart getting everything under raptor root dir I don't see...
 +ALCHEMY_WORKSPACE_DIR := $(realpath $(TOPDIR)..)
 +ALCHEMY_DIR := $(ALCHEMY_WORKSPACE_DIR)/Alchemy
-+ALCHEMY_CONFIG_DIR := $(ALCHEMY_WORKSPACE_DIR)/Alchemy-config/fc6100-hiphop
++ALCHEMY_CONFIG_DIR := $(ALCHEMY_WORKSPACE_DIR)/Alchemy/test/config/fc6100-hiphop
 diff --git a/fc6100android.mk b/fc6100android.mk
 index 37b979d..d88567b 100644
 --- a/fc6100android.mk
