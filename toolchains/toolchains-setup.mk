@@ -84,3 +84,7 @@ TARGET_LD ?= $(TARGET_CROSS)ld
 TARGET_NM ?= $(TARGET_CROSS)nm
 TARGET_STRIP ?= $(TARGET_CROSS)strip
 
+# No libc or gdbserver by default
+TOOLCHAIN_LIBC ?=
+TOOLCHAIN_GDBSERVER ?=
+

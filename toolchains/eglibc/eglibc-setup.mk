@@ -14,3 +14,16 @@ endif
 TARGET_GLOBAL_LDLIBS += -lpthread -lrt
 TARGET_GLOBAL_LDLIBS_SHARED += -lpthread -lrt
 
+# Gcc sysroot
+gcc-sysroot := $(shell $(TARGET_CROSS)gcc -print-sysroot)
+
+# Get libc/gdbserver to copy
+ifneq ("$(gcc-sysroot)","")
+  ifneq ("$(wildcard $(gcc-sysroot))","")
+    TOOLCHAIN_LIBC := $(gcc-sysroot)
+    ifneq ("$(wildcard $(gcc-sysroot)/usr/bin/gdbserver)","")
+      TOOLCHAIN_GDBSERVER := $(gcc-sysroot)/usr/bin/gdbserver
+    endif
+  endif
+endif
+

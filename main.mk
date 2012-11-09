@@ -98,7 +98,7 @@ endif
 __clean-targets := clean dirclean clobber
 __query-targets := scan help help-modules dump dump-depends build-graph
 __config-targets := config xconfig menuconfig nconfig
-__fs-targets := final final-nostrip
+__fs-targets := final final-nostrip plf
 __skip_targets := $(__clean-targets) $(__query-targets) $(__config-targets) $(__fs-targets)
 ifneq ("$(call is-targets-in-make-goals,$(__skip_targets))","")
   SKIP_DEPS_AND_CHECKS := 1
@@ -348,25 +348,6 @@ clobber:
 	@rm -rf $(TARGET_OUT_STAGING)
 	@rm -rf $(TARGET_OUT_FINAL)
 
-# Generate final tree
-.PHONY: final
-final:
-	@echo "Generating final tree..."
-	@rm -rf $(TARGET_OUT_FINAL)
-	@$(BUILD_SYSTEM)/scripts/makefinal.py \
-		--strip="$(TARGET_STRIP)" \
-		$(TARGET_OUT_STAGING) $(TARGET_OUT_FINAL)
-	@echo "Done generating final tree"
-
-# Generate final tree without stripping executables
-.PHONY: final-nostrip
-final-nostrip:
-	@echo "Generating final tree (no stripping)..."
-	@rm -rf $(TARGET_OUT_FINAL)
-	@$(BUILD_SYSTEM)/scripts/makefinal.py \
-		$(TARGET_OUT_STAGING) $(TARGET_OUT_FINAL)
-	@echo "Done generating final tree (no stripping)"
-
 # Dump the module database for debuging the build system
 .PHONY: dump
 dump:
@@ -383,6 +364,9 @@ check:
 
 # Graph of build dependencies
 include $(BUILD_SYSTEM)/build-graph.mk
+
+# Final tree generation
+include $(BUILD_SYSTEM)/final.mk
 
 # Plf generation
 include $(BUILD_SYSTEM)/plf.mk

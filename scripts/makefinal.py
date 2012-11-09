@@ -10,19 +10,25 @@
 import sys, os, logging
 import subprocess
 import optparse
+import re
 
 #===============================================================================
 # Global variables.
 #===============================================================================
 
 # Directories to exclude
-EXCLUDE_DIRS = ["linux-headers", "include", "man", "pkgconfig", "doc", "aclocal", "info", "locale"]
+EXCLUDE_DIRS = [
+	".git", ".repo",
+	"linux-headers", "include", "man",
+	"pkgconfig", "doc", "aclocal", "info", "locale"]
 
 # Extension to exclude
 EXCLUDE_FILTERS = [".a", ".la", ".py", ".pyc", ".pyo"]
 
 # Files to exclude
-EXCLUDE_FILES = ["Image", "zImage", "bzImage", "uImage", "kernel.plf"]
+EXCLUDE_FILES = [
+	".gitignore",
+	"Image", "zImage", "bzImage", "uImage", "kernel.plf"]
 
 #==============================================================================
 # Execute a command and get its output
@@ -66,6 +72,7 @@ def canStrip(filePath):
 	return result
 
 #===============================================================================
+# Copy a file using a makefile (do do strip in parallel).
 #===============================================================================
 def doCopyByMakefile(dstFileName, srcFileName, doStrip, options):
 	# if source file contains ':' or '=' it doesn't work great
@@ -102,8 +109,9 @@ def doCopyByMakefile(dstFileName, srcFileName, doStrip, options):
 	options.makefile.write("\n")
 
 #===============================================================================
+# Copy a file by directly making a copy.
 #===============================================================================
-def doCopy(dstFileName, srcFileName, doStrip, options):
+def doCopyDirect(dstFileName, srcFileName, doStrip, options):
 	# copy and strip executables
 	# make sure we restore permission bits after strip operation
 	if doStrip:
@@ -111,6 +119,53 @@ def doCopy(dstFileName, srcFileName, doStrip, options):
 		os.system("chmod $(stat --printf '%%a' %s) %s" % (srcFileName, dstFileName))
 	else:
 		os.system("cp -af %s %s" % (srcFileName, dstFileName))
+
+#===============================================================================
+# Copy a file.
+#===============================================================================
+def doCopy(dstFileName, srcFileName, options):
+	relPath = os.path.relpath(dstFileName, options.finalDir)
+	if os.path.islink(srcFileName):
+		logging.info("Link : %s", relPath)
+	else:
+		logging.info("File : %s", relPath)
+
+	# do we need to strip ?
+	# FIXME: stripping kernel modules under android causes issues
+	doStrip = False
+	if options.strip != None \
+		and not srcFileName.endswith(".ko") \
+		and isExec(srcFileName) \
+		and canStrip(srcFileName) \
+		and not os.path.islink(srcFileName):
+		doStrip = True
+
+	# check if we need to do something
+	doAction = False
+	if not os.path.exists(dstFileName):
+		doAction = True
+	elif os.path.islink(srcFileName):
+		doAction = True
+	else:
+		srcStat = os.stat(srcFileName)
+		dstStat = os.stat(dstFileName)
+		if srcStat.st_mtime > dstStat.st_mtime:
+			doAction = True
+
+	# nothing to do if destination is already OK
+	if doAction == False:
+		return
+
+	# make sure destination directory exists
+	dstDirName = os.path.split(dstFileName)[0]
+	if not os.path.exists(dstDirName):
+		os.makedirs(dstDirName, 0755)
+
+	# do the copy by wanted method
+	if options.makefile != None:
+		doCopyByMakefile(dstFileName, srcFileName, doStrip, options)
+	else:
+		doCopyDirect(dstFileName, srcFileName, doStrip, options)
 
 #===============================================================================
 # Makefile banner
@@ -134,10 +189,71 @@ def writeMakefileHeader(options):
 	options.makefile.write("all: do-all\n\n")
 
 #===============================================================================
+# Makefile footer.
 #===============================================================================
 def writeMakefileFooter(options):
 	options.makefile.write(".PHONY: do-all\n")
 	options.makefile.write("do-all: $(ALL)\n\n")
+
+#===============================================================================
+# Process a directory and copy dirs/files to final directory.
+#===============================================================================
+def processDir(rootDir, options):
+	for (dirPath, dirNames, fileNames) in os.walk(rootDir):
+		# exclude some directories
+		for dirName in EXCLUDE_DIRS:
+			if dirName in dirNames:
+				logging.debug("Exclude directory : %s",
+					os.path.relpath(os.path.join(dirPath, dirName), rootDir))
+				dirNames.remove(dirName)
+
+		# create directories (usefull for empty directories)
+		for dirName in dirNames:
+			srcDirName = os.path.join(dirPath, dirName)
+			relPath = os.path.relpath(srcDirName, rootDir)
+			dstDirName = os.path.join(options.finalDir, relPath)
+			logging.info("Directory : %s", relPath)
+			if not os.path.exists(dstDirName):
+				os.makedirs(dstDirName, 0755)
+
+		# copy files
+		for fileName in fileNames:
+			if fileName in EXCLUDE_FILES:
+				logging.debug("Exclude file : %s",
+					os.path.relpath(os.path.join(dirPath, fileName), rootDir))
+				continue
+			# skip some extensions
+			srcFileName = os.path.join(dirPath, fileName)
+			relPath = os.path.relpath(srcFileName, rootDir)
+			if os.path.splitext(srcFileName)[1] in EXCLUDE_FILTERS:
+				logging.debug("Exclude file : %s", relPath) 
+				continue
+			# go
+			dstFileName = os.path.join(options.finalDir, relPath)
+			doCopy(dstFileName, srcFileName, options)
+
+#===============================================================================
+# Process toolchain libc directory.
+#===============================================================================
+def processToolchainLibc(libcDir, options):
+
+	# copy name with .so from 'lib' directory
+	libDir = os.path.join(libcDir, "lib")
+	for fileName in os.listdir(libDir):
+		if re.match(r".*\.so.*", fileName):
+			srcFileName = os.path.join(libDir, fileName)
+			relPath = os.path.relpath(srcFileName, libcDir)
+			dstFileName = os.path.join(options.finalDir, relPath)
+			doCopy(dstFileName, srcFileName, options)
+
+	# copy 'libstdc++' from 'usr/lib' directory
+	usrLibDir = os.path.join(libcDir, "usr/lib")
+	for fileName in os.listdir(usrLibDir):
+		if re.match(r"libstdc\+\+.*\.so.*", fileName):
+			srcFileName = os.path.join(usrLibDir, fileName)
+			relPath = os.path.relpath(srcFileName, libcDir)
+			dstFileName = os.path.join(options.finalDir, relPath)
+			doCopy(dstFileName, srcFileName, options)
 
 #===============================================================================
 # Main function.
@@ -165,74 +281,21 @@ def main():
 	if options.makefile != None:
 		writeMakefileHeader(options)
 
-	# browse staging directory
-	for (dirPath, dirNames, fileNames) in os.walk(options.stagingDir):
-		# exclude some directories
-		for dirName in EXCLUDE_DIRS:
-			if dirName in dirNames:
-				logging.debug("Exclude directory : %s",
-					os.path.relpath(os.path.join(dirPath, dirName), options.stagingDir))
-				dirNames.remove(dirName)
+	# process staging directory
+	processDir(options.stagingDir, options)
 
-		# create directories (usefull for empty directories)
-		for dirName in dirNames:
-			srcDirName = os.path.join(dirPath, dirName)
-			relPath = os.path.relpath(srcDirName, options.stagingDir)
-			dstDirName = os.path.join(options.finalDir, relPath)
-			logging.info("Directory : %s", relPath)
-			if not os.path.exists(dstDirName):
-				os.makedirs(dstDirName, 0755)
+	# process skeleton directory
+	if options.skelDir != None:
+		processDir(options.skelDir, options)
 
-		# copy files
-		for fileName in fileNames:
-			if fileName in EXCLUDE_FILES:
-				logging.debug("Exclude file : %s",
-					os.path.relpath(os.path.join(dirPath, fileName), options.stagingDir))
-				continue
-			# skip some extensions
-			srcFileName = os.path.join(dirPath, fileName)
-			relPath = os.path.relpath(srcFileName, options.stagingDir)
-			if os.path.splitext(srcFileName)[1] in EXCLUDE_FILTERS:
-				logging.debug("Exclude file : %s", relPath) 
-				continue
-			logging.info("File : %s", relPath)
-			# destination
-			dstFileName = os.path.join(options.finalDir, relPath)
-			dstDirName = os.path.split(dstFileName)[0]
-			if not os.path.exists(dstDirName):
-				os.makedirs(dstDirName, 0755)
+	# process libc  directory
+	if options.toolchainLibcDir != None:
+		processToolchainLibc(options.toolchainLibcDir, options)
 
-			# do we need to strip ?
-			# FIXME: stripping kernel modules under android causes issues
-			doStrip = False
-			if options.strip != None \
-				and not srcFileName.endswith(".ko") \
-				and isExec(srcFileName) \
-				and canStrip(srcFileName) \
-				and not os.path.islink(srcFileName):
-				doStrip = True
-
-			# check if we need to do something
-			doAction = False
-			if not os.path.exists(dstFileName):
-				doAction = True
-			elif os.path.islink(srcFileName):
-				doAction = True
-			else:
-				srcStat = os.stat(srcFileName)
-				dstStat = os.stat(dstFileName)
-				if srcStat.st_mtime > dstStat.st_mtime:
-					doAction = True
-
-			# nothing to do if destination is already OK
-			if doAction == False:
-				continue
-
-			# go
-			if options.makefile != None:
-				doCopyByMakefile(dstFileName, srcFileName, doStrip, options)
-			else:
-				doCopy(dstFileName, srcFileName, doStrip, options)
+	# process gdbserver binary
+	if options.toolchainGdbserverName:
+		doCopy(os.path.join(options.finalDir, "usr/bin/gdbserver"),
+			options.toolchainGdbserverName, options)
 
 	if options.makefile != None:
 		writeMakefileFooter(options)
@@ -247,6 +310,18 @@ def parseArgs():
 		dest="strip",
 		default=None,
 		help="strip program to use to remove symbols")
+	parser.add_option("--skel",
+		dest="skelDir",
+		default=None,
+		help="path to skeleton tree to merge in final tree")
+	parser.add_option("--toolchain-libc",
+		dest="toolchainLibcDir",
+		default=None,
+		help="path to toolchain libc directory to merge in final tree")
+	parser.add_option("--toolchain-gdbserver",
+		dest="toolchainGdbserverName",
+		default=None,
+		help="path to toolchain gdbserver binary to merge in final tree")
 	parser.add_option("-q",
 		dest="quiet",
 		action="store_true",
