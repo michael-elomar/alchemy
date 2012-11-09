@@ -13,6 +13,7 @@ PLFTOOL ?= plftool
 MK_KERNEL_PLF ?= mk_kernel_plf
 PRODUCT_PLF := $(TARGET_OUT)/$(TARGET_PRODUCT).plf
 
+.PHONY: plf
 plf:
 	@echo "Plf image: start"
 	$(Q) rm -f $(PRODUCT_PLF)
@@ -26,4 +27,12 @@ plf:
 		find . ! -name '.' -printf '%P;uid=0;gid=0\n' | \
 			plfbatch '-a u_unixfile="&"' $(PRODUCT_PLF)
 	@echo "Plf image: done -> $(PRODUCT_PLF)"
+
+.PHONY: clean-plf
+clean-plf:
+	$(Q)rm -f $(TARGET_OUT)/kernel.plf
+	$(Q)rm -f $(PRODUCT_PLF)
+
+clean: clean-plf
+clobber: clean-plf
 
