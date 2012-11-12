@@ -80,6 +80,24 @@ __default-clean = \
 __apply-patches = \
 	$(BUILD_SYSTEM)/scripts/apply-patches.sh $(PRIVATE_SRC_DIR) $(PRIVATE_PATH) $(PRIVATE_PATCHES)
 
+# Patch libtool to make it work properly for cross-compilation.
+# Modify the libdir in .la files installed in staging dir so that they reference the staging dir
+# and not the final dir. Do this only if dest dir is not empty (in native build staging dir
+# is the final dir specified in configure script).
+# Use -rpath-link instead of -rpath to avoid hardcoding host path in binaries.
+__libtool_patch = \
+	$(Q)for f in `find $(PRIVATE_OBJ_DIR) -name libtool -o -name ltmain.sh`; do \
+		echo "Patching $$f"; \
+		$(if $(AUTOTOOLS_INSTALL_DESTDIR), \
+			sed -i -e "s|^libdir='\$$install_libdir'|libdir='\$${install_libdir:\+$(TARGET_OUT_STAGING)\$$install_libdir}'|1" $$f; \
+		) \
+		sed -i -e "s|{wl}-rpath|{wl}-rpath-link|1" $$f; \
+		sed -i -e "s|{wl}--rpath|{wl}-rpath-link|1" $$f; \
+	done
+
+#		sed -i -e "s|runpath_var=LD_RUN_PATH|runpath_var=|1" $$f; \
+#		sed -i -e "s|need_relink=yes|need_relink=no|1" $$f; \
+
 ###############################################################################
 ###############################################################################
 
@@ -136,6 +154,7 @@ $(configured_file): $(unpacked_file)
 	@mkdir -p $(PRIVATE_OBJ_DIR)
 	+$(Q)$(call $(PRIVATE_CMD_CONFIGURE))
 	+$(Q)$(if $(PRIVATE_CMD_POST_CONFIGURE), $(call $(PRIVATE_CMD_POST_CONFIGURE)))
+	$(__libtool_patch)
 	@mkdir -p $(dir $@)
 	@touch $@
 
