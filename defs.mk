@@ -836,8 +836,6 @@ $(call check-pwd-is-top-dir)
 $(Q)$(TARGET_CXX) \
 	$(TARGET_GLOBAL_LDFLAGS) \
 	-Wl,-Map -Wl,$(basename $@).map \
-	-Wl,-rpath-link=$(TARGET_OUT_STAGING)/lib \
-	-Wl,-rpath-link=$(TARGET_OUT_STAGING)/usr/lib \
 	-Wl,--gc-sections \
 	-Wl,--as-needed \
 	$(PRIVATE_LDFLAGS) \

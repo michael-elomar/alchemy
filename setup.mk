@@ -112,7 +112,6 @@ endif
 
 # Make sure that staging dir are found first in case we want to override something
 TARGET_GLOBAL_C_INCLUDES := \
-	$(TARGET_OUT_STAGING)/include \
 	$(TARGET_OUT_STAGING)/usr/include \
 	$(TARGET_GLOBAL_C_INCLUDES)
 
@@ -127,6 +126,11 @@ TARGET_GLOBAL_LDFLAGS += -L$(TARGET_OUT_STAGING)/lib
 TARGET_GLOBAL_LDFLAGS += -L$(TARGET_OUT_STAGING)/usr/lib
 TARGET_GLOBAL_LDFLAGS_SHARED += -L$(TARGET_OUT_STAGING)/lib
 TARGET_GLOBAL_LDFLAGS_SHARED += -L$(TARGET_OUT_STAGING)/usr/lib
+
+# Make sure the linker will not hardcode the path to the lib in the binary
+# because they are not in the standard places
+TARGET_GLOBAL_LDFLAGS += -Wl,-rpath-link=$(TARGET_OUT_STAGING)/lib
+TARGET_GLOBAL_LDFLAGS += -Wl,-rpath-link=$(TARGET_OUT_STAGING)/usr/lib
 
 # Make sure the architecture specific flags is defined
 # For arm/thumb it is done above
