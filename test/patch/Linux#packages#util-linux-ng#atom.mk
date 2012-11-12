@@ -68,6 +68,12 @@ LOCAL_AUTOTOOLS_CONFIGURE_ARGS := \
 	--disable-wall \
 	--without-ncurses
 
+ifeq ("$(TARGET_OS_FLAVOUR)","native")
+  LOCAL_AUTOTOOLS_CONFIGURE_ARGS += --prefix=$(TARGET_OUT_STAGING)
+else
+  LOCAL_AUTOTOOLS_CONFIGURE_ARGS += --prefix=/
+endif
+
 LOCAL_AUTOTOOLS_CMD_BUILD := ulng-cmd-build
 LOCAL_AUTOTOOLS_CMD_INSTALL := ulng-cmd-install
 LOCAL_AUTOTOOLS_CMD_CLEAN := ulng-cmd-clean
@@ -82,20 +88,21 @@ ulng-cmd-install = \
 	$(AUTOTOOLS_MAKE_ENV) $(MAKE) $(AUTOTOOLS_MAKE_ARGS) \
 		-C $(PRIVATE_SRC_DIR)/shlibs install; \
 	$(AUTOTOOLS_MAKE_ENV) $(MAKE) $(AUTOTOOLS_MAKE_ARGS) \
-		-C $(PRIVATE_SRC_DIR)/misc-utils blkid install; \
+		-C $(PRIVATE_SRC_DIR)/misc-utils \
+		sbin_PROGRAMS=blkid install-sbinPROGRAMS; \
 	install -p -m755 -d $(TARGET_OUT_STAGING)/sbin; \
-	install -p -m755 $(PRIVATE_SRC_DIR)/misc-utils/.libs/blkid $(TARGET_OUT_STAGING)/sbin/blkid-ng
+	install -p -m755 $(TARGET_OUT_STAGING)/sbin/blkid $(TARGET_OUT_STAGING)/sbin/blkid-ng
 
 ulng-cmd-clean = \
 	if [ -d $(PRIVATE_SRC_DIR) ]; then \
 		$(AUTOTOOLS_MAKE_ENV) $(MAKE) $(AUTOTOOLS_MAKE_ARGS) \
-			-C $(PRIVATE_SRC_DIR)/shlibs uninstall || true; \
+			-C $(PRIVATE_SRC_DIR)/shlibs uninstall || echo "Ignoring uninstall errors"; \
 		$(AUTOTOOLS_MAKE_ENV) $(MAKE) $(AUTOTOOLS_MAKE_ARGS) \
-			-C $(PRIVATE_SRC_DIR)/shlibs clean || true; \
+			-C $(PRIVATE_SRC_DIR)/shlibs clean || echo "Ignoring uninstall clean"; \
 		$(AUTOTOOLS_MAKE_ENV) $(MAKE) $(AUTOTOOLS_MAKE_ARGS) \
-			-C $(PRIVATE_SRC_DIR)/misc-utils uninstall || true; \
+			-C $(PRIVATE_SRC_DIR)/misc-utils uninstall || echo "Ignoring uninstall errors"; \
 		$(AUTOTOOLS_MAKE_ENV) $(MAKE) $(AUTOTOOLS_MAKE_ARGS) \
-			-C $(PRIVATE_SRC_DIR)/misc-utils clean || true; \
+			-C $(PRIVATE_SRC_DIR)/misc-utils clean || echo "Ignoring clean errors"; \
 	fi; \
 	rm -f $(TARGET_OUT_STAGING)/sbin/blkid-ng
 

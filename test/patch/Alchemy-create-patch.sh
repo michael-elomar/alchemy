@@ -31,7 +31,9 @@ filelist=" $(find -path ./Alchemy -prune \
   -o -name blues-stub.c -print \
   -o -name ConfigHSTIGenerator.in -print \
   -o -name svox-stub.c -print \
-  -o -name pal_main.c -print) \
+  -o -name pal_main.c -print \
+  -o -name tcpdump-4.1.1-configure.patch -print \
+  -o -name valgrind-3.6.1-extern.patch -print ) \
   Alchemy-build-*.sh \
 "
 
