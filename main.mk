@@ -433,13 +433,8 @@ NATIVE_WRAPPER_SCRIPT := native-wrapper.sh
 $(eval $(call copy-one-file, \
 	$(BUILD_SYSTEM)/scripts/$(NATIVE_WRAPPER_SCRIPT), \
 	$(TARGET_OUT_STAGING)/$(NATIVE_WRAPPER_SCRIPT)))
-$(eval $(call copy-one-file, \
-	$(BUILD_SYSTEM)/scripts/$(NATIVE_WRAPPER_SCRIPT), \
-	$(TARGET_OUT_FINAL)/$(NATIVE_WRAPPER_SCRIPT)))
 
 all: $(TARGET_OUT_STAGING)/$(NATIVE_WRAPPER_SCRIPT)
-final: $(TARGET_OUT_FINAL)/$(NATIVE_WRAPPER_SCRIPT)
-final-nostrip: $(TARGET_OUT_FINAL)/$(NATIVE_WRAPPER_SCRIPT)
 
 endif
 endif

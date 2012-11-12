@@ -4,7 +4,8 @@
 # Folders bin, usr/bin, lib, /usr/lib are subdirectories there
 
 # Get full path to this script (either when executed or sourced)
-SCRIPT_PATH=$(cd $(dirname ${BASH_SOURCE}) && pwd))
+SCRIPT_PATH=$(cd $(dirname ${BASH_SOURCE}) && pwd)
+SYSROOT=${SCRIPT_PATH}
 
 # Restore previous variables
 if [ "${OLD_PATH}" != "" ]; then
@@ -19,10 +20,10 @@ OLD_PATH=${PATH}
 OLD_LD_LIBRARY_PATH=${LD_LIBRARY_PATH}
 
 # Update path
-export PATH=${SCRIPT_PATH}/bin:${SCRIPT_PATH}/usr/bin:${PATH}
+export PATH=${SYSROOT}/bin:${SYSROOT}/usr/bin:${PATH}
 
 # Update library path
-export LD_LIBRARY_PATH=${SCRIPT_PATH}/lib:${SCRIPT_PATH}/usr/lib:${LD_LIBRARY_PATH}
+export LD_LIBRARY_PATH=${SYSROOT}/lib:${SYSROOT}/usr/lib:${LD_LIBRARY_PATH}
 
 # execute given command line (only if not sourced)
 if [ "${BASH_SOURCE}" = "$0" ]; then
