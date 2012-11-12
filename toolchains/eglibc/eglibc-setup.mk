@@ -7,7 +7,9 @@
 ###############################################################################
 
 ifndef TARGET_CROSS
-  TARGET_CROSS="/opt/arm-2009q1/bin/arm-none-linux-gnueabi-"
+  ifeq ("$(TARGET_ARCH)","arm")
+    TARGET_CROSS := /opt/arm-2009q1/bin/arm-none-linux-gnueabi-
+  endif
 endif
 
 # Assume everybody will wants this
