@@ -185,14 +185,10 @@ LOCAL_SRC_FILES := \
 	drivers/src/linux/mqueue.c \
 	drivers/src/linux/eth.c \
 	drivers/src/linux/sread.c \
-	drivers/src/linux/hid.c
-
-ifneq ("$(TARGET_OS_FLAVOUR)","native")
-LOCAL_SRC_FILES += \
+	drivers/src/linux/hid.c \
 	drivers/src/linux/button.c \
 	drivers/src/linux/gpio.c \
 	drivers/src/linux/pwm.c
-endif
 
 else ifeq ("$(TARGET_OS)","ecos")
 

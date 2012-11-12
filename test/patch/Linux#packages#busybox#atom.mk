@@ -63,7 +63,7 @@ $(BUSYBOX_BUILD_DIR)/$(LOCAL_MODULE_FILENAME): $(BUSYBOX_SRC_DIR)/.config
 	@echo "Checking busybox config: $(BUSYBOX_CONFIG_FILE)"
 	$(Q)yes "" | $(MAKE) $(BUSYBOX_MAKE_ARGS) -C $(BUSYBOX_SRC_DIR) silentoldconfig
 	@echo "Building busybox"
-	$(Q)$(MAKE) $(BUSYBOX_MAKE_ARGS) -C $(BUSYBOX_SRC_DIR)
+	$(Q)$(MAKE) $(BUSYBOX_MAKE_ARGS) -C $(BUSYBOX_SRC_DIR) SKIP_STRIP=y
 	@echo "Installing busybox"
 	$(Q) $(MAKE) $(BUSYBOX_MAKE_ARGS) -C $(BUSYBOX_SRC_DIR) install
 	@touch $@
@@ -85,8 +85,10 @@ xconfig-busybox: $(BUSYBOX_SRC_DIR)/.config
 .PHONY: clean-busybox
 clean-busybox:
 	$(Q)if [ -d $(BUSYBOX_SRC_DIR) ]; then \
-		$(MAKE) $(BUSYBOX_MAKE_ARGS) -C $(BUSYBOX_SRC_DIR) uninstall || true; \
-		$(MAKE) $(BUSYBOX_MAKE_ARGS) -C $(BUSYBOX_SRC_DIR) clean || true; \
+		$(MAKE) $(BUSYBOX_MAKE_ARGS) -C $(BUSYBOX_SRC_DIR) uninstall \
+			|| echo "Ignoring uninstall errors"; \
+		$(MAKE) $(BUSYBOX_MAKE_ARGS) -C $(BUSYBOX_SRC_DIR) clean \
+			|| echo "Ignoring clean errors"; \
 	fi
 
 $(call local-add-module)

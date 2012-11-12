@@ -15,16 +15,20 @@ LOCAL_AUTOTOOLS_DIR := $(LOCAL_MODULE)-$(LOCAL_AUTOTOOLS_VERSION)
 
 LOCAL_AUTOTOOLS_PATCHES :=
 
+# Override install prefix
+LOCAL_AUTOTOOLS_MAKE_INSTALL_ARGS := \
+	prefix=$(TARGET_OUT_STAGING)/usr
+
 LOCAL_AUTOTOOLS_CMD_CONFIGURE := zlib-cmd-configure
 LOCAL_AUTOTOOLS_CMD_POST_CLEAN := zlib-cmd-post-clean
 
 # Not a real configure script, it does not support standard --host option, everything is done
-# via envrironment
+# via environment
 zlib-cmd-configure = \
-	cd $(PRIVATE_SRC_DIR) && $(AUTOTOOLS_CONFIGURE_ENV) \
-		AR="$(TARGET_AR) rcs" ./configure \
-		--prefix="$(TARGET_OUT_STAGING)/usr" \
-		--shared
+	cd $(PRIVATE_SRC_DIR) && $(AUTOTOOLS_CONFIGURE_ENV) AR="$(TARGET_AR) rcs" \
+		./configure \
+			--prefix="$(AUTOTOOLS_CONFIGURE_PREFIX)" \
+			--shared
 
 zlib-cmd-post-clean = \
 	rm -f $(TARGET_OUT_STAGING)/usr/include/zlib.h; \

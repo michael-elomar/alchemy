@@ -34,14 +34,16 @@ LOCAL_AUTOTOOLS_CONFIGURE_ARGS := \
 	--disable-extras \
 	--enable-static \
 	--prefix=$(TARGET_OUT_STAGING)/usr \
-	--exec-prefix=$(TARGET_OUT_FINAL) \
-	--libexecdir=$(TARGET_OUT_FINAL)/lib/udev
+	--exec-prefix=$(TARGET_OUT_STAGING) \
+	--libdir=$(TARGET_OUT_STAGING)/lib \
+	--libexecdir=$(TARGET_OUT_STAGING)/lib/udev
 else
 LOCAL_AUTOTOOLS_CONFIGURE_ARGS := \
 	--disable-introspection \
 	--disable-extras \
-	--prefix=$(TARGET_OUT_STAGING)/usr \
+	--prefix=/usr \
 	--exec-prefix=/ \
+	--libdir=/lib \
 	--libexecdir=/lib/udev
 endif
 endif
@@ -78,21 +80,24 @@ udev-cmd-install = \
 	mkdir -p $(TARGET_OUT_STAGING)/usr/include; \
 	install -p $(PRIVATE_SRC_DIR)/libudev/libudev.h $(TARGET_OUT_STAGING)/usr/include; \
 	mkdir -p $(TARGET_OUT_STAGING)/sbin; \
-	install -p $(addprefix $(PRIVATE_SRC_DIR)/udev/,udevd udevadm udevd_init) $(TARGET_OUT_STAGING)/sbin; \
-	install -p $(PRIVATE_PATH)/lucie/udevd.sh $(TARGET_OUT_STAGING)/sbin/udevd.sh;
+	install -p $(PRIVATE_SRC_DIR)/udev/udevd $(TARGET_OUT_STAGING)/sbin; \
+	install -p $(PRIVATE_SRC_DIR)/udev/udevadm $(TARGET_OUT_STAGING)/sbin; \
+	install -p $(PRIVATE_SRC_DIR)/udev/udevd_init $(TARGET_OUT_STAGING)/sbin; \
+	install -p $(PRIVATE_PATH)/lucie/udevd.sh $(TARGET_OUT_STAGING)/sbin
 else
 udev-cmd-install = \
-	mkdir -p $(TARGET_OUT_STAGING)/lib; \
-	install -p $(PRIVATE_SRC_DIR)/libudev/.libs/libudev*.so* $(TARGET_OUT_STAGING)/lib; \
-	install -p $(PRIVATE_SRC_DIR)/libudev/.libs/libudev*.a* $(TARGET_OUT_STAGING)/lib; \
+	$(AUTOTOOLS_MAKE_ENV) $(MAKE) $(AUTOTOOLS_MAKE_ARGS) -C $(PRIVATE_SRC_DIR) \
+		install-libLTLIBRARIES; \
 	mkdir -p $(TARGET_OUT_STAGING)/lib/udev; \
 	install -p $(PRIVATE_SRC_DIR)/extras/usb_id/usb_id $(TARGET_OUT_STAGING)/lib/udev; \
 	mkdir -p $(TARGET_OUT_STAGING)/tmp/udev/dev; \
 	mkdir -p $(TARGET_OUT_STAGING)/usr/include; \
 	install -p $(PRIVATE_SRC_DIR)/libudev/libudev.h $(TARGET_OUT_STAGING)/usr/include; \
 	mkdir -p $(TARGET_OUT_STAGING)/sbin; \
-	install -p $(addprefix $(PRIVATE_SRC_DIR)/udev/,udevd udevadm udevd_init) $(TARGET_OUT_STAGING)/sbin; \
-	install -p $(PRIVATE_PATH)/lucie/udevd.sh $(TARGET_OUT_STAGING)/sbin/udevd.sh;
+	install -p $(PRIVATE_SRC_DIR)/udev/udevd $(TARGET_OUT_STAGING)/sbin; \
+	install -p $(PRIVATE_SRC_DIR)/udev/udevadm $(TARGET_OUT_STAGING)/sbin; \
+	install -p $(PRIVATE_SRC_DIR)/udev/udevd_init $(TARGET_OUT_STAGING)/sbin; \
+	install -p $(PRIVATE_PATH)/lucie/udevd.sh $(TARGET_OUT_STAGING)/sbin
 endif
 
 # Clean actions (as install was not done via standard make, trying default clean actions will fail)

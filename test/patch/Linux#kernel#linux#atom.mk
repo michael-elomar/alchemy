@@ -131,7 +131,7 @@ xconfig-linux: $(LINUX_BUILD_DIR)/.config
 .PHONY: clean-linux
 clean-linux:
 	$(Q)if [ -d $(LINUX_BUILD_DIR) ]; then \
-		$(MAKE) $(LINUX_MAKE_ARGS) clean || true; \
+		$(MAKE) $(LINUX_MAKE_ARGS) clean || echo "Ignoring clean errors"; \
 	fi
 	$(Q)rm -rf $(TARGET_OUT_STAGING)/lib/modules
 	$(Q)rm -f $(TARGET_OUT_STAGING)/Image

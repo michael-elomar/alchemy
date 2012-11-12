@@ -88,7 +88,7 @@ $(JIM_LIB): $(JIM_SETUP_EXE)
 		PATH=$(dir $(JIM_SETUP_EXE)):$(PATH) $(AUTOTOOLS_CONFIGURE_ENV) \
 			$(JIM_DIR)/configure \
 			--host="${GNU_TARGET_NAME}" \
-			--prefix="$(TARGET_OUT_STAGING)/usr" \
+			--prefix="$(AUTOTOOLS_CONFIGURE_PREFIX)" \
 			--disable-lineedit \
 			--with-out-jim-ext="stdlib posix load signal syslog"
 	@echo "Compiling the Jim library ..."
