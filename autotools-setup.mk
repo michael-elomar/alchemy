@@ -12,6 +12,16 @@
 # (we add the -p option to preserve timestamp of installed files)
 AUTOTOOLS_INSTALL_BIN := $(shell which install)
 
+# This needs to be exported to be working properly (In case an already configured
+# package tries to reconfigure itself, it will need this)
+export PKG_CONFIG_PATH := $(TARGET_OUT_STAGING)/usr/lib/pkgconfig
+export PKG_CONFIG_LIBDIR := $(TARGET_OUT_STAGING)/usr/lib/pkgconfig
+ifeq ("$(TARGET_OS_FLAVOUR)","native")
+  export PKG_CONFIG_SYSROOT_DIR :=
+else
+  export PKG_CONFIG_SYSROOT_DIR := $(TARGET_OUT_STAGING)
+endif
+
 # Environment to use when executing configure script
 AUTOTOOLS_CONFIGURE_ENV := \
 	AR="$(TARGET_CROSS)ar" \
@@ -26,48 +36,44 @@ AUTOTOOLS_CONFIGURE_ENV := \
 	RANLIB="$(TARGET_CROSS)ranlib" \
 	STRIP="$(TARGET_STRIP)" \
 	OBJCOPY="$(TARGET_CROSS)objcopy" \
+	OBJDUMP="$(TARGET_CROSS)objdump" \
 	CC_FOR_BUILD="$(HOST_CC)" \
 	CPPFLAGS="$(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES)) $(TARGET_GLOBAL_CFLAGS)" \
 	CFLAGS="$(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES)) $(TARGET_GLOBAL_CFLAGS)" \
 	CXXFLAGS="$(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES)) $(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CPPFLAGS)" \
 	LDFLAGS="$(TARGET_GLOBAL_LDFLAGS) $(TARGET_GLOBAL_LDLIBS)" \
-	DYN_LDFLAGS="$(TARGET_GLOBAL_LDFLAGS_SHARED) $(TARGET_GLOBAL_LDLIBS_SHARED)" \
-	PKG_CONFIG_PATH="$(TARGET_OUT_STAGING)/usr/lib/pkgconfig" \
-	PKG_CONFIG_LIBDIR="$(TARGET_OUT_STAGING)/usr/lib/pkgconfig" \
-	PKG_CONFIG_SYSROOT="$(TARGET_OUT_STAGING)"
+	DYN_LDFLAGS="$(TARGET_GLOBAL_LDFLAGS_SHARED) $(TARGET_GLOBAL_LDLIBS_SHARED)"
 
-#	PKG_CONFIG="$(TARGET_OUT_STAGING)/usr/bin/pkg-config"
+# Build triplet
+GNU_BUILD_NAME := $(shell $(HOST_CC) -dumpmachine)
 
-# FIXME : put this somewehere else...
-ifeq ("$(TARGET_ARCH)","arm")
-  ifeq ("$(TARGET_OS_FLAVOUR)","android")
-    GNU_TARGET_NAME := arm-eabi
-  else
-    GNU_TARGET_NAME := arm-none-linux-gnueabi
-  endif
-else ifeq ("$(TARGET_ARCH)","x86")
-  GNU_TARGET_NAME := i386-linux-gnu
-else ifeq ("$(TARGET_ARCH)","x64")
-  GNU_TARGET_NAME := x86_64-linux-gnu
-endif
+# Target triplet
+GNU_TARGET_NAME := $(TOOLCHAIN_TARGET_NAME)
 
-# Arguments to give to configure script
+# Arguments to give to configure script. Autotools 'host' is the name of the machine
+# on which the package will run and  we call it 'target'.
 AUTOTOOLS_CONFIGURE_ARGS := \
-	--host="${GNU_TARGET_NAME}" \
-	--prefix="$(TARGET_OUT_STAGING)/usr"
+	--build="$(GNU_BUILD_NAME)" \
+	--host="$(GNU_TARGET_NAME)" \
 
-# Give build name to avoid warning during configure excution
-__build-name := $(shell $(HOST_CC) -dumpmachine)
-ifneq ("$(__build-name)","")
-AUTOTOOLS_CONFIGURE_ARGS += \
-	--build="$(__build-name)"
+# For cross-compilation, use /usr as prefix and install in our staging dir
+# For native compilation, use staging as prefix and nothing for install dest dir
+ifeq ("$(TARGET_OS_FLAVOUR)","native")
+  AUTOTOOLS_CONFIGURE_PREFIX := $(TARGET_OUT_STAGING)/usr
+  AUTOTOOLS_INSTALL_DESTDIR :=
+else
+  AUTOTOOLS_CONFIGURE_PREFIX := /usr
+  AUTOTOOLS_INSTALL_DESTDIR := $(TARGET_OUT_STAGING)
 endif
+
+AUTOTOOLS_CONFIGURE_ARGS += \
+	--prefix="$(AUTOTOOLS_CONFIGURE_PREFIX)" \
 
 # Environment to use when executing make
 AUTOTOOLS_MAKE_ENV :=
 
 # Arguments to give to make
-AUTOTOOLS_MAKE_ARGS :=
+AUTOTOOLS_MAKE_ARGS := DESTDIR="$(AUTOTOOLS_INSTALL_DESTDIR)"
 
 # Quiet flags
 ifeq ("$(V)","0")

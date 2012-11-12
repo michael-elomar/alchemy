@@ -88,3 +88,6 @@ TARGET_STRIP ?= $(TARGET_CROSS)strip
 TOOLCHAIN_LIBC ?=
 TOOLCHAIN_GDBSERVER ?=
 
+# Machine targetted by toolchain to be used by autotools
+TOOLCHAIN_TARGET_NAME ?= $(shell $(TARGET_CC) -dumpmachine)
+

@@ -71,10 +71,10 @@ __default-clean = \
 	if [ -d $(PRIVATE_OBJ_DIR) ]; then \
 		$(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) $(MAKE) \
 			-C $(PRIVATE_OBJ_DIR) $(AUTOTOOLS_MAKE_ARGS) $(PRIVATE_MAKE_INSTALL_ARGS) \
-			uninstall || true; \
+			uninstall || echo "Ignoring uninstall errors"; \
 		$(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) $(MAKE) \
 			-C $(PRIVATE_OBJ_DIR) $(AUTOTOOLS_MAKE_ARGS) \
-			clean || true; \
+			clean || echo "Ignoring clean errors"; \
 	fi;
 
 __apply-patches = \

@@ -25,3 +25,10 @@ endif
 TARGET_GLOBAL_LDLIBS += -lpthread -lrt
 TARGET_GLOBAL_LDLIBS_SHARED += -lpthread -lrt
 
+# Machine targetted by toolchain to be used by autotools
+ifeq ("$(TARGET_ARCH)","x64")
+  TOOLCHAIN_TARGET_NAME := x86_64-linux-gnu
+else
+  TOOLCHAIN_TARGET_NAME := i386-linux-gnu
+endif
+
