@@ -437,5 +437,18 @@ $(eval $(call copy-one-file, \
 all: $(TARGET_OUT_STAGING)/$(NATIVE_WRAPPER_SCRIPT)
 
 endif
+
+ifeq ("$(TARGET_OS_FLAVOUR)","native-chroot")
+
+NATIVE_CHROOT_WRAPPER_SCRIPT := native-chroot-wrapper.sh
+
+$(eval $(call copy-one-file, \
+	$(BUILD_SYSTEM)/scripts/$(NATIVE_CHROOT_WRAPPER_SCRIPT), \
+	$(TARGET_OUT_STAGING)/$(NATIVE_CHROOT_WRAPPER_SCRIPT)))
+
+all: $(TARGET_OUT_STAGING)/$(NATIVE_CHROOT_WRAPPER_SCRIPT)
+
+endif
+
 endif
 
