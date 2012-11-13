@@ -398,11 +398,11 @@ def checkModuleConfig(module, doWriteDiff):
 		return True
 	result = checkConfig(module.name, module.configPath)
 	if not result and doWriteDiff:
-		message("%s config is old, see diff in: %s",
-			module.name, getDiffConfigPath(module.configPath))
+		message("%s config is old (%s), see diff in: %s",
+			module.name, module.configPath, getDiffConfigPath(module.configPath))
 		writeDiffConfig(module.configPath)
 	elif not result:
-		message("%s config is old", module.name)
+		message("%s config is old (%s)", module.name, module.configPath)
 	logging.debug("Delete %s", getEditConfigPath(module.configPath))
 	safeUnlink(getEditConfigPath(module.configPath))
 	return result
@@ -426,12 +426,12 @@ def updateModuleConfig(module):
 def checkMainConfig(mainConfigPath, doWriteDiff):
 	result = checkConfig("main", mainConfigPath)
 	if not result and doWriteDiff:
-		message("%s config is old, see diff in: %s",
-			"main", getDiffConfigPath(mainConfigPath))
+		message("%s config is old (%s), see diff in: %s",
+			"main", mainConfigPath, getDiffConfigPath(mainConfigPath))
 		writeDiffConfig(mainConfigPath)
 	elif not result:
-		message("%s config is old", "main")
-	logging.debug("Delete %s", getEditConfigPath(mainConfigPath))
+		message("%s config is old (%s)", "main")
+	logging.debug("Delete %s", mainConfigPath, getEditConfigPath(mainConfigPath))
 	safeUnlink(getEditConfigPath(mainConfigPath))
 	return result
 
