@@ -1,12 +1,12 @@
 #!/bin/bash
 
-readonly binaries=$(file $(find -type f) | grep 'ELF' | cut -d: -f1)
+readonly binaries=$(file $(find -type f) | /bin/grep 'ELF' | cut -d: -f1)
 
 libs=""
 rpath=""
 for bin in ${binaries}; do
-	libs="${libs} $(objdump -p ${bin} | grep NEEDED | cut -b24-)"
-	bin_rpath="$(objdump -p ${bin} | grep RPATH | cut -b24-)"
+	libs="${libs} $(objdump -p ${bin} | /bin/grep NEEDED | cut -b24-)"
+	bin_rpath="$(objdump -p ${bin} | /bin/grep RPATH | cut -b24-)"
 	if test -n "${bin_rpath}"; then
 		rpath="${rpath} ${bin}:${bin_rpath}"
 	fi
