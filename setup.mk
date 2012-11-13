@@ -5,12 +5,18 @@
 ###############################################################################
 
 ###############################################################################
-## Make sure that there are no spaces in the absolute path; the build system
-## can't deal with them.
+## Check some stuff first.
 ###############################################################################
 
+# Make sure that there are no spaces in the absolute path; the build system
+# can't deal with them.
 ifneq ("$(words $(shell pwd))","1")
 $(error Top directory contains space characters)
+endif
+
+# Target OS
+ifndef TARGET_OS
+  $(error TARGET_OS is not defined)
 endif
 
 ###############################################################################
@@ -71,11 +77,6 @@ HOST_STRIP ?= strip
 
 # Host OS
 HOST_OS := linux
-
-# Target OS
-ifndef TARGET_OS
-  $(error TARGET_OS is not defined)
-endif
 
 # Binary suffixes
 ifeq ("$(TARGET_OS)","linux")

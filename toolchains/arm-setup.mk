@@ -6,6 +6,10 @@
 ## This file contains additional setup for arm toolchain.
 ###############################################################################
 
+# Allow mix thumb/arm mode
+TARGET_GLOBAL_CFLAGS += \
+	-mthumb-interwork
+
 # arm v5te flags (to be used in cpu flags below)
 cflags_armv5te :=
 	-march=armv5te \
@@ -47,23 +51,19 @@ endif
 ###############################################################################
 
 # Arm mode specific flags
-ifeq ("$(TARGET_GLOBAL_CFLAGS_arm)","")
-TARGET_GLOBAL_CFLAGS_arm := \
+TARGET_GLOBAL_CFLAGS_arm ?= \
 	-marm \
 	-O2 \
 	-fomit-frame-pointer \
 	-fstrict-aliasing \
 	-funswitch-loops \
 	-finline-limit=300
-endif
 
 # Thumb mode specific flags
-ifeq ("$(TARGET_GLOBAL_CFLAGS_thumb)","")
 TARGET_GLOBAL_CFLAGS_thumb ?= \
 	-mthumb \
 	-Os \
 	-fomit-frame-pointer \
 	-fno-strict-aliasing \
 	-finline-limit=64
-endif
 

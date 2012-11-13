@@ -25,11 +25,26 @@ TARGET_PCH_FLAGS ?=
 ## Generic setup.
 ###############################################################################
 
+# Add some generic flags
+# -fdata-sections causes issues with some packages
 TARGET_GLOBAL_CFLAGS += \
 	-pipe \
 	-O2 -g \
 	-ffunction-sections \
 	-fno-common
+
+# TODO: check for these flags
+#TARGET_GLOBAL_CFLAGS += \
+#	-fpic -fPIE \
+#	-funwind-tables \
+#	-fstack-protector \
+#	-Wa,--noexecstack \
+
+# TODO: check for these flags
+#TARGET_GLOBAL_LDFLAGS += \
+#	-Wl,-z,noexecstack \
+#	-Wl,-z,relro \
+#	-Wl,-z,now
 
 TARGET_GLOBAL_ARFLAGS += rcs
 
