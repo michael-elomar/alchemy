@@ -25,7 +25,9 @@ fi
 
 # Search new files
 echo "Searching new files"
-filelist=" $(find -path ./Alchemy -prune \
+filelist=" $(find \
+  -path ./Alchemy -prune \
+  -o -path ./Alchemy-out -prune \
   -o -name atom.mk -print \
   -o -name blues-config.h -print \
   -o -name blues-stub.c -print \
@@ -65,7 +67,7 @@ function save_patch()
 
 # get list of git repositories
 echo "Searching git repositories"
-readonly repolist=$(find -name ".git")
+readonly repolist=$(find -path ./Alchemy-out -prune -o -name ".git" -print)
 
 echo "Generating git patches"
 for repo in ${repolist}; do
