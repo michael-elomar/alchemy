@@ -97,7 +97,7 @@ endif
 # Skip some steps for some make goals
 __clean-targets := clean dirclean clobber
 __query-targets := scan help help-modules dump dump-depends build-graph
-__config-targets := config xconfig menuconfig nconfig
+__config-targets := config config-check config-update xconfig menuconfig nconfig
 __fs-targets := final final-nostrip plf
 __skip_targets := $(__clean-targets) $(__query-targets) $(__config-targets) $(__fs-targets)
 ifneq ("$(call is-targets-in-make-goals,$(__skip_targets))","")

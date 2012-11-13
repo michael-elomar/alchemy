@@ -430,7 +430,7 @@ def checkMainConfig(mainConfigPath, doWriteDiff):
 			"main", mainConfigPath, getDiffConfigPath(mainConfigPath))
 		writeDiffConfig(mainConfigPath)
 	elif not result:
-		message("%s config is old (%s)", "main")
+		message("%s config is old (%s)", "main", mainConfigPath)
 	logging.debug("Delete %s", mainConfigPath, getEditConfigPath(mainConfigPath))
 	safeUnlink(getEditConfigPath(mainConfigPath))
 	return result
