@@ -75,37 +75,41 @@ def canStrip(filePath):
 # Copy a file using a makefile (do do strip in parallel).
 #===============================================================================
 def doCopyByMakefile(dstFileName, srcFileName, doStrip, options):
-	# if source file contains ':' or '=' it doesn't work great
+	srcFileNameEsc = srcFileName
+	dstFileNameEsc = dstFileName
+	# if source file contains ' ', ':' or '=' it doesn't work great
 	# prerequisite shall be escaped
-	# target can not contain at all any ':' or '=' so replace with '_'
+	# target can not contain at all any ' ', ':' or '=' so replace with '_'
 	# in command do not use target name as it will be wrong
 	# consequence is that target will never actually exists and commands
 	# will always be executed
-	if srcFileName.find(":") >= 0:
-		srcFileName = srcFileName.replace(":", "\\:")
-		srcFileName = srcFileName.replace("=", "\\=")
-		dstFileName = dstFileName.replace(":", "_")
-		dstFileName = dstFileName.replace("=", "_")
+	if srcFileNameEsc.find(" ") >= 0:
+		srcFileNameEsc = srcFileNameEsc.replace(" ", "\\ ")
+		dstFileNameEsc = dstFileNameEsc.replace(" ", "_")
+	if srcFileNameEsc.find(":") >= 0:
+		srcFileNameEsc = srcFileNameEsc.replace(":", "\\:")
+		dstFileNameEsc = dstFileNameEsc.replace(":", "_")
+	if srcFileNameEsc.find("=") >= 0:
+		srcFileNameEsc = srcFileNameEsc.replace("=", "\\=")
+		dstFileNameEsc = dstFileNameEsc.replace("=", "_")
 
 	# register destination in ALL variable
-	options.makefile.write("ALL += %s\n" % dstFileName)
+	options.makefile.write("ALL += %s\n" % dstFileNameEsc)
 
 	# rule
-	options.makefile.write("%s: %s\n" % (dstFileName, srcFileName))
-
-	# define variables with real src and dst (in case it was patched above)
-	options.makefile.write("\t$(eval __src := $<)\n")
-	options.makefile.write("\t$(eval __dst := $(patsubst %s/%%,%s/%%,$<))\n" % \
-		(options.stagingDir, options.finalDir))
+	options.makefile.write("%s: %s\n" % (dstFileNameEsc, srcFileNameEsc))
 
 	# commands, see doCopy for more info
-	options.makefile.write("\t@mkdir -p $(dir $(__dst))\n")
-	options.makefile.write("\t@echo Alchemy install: $(patsubst $(PWD)/%,%,$(__dst))\n")
+	options.makefile.write("\t@mkdir -p \"%s\"\n" % os.path.dirname(dstFileName))
+	options.makefile.write("\t@echo Alchemy install: %s\n" % os.path.relpath(dstFileName))
 	if doStrip:
-		options.makefile.write("\t$(Q)$(STRIP) -o $(__dst) $(__src)\n")
-		options.makefile.write("\t$(Q)chmod $$(stat --printf '%a' $(__src)) $(__dst)")
+		options.makefile.write("\t$(Q)$(STRIP) -o \"%s\" \"%s\"\n" % \
+			(dstFileName, srcFileName))
+		options.makefile.write("\t$(Q)chmod $$(stat --printf '%a' \"%s\") \"%s\"" % \
+			(srcFileName, dstFileName))
 	else:
-		options.makefile.write("\t$(Q)cp -af $(__src) $(__dst)\n")
+		options.makefile.write("\t$(Q)cp -af \"%s\" \"%s\"\n" % \
+			(srcFileName, dstFileName))
 	options.makefile.write("\n")
 
 #===============================================================================
@@ -115,10 +119,10 @@ def doCopyDirect(dstFileName, srcFileName, doStrip, options):
 	# copy and strip executables
 	# make sure we restore permission bits after strip operation
 	if doStrip:
-		os.system("%s -o %s %s" % (options.strip, dstFileName, srcFileName))
-		os.system("chmod $(stat --printf '%%a' %s) %s" % (srcFileName, dstFileName))
+		os.system("%s -o \"%s\" \"%s\"" % (options.strip, dstFileName, srcFileName))
+		os.system("chmod $(stat --printf '%%a' \"%s\") \"%s\"" % (srcFileName, dstFileName))
 	else:
-		os.system("cp -af %s %s" % (srcFileName, dstFileName))
+		os.system("cp -af \"%s\" \"%s\"" % (srcFileName, dstFileName))
 
 #===============================================================================
 # Copy a file.
