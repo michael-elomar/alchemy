@@ -41,8 +41,8 @@ echo "Copying files"
 for file in ${filelist}; do
 	# remove leading './'
 	file=${file#./}
-	# replace '/' by '#'
-	name=$(echo ${file} | sed -e "s/\\//#/g")
+	# replace '/' by '#' and .patch by .patch_
+	name=$(echo ${file} | sed -e "s/\\//#/g" | sed -e "s/\\.patch/\\.patch_/g")
 	echo "${file} -> ${name}"
 	cp -pf ${file} ${PATCHDIR}/${name}
 done
