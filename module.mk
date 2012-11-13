@@ -26,7 +26,7 @@ LOCAL_BUILD_MODULE := $(call module-get-build-filename,$(LOCAL_MODULE))
 LOCAL_STAGING_MODULE := $(call module-get-staging-filename,$(LOCAL_MODULE))
 
 # Assemble the list of targets to create PRIVATE_ variables for.
-LOCAL_TARGETS := $(LOCAL_BUILD_MODULE) clean-$(LOCAL_MODULE) dirclean-$(LOCAL_MODULE)
+LOCAL_TARGETS := $(LOCAL_BUILD_MODULE) $(LOCAL_MODULE)-clean $(LOCAL_MODULE)-dirclean
 
 # Get external libraries used by static libraries
 LOCAL_EXTERNAL_LIBRARIES := \
@@ -113,19 +113,19 @@ $(LOCAL_TARGETS): PRIVATE_CLEAN_DIRS := $(LOCAL_CLEAN_DIRS)
 $(LOCAL_MODULE): $(LOCAL_BUILD_MODULE)
 
 # Clean module
-.PHONY: clean-$(LOCAL_MODULE)
-clean-$(LOCAL_MODULE): clean-common-$(LOCAL_MODULE)
+.PHONY: $(LOCAL_MODULE)-clean
+$(LOCAL_MODULE)-clean: $(LOCAL_MODULE)-clean-common
 
 # Common part, delete registered files and directories
-.PHONY: clean-common-$(LOCAL_MODULE)
-clean-common-$(LOCAL_MODULE):
+.PHONY: $(LOCAL_MODULE)-clean-common
+$(LOCAL_MODULE)-clean-common:
 	@echo "Clean: $(PRIVATE_MODULE)"
 	$(Q)$(if $(PRIVATE_CLEAN_FILES),rm -f $(PRIVATE_CLEAN_FILES))
 	$(Q)$(if $(PRIVATE_CLEAN_DIRS),rm -rf $(PRIVATE_CLEAN_DIRS))
 
 # Clean + delete the build directory
-.PHONY: dirclean-$(LOCAL_MODULE)
-dirclean-$(LOCAL_MODULE): clean-$(LOCAL_MODULE)
+.PHONY: $(LOCAL_MODULE)-dirclean
+$(LOCAL_MODULE)-dirclean: $(LOCAL_MODULE)-clean
 	$(Q)rm -rf $(PRIVATE_BUILD_DIR)
 
 ###############################################################################
@@ -233,7 +233,7 @@ $(foreach __pair,$(LOCAL_COPY_FILES), \
 $(LOCAL_BUILD_MODULE): $(all_copy_files)
 
 # Add rule to delete copied files during clean
-clean-$(LOCAL_MODULE): PRIVATE_CLEAN_FILES += $(all_copy_files)
+$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(all_copy_files)
 
 endif
 

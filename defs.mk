@@ -348,7 +348,7 @@ is-targets-in-make-goals = $(strip \
 ## $1 : module to check.
 ###############################################################################
 is-module-in-make-goals = $(strip \
-	$(call is-targets-in-make-goals,$1 clean-$1 dirclean-$1))
+	$(call is-targets-in-make-goals,$1 $1-clean $1-dirclean))
 
 ###############################################################################
 ## Check if a module is registered.

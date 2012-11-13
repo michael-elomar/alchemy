@@ -69,21 +69,24 @@ $(BUSYBOX_BUILD_DIR)/$(LOCAL_MODULE_FILENAME): $(BUSYBOX_SRC_DIR)/.config
 	@touch $@
 
 # Busybox configuration
-.PHONY: menuconfig-busybox
-menuconfig-busybox: $(BUSYBOX_SRC_DIR)/.config
+.PHONY: busybox-menuconfig
+busybox-menuconfig: $(BUSYBOX_SRC_DIR)/.config
 	@echo "Configuring busybox: $(BUSYBOX_CONFIG_FILE)"
 	$(Q)$(MAKE) $(BUSYBOX_MAKE_ARGS) -C $(BUSYBOX_SRC_DIR) menuconfig
 	@cp -af $(BUSYBOX_SRC_DIR)/.config $(BUSYBOX_CONFIG_FILE)
 
-.PHONY: xconfig-busybox
-xconfig-busybox: $(BUSYBOX_SRC_DIR)/.config
+.PHONY: busybox-xconfig
+busybox-xconfig: $(BUSYBOX_SRC_DIR)/.config
 	@echo "Configuring busybox: $(BUSYBOX_CONFIG_FILE)"
 	$(Q)$(MAKE) $(BUSYBOX_MAKE_ARGS) -C $(BUSYBOX_SRC_DIR) xconfig
 	@cp -af $(BUSYBOX_SRC_DIR)/.config $(BUSYBOX_CONFIG_FILE)
 
+.PHONY: busybox-config
+busybox-config: busybox-xconfig
+
 # Custom clean rule. LOCAL_MODULE_FILENAME already deleted by common rule
-.PHONY: clean-busybox
-clean-busybox:
+.PHONY: busybox-clean
+busybox-clean:
 	$(Q)if [ -d $(BUSYBOX_SRC_DIR) ]; then \
 		$(MAKE) $(BUSYBOX_MAKE_ARGS) -C $(BUSYBOX_SRC_DIR) uninstall \
 			|| echo "Ignoring uninstall errors"; \

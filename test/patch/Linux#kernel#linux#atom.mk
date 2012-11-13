@@ -114,22 +114,25 @@ TARGET_GLOBAL_PREREQUISITES += $(LINUX_HEADERS_DONE_FILE)
 endif
 
 # Kernel configuration
-.PHONY: menuconfig-linux
-menuconfig-linux: $(LINUX_BUILD_DIR)/.config
+.PHONY: linux-menuconfig
+linux-menuconfig: $(LINUX_BUILD_DIR)/.config
 	@echo "Configuring linux kernel: $(LINUX_CONFIG_FILE)"
 	$(Q)$(MAKE) $(LINUX_MAKE_ARGS) menuconfig
 	@cp -af $(LINUX_BUILD_DIR)/.config $(LINUX_CONFIG_FILE)
 
-.PHONY: xconfig-linux
-xconfig-linux: $(LINUX_BUILD_DIR)/.config
+.PHONY: linux-xconfig
+linux-xconfig: $(LINUX_BUILD_DIR)/.config
 	@echo "Configuring linux kernel: $(LINUX_CONFIG_FILE)"
 	$(Q)$(MAKE) $(LINUX_MAKE_ARGS) xconfig
 	@cp -af $(LINUX_BUILD_DIR)/.config $(LINUX_CONFIG_FILE)
 
+.PHONY: linux-config
+linux-config: linux-xconfig
+
 # Custom clean rule. LOCAL_MODULE_FILENAME already deleted by common rule
 # make clean may fail, so ignore its error
-.PHONY: clean-linux
-clean-linux:
+.PHONY: linux-clean
+linux-clean:
 	$(Q)if [ -d $(LINUX_BUILD_DIR) ]; then \
 		$(MAKE) $(LINUX_MAKE_ARGS) clean || echo "Ignoring clean errors"; \
 	fi

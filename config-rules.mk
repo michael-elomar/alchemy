@@ -61,8 +61,8 @@ nconfig:
 ###############################################################################
 
 # Check a module
-.PHONY: config-check-%
-config-check-%:
+.PHONY: %-config-check
+%-config-check:
 	$(eval __mod := $*)
 	$(eval __args := $(call __generate-config-module-args,$(__mod)))
 	$(if $(call __check-module-configurable,$(__mod)), \
@@ -83,8 +83,8 @@ __config-check-%:
 	)
 
 # Update a module
-.PHONY: config-update-%
-config-update-%:
+.PHONY: %-config-update
+%-config-update:
 	$(eval __mod := $*)
 	$(eval __args := $(call __generate-config-module-args,$(__mod)))
 	$(if $(call __check-module-configurable,$(__mod)), \
@@ -92,8 +92,8 @@ config-update-%:
 	)
 
 # Configure a module using default user interface (qconf)
-.PHONY: config-%
-config-%:
+.PHONY: %-config
+%-config:
 	$(eval __mod := $*)
 	$(eval __args := $(call __generate-config-module-args,$(__mod)))
 	$(if $(call __check-module-configurable,$(__mod)), \
@@ -101,8 +101,8 @@ config-%:
 	)
 
 # Configure a module using qconf
-.PHONY: xconfig-%
-xconfig-%:
+.PHONY: %-xconfig
+%-xconfig:
 	$(eval __mod := $*)
 	$(eval __args := $(call __generate-config-module-args,$(__mod)))
 	$(if $(call __check-module-configurable,$(__mod)), \
@@ -110,8 +110,8 @@ xconfig-%:
 	)
 
 # Configure a module using mconf
-.PHONY: menuconfig-%
-menuconfig-%:
+.PHONY: %-menuconfig
+%-menuconfig:
 	$(eval __mod := $*)
 	$(eval __args := $(call __generate-config-module-args,$(__mod)))
 	$(if $(call __check-module-configurable,$(__mod)), \
@@ -119,8 +119,8 @@ menuconfig-%:
 	)
 
 # Configure a module using nconf
-.PHONY: nconfig-%
-nconfig-%:
+.PHONY: %-nconfig
+%-nconfig:
 	$(eval __mod := $*)
 	$(eval __args := $(call __generate-config-module-args,$(__mod)))
 	$(if $(call __check-module-configurable,$(__mod)), \

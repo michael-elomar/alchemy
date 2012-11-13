@@ -180,8 +180,8 @@ $(LOCAL_BUILD_MODULE): $(installed_file)
 	@mkdir -p $(dir $@)
 	@touch $@
 
-# clean- targets additional commands
-clean-$(LOCAL_MODULE):
+# clean targets additional commands
+$(LOCAL_MODULE)-clean:
 	+$(Q)$(call $(PRIVATE_CMD_CLEAN))
 	+$(Q)$(if $(PRIVATE_CMD_POST_CLEAN), $(call $(PRIVATE_CMD_POST_CLEAN)))
 
@@ -189,7 +189,7 @@ clean-$(LOCAL_MODULE):
 ## Rule-specific variable definitions.
 ###############################################################################
 
-# clean- targets additional variables
+# clean targets additional variables
 # To NOT put build dir in PRIVATE_CLEAN_DIRS
 # we need to call some makefiles during our custom clean
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(installed_file)

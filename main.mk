@@ -103,13 +103,22 @@ __skip_targets := $(__clean-targets) $(__query-targets) $(__config-targets) $(__
 ifneq ("$(call is-targets-in-make-goals,$(__skip_targets))","")
   SKIP_DEPS_AND_CHECKS := 1
 endif
-ifneq ("$(findstring clean-,$(MAKECMDGOALS))","")
+ifneq ("$(findstring -clean,$(MAKECMDGOALS))","")
   SKIP_DEPS_AND_CHECKS := 1
 endif
-ifneq ("$(findstring dirclean-,$(MAKECMDGOALS))","")
+ifneq ("$(findstring -dirclean,$(MAKECMDGOALS))","")
   SKIP_DEPS_AND_CHECKS := 1
 endif
-ifneq ("$(findstring config-,$(MAKECMDGOALS))","")
+ifneq ("$(findstring -config,$(MAKECMDGOALS))","")
+  SKIP_DEPS_AND_CHECKS := 1
+endif
+ifneq ("$(findstring -xconfig,$(MAKECMDGOALS))","")
+  SKIP_DEPS_AND_CHECKS := 1
+endif
+ifneq ("$(findstring -menuconfig,$(MAKECMDGOALS))","")
+  SKIP_DEPS_AND_CHECKS := 1
+endif
+ifneq ("$(findstring -nconfig,$(MAKECMDGOALS))","")
   SKIP_DEPS_AND_CHECKS := 1
 endif
 
@@ -330,13 +339,13 @@ all: $(ALL_BUILD_MODULES)
 	@echo "Done building all"
 
 .PHONY: clean
-clean: $(foreach __mod,$(ALL_BUILD_MODULES),clean-$(__mod))
+clean: $(foreach __mod,$(ALL_BUILD_MODULES),$(__mod)-clean)
 	@rm -f $(AUTOCONF_MERGE_FILE)
 	@rm -f $(USER_MAKEFILES_CACHE)
 	@echo "Done cleaning"
 
 .PHONY: dirclean
-dirclean: $(foreach __mod,$(ALL_BUILD_MODULES),dirclean-$(__mod))
+dirclean: $(foreach __mod,$(ALL_BUILD_MODULES),$(__mod)-dirclean)
 	@rm -f $(AUTOCONF_MERGE_FILE)
 	@rm -f $(USER_MAKEFILES_CACHE)
 	@echo "Done cleaning directories"
@@ -386,8 +395,8 @@ help:
 	@echo ""
 	@echo "Module targets:"
 	@echo "  <module>         : build specified module."
-	@echo "  clean-<module>   : clean specified module."
-	@echo "  dirclean-<module>: clean specified module and delete its build directory."
+	@echo "  <module>-clean   : clean specified module."
+	@echo "  <module>-dirclean: clean specified module and delete its build directory."
 	@echo ""
 	@echo "Main configuration targets:"
 	@echo "  config       : configure the build as well as modules."
@@ -395,9 +404,9 @@ help:
 	@echo "  config-update: update all config files with new options."
 	@echo ""
 	@echo "Module configuration targets:"
-	@echo "  config-<module>       : configure the specified module."
-	@echo "  config-check-<module> : check the specified module config file."
-	@echo "  config-update-<module>: update the specified module config file new options."
+	@echo "  <module>-config       : configure the specified module."
+	@echo "  <module>-config-check : check the specified module config file."
+	@echo "  <module>-config-update: update the specified module config file new options."
 	@echo ""
 	@echo "Other available frontends for configuration:"
 	@echo "  xconfig   : use qconf (Qt), default."

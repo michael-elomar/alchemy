@@ -166,12 +166,3 @@ $(UJUBA_RULES_BUILD_DIR)/$(LOCAL_MODULE_FILENAME):
 
 $(call local-add-module)
 
-###############################################################################
-###############################################################################
-UJUBA_TARGETS := cifs firmware modem rnb4_hub storage usb rules
-
-ujuba: $(addprefix ujuba_,$(UJUBA_TARGETS))
-
-clean-ujuba: $(addprefix clean-ujuba_,$(UJUBA_TARGETS))
-
-

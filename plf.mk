@@ -28,11 +28,11 @@ plf:
 			plfbatch '-a u_unixfile="&"' $(PRODUCT_PLF)
 	@echo "Plf image: done -> $(PRODUCT_PLF)"
 
-.PHONY: clean-plf
-clean-plf:
+.PHONY: plf-clean
+plf-clean:
 	$(Q)rm -f $(TARGET_OUT)/kernel.plf
 	$(Q)rm -f $(PRODUCT_PLF)
 
-clean: clean-plf
-clobber: clean-plf
+clean: plf-clean
+clobber: plf-clean
 
