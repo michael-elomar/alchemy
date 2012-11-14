@@ -105,7 +105,7 @@ def doCopyByMakefile(dstFileName, srcFileName, doStrip, options):
 	if doStrip:
 		options.makefile.write("\t$(Q)$(STRIP) -o \"%s\" \"%s\"\n" % \
 			(dstFileName, srcFileName))
-		options.makefile.write("\t$(Q)chmod $$(stat --printf '%a' \"%s\") \"%s\"" % \
+		options.makefile.write("\t$(Q)chmod $$(stat --printf '%%a' \"%s\") \"%s\"" % \
 			(srcFileName, dstFileName))
 	else:
 		options.makefile.write("\t$(Q)cp -af \"%s\" \"%s\"\n" % \
