@@ -45,6 +45,11 @@ for n in ${usr_lib_names}; do
 	cp -af /usr/lib/${ARCHDIR}/${n}.so* ${SYSROOT}/usr/lib
 done
 
+# gdbserver
+if [ -f /usr/bin/gdbserver ]; then
+	cp -af /usr/bin/gdbserver ${SYSROOT}/usr/bin
+fi
+
 # Add minimal /etc/group and /etc/passwd
 if [ ! -f ${SYSROOT}/etc/group ]; then
 	echo -e "root::0:" > ${SYSROOT}/etc/group
@@ -54,4 +59,12 @@ if [ ! -f ${SYSROOT}/etc/passwd ]; then
 	echo -e "${USER}::${UID}:${UID}:${USER}:/home/${USER}:/bin/sh" >> ${SYSROOT}/etc/passwd
 fi
 
+# Add minimal /etc/asound.conf
+if [ ! -f ${SYSROOT}/etc/asound.conf ]; then
+	echo -e "pcm.!default {" > ${SYSROOT}/etc/asound.conf
+	echo -e "type hw" >> ${SYSROOT}/etc/asound.conf
+	echo -e "card 0" >> ${SYSROOT}/etc/asound.conf
+	echo -e "device 0" >> ${SYSROOT}/etc/asound.conf
+	echo -e "}" >> ${SYSROOT}/etc/asound.conf
+fi
 
