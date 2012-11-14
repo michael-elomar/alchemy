@@ -18,5 +18,5 @@ export TARGET_SCAN_PRUNE_DIRS="Alchemy-out raptor"
 
 export USE_COLORS=1
 
-time make -f ./Alchemy/main.mk $*
+time ./Alchemy/scripts/alchemake.py -f ./Alchemy/main.mk $*
 
