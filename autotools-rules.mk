@@ -85,6 +85,8 @@ __apply-patches = \
 # and not the final dir. Do this only if dest dir is not empty (in native build staging dir
 # is the final dir specified in configure script).
 # Use -rpath-link instead of -rpath to avoid hardcoding host path in binaries.
+# See this link for more information :
+# http://www.metastatic.org/text/libtool.html
 __libtool_patch = \
 	$(Q)for f in `find $(PRIVATE_OBJ_DIR) -name libtool -o -name ltmain.sh`; do \
 		echo "Patching $$f"; \
