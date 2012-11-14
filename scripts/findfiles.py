@@ -10,7 +10,7 @@ def main():
 	(options, args) = parseArgs()
 
 	# Extract arguments
-	topDir = args[0]
+	topDir = os.path.abspath(args[0])
 	fileName = args[1]
 
 	# Go
@@ -19,7 +19,8 @@ def main():
 		# Remove directories to skip from list
 		i = 0
 		while i < len(dirNames):
-			if dirNames[i] in options.pruneList:
+			if dirNames[i] in options.pruneList \
+				or os.path.join(dirPath, dirNames[i]) in options.pruneList:
 				del dirNames[i]
 			else:
 				i += 1
