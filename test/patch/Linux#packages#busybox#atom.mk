@@ -88,10 +88,10 @@ busybox-config: busybox-xconfig
 .PHONY: busybox-clean
 busybox-clean:
 	$(Q)if [ -d $(BUSYBOX_SRC_DIR) ]; then \
-		$(MAKE) $(BUSYBOX_MAKE_ARGS) -C $(BUSYBOX_SRC_DIR) uninstall \
-			|| echo "Ignoring uninstall errors"; \
-		$(MAKE) $(BUSYBOX_MAKE_ARGS) -C $(BUSYBOX_SRC_DIR) clean \
-			|| echo "Ignoring clean errors"; \
+		$(MAKE) $(BUSYBOX_MAKE_ARGS) --ignore-errors \
+			-C $(BUSYBOX_SRC_DIR) uninstall || echo "Ignoring uninstall errors"; \
+		$(MAKE) $(BUSYBOX_MAKE_ARGS) --ignore-errors \
+			-C $(BUSYBOX_SRC_DIR) clean || echo "Ignoring clean errors"; \
 	fi
 
 $(call local-add-module)

@@ -95,13 +95,13 @@ ulng-cmd-install = \
 
 ulng-cmd-clean = \
 	if [ -d $(PRIVATE_SRC_DIR) ]; then \
-		$(AUTOTOOLS_MAKE_ENV) $(MAKE) $(AUTOTOOLS_MAKE_ARGS) \
+		$(AUTOTOOLS_MAKE_ENV) $(MAKE) $(AUTOTOOLS_MAKE_ARGS) --ignore-errors \
 			-C $(PRIVATE_SRC_DIR)/shlibs uninstall || echo "Ignoring uninstall errors"; \
-		$(AUTOTOOLS_MAKE_ENV) $(MAKE) $(AUTOTOOLS_MAKE_ARGS) \
+		$(AUTOTOOLS_MAKE_ENV) $(MAKE) $(AUTOTOOLS_MAKE_ARGS) --ignore-errors \
 			-C $(PRIVATE_SRC_DIR)/shlibs clean || echo "Ignoring uninstall clean"; \
-		$(AUTOTOOLS_MAKE_ENV) $(MAKE) $(AUTOTOOLS_MAKE_ARGS) \
+		$(AUTOTOOLS_MAKE_ENV) $(MAKE) $(AUTOTOOLS_MAKE_ARGS) --ignore-errors \
 			-C $(PRIVATE_SRC_DIR)/misc-utils uninstall || echo "Ignoring uninstall errors"; \
-		$(AUTOTOOLS_MAKE_ENV) $(MAKE) $(AUTOTOOLS_MAKE_ARGS) \
+		$(AUTOTOOLS_MAKE_ENV) $(MAKE) $(AUTOTOOLS_MAKE_ARGS) --ignore-errors \
 			-C $(PRIVATE_SRC_DIR)/misc-utils clean || echo "Ignoring clean errors"; \
 	fi; \
 	rm -f $(TARGET_OUT_STAGING)/sbin/blkid-ng

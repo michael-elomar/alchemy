@@ -37,8 +37,8 @@ ppp-cmd-install = \
 ppp-cmd-clean = \
 	if [ -d $(PRIVATE_SRC_DIR) ]; then \
 		$(AUTOTOOLS_CONFIGURE_ENV) $(AUTOTOOLS_MAKE_ENV) $(MAKE) \
-			$(AUTOTOOLS_MAKE_ARGS) -C $(PRIVATE_SRC_DIR) clean \
-		|| echo "Ignoring clean errors"; \
+			$(AUTOTOOLS_MAKE_ARGS) --ignore-errors \
+			-C $(PRIVATE_SRC_DIR) clean || echo "Ignoring clean errors"; \
 	fi; \
 	rm -rf $(TARGET_OUT_STAGING)/usr/include/pppd; \
 	rm -rf $(TARGET_OUT_STAGING)/usr/lib/pppd/2.4.5; \
