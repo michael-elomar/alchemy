@@ -162,6 +162,35 @@ LOCAL_CFLAGS += $(foreach __mod,$(all_depends), \
 all_internal_depends := $(LOCAL_PATH)/$(USER_MAKEFILE_NAME)
 
 ###############################################################################
+## Add debug flags.
+###############################################################################
+
+debug_CFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),CFLAGS)
+debug_CPPFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),CPPFLAGS)
+debug_LDFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),LDFLAGS)
+
+ifneq ("$(debug_CFLAGS)","")
+  ifneq ("$(V)","0")
+    $(info Adding '$(debug_CFLAGS)' to '$(LOCAL_MODULE)' CFLAGS)
+  endif
+  LOCAL_CFLAGS += $(debug_CFLAGS)
+endif
+
+ifneq ("$(debug_CPPFLAGS)","")
+  ifneq ("$(V)","0")
+    $(info Adding '$(debug_CPPFLAGS)' to '$(LOCAL_MODULE)' CPPFLAGS)
+  endif
+  LOCAL_CPPFLAGS += $(debug_CPPFLAGS)
+endif
+
+ifneq ("$(debug_LDFLAGS)","")
+  ifneq ("$(V)","0")
+    $(info Adding '$(debug_LDFLAGS)' to '$(LOCAL_MODULE)' LDFLAGS)
+  endif
+  LOCAL_LDFLAGS += $(debug_LDFLAGS)
+endif
+
+###############################################################################
 ## Actual rules.
 ###############################################################################
 

@@ -641,6 +641,16 @@ module-get-staging-filename = \
 	$(TARGET_OUT_STAGING)/$(__modules.$1.DESTDIR)/$(__modules.$1.MODULE_FILENAME)
 
 ###############################################################################
+## Debug cutomization access.
+## $1 : module name.
+## $2 : field name (CFLAGS, CPPFLAGS, LDFLAGS).
+###############################################################################
+module-get-debug-flags = $(strip \
+	$(if $(call strneq,$(origin debug.$1.$2),undefined), \
+		$(debug.$1.$2) \
+	))
+
+###############################################################################
 ## Generate autoconf.h file from config file.
 ## $1 : input config file.
 ## $2 : output autoconf.h file.

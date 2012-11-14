@@ -46,6 +46,21 @@ $(call delete-one-done-file,$(installed_file))
 endif
 
 ###############################################################################
+## Add debug flags.
+###############################################################################
+
+debug_CFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),CFLAGS)
+
+ifneq ("$(debug_CFLAGS)","")
+  ifneq ("$(V)","0")
+    $(info Adding '$(debug_CFLAGS)' to '$(LOCAL_MODULE)' CFLAGS)
+  endif
+  LOCAL_AUTOTOOLS_CONFIGURE_ENV += CFLAGS="$$CFLAGS $(debug_CFLAGS)"
+  LOCAL_AUTOTOOLS_CONFIGURE_ENV += CPPFLAGS="$$CPPFLAGS $(debug_CFLAGS)"
+  LOCAL_AUTOTOOLS_CONFIGURE_ENV += CXXFLAGS="$$CXXFLAGS $(debug_CFLAGS)"
+endif
+
+###############################################################################
 ## Default commands
 ###############################################################################
 

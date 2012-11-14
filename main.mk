@@ -166,6 +166,14 @@ $(call msg,+ TARGET_CC_PATH = $(TARGET_CC_PATH))
 $(call msg,+ TARGET_CC_VERSION = $(TARGET_CC_VERSION))
 $(info ----------------------------------------------------------------------)
 
+# User specific debug setup makefile
+ifneq ("$(wildcard $(TOP_DIR)/Alchemy-debug-setup.mk)","")
+  ifneq ("$(V)","0")
+    $(info Including debug setup makefile)
+  endif
+  include $(TOP_DIR)/Alchemy-debug-setup.mk
+endif
+
 ###############################################################################
 ## Makefile scan and includes.
 ###############################################################################
