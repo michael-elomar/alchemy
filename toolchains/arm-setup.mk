@@ -7,8 +7,11 @@
 ###############################################################################
 
 # Allow mix thumb/arm mode
+ifneq ("$(TARGET_OS)","ecos")
 TARGET_GLOBAL_CFLAGS += \
+	-fPIC \
 	-mthumb-interwork
+endif
 
 # arm v5te flags (to be used in cpu flags below)
 cflags_armv5te :=
