@@ -59,20 +59,15 @@ endif
 ecos-build: $(ECOS_MAKEFILE)
 	@echo "Building ecos"
 	$(Q)cd $(ECOS_BUILD_DIR) && $(MAKE) $(ECOS_MAKE_ARGS)
-	@echo "Building ecos : done"
+	@echo "Building ecos: done"
 
 # Module main rule
 $(ECOS_DONE_FILE): | ecos-build
 	@touch $@
 
-# Additional done file to be used in TARGET_GLOBAL_PREREQUISITES. Usind directly
-# ECOS_DONE_FILE causes in dependency loop.
-$(ECOS_BUILD_DIR)/$(LOCAL_MODULE)-installed.done: $(ECOS_DONE_FILE)
-	@touch $@
-
 # As a special exception, this variable is modified to make sure ecos is build
 # before anything happens
-TARGET_GLOBAL_PREREQUISITES += $(ECOS_BUILD_DIR)/$(LOCAL_MODULE)-installed.done
+TARGET_GLOBAL_PREREQUISITES += $(ECOS_DONE_FILE)
 
 # Additional clean variables
 LOCAL_CLEAN_DIRS +=$(ECOS_BUILD_DIR) $(ECOS_INSTALL_DIR)

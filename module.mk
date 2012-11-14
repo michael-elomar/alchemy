@@ -38,8 +38,9 @@ all_external_libraries := \
 		$(call module-get-build-filename,$(lib)))
 
 # List of all prerequisites (ours + dependencies)
+# Remove our build module from the list of global deps to avoid circular chain
 all_prerequisites := \
-	$(TARGET_GLOBAL_PREREQUISITES) \
+	$(filter-out $(LOCAL_BUILD_MODULE),$(TARGET_GLOBAL_PREREQUISITES)) \
 	$(LOCAL_PREREQUISITES) \
 	$(LOCAL_EXPORT_PREREQUISITES) \
 	$(all_external_libraries)
