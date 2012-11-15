@@ -31,7 +31,7 @@ def readerThread(p, fh, n):
 			sys.stderr.write("\n\033[31mMAKE ERROR DETECTED\n\033[00m")
 			# Kill the process group (so all sub-makes...)
 			shouldStop = True
-			os.killpg(0, signal.SIGTERM)
+			p.terminate()
 
 #===============================================================================
 #===============================================================================
@@ -48,12 +48,15 @@ def main():
 	signal.signal(signal.SIGINT, signalHandler)
 	signal.signal(signal.SIGTERM, signalHandler)
 
-	# call make with given arguments
-	cmdArgs = ["make"] + sys.argv[1:]
+	# call make with given arguments, stat in a shell so we can kill it
+	# and all its child automatically
+	cmdArgs = "make"
+	for arg in sys.argv[1:]:
+		cmdArgs += " \"" + arg + "\""
 	p = subprocess.Popen(cmdArgs,
 		stdout=subprocess.PIPE,
 		stderr=subprocess.PIPE,
-		shell=False)
+		shell=True)
 
 	# Start thread to read stdout/stderr
 	stdoutThread = threading.Thread(target=readerThread, args=(p, p.stdout, 1))
