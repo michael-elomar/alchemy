@@ -7,6 +7,6 @@
 SCRIPT_PATH=$(cd $(dirname ${BASH_SOURCE}) && pwd)
 SYSROOT=${SCRIPT_PATH}
 
-# Need to be root to chroot, be then go back to initial user
-sudo chroot --userspec=${UID}:${UID} ${SYSROOT} /bin/sh
+# Need to be root to chroot, but then go back to initial user
+sudo chroot --userspec=${UID}:${UID} ${SYSROOT} /bin/sh -l
 
