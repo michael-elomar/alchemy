@@ -19,8 +19,9 @@ import re
 # Directories to exclude
 EXCLUDE_DIRS = [
 	".git", ".repo",
-	"linux-headers", "include", "man",
-	"pkgconfig", "doc", "aclocal", "info", "locale"]
+	"linux-headers", "include",
+	"man", "doc", "html", "info",
+	"pkgconfig", "aclocal", "locale"]
 
 # Extension to exclude
 EXCLUDE_FILTERS = [".a", ".la", ".py", ".pyc", ".pyo"]
@@ -202,7 +203,7 @@ def writeMakefileFooter(options):
 #===============================================================================
 # Process a directory and copy dirs/files to final directory.
 #===============================================================================
-def processDir(rootDir, options):
+def processDir(rootDir, options, withEmptyDir):
 	for (dirPath, dirNames, fileNames) in os.walk(rootDir):
 		# exclude some directories
 		for dirName in EXCLUDE_DIRS:
@@ -212,13 +213,14 @@ def processDir(rootDir, options):
 				dirNames.remove(dirName)
 
 		# create directories (usefull for empty directories)
-		for dirName in dirNames:
-			srcDirName = os.path.join(dirPath, dirName)
-			relPath = os.path.relpath(srcDirName, rootDir)
-			dstDirName = os.path.join(options.finalDir, relPath)
-			logging.info("Directory : %s", relPath)
-			if not os.path.exists(dstDirName):
-				os.makedirs(dstDirName, 0755)
+		if withEmptyDir:
+			for dirName in dirNames:
+				srcDirName = os.path.join(dirPath, dirName)
+				relPath = os.path.relpath(srcDirName, rootDir)
+				dstDirName = os.path.join(options.finalDir, relPath)
+				logging.info("Directory : %s", relPath)
+				if not os.path.exists(dstDirName):
+					os.makedirs(dstDirName, 0755)
 
 		# copy files
 		for fileName in fileNames:
@@ -285,12 +287,12 @@ def main():
 	if options.makefile != None:
 		writeMakefileHeader(options)
 
-	# process staging directory
-	processDir(options.stagingDir, options)
+	# process staging directory (without empty dirs)
+	processDir(options.stagingDir, options, False)
 
-	# process skeleton directory
+	# process skeleton directory (with empty dirs)
 	if options.skelDir != None:
-		processDir(options.skelDir, options)
+		processDir(options.skelDir, options, True)
 
 	# process libc  directory
 	if options.toolchainLibcDir != None:
