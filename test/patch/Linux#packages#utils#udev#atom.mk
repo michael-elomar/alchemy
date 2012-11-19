@@ -76,7 +76,6 @@ udev-cmd-install = \
 	install -p $(PRIVATE_SRC_DIR)/libudev*.a* $(TARGET_OUT_STAGING)/lib; \
 	mkdir -p $(TARGET_OUT_STAGING)/lib/udev; \
 	install -p $(PRIVATE_SRC_DIR)/extras/usb_id/usb_id $(TARGET_OUT_STAGING)/lib/udev; \
-	mkdir -p $(TARGET_OUT_STAGING)/tmp/udev/dev; \
 	mkdir -p $(TARGET_OUT_STAGING)/usr/include; \
 	install -p $(PRIVATE_SRC_DIR)/libudev/libudev.h $(TARGET_OUT_STAGING)/usr/include; \
 	mkdir -p $(TARGET_OUT_STAGING)/sbin; \
@@ -90,7 +89,6 @@ udev-cmd-install = \
 		install-libLTLIBRARIES; \
 	mkdir -p $(TARGET_OUT_STAGING)/lib/udev; \
 	install -p $(PRIVATE_SRC_DIR)/extras/usb_id/usb_id $(TARGET_OUT_STAGING)/lib/udev; \
-	mkdir -p $(TARGET_OUT_STAGING)/tmp/udev/dev; \
 	mkdir -p $(TARGET_OUT_STAGING)/usr/include; \
 	install -p $(PRIVATE_SRC_DIR)/libudev/libudev.h $(TARGET_OUT_STAGING)/usr/include; \
 	mkdir -p $(TARGET_OUT_STAGING)/sbin; \
