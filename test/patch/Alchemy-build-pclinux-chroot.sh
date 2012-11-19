@@ -15,6 +15,7 @@ export TARGET_OUT_STAGING="${TARGET_OUT}/staging"
 export TARGET_OUT_FINAL="${TARGET_OUT}/final"
 export TARGET_CONFIG_DIR="${TOP_DIR}/Alchemy/test/config/${TARGET_PRODUCT}-${TARGET_PRODUCT_VARIANT}"
 export TARGET_SCAN_PRUNE_DIRS="Alchemy-out raptor"
+export TARGET_SKEL="${TOP_DIR}/Alchemy/test/native-chroot-skel"
 
 export USE_COLORS=1
 
