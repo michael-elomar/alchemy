@@ -251,6 +251,8 @@ $(LOCAL_BUILD_MODULE): | $(all_prerequisites)
 ###############################################################################
 
 ifeq ("$(copy_to_staging)","1")
+$(LOCAL_MODULE): $(LOCAL_STAGING_MODULE)
+$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(LOCAL_STAGING_MODULE)
 $(eval $(call copy-one-file,$(LOCAL_BUILD_MODULE),$(LOCAL_STAGING_MODULE)))
 endif
 

@@ -238,9 +238,6 @@ ifneq ("$(skip_include_deps)","1")
 endif
 endif
 
-# Additional module dependencies
-$(LOCAL_MODULE): $(LOCAL_BUILD_MODULE) $(LOCAL_STAGING_MODULE)
-
 # Make sure all prerequisites files are generated first
 # But do NOT force recompilation (order only)
 ifneq ("$(all_prerequisites)","")
@@ -252,7 +249,6 @@ $(all_objects): $(all_internal_depends)
 
 # Clean objects
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(build_dir)/$(LOCAL_MODULE).map
-$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(LOCAL_STAGING_MODULE)
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(all_objects)
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(all_objects:%.o=%.d)
 
