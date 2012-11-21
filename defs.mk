@@ -203,6 +203,10 @@ modules-LOCALS += FORCE_WHOLE_STATIC_LIBRARY
 modules-LOCALS += CLEAN_FILES
 modules-LOCALS += CLEAN_DIRS
 
+# Macro to be executed before installing binary in staging dir
+# It MUST be a macro that will execute commands, not directly commands
+modules-LOCALS += CMD_PRE_INSTALL
+
 # Autotools customization
 modules-LOCALS += AUTOTOOLS_VERSION
 modules-LOCALS += AUTOTOOLS_ARCHIVE
