@@ -26,7 +26,11 @@ LOCAL_BUILD_MODULE := $(call module-get-build-filename,$(LOCAL_MODULE))
 LOCAL_STAGING_MODULE := $(call module-get-staging-filename,$(LOCAL_MODULE))
 
 # Assemble the list of targets to create PRIVATE_ variables for.
-LOCAL_TARGETS := $(LOCAL_BUILD_MODULE) $(LOCAL_MODULE)-clean $(LOCAL_MODULE)-dirclean
+LOCAL_TARGETS := \
+	$(LOCAL_BUILD_MODULE) \
+	$(LOCAL_MODULE)-clean \
+	$(LOCAL_MODULE)-dirclean \
+	$(LOCAL_MODULE)-pre-install
 
 # Get external libraries used by static libraries
 LOCAL_EXTERNAL_LIBRARIES := \
@@ -263,6 +267,8 @@ endif
 .PHONY: $(LOCAL_MODULE)-pre-install
 $(LOCAL_MODULE)-pre-install:
 	+$(Q)$(if $(PRIVATE_CMD_PRE_INSTALL), $(call $(PRIVATE_CMD_PRE_INSTALL)))
+
+$(LOCAL_TARGETS): PRIVATE_CMD_PRE_INSTALL := $(LOCAL_CMD_PRE_INSTALL)
 
 # If a copy in staging is done do it before otherwise we can only hook before
 # build module is done...
