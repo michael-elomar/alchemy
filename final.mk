@@ -13,16 +13,20 @@
 MAKEFINAL_SCRIPT := $(BUILD_SYSTEM)/scripts/makefinal.py
 MAKEFINAL_ARGS := 
 
+ifneq ("$(TARGET_STRIP)","")
+  MAKEFINAL_ARGS += --strip="$(TARGET_STRIP)"
+endif
+
 ifneq ("$(TARGET_SKEL)","")
-  MAKEFINAL_ARGS += "--skel=$(TARGET_SKEL)"
+  MAKEFINAL_ARGS += --skel="$(TARGET_SKEL)"
 endif
 
 ifneq ("$(TOOLCHAIN_LIBC)","")
-  MAKEFINAL_ARGS += "--toolchain-libc=$(TOOLCHAIN_LIBC)"
+  MAKEFINAL_ARGS += --toolchain-libc="$(TOOLCHAIN_LIBC)"
 endif
 
 ifneq ("$(TOOLCHAIN_GDBSERVER)","")
-  MAKEFINAL_ARGS += "--toolchain-gdbserver=$(TOOLCHAIN_GDBSERVER)"
+  MAKEFINAL_ARGS += --toolchain-gdbserver="$(TOOLCHAIN_GDBSERVER)"
 endif
 
 ###############################################################################
@@ -55,18 +59,7 @@ final:
 	@echo "Generating final tree..."
 	$(Q)$(__final-prepare)
 	$(Q)$(MAKEFINAL_SCRIPT) $(MAKEFINAL_ARGS) \
-		--strip="$(TARGET_STRIP)" \
 		$(TARGET_OUT_STAGING) $(TARGET_OUT_FINAL)
 	$(Q)$(__final-finish)
 	@echo "Done generating final tree"
-
-# Generate final tree without stripping executables
-.PHONY: final-nostrip
-final-nostrip:
-	@echo "Generating final tree (no stripping)..."
-	$(Q)$(__final-prepare)
-	$(Q)$(MAKEFINAL_SCRIPT) $(MAKEFINAL_ARGS) \
-		$(TARGET_OUT_STAGING) $(TARGET_OUT_FINAL)
-	$(Q)$(__final-finish)
-	@echo "Done generating final tree (no stripping)"
 
