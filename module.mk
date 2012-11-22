@@ -272,9 +272,10 @@ $(LOCAL_TARGETS): PRIVATE_CMD_PRE_INSTALL := $(LOCAL_CMD_PRE_INSTALL)
 
 # If a copy in staging is done do it before otherwise we can only hook before
 # build module is done...
+# Order only prerequiqites to avoid recompilation...
 ifeq ("$(copy_to_staging)","1")
-$(LOCAL_STAGING_MODULE): $(LOCAL_MODULE)-pre-install
+$(LOCAL_STAGING_MODULE): | $(LOCAL_MODULE)-pre-install
 else
-$(LOCAL_BUILD_MODULE): $(LOCAL_MODULE)-pre-install
+$(LOCAL_BUILD_MODULE): | $(LOCAL_MODULE)-pre-install
 endif
 
