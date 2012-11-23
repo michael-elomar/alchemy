@@ -1,53 +1,66 @@
 #!/bin/bash
 
+DRYRUN=0
+if [ "$1" = "-n" ]; then
+	DRYRUN=1
+fi
+
 ORIG=$(pwd)
 PATCHDIR=${ORIG}/Alchemy/test/patch
 mkdir -p ${PATCHDIR}
 
-# Save some files
-if [ -f ${PATCHDIR}/Alchemy-create-patch.sh ]; then
-	cp -af ${PATCHDIR}/Alchemy-create-patch.sh /tmp
-fi
-if [ -f ${PATCHDIR}/Alchemy-apply-patch.sh ]; then
-	cp -af ${PATCHDIR}/Alchemy-apply-patch.sh /tmp
+if [ "${DRYRUN}" = "0" ]; then
+	# Save some files
+	if [ -f ${PATCHDIR}/Alchemy-create-patch.sh ]; then
+		cp -af ${PATCHDIR}/Alchemy-create-patch.sh /tmp
+	fi
+	if [ -f ${PATCHDIR}/Alchemy-apply-patch.sh ]; then
+		cp -af ${PATCHDIR}/Alchemy-apply-patch.sh /tmp
+	fi
+
+	# Delete all files
+	rm -f ${PATCHDIR}/*
+
+	# Restore saved files
+	if [ -f /tmp/Alchemy-create-patch.sh ]; then
+		cp -af /tmp/Alchemy-create-patch.sh ${PATCHDIR}
+	fi
+	if [ -f /tmp/Alchemy-apply-patch.sh ]; then
+		cp -af /tmp/Alchemy-apply-patch.sh ${PATCHDIR}
+	fi
 fi
 
-# Delete all files
-rm -f ${PATCHDIR}/*
+# get list of git repositories
+echo "Searching git repositories"
+readonly repolist=$(find -path ./Alchemy-out -prune -o -name ".git" -print)
 
-# Restore saved files
-if [ -f /tmp/Alchemy-create-patch.sh ]; then
-	cp -af /tmp/Alchemy-create-patch.sh ${PATCHDIR}
-fi
-if [ -f /tmp/Alchemy-apply-patch.sh ]; then
-	cp -af /tmp/Alchemy-apply-patch.sh ${PATCHDIR}
-fi
-
-# Search new files
-echo "Searching new files"
-filelist=" $(find \
-  -path ./Alchemy -prune \
-  -o -path ./Alchemy-out -prune \
-  -o -name atom.mk -print \
-  -o -name blues-config.h -print \
-  -o -name blues-stub.c -print \
-  -o -name ConfigHSTIGenerator.in -print \
-  -o -name svox-stub.c -print \
-  -o -name pal_main.c -print \
-  -o -name tcpdump-4.1.1-configure.patch -print \
-  -o -name valgrind-3.6.1-extern.patch -print ) \
-  Alchemy-build-*.sh \
-"
+filelist=Alchemy-build-*.sh
 
 echo "Copying files"
-for file in ${filelist}; do
+for file in Alchemy-build-*.sh; do
 	# remove leading './'
 	file=${file#./}
 	# replace '/' by '#' and .patch by .patch_
 	name=$(echo ${file} | sed -e "s/\\//#/g" | sed -e "s/\\.patch/\\.patch_/g")
 	echo "${file} -> ${name}"
-	cp -pf ${file} ${PATCHDIR}/${name}
+	if [ "${DRYRUN}" = "0" ]; then
+		cp -pf ${file} ${PATCHDIR}/${name}
+	fi
 done
+
+function copy_new_files()
+{
+	# get new files
+	NEW_FILES=$(git status -u --porcelain | grep \?\? | cut -b4-)
+	for file in ${NEW_FILES}; do
+		# replace '/' by '#' and .patch by .patch_
+		name=$(echo $1/${file} | sed -e "s/\\//#/g" | sed -e "s/\\.patch/\\.patch_/g")
+		echo "$1/${file} -> ${name}"
+		if [ "${DRYRUN}" = "0" ]; then
+			cp -af ${file} ${PATCHDIR}/${name}
+		fi
+	done
+}
 
 function save_patch()
 {
@@ -61,20 +74,18 @@ function save_patch()
 			name=$(echo $1 | sed -e "s/\\//#/g")
 		fi
 		echo "$1 -> ${name}.patch"
-		git --no-pager diff > ${PATCHDIR}/${name}.patch
+		if [ "${DRYRUN}" = "0" ]; then
+			git --no-pager diff > ${PATCHDIR}/${name}.patch
+		fi
 	fi
 }
 
-# get list of git repositories
-echo "Searching git repositories"
-readonly repolist=$(find -path ./Alchemy-out -prune -o -name ".git" -print)
-
-echo "Generating git patches"
 for repo in ${repolist}; do
 	# remove trailing '/.git' and leading './'
 	repopath=${repo%/.git}
 	repopath=${repopath#./}
 	if [ "${repopath}" != "Alchemy" -a "${repopath}" != "Alchemy-patch" -a "${repopath}" != "Alchemy-config" ]; then
+		(cd ${repopath} && copy_new_files ${repopath})
 		(cd ${repopath} && save_patch ${repopath})
 	fi
 done
