@@ -62,7 +62,7 @@ index 8206851..d193dc1 100644
 +
 +#endif // ALCHEMY_BUILD
 diff --git a/core/src/generic/backtrace.c b/core/src/generic/backtrace.c
-index a588c80..4fdf374 100644
+index be8e3d2..e9b112f 100644
 --- a/core/src/generic/backtrace.c
 +++ b/core/src/generic/backtrace.c
 @@ -8,10 +8,289 @@

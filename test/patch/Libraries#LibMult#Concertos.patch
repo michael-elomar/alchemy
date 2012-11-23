@@ -1,8 +1,8 @@
 diff --git a/Sources/MediaSources/Java/JavaSourceList.cpp b/Sources/MediaSources/Java/JavaSourceList.cpp
-index 7b2938f..d73830e 100644
+index 677f45b..132e81e 100644
 --- a/Sources/MediaSources/Java/JavaSourceList.cpp
 +++ b/Sources/MediaSources/Java/JavaSourceList.cpp
-@@ -215,6 +215,7 @@ public:
+@@ -216,6 +216,7 @@ public:
  							 Concertos_MediaSource_Cnx connectivity, Concertos_MediaSource_Features features,
  							 bool connected)
  	{
@@ -10,7 +10,7 @@ index 7b2938f..d73830e 100644
  		Concertos_Java_Parameters params;
  		Concertos_Java_InitParameters(&params);
  		params.serviceId = serviceId;
-@@ -226,6 +227,7 @@ public:
+@@ -227,6 +228,7 @@ public:
  		params.features = features;
  		params.connected = connected;
  		Concertos_Java_RegisterEx(m_instance, &params, m_config);

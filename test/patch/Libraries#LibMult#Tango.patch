@@ -17,7 +17,7 @@ index 24007ec..0552c6e 100644
  
 +#endif // TANGO_USE_FLAC_DECODER
 diff --git a/Sources/pfd/pfd_codec_heaac.c b/Sources/pfd/pfd_codec_heaac.c
-index c6bc514..e185740 100644
+index cc6798f..c2eea97 100644
 --- a/Sources/pfd/pfd_codec_heaac.c
 +++ b/Sources/pfd/pfd_codec_heaac.c
 @@ -28,9 +28,9 @@
@@ -31,7 +31,7 @@ index c6bc514..e185740 100644
  #include "TELPLAYERWRAPPER.h"
  #endif
  
-@@ -173,7 +173,7 @@ static void Pfd_Heaac_Cache_Read(Pfd_Heaac_Cache *c, int8_t *buffer, int64_t off
+@@ -184,7 +184,7 @@ static void Pfd_Heaac_Cache_Read(Pfd_Heaac_Cache *c, int8_t *buffer, int64_t off
              }
  
              //PFD_TRACE("Read %d from file\n", s);
@@ -40,7 +40,7 @@ index c6bc514..e185740 100644
              if (r < s)
              {
                  // couldn't read all, FAIL
-@@ -211,6 +211,7 @@ static void Pfd_Heaac_Cache_Read(Pfd_Heaac_Cache *c, int8_t *buffer, int64_t off
+@@ -222,6 +222,7 @@ static void Pfd_Heaac_Cache_Read(Pfd_Heaac_Cache *c, int8_t *buffer, int64_t off
      Pfd_CurrentSettings.CurrentSong->Handler.Aac->seekPosition = o + *size;
  }
  
@@ -48,7 +48,7 @@ index c6bc514..e185740 100644
  void Pfd_Heaac_GetData(int8* pBuffer, uint64 fileoffset, uint32 *pBytesRead)
  {
      int64_t offset = (int64_t) fileoffset;
-@@ -229,6 +230,7 @@ void Pfd_Heaac_GetData(int8* pBuffer, uint64 fileoffset, uint32 *pBytesRead)
+@@ -240,6 +241,7 @@ void Pfd_Heaac_GetData(int8* pBuffer, uint64 fileoffset, uint32 *pBytesRead)
  
      //PFD_TRACE("Returned %d\n", read);
  }
@@ -57,7 +57,7 @@ index c6bc514..e185740 100644
  PFD_ERR Pfd_Heaac_ParseInit(PFD_SONGDESC * Desc)
  {
 diff --git a/Sources/pfd/pfd_types.h b/Sources/pfd/pfd_types.h
-index 96b125f..29dc688 100644
+index 8fc2c49..d85e279 100644
 --- a/Sources/pfd/pfd_types.h
 +++ b/Sources/pfd/pfd_types.h
 @@ -19,7 +19,10 @@
@@ -72,7 +72,7 @@ index 96b125f..29dc688 100644
  
  typedef U32 PFD_STATUS;
  
-@@ -94,7 +97,11 @@ typedef struct {
+@@ -96,7 +99,11 @@ typedef struct {
  
  typedef struct
  {
