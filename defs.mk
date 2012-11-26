@@ -19,6 +19,12 @@ space4 := $(space)$(space)$(space)$(space)
 true := T
 false :=
 
+# New line definition, please keep the two and only two empty lines in the macro
+define endl
+
+
+endef
+
 # Return negation of argument.
 # $1 : input boolean argument.
 not = $(if $1,$(false),$(true))
@@ -268,50 +274,6 @@ modules-fields-depends := \
 modules-fields := \
 	$(modules-fields-depends) \
 	$(modules-LOCALS)
-
-###############################################################################
-## Dump all module information. Only use this for debugging.
-###############################################################################
-modules-dump-database = \
-	$(info --------------------) \
-	$(info Modules: $(sort $(__modules))) \
-	$(foreach __mod,$(sort $(__modules)), \
-		$(info --------------------) \
-		$(info $(__mod):) \
-		$(foreach __field,$(modules-fields), \
-			$(eval __fieldval := $(strip $(__modules.$(__mod).$(__field)))) \
-			$(call __dump-field,$(__field),$(__fieldval)) \
-		) \
-	) \
-	$(info --------------------)
-
-# This will only dump dependencies
-modules-dump-database-depends = \
-	$(info --------------------) \
-	$(info Modules: $(sort $(__modules))) \
-	$(foreach __mod,$(sort $(__modules)), \
-		$(info --------------------) \
-		$(info $(__mod):) \
-		$(foreach __field,$(modules-fields-depends), \
-			$(eval __fieldval := $(strip $(__modules.$(__mod).$(__field)))) \
-			$(call __dump-field,$(__field),$(__fieldval)) \
-		) \
-	) \
-	$(info --------------------)
-
-# Dump a field if not empty
-# $1 : field name
-# $2 : field value
-__dump-field = \
-	$(if $2, \
-		$(if $(filter 1,$(words $2)), \
-			$(info $(space4)$1: $2), \
-			$(info $(space4)$1: ) \
-			$(foreach __fielditem,$2, \
-				$(info $(space4)$(space4)$(__fielditem)) \
-			) \
-		) \
-	)
 
 ###############################################################################
 ## Add a module in the build system and save its LOCAL_xxx variables.

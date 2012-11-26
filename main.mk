@@ -98,7 +98,7 @@ endif
 
 # Skip some steps for some make goals
 __clean-targets := clean dirclean clobber
-__query-targets := scan help help-modules dump dump-depends build-graph
+__query-targets := scan help help-modules dump dump-depends dump-xml build-graph
 __config-targets := config config-check config-update xconfig menuconfig nconfig
 __fs-targets := final final-nostrip plf
 __skip_targets := \
@@ -375,19 +375,12 @@ clobber:
 	$(Q)rm -rf $(TARGET_OUT_STAGING)
 	$(Q)rm -rf $(TARGET_OUT_FINAL)
 
-# Dump the module database for debuging the build system
-.PHONY: dump
-dump:
-	$(call modules-dump-database)
-
-# Dump the module database for debuging the build system
-.PHONY: dump-depends
-dump-depends:
-	$(call modules-dump-database-depends)
-
 # Dummy target to check internal variables
 .PHONY: check
 check:
+
+# Dump internal database
+include $(BUILD_SYSTEM)/dump-database.mk
 
 # Graph of build dependencies
 include $(BUILD_SYSTEM)/build-graph.mk
