@@ -35,7 +35,6 @@ cdl_configuration eCos {
     package -hardware CYGPKG_HAL_ARM_ARM9_P6DEV current ;
     package -hardware CYGPKG_IO_SERIAL_ARM_P6DEV current ;
     package -hardware CYGPKG_IO_SERIAL_ARM_PARROT5 current ;
-    package CYGPKG_RAMBOOT current ;
     package CYGPKG_UTILS current ;
     package CYGPKG_CRC current ;
     package CYGPKG_COMPRESS_ZLIB current ;
