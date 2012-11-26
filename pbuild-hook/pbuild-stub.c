@@ -87,19 +87,6 @@ int pal_log_dyn_get_modules(const char **modules[])
 }
 
 /**
- * Register a library description.
- * @param data : library data. No copy is done, so it shall reside in memory
- * until the end of the program. It is also modified when added in the linked
- * list.
- * @remarks : it is not thread safe so it shall only be called during init
- */
-void pal_lib_desc_add(struct pal_lib_desc_data *data)
-{
-	data->next = pal_lib_desc_head;
-	pal_lib_desc_head = data;
-}
-
-/**
  * Get the description of a library.
  * @param lib : library to query.
  * @return description of the library.
@@ -117,6 +104,24 @@ const char *pal_lib_desc_get(const char *lib)
 
 	/* not found */
 	return NULL;
+}
+
+/**
+ * Register a library description.
+ * @param data : library data. No copy is done, so it shall reside in memory
+ * until the end of the program. It is also modified when added in the linked
+ * list.
+ * @remarks : it is not thread safe so it shall only be called during init
+ */
+void pal_lib_desc_add(struct pal_lib_desc_data *data)
+{
+	const char *desc = pal_lib_desc_get(data->lib);
+
+	/* only add if not already present */
+	if (desc == NULL || strcmp(desc, data->desc) != 0) {
+		data->next = pal_lib_desc_head;
+		pal_lib_desc_head = data;
+	}
 }
 
 /**

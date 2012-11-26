@@ -710,17 +710,23 @@ print-banner2 = \
 ###############################################################################
 ## Macro called during link.
 ## $1 : module name.
-## $2 : module path.
-## $3 : name of the binary being linked.
-## $4 : list of object files as well as static libraries used during link.
+## $2 : name of the binary being linked.
+## $3 : list of object files as well as static libraries used during link.
 ## It returns additional object files to add in link.
+##
+## The pbuild hook will be given the list of all dependencies of the module.
 ###############################################################################
-link-hook = \
+link-hook = $(strip \
 	$(if $(PRIVATE_PBUILD_HOOK), \
+		$(eval __depsdata := $(empty)) \
+		$(foreach __lib,$(__modules.$1.depends.all), \
+			$(eval __deps_data += $(__lib):$(__modules.$(__lib).PATH)) \
+		)\
 		$(shell $(BUILD_SYSTEM)/pbuild-hook/pbuild-link-hook.sh \
-			"$(TARGET_NM)" "$(TARGET_CC) $(TARGET_GLOBAL_CFLAGS)" $1 $2 $3 $4 \
+			"$(TARGET_NM)" "$(TARGET_CC) $(TARGET_GLOBAL_CFLAGS)" \
+			$1 $2 "$(__deps_data)" $3 \
 		) \
-	)
+	))
 
 ###############################################################################
 ## Commands to generate a precompiled file.
@@ -825,15 +831,15 @@ $(Q)$(TARGET_CXX) \
 	-Wl,--as-needed \
 	$(PRIVATE_LDFLAGS) \
 	$(PRIVATE_ALL_OBJECTS) \
+	$(call link-hook,$(PRIVATE_MODULE),$@, \
+		$(PRIVATE_ALL_OBJECTS) \
+		$(PRIVATE_ALL_STATIC_LIBRARIES) \
+		$(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES)) \
 	-Wl,--whole-archive \
 	$(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES) \
 	-Wl,--no-whole-archive \
 	$(PRIVATE_ALL_STATIC_LIBRARIES) \
 	$(PRIVATE_ALL_SHARED_LIBRARIES) \
-	$(call link-hook,$(PRIVATE_MODULE),$(PRIVATE_PATH),$@, \
-		$(PRIVATE_ALL_OBJECTS) \
-		$(PRIVATE_ALL_STATIC_LIBRARIES) \
-		$(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES)) \
 	-o $@ \
 	$(PRIVATE_LDLIBS) \
 	$(TARGET_GLOBAL_LDLIBS_SHARED)
@@ -854,15 +860,15 @@ $(Q)$(TARGET_CXX) \
 	-Wl,--as-needed \
 	$(PRIVATE_LDFLAGS) \
 	$(PRIVATE_ALL_OBJECTS) \
+	$(call link-hook,$(PRIVATE_MODULE),$@, \
+		$(PRIVATE_ALL_OBJECTS) \
+		$(PRIVATE_ALL_STATIC_LIBRARIES) \
+		$(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES)) \
 	-Wl,--whole-archive \
 	$(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES) \
 	-Wl,--no-whole-archive \
 	$(PRIVATE_ALL_STATIC_LIBRARIES) \
 	$(PRIVATE_ALL_SHARED_LIBRARIES) \
-	$(call link-hook,$(PRIVATE_MODULE),$(PRIVATE_PATH),$@, \
-		$(PRIVATE_ALL_OBJECTS) \
-		$(PRIVATE_ALL_STATIC_LIBRARIES) \
-		$(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES)) \
 	-o $@ \
 	$(PRIVATE_LDLIBS) \
 	$(TARGET_GLOBAL_LDLIBS)

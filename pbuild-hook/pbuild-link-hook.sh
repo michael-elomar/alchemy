@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Check argument count, do NOT display anything on stdout
 if [ $# -lt 5 ]; then
@@ -6,14 +6,14 @@ if [ $# -lt 5 ]; then
 fi
 
 # Get full path to this script
-SCRIPT_PATH=`(cd $(dirname $0) && pwd)`
+SCRIPT_PATH=$(cd $(dirname $0) && pwd)
 
 # Get parameters
 NM=$1
 CC=$2
 MODULE_NAME=$3
-MODULE_PATH=$4
-OUT_DIR=$(dirname $5)
+OUT_DIR=$(dirname $4)
+DEPS_DATA=$5
 shift 5
 OBJECTS=$*
 
@@ -27,12 +27,20 @@ rm -f ${OUT_OBJ}
 touch ${OUT_SRC}
 
 ###############################################################################
+## Write in output.
+###############################################################################
+function outwrite()
+{
+	echo "$1" >> ${OUT_SRC}
+}
+
+###############################################################################
 ## Banner.
 ###############################################################################
-echo "/*" >> ${OUT_SRC}
-echo " * GENERATED FILE, DO NOT MODIFY" >> ${OUT_SRC}
-echo " */" >> ${OUT_SRC}
-echo "" >> ${OUT_SRC}
+outwrite "/*"
+outwrite " * GENERATED FILE, DO NOT MODIFY"
+outwrite " */"
+outwrite ""
 
 ###############################################################################
 ## plog dynamic level.
@@ -52,97 +60,116 @@ SYMBOLS=$( \
 if [ "${SYMBOLS}" != "" ]; then
 
 	# Level definition shall be in extern "C" block
-	echo "extern \"C\" {" >> ${OUT_SRC}
-	echo "" >> ${OUT_SRC}
+	outwrite "extern \"C\" {"
+	outwrite ""
 
 	# Shall be the same structure than in 'pbuild-stub.c'
-	echo "struct pal_log_dyn_data {" >> ${OUT_SRC}
-	echo "    int *level;" >> ${OUT_SRC}
-	echo "    const char *ident;" >> ${OUT_SRC}
-	echo "    struct pal_log_dyn_data *next;" >> ${OUT_SRC}
-	echo "};" >> ${OUT_SRC}
-	echo "" >> ${OUT_SRC}
-	echo "void pal_log_dyn_add(struct pal_log_dyn_data *data);" >> ${OUT_SRC}
-	echo "" >> ${OUT_SRC}
+	outwrite "struct pal_log_dyn_data {"
+	outwrite "    int *level;"
+	outwrite "    const char *ident;"
+	outwrite "    struct pal_log_dyn_data *next;"
+	outwrite "};"
+	outwrite ""
+	outwrite "void pal_log_dyn_add(struct pal_log_dyn_data *data);"
+	outwrite ""
 
 	# Define levels and data structure
 	for x in ${SYMBOLS}; do
-		echo "int ${x} = 3;" >> ${OUT_SRC}
-		echo "static struct pal_log_dyn_data ${x}_data =" >> ${OUT_SRC}
-		echo "    {&${x}, \"${x#pal_log_dyn_level_}\", 0};" >> ${OUT_SRC}
-		echo "" >> ${OUT_SRC}
+		outwrite "int ${x} = 3;"
+		outwrite "static struct pal_log_dyn_data ${x}_data ="
+		outwrite "    {&${x}, \"${x#pal_log_dyn_level_}\", 0};"
+		outwrite ""
 	done
 
-	echo "}" >> ${OUT_SRC}
-	echo "" >> ${OUT_SRC}
+	# End of extern "C" block
+	outwrite "}"
+	outwrite ""
 
 	# Use a global class object in anonymous namespace to do load time registration
-	echo "namespace {" >> ${OUT_SRC}
-	echo "" >> ${OUT_SRC}
+	outwrite "namespace {"
+	outwrite ""
 
-	echo "class pal_log_dyn_init {" >> ${OUT_SRC}
-	echo "public:" >> ${OUT_SRC}
+	# Start class declaration
+	outwrite "class pal_log_dyn_init {"
+	outwrite "public:"
 
 	# Register levels in constructor
-	echo "    pal_log_dyn_init() {" >> ${OUT_SRC}
+	outwrite "    pal_log_dyn_init() {"
 	for x in ${SYMBOLS}; do
-		echo "        pal_log_dyn_add(&${x}_data);" >> ${OUT_SRC}
+		outwrite "        pal_log_dyn_add(&${x}_data);"
 	done
-	echo "    }" >> ${OUT_SRC}
+	outwrite "    }"
 
-	echo "} pal_log_dyn_init_obj;" >> ${OUT_SRC}
-	echo "" >> ${OUT_SRC}
+	# End of class declaration + global object
+	outwrite "} pal_log_dyn_init_obj;"
+	outwrite ""
 
-	echo "}" >> ${OUT_SRC}
-	echo "" >> ${OUT_SRC}
+	# End of anonymous namespace
+	outwrite "}"
+	outwrite ""
 
 fi
 
 ###############################################################################
 ## Library describe
 ###############################################################################
-LIB_DESC=$(cd ${MODULE_PATH} && ${SCRIPT_PATH}/describe.sh)
 
-if [ "${LIB_DESC}" != "" ]; then
+if [ "${DEPS_DATA}" != "" ]; then
 	# Definition shall be in extern "C" block
-	echo "extern \"C\" {" >> ${OUT_SRC}
-	echo "" >> ${OUT_SRC}
+	outwrite "extern \"C\" {"
+	outwrite ""
 
 	# Shall be the same structure than in 'pbuild-stub.c'
-	echo "struct pal_lib_desc_data {" >> ${OUT_SRC}
-	echo "    const char *lib;" >> ${OUT_SRC}
-	echo "    const char *desc;" >> ${OUT_SRC}
-	echo "    struct pal_lib_desc_data *next;" >> ${OUT_SRC}
-	echo "};" >> ${OUT_SRC}
-	echo "" >> ${OUT_SRC}
-	echo "void pal_lib_desc_add(struct pal_lib_desc_data *data);" >> ${OUT_SRC}
-	echo "" >> ${OUT_SRC}
+	outwrite "struct pal_lib_desc_data {"
+	outwrite "    const char *lib;"
+	outwrite "    const char *desc;"
+	outwrite "    struct pal_lib_desc_data *next;"
+	outwrite "};"
+	outwrite ""
+	outwrite "void pal_lib_desc_add(struct pal_lib_desc_data *data);"
+	outwrite ""
 
 	# Data structure
-	echo "static struct pal_lib_desc_data lib_desc_data =" >> ${OUT_SRC}
-	echo "    {\"${MODULE_NAME}\", \"${LIB_DESC}\"};" >> ${OUT_SRC}
-	echo "" >> ${OUT_SRC}
+	outwrite "static struct pal_lib_desc_data lib_desc_data[] = {"
+	for x in ${DEPS_DATA}; do
+		lib=$(echo "${x}" | cut -d: -f1)
+		path=$(echo "${x}" | cut -d: -f2)
+		pattern=$(echo "${lib}" | cut -d- -f1)
+		# TODO: using describe for all libs of all module is too much.
+		# Only use SHA1 for the moment. See if possible to store this
+		# information in module database.
+#		desc=$(cd ${path} && ${SCRIPT_PATH}/describe.sh ${pattern})
+		desc=$(cd ${path} && git rev-parse HEAD 2>/dev/null)
+		outwrite "    {\"${lib}\", \"${desc}\", 0},"
+	done
+	outwrite "    {0, 0, 0}"
+	outwrite "};"
 
-	echo "}" >> ${OUT_SRC}
-	echo "" >> ${OUT_SRC}
+	# End of extern "C" block
+	outwrite "}"
+	outwrite ""
 
 	# Use a global class object in anonymous namespace to do load time registration
-	echo "namespace {" >> ${OUT_SRC}
-	echo "" >> ${OUT_SRC}
+	outwrite "namespace {"
+	outwrite ""
 
-	echo "class pal_lib_desc_init {" >> ${OUT_SRC}
-	echo "public:" >> ${OUT_SRC}
+	# Start class declaration
+	outwrite "class pal_lib_desc_init {"
+	outwrite "public:"
 
-	# Register levels in constructor
-	echo "    pal_lib_desc_init() {" >> ${OUT_SRC}
-	echo "        pal_lib_desc_add(&lib_desc_data);" >> ${OUT_SRC}
-	echo "    }" >> ${OUT_SRC}
+	# Register data in constructor
+	outwrite "    pal_lib_desc_init() {"
+	outwrite "        for (int i = 0; lib_desc_data[i].lib != 0; i++)"
+	outwrite "            pal_lib_desc_add(&lib_desc_data[i]);"
+	outwrite "    }"
 
-	echo "} pal_lib_desc_init_obj;" >> ${OUT_SRC}
-	echo "" >> ${OUT_SRC}
+	# End of class declaration + global object
+	outwrite "} pal_lib_desc_init_obj;"
+	outwrite ""
 
-	echo "}" >> ${OUT_SRC}
-	echo "" >> ${OUT_SRC}
+	# End of anonymous namespace
+	outwrite "}"
+	outwrite ""
 
 fi
 
