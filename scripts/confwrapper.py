@@ -37,23 +37,98 @@ KCONFIG_BIN_DIR = os.path.join(SCRIPT_PATH, "../kconfig/bin-linux-" + ARCH)
 KCONFIG_TITLE = "Alchemy Configuration"
 
 #===============================================================================
+# Group class.
+#===============================================================================
+class Group:
+	def __init__(self, parent, name):
+		self.parent = parent
+		self.name = name
+		self.subGroups = []
+		self.modules = []
+		if parent != None:
+			parent.subGroups.append(self)
+
+	# Get subgroup having given name, creating it if needed
+	def getSubGroup(self, name):
+		for group in self.subGroups:
+			if group.name == name:
+				return group
+		return Group(self, name)
+
+	def __repr__(self):
+		return "{name=%s,subGroups=%s,modules=%s}" % \
+				(self.name, str(self.subGroups), str(self.modules))
+
+#===============================================================================
 # Encapsulate module information.
 #===============================================================================
 class Module:
 	def __init__(self, arg):
 		fields = arg.split(ARG_FIELD_SEP)
 		self.name = ""
+		self.groupPath = ""
 		self.configPath = ""
 		self.configInPathList = []
 		if len(fields) > 0:
 			self.name = fields[0]
 		if len(fields) > 1:
-			self.configPath = fields[1]
+			self.groupPath = fields[1].rstrip("/")
 		if len(fields) > 2:
-			self.configInPathList = fields[2:]
+			self.configPath = fields[2]
+		if len(fields) > 3:
+			self.configInPathList = fields[3:]
+
+	def __repr__(self):
+		return "{name=%s,groupPath=%s,configPath=%s,configInPathList=%s}" % \
+				(self.name, self.groupPath, self.configPath, str(self.configInPathList))
 
 #===============================================================================
-# Expand a list of string as a string with items separated by comma.
+# Simplify tree of groups by moving up modules to first non-empty parent.
+#===============================================================================
+def simplifyGroupTree(group):
+	# If we have only one sub-group and no modules, move up our sub group
+	if len(group.subGroups) == 1 and len(group.modules) == 0:
+		group.modules = group.subGroups[0].modules
+		if group.name != "":
+			group.name += "/" + group.subGroups[0].name
+		else:
+			group.name = group.subGroups[0].name
+		group.subGroups = group.subGroups[0].subGroups
+		# Start again with this group
+		simplifyGroupTree(group)
+
+	# If we have no sub-groups and only one module, move up if no previous up
+	# were done (name does not have '/' )
+	if len(group.subGroups) == 0 and len(group.modules) == 1 \
+			and group.name.find("/") < 0 and group.parent != None:
+		group.parent.modules.append(group.modules[0])
+		group.parent.subGroups.remove(group)
+
+	# Go down (make a copy of list before as we may change it)
+	for subGroup in group.subGroups[:]:
+		simplifyGroupTree(subGroup)
+
+#===============================================================================
+# Build the tree of groups of modules.
+# modules: list of modules to put in tree.
+#===============================================================================
+def buildGroupTree(modules):
+	# Create root first
+	groupRoot = Group(None, "")
+	for module in modules:
+		# Get group path, split it in components
+		components = module.groupPath.split("/")
+		group = groupRoot
+		for component in components:
+			# Get next subgroup, creating it if needed
+			group = group.getSubGroup(component)
+		# Add module in this group
+		group.modules.append(module)
+	simplifyGroupTree(groupRoot)
+	return groupRoot
+
+#===============================================================================
+# Expand a list of strings as a string with items separated by comma.
 #===============================================================================
 def expandListStr(itemList):
 	res = ""
@@ -149,17 +224,25 @@ def writeModuleConfigIn(outFile, module):
 	outFile.write("endmenu\n")
 
 #===============================================================================
-# Write the config.in file for the full configuration.
+# Write the config.in file for the full configuration. It recursively descends
+# in group to creat the file.
 # outFile : output file object.
-# module : list of modules.
+# group : group to process.
 #===============================================================================
-def writeFullConfigIn(outFile, modules):
-	for module in modules:
+def writeFullConfigIn(outFile, group):
+
+	# Start new group
+	if group.name != "":
+		outFile.write("menu '%s'\n" % group.name)
+
+	# Descend in sub group first
+	for subGroup in group.subGroups:
+		writeFullConfigIn(outFile, subGroup)
+
+	# Process modules
+	for module in group.modules:
 		buildDefine = "ALCHEMY_BUILD_" + getDefine(module.name)
-		if len(module.configInPathList) > 0:
-			outFile.write("menuconfig %s\n" % buildDefine)
-		else:
-			outFile.write("config %s\n" % buildDefine)
+		outFile.write("menuconfig %s\n" % buildDefine)
 
 		outFile.write("  bool '%s'\n" % module.name)
 		outFile.write("  default y\n")
@@ -177,8 +260,16 @@ def writeFullConfigIn(outFile, modules):
 			for configInPath in module.configInPathList:
 				outFile.write("source %s\n" % configInPath)
 			outFile.write("\n")
+			outFile.write("config ALCHEMY_ENDFILE_%s\n" % getDefine(module.name))
+			outFile.write("  string\n")
+			outFile.write("  default ''\n")
+			outFile.write("\n")
 			outFile.write("endif\n")
 			outFile.write("\n")
+
+	# End of group
+	if group.name != "":
+			outFile.write("endmenu\n")
 
 #===============================================================================
 # Write the header of the config file.
@@ -215,25 +306,18 @@ def prepareModuleConfig(module):
 	prepareConfig(module.configPath)
 
 #===============================================================================
-# Prepare the full configuration for edition.
+# Write a group of module configuration. It recursively descend in the tree.
 # outFile : output file object.
-# modules : list of modules to edit.
-# mainConfigPath : main config path.
+# group : group to write.
+# mainConfig : main configuration file content.
 #===============================================================================
-def prepareFullConfig(outFile, modules, mainConfigPath):
-	# Read main configuration file
-	mainConfig = []
-	try:
-		mainConfigFile = open(mainConfigPath, "r")
-		mainConfig = mainConfigFile.read().split("\n")
-		mainConfigFile.close()
-	except IOError as ex:
-		logging.error("Unable to open file: %s [err=%d %s]",
-			mainConfigPath, ex.errno, ex.strerror)
+def writeConfigGroup(outFile, group, mainConfig):
+	# Sub groups
+	for subGroup in group.subGroups:
+		writeConfigGroup(outFile, subGroup, mainConfig)
 
-	# Write header followed by modules
-	writeConfigHeader(outFile)
-	for module in modules:
+	# Modules
+	for module in group.modules:
 		moduleBuildDefine = "CONFIG_ALCHEMY_BUILD_" + getDefine(module.name)
 		moduleBuildDefineSet = moduleBuildDefine + "=y"
 		moduleBuildDefineNotSet = "# " + moduleBuildDefine + " is not set"
@@ -248,6 +332,7 @@ def prepareFullConfig(outFile, modules, mainConfigPath):
 			# (if some can be configured though)
 			if len(module.configInPathList) > 0:
 				moduleFileDefine = "CONFIG_ALCHEMY_FILE_" + getDefine(module.name)
+				moduleEndFileDefine = "CONFIG_ALCHEMY_ENDFILE_" + getDefine(module.name)
 				outFile.write("%s=\"%s\"\n" % (moduleFileDefine, module.configPath))
 				# Read module configuration file
 				moduleConfig = []
@@ -263,6 +348,28 @@ def prepareFullConfig(outFile, modules, mainConfigPath):
 				lastEmpty = (len(moduleConfig) > 0 and len(moduleConfig[-1]) == 0)
 				for line in (moduleConfig[8:-1] if lastEmpty else moduleConfig[8:]):
 					outFile.write(line + "\n")
+				outFile.write("%s=\"\"\n" % moduleEndFileDefine)
+
+#===============================================================================
+# Prepare the full configuration for edition.
+# outFile : output file object.
+# group : root of group with modules.
+# mainConfigPath : main config path.
+#===============================================================================
+def prepareFullConfig(outFile, group, mainConfigPath):
+	# Read main configuration file
+	mainConfig = []
+	try:
+		mainConfigFile = open(mainConfigPath, "r")
+		mainConfig = mainConfigFile.read().split("\n")
+		mainConfigFile.close()
+	except IOError as ex:
+		logging.error("Unable to open file: %s [err=%d %s]",
+			mainConfigPath, ex.errno, ex.strerror)
+
+	# Write header followed by groups
+	writeConfigHeader(outFile)
+	writeConfigGroup(outFile, group, mainConfig)
 
 #===============================================================================
 # Process ful configuration after its edition.
@@ -274,26 +381,23 @@ def processFullConfig(inFile, modules, mainConfigPath):
 	logging.debug("Processing full config")
 
 	reConfigBuild = re.compile(r"(# )?CONFIG_ALCHEMY_BUILD_([^= ]*)[= ].*")
-
-	# Create main configuration file
-	try:
-		mainConfigFile = open(getEditConfigPath(mainConfigPath), "w")
-	except IOError as ex:
-		logging.error("Unable to create file: %s [err=%d %s]",
-			getEditConfigPath(mainConfigPath), ex.errno, ex.strerror)
-		return
-	writeConfigHeader(mainConfigFile)
-
+	moduleStatus = {}
 	module = None
 	moduleConfigFile = None
 
+	# Write modules configuration in their own file
 	lineIdx = 0
 	for line in inFile:
 		line = line.rstrip("\n")
 		# Determine if we are starting a new module
 		if line.startswith("# CONFIG_ALCHEMY_BUILD_") \
 				or line.startswith("CONFIG_ALCHEMY_BUILD_"):
-			mainConfigFile.write(line + "\n")
+			# Clear current module
+			if moduleConfigFile != None:
+				moduleConfigFile.close()
+			moduleConfigFile = None
+			module = None
+			# Get new module
 			match = reConfigBuild.match(line)
 			if match == None:
 				logging.warning("Unable to extract module name from: %s", line)
@@ -303,9 +407,8 @@ def processFullConfig(inFile, modules, mainConfigPath):
 					logging.warning("Unknown module: %s", match.group(2))
 				else:
 					logging.debug("New module: %s", module.name)
-			if moduleConfigFile != None:
-				moduleConfigFile.close()
-			moduleConfigFile = None
+			if module != None:
+				moduleStatus[module.name] = not line.startswith("#")
 		# Get the name of the configuration file for the module
 		elif line.startswith("CONFIG_ALCHEMY_FILE_"):
 			if moduleConfigFile != None:
@@ -321,16 +424,42 @@ def processFullConfig(inFile, modules, mainConfigPath):
 				except IOError as ex:
 					logging.error("Unable to create file: %s [err=%d %s]",
 						getEditConfigPath(moduleConfigPath), ex.errno, ex.strerror)
+		# End of file
+		elif line.startswith("CONFIG_ALCHEMY_ENDFILE_"):
+			if moduleConfigFile != None:
+				moduleConfigFile.close()
+			moduleConfigFile = None
 		elif moduleConfigFile != None:
 			moduleConfigFile.write(line + "\n")
+		# Ignore empty lines and comments silently (almost)
+		elif len(line) == 0 or line.startswith("#"):
+			logging.debug("Skipping line: %s", line)
 		# The 4 first lines are the header, and are silently skipped
 		elif lineIdx >= 4:
 			logging.warning("Skipping line: %s", line)
 		lineIdx += 1
 
-	mainConfigFile.close()
+	# Close file
 	if moduleConfigFile != None:
 		moduleConfigFile.close()
+
+	# Create main configuration file
+	try:
+		mainConfigFile = open(getEditConfigPath(mainConfigPath), "w")
+	except IOError as ex:
+		logging.error("Unable to create file: %s [err=%d %s]",
+			getEditConfigPath(mainConfigPath), ex.errno, ex.strerror)
+		return
+	writeConfigHeader(mainConfigFile)
+	# Write modules in a sorted order to ease merge.
+	for key in sorted(moduleStatus.keys()):
+		if moduleStatus[key]== True:
+			mainConfigFile.write("CONFIG_ALCHEMY_BUILD_%s=y\n" % \
+					getDefine(key))
+		else:
+			mainConfigFile.write("# CONFIG_ALCHEMY_BUILD_%s is not set\n" % \
+					getDefine(key))
+	mainConfigFile.close()
 
 #===============================================================================
 # Check if a configuration is up to date.
@@ -483,7 +612,7 @@ def execConf(configInPath, configPath):
 	# Construct command line, simulate accepting all new options to their
 	# default values by piping 'yes' as input
 	cmdline = "yes \"\" | %s --oldconfig %s" % \
-		(os.path.join(KCONFIG_BIN_DIR, "conf"), configInPath)
+			(os.path.join(KCONFIG_BIN_DIR, "conf"), configInPath)
 
 	# Setup environment
 	# KCONFIG_CONFIG : name of .config file to use as input/ouput
@@ -518,7 +647,7 @@ def execConfUi(confUi, configInPath, configPath):
 
 	# Construct command line
 	cmdline = "%s %s" % \
-		(os.path.join(KCONFIG_BIN_DIR, confUi), configInPath)
+			(os.path.join(KCONFIG_BIN_DIR, confUi), configInPath)
 
 	# Setup environment
 	# KCONFIG_CONFIG : name of .config file to use as input/ouput
@@ -555,6 +684,9 @@ def main():
 	for arg in args[1:]:
 		modules.append(Module(arg))
 
+	# Build tree of groups of modules
+	groupRoot = buildGroupTree(modules)
+
 	# If only one module, check it has some configuration data
 	if options.main == None:
 		if len(modules[0].configInPathList) == 0:
@@ -570,7 +702,7 @@ def main():
 		writeModuleConfigIn(configInFile, modules[0])
 	else:
 		logging.info("Generating full 'config.in' file as %s", configInPath)
-		writeFullConfigIn(configInFile, modules)
+		writeFullConfigIn(configInFile, groupRoot)
 	configInFile.close()
 
 	# prepare input config file
@@ -582,7 +714,7 @@ def main():
 		(fullConfigFd, fullConfigPath) = tempfile.mkstemp(suffix=TEMP_SUFFIX)
 		fullConfigFile = os.fdopen(fullConfigFd, "w")
 		logging.info("Generating full '.config' file as %s", fullConfigPath)
-		prepareFullConfig(fullConfigFile, modules, options.main)
+		prepareFullConfig(fullConfigFile, groupRoot, options.main)
 		fullConfigFile.close()
 
 	# Cleanup function (in main context)

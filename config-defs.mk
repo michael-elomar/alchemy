@@ -74,9 +74,10 @@ __get-module-config-in-files = $(strip \
 ###############################################################################
 __generate-config-module-args = $(strip \
 	$(eval __mod := $1) \
+	$(eval __grouppath := $(call path-from-top,$(__modules.$(__mod).PATH))) \
 	$(eval __config := $(call __get-module-config,$(__mod))) \
 	$(eval __configInFiles := $(call __get-module-config-in-files,$(__mod))) \
-	$(eval __arg := $(__mod):$(__config)) \
+	$(eval __arg := $(__mod):$(__grouppath):$(__config)) \
 	$(foreach __f,$(__configInFiles), \
 		$(eval __arg := $(__arg):$(call fullpath,$(__f))) \
 	) \
