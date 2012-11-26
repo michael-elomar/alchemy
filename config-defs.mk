@@ -51,9 +51,14 @@ __check-module-configurable = $(strip \
 
 ###############################################################################
 ## Get the name of the configuration file of a module.
+## If a variable named custom.<module>.config exists, it is used, otherwise
+## it gets the file from the original config directory.
 ## $1 : module name.
 ###############################################################################
-__get-module-config = $(CONFIG_ORIG_DIR)/$1.config
+__get-module-config = $(strip \
+	$(if $(call strneq,$(origin custom.$1.config),undefined), \
+		$(custom.$1.config),$(CONFIG_ORIG_DIR)/$1.config \
+	))
 
 ###############################################################################
 ## Get the list of path to Config.in files of a module.
