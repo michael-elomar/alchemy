@@ -245,7 +245,7 @@ def writeFullConfigIn(outFile, group):
 		outFile.write("menuconfig %s\n" % buildDefine)
 
 		outFile.write("  bool '%s'\n" % module.name)
-		outFile.write("  default y\n")
+		outFile.write("  default n\n")
 		outFile.write("  help\n")
 		outFile.write("    Build %s\n" % module.name)
 		outFile.write("\n")
