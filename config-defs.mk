@@ -22,13 +22,11 @@ else
   CONFIG_DIR_AVAILABLE := 1
 endif
 
-# Avoid checking global config if we are requested to skip it
-# Skip also if configuration directory does not exist at all
-# In other cases, try to include config but do not fail if not possible
+# Include global config file, do not fail if directory does not exists or we
+# are requested to skip checks.
 ifeq ("$(CONFIG_DIR_AVAILABLE)","1")
   ifeq ("$(SKIP_DEPS_AND_CHECKS)","0")
     include $(CONFIG_GLOBAL_FILE)
-    $(CONFIG_GLOBAL_FILE): __config-check
   else
     -include $(CONFIG_GLOBAL_FILE)
   endif
@@ -97,18 +95,11 @@ __generate-config-args = $(strip \
 
 ###############################################################################
 ## Load configuration of a module.
+## $1: module name.
 ###############################################################################
-
-# Avoid checking module config if we are requested to skip it
-# In this case, do not fail if it can not be found
 define __load-config-internal
   $(eval __config := $(call __get-module-config,$1))
-  ifeq ("$(SKIP_DEPS_AND_CHECKS)","0")
-    include $(__config)
-    $(__config): __config-check-$1
-  else
-    -include $(__config)
-  endif
+  -include $(__config)
 endef
 
 ###############################################################################

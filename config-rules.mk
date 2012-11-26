@@ -6,6 +6,14 @@
 ## Configuration management, rules.
 ###############################################################################
 
+# Avoid checking global config if directory does not exists or we
+# are requested to skip checks.
+ifeq ("$(CONFIG_DIR_AVAILABLE)","1")
+ifeq ("$(SKIP_DEPS_AND_CHECKS)","0")
+$(CONFIG_GLOBAL_FILE): __config-check
+endif
+endif
+
 ###############################################################################
 ## Full configuration rules.
 ###############################################################################

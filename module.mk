@@ -146,14 +146,22 @@ $(LOCAL_MODULE)-dirclean: $(LOCAL_MODULE)-clean
 	$(Q)rm -rf $(PRIVATE_BUILD_DIR)
 
 ###############################################################################
-## autoconf.h file generation.
+## Configuration file management.
 ###############################################################################
+
+# Check validity of config file
+config_file := $(call __get-module-config,$(LOCAL_MODULE))
+ifneq ("$(config_file)","")
+ifeq ("$(SKIP_DEPS_AND_CHECKS)","0")
+$(config_file): __config-check-$(LOCAL_MODULE)
+endif
+endif
 
 autoconf_file := $(call module-get-autoconf,$(LOCAL_MODULE))
 ifneq ("$(autoconf_file)","")
 
 # autoconf.h file depends on module config
-$(autoconf_file): $(call __get-module-config,$(LOCAL_MODULE))
+$(autoconf_file): $(config_file)
 	@$(call generate-autoconf-file,$<,$@)
 
 # Don't forget to clean autoconf.h file
