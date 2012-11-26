@@ -682,7 +682,9 @@ def parseArgs():
 	if len(args) < 1:
 		parser.error("Missing action")
 	elif len(args) < 2:
-		parser.error("At least one module required")
+		# Do not fail completely, display a message and exit with success
+		sys.stderr.write("No module given\n")
+		sys.exit(0)
 	elif args[0] not in ACTIONS:
 		parser.error("Bad action: %s (%s)" %(args[0], expandListStr(ACTIONS)))
 	elif len(args) > 2 and options.main == None:
