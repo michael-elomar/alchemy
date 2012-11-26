@@ -429,16 +429,19 @@ help:
 	@echo "  help-modules: display the list of registered modules."
 	@echo "  dump        : dump the full module database."
 	@echo "  dump-depends: dump dependencies of module database."
+	@echo "  dump-xml    : dump the full module database in xml format."
 	@echo "  build-graph : create a graph of build dependencies."
 	@echo ""
 	@echo "Usefull variables:"
 	@echo "  V: set to 1 to activate verbose mode."
 	@echo "  F: set to 1 to activate force mode (modules built externally will be re-checked)."
 	@echo "  W: set to 1 to activate more compilation warnings."
+	@echo "  USE_SCAN_CACHE: use the previous cache of makefiles to speedup scan."
+	@echo "  USE_COLORS    : activate colors in output."
 
 .PHONY: help-modules
 help-modules:
-	@echo "List of registered modules:"
+	@echo "List of registered modules ($(words $(__modules))):"
 	@echo "$(sort $(__modules))"
 
 ###############################################################################
