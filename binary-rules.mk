@@ -65,6 +65,9 @@ cpp_objects := $(addprefix $(build_dir)/obj/,$(cpp_sources:.cpp=.o))
 cxx_sources := $(filter %.cxx,$(LOCAL_SRC_FILES))
 cxx_objects := $(addprefix $(build_dir)/obj/,$(cxx_sources:.cxx=.o))
 
+cc_sources := $(filter %.cc,$(LOCAL_SRC_FILES))
+cc_objects := $(addprefix $(build_dir)/obj/,$(cc_sources:.cc=.o))
+
 c_sources := $(filter %.c,$(LOCAL_SRC_FILES))
 c_objects := $(addprefix $(build_dir)/obj/,$(c_sources:.c=.o))
 
@@ -77,6 +80,7 @@ S_objects := $(addprefix $(build_dir)/obj/,$(S_sources:.S=.o))
 all_objects := \
 	$(cpp_objects) \
 	$(cxx_objects) \
+	$(cc_objects) \
 	$(c_objects) \
 	$(s_objects) \
 	$(S_objects)
@@ -209,6 +213,15 @@ $(cxx_objects): $(build_dir)/obj/%.o: $(LOCAL_PATH)/%.cxx
 	$(transform-cpp-to-o)
 ifneq ("$(skip_include_deps)","1")
 -include $(cxx_objects:%.o=%.d)
+endif
+endif
+
+# cc files
+ifneq ("$(strip $(cc_objects))","")
+$(cc_objects): $(build_dir)/obj/%.o: $(LOCAL_PATH)/%.cc
+	$(transform-cpp-to-o)
+ifneq ("$(skip_include_deps)","1")
+-include $(cc_objects:%.o=%.d)
 endif
 endif
 
