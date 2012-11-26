@@ -85,11 +85,40 @@ __generate-config-module-args = $(strip \
 
 ###############################################################################
 ## Generate arguments suitable for an action on a full config.
-## Do not include prebuilt module, it has no real sense.
+## Do not include prebuilt modules, it has no real sense.
+## Autotools modules won't compile under ecos, so don't bother display them or
+## any module that has a dependency on it.
 ###############################################################################
+
+# Check if a module has a dependecny on an autotools module
+# $1 : module name
+__has-autotools-deps = $(strip \
+	$(foreach __mod,$(__modules.$1.depends.all), \
+		$(if $(call streq,$(__modules.$(__mod).MODULE_CLASS),AUTOTOOLS), \
+			$(true), \
+		) \
+	))
+
+# Check if a single module shall be displayed in the config
+# $1 : module name
+__show-in-config = $(strip \
+	$(if $(call streq,$(__modules.$1.MODULE_CLASS),PREBUILT), \
+		$(false), \
+		$(if $(call strneq,$(TARGET_OS),ecos), \
+			$(true), \
+			$(if $(call streq,$(__modules.$1.MODULE_CLASS),AUTOTOOLS), \
+				$(false), \
+				$(if $(call __has-autotools-deps,$1), \
+					$(false),$(true) \
+				) \
+			) \
+		) \
+	))
+
+# No arguments
 __generate-config-args = $(strip \
 	$(foreach __mod,$(sort $(__modules)), \
-		$(if $(call strneq,$(__modules.$(__mod).MODULE_CLASS),PREBUILT), \
+		$(if $(call __show-in-config,$(__mod)), \
 			$(call __generate-config-module-args,$(__mod)) \
 		) \
 	))
