@@ -69,6 +69,11 @@ endif
 AUTOTOOLS_CONFIGURE_ARGS += \
 	--prefix="$(AUTOTOOLS_CONFIGURE_PREFIX)" \
 
+# Avoid triggering regeneration of configure/Makefile.in. The regeneration
+# could cause issues because it would remove the patches we made in libtool
+AUTOTOOLS_CONFIGURE_ARGS += \
+	--disable-maintainer-mode
+
 # Environment to use when executing make
 AUTOTOOLS_MAKE_ENV :=
 
