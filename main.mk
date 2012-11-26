@@ -36,6 +36,8 @@ USE_COLORS ?= 0
 ifeq ("$(V)","0")
   Q := @
   MAKEFLAGS += --no-print-directory
+else
+  Q :=
 endif
 
 # This is the default target.  It must be the first declared target.
