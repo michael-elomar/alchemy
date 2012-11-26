@@ -61,8 +61,9 @@ JIM_SETUP_MAKE := $(JIM_DIR)/make-bootstrap-jim
 JIM_SETUP_C := $(USMD_BUILD_DIR)/autosetup/jimsh0.c
 JIM_SETUP_EXE := $(USMD_BUILD_DIR)/autosetup/jimsh
 
-# Build system variables. Build dir is internally added (to find usb_modeswitch.string)
-# To NOT put it to avoid a warning saying that the build dir does not exist yet...
+# Build system variables. Build dir is internally added in include path
+# To NOT put it (to find usb_modeswitch.string) to avoid a warning saying that
+# the build dir does not exist yet...
 LOCAL_SRC_FILES := dispatcher.c
 LOCAL_C_INCLUDES := $(JIM_DIR)
 LOCAL_LDLIBS := $(JIM_LIB)
@@ -87,12 +88,12 @@ $(JIM_LIB): $(JIM_SETUP_EXE)
 	$(Q)cd $(dir $@); \
 		PATH=$(dir $(JIM_SETUP_EXE)):$(PATH) $(AUTOTOOLS_CONFIGURE_ENV) \
 			$(JIM_DIR)/configure \
-			--host="${GNU_TARGET_NAME}" \
+			--host="$(GNU_TARGET_NAME)" \
 			--prefix="$(AUTOTOOLS_CONFIGURE_PREFIX)" \
 			--disable-lineedit \
 			--with-out-jim-ext="stdlib posix load signal syslog"
 	@echo "Compiling the Jim library ..."
-	$(Q)$(MAKE) -C $(dir $@) lib
+	$(Q)$(AUTOTOOLS_CONFIGURE_ENV) $(MAKE) -C $(dir $@) lib
 
 # Convert tcl script to c string, using a tcl script executed by jimsh0 bootstrap...
 $(USMD_STRING): $(JIM_SETUP_EXE) $(USMD_MAKE_STRING) $(USMD_TCL)
