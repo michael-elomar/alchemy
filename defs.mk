@@ -700,6 +700,19 @@ all-cxx-files-under = $(call all-files-under,$1,.cxx)
 all-cc-files-under = $(call all-files-under,$1,.cc)
 
 ###############################################################################
+## Check compilation flags for some forbidden stuff.
+## $1 : variable to check (its name, not its value).
+## $2 : list of flags to check for their presence in $1.
+## $3 : message to display in case of error.
+###############################################################################
+check-flags = \
+	$(foreach __flag,$2, \
+		$(if $(findstring $(__flag),$($1)), \
+			$(error $(LOCAL_PATH): $1 contains $(__flag) : $3) \
+		) \
+	)
+
+###############################################################################
 ## Normalize a list of includes. It adds -I if needed.
 ## $1 : list of includes
 ###############################################################################

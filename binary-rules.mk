@@ -35,25 +35,28 @@ ifneq ("$(LOCAL_ARM_MODE)","thumb")
 endif
 endif
 
-## Check that compilation flags do not include forbidden stuff.
-check-flags-arm-mode := -marm -mthumb
-check-flags = \
-	$(foreach flags,$1, \
-		$(if $(findstring $($3),$(flags)), \
-			$(error $(LOCAL_PATH): $3 contains $(flags) : $2) \
-		) \
-	)
-
 # Check that -marm or -mthumb is not forced in compilation flags
-flags-arm-mode := -marm -mthumb
-check-message := please use LOCAL_ARM_MODE
-check-flags-arm-mode = $(call check-flags,$(flags-arm-mode),$(check-message),$1)
-$(call check-flags-arm-mode,LOCAL_CFLAGS)
-$(call check-flags-arm-mode,LOCAL_CPPFLAGS)
-$(call check-flags-arm-mode,LOCAL_EXPORT_CFLAGS)
-$(call check-flags-arm-mode,LOCAL_EXPORT_CPPFLAGS)
+check-flags-arm-mode := -marm -mthumb
+check-flags-arm-mode-message := please use LOCAL_ARM_MODE
+$(call check-flags,LOCAL_CFLAGS,$(check-flags-arm-mode),$(check-flags-arm-mode-message))
+$(call check-flags,LOCAL_CPPFLAGS,$(check-flags-arm-mode),$(check-flags-arm-mode-message))
+$(call check-flags,LOCAL_EXPORT_CFLAGS,$(check-flags-arm-mode),$(check-flags-arm-mode-message))
+$(call check-flags,LOCAL_EXPORT_CPPFLAGS,$(check-flags-arm-mode),$(check-flags-arm-mode-message))
 
 endif
+
+###############################################################################
+## Generic checks.
+###############################################################################
+
+# Do not put -O0 in flags, use debug setup makefil
+check-flags-debug := -O0
+check-flags-debug-message := please use custom $(debug-setup-makefile) in top dir
+$(call check-flags,LOCAL_CFLAGS,$(check-flags-debug),$(check-flags-debug-message))
+$(call check-flags,LOCAL_CPPFLAGS,$(check-flags-debug),$(check-flags-debug-message))
+$(call check-flags,LOCAL_EXPORT_CFLAGS,$(check-flags-debug),$(check-flags-debug-message))
+$(call check-flags,LOCAL_EXPORT_CPPFLAGS,$(check-flags-debug),$(check-flags-debug-message))
+
 
 ###############################################################################
 ## List of sources, objects and libraries.
