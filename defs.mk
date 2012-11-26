@@ -39,7 +39,7 @@ rest = $(wordlist 2,$(words $1),$1)
 
 # Get a path relative to top directory.
 # $1 : full path to convert.
-path-from-top = $(patsubst $(TOP_DIR)%,.%,$1)
+path-from-top = $(patsubst $(TOP_DIR)/%,%,$1)
 
 # Translate characters.
 # $1 : text to convert.
