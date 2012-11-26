@@ -46,6 +46,42 @@ $(call delete-one-done-file,$(installed_file))
 endif
 
 ###############################################################################
+## Configure argument sanitization.
+###############################################################################
+
+# This file is included several times, define macros only once
+# (mainly to improve perf)
+ifndef autotools-macros
+
+# List of flag to check for their actual support by configure script
+configure-flags := \
+	--disable-maintainer-mode \
+	--enable-silent-rules
+
+# Check if a flag is supported by configure script. This is to avoid warning
+# $1 : full path to configure script to check
+# $2 : flag to check
+configure-check-flag = $(strip \
+	$(if $(shell grep -e "$(strip $2)" "$(strip $1)"),$(true),$(false)))
+
+# Get the list of flags to filter out of configure arguments
+# $1 : full path to configure script to check
+configure-getfilter-args = $(strip \
+	$(foreach __flag,$(configure-flags), \
+		$(if $(call configure-check-flag,$1,$(__flag)), \
+			$(empty),$(__flag) \
+		) \
+	))
+
+# Remove flags not supported by configure
+# $1 : full path to configure script to check
+# $2 : configure arguments
+configure-filter-args = $(strip \
+	$(filter-out $(call configure-getfilter-args,$1),$2))
+
+endif
+
+###############################################################################
 ## Add debug flags.
 ###############################################################################
 
@@ -64,41 +100,53 @@ endif
 ## Default commands
 ###############################################################################
 
+# This file is included several times, define macros only once
+# (mainly to improve perf)
+ifndef autotools-macros
+
 __default-unpack = \
 	tar -C $(PRIVATE_UNPACK_DIR) -xf $(PRIVATE_ARCHIVE)
 
 __default-configure = \
 	cd $(PRIVATE_OBJ_DIR) && \
-		$(AUTOTOOLS_CONFIGURE_ENV) $(PRIVATE_CONFIGURE_ENV) $(PRIVATE_SRC_DIR)/configure \
-		$(AUTOTOOLS_CONFIGURE_ARGS) $(PRIVATE_CONFIGURE_ARGS)
+		$(AUTOTOOLS_CONFIGURE_ENV) $(PRIVATE_CONFIGURE_ENV) \
+		$(PRIVATE_SRC_DIR)/configure \
+		$(call configure-filter-args, \
+			$(PRIVATE_SRC_DIR)/configure,$(AUTOTOOLS_CONFIGURE_ARGS)) \
+		$(PRIVATE_CONFIGURE_ARGS)
 
 __default-make-build = \
-	$(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_BUILD_ENV) $(MAKE) -C $(PRIVATE_OBJ_DIR) \
+	$(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_BUILD_ENV) \
+		$(MAKE) -C $(PRIVATE_OBJ_DIR) \
 		$(AUTOTOOLS_MAKE_ARGS) $(PRIVATE_MAKE_BUILD_ARGS)
 
 __default-make-install = \
-	$(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) $(MAKE) -C $(PRIVATE_OBJ_DIR) \
+	$(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) \
+		$(MAKE) -C $(PRIVATE_OBJ_DIR) \
 		$(AUTOTOOLS_MAKE_ARGS) $(PRIVATE_MAKE_INSTALL_ARGS) install
 
 # Force success for command in case "uninstall" or "clean" is not supported
 # or Makefile not present
 __default-clean = \
 	if [ -d $(PRIVATE_OBJ_DIR) ]; then \
-		$(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) $(MAKE) --ignore-errors \
-			-C $(PRIVATE_OBJ_DIR) $(AUTOTOOLS_MAKE_ARGS) $(PRIVATE_MAKE_INSTALL_ARGS) \
+		$(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) \
+			$(MAKE) --ignore-errors -C $(PRIVATE_OBJ_DIR) \
+			$(AUTOTOOLS_MAKE_ARGS) $(PRIVATE_MAKE_INSTALL_ARGS) \
 			uninstall || echo "Ignoring uninstall errors"; \
-		$(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) $(MAKE) --ignore-errors \
-			-C $(PRIVATE_OBJ_DIR) $(AUTOTOOLS_MAKE_ARGS) \
+		$(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) \
+			$(MAKE) --ignore-errors -C $(PRIVATE_OBJ_DIR) \
+			$(AUTOTOOLS_MAKE_ARGS) \
 			clean || echo "Ignoring clean errors"; \
 	fi;
 
 __apply-patches = \
-	$(BUILD_SYSTEM)/scripts/apply-patches.sh $(PRIVATE_SRC_DIR) $(PRIVATE_PATH) $(PRIVATE_PATCHES)
+	$(BUILD_SYSTEM)/scripts/apply-patches.sh \
+		$(PRIVATE_SRC_DIR) $(PRIVATE_PATH) $(PRIVATE_PATCHES)
 
 # Patch libtool to make it work properly for cross-compilation.
-# Modify the libdir in .la files installed in staging dir so that they reference the staging dir
-# and not the final dir. Do this only if dest dir is not empty (in native build staging dir
-# is the final dir specified in configure script).
+# Modify the libdir in .la files installed in staging dir so that they reference
+# the staging dir and not the final dir. Do this only if dest dir is not empty
+# (in native build staging dir is the final dir specified in configure script).
 # Use -rpath-link instead of -rpath to avoid hardcoding host path in binaries.
 # See this link for more information :
 # http://www.metastatic.org/text/libtool.html
@@ -114,6 +162,8 @@ __libtool_patch = \
 
 #		sed -i -e "s|runpath_var=LD_RUN_PATH|runpath_var=|1" $$f; \
 #		sed -i -e "s|need_relink=yes|need_relink=no|1" $$f; \
+
+endif
 
 ###############################################################################
 ###############################################################################
@@ -145,7 +195,7 @@ endif
 
 ###############################################################################
 ## Rules.
-## Note : use '+' to make sure sub-make is properly managed, this avoid the message :
+## Note : use '+' to make sure sub-make is properly managed, this avoid:
 ## warning: jobserver unavailable: using -j1.  Add `+' to parent make rule.
 ###############################################################################
 
@@ -234,3 +284,5 @@ $(LOCAL_TARGETS): PRIVATE_CMD_POST_BUILD := $(LOCAL_AUTOTOOLS_CMD_POST_BUILD)
 $(LOCAL_TARGETS): PRIVATE_CMD_POST_INSTALL := $(LOCAL_AUTOTOOLS_CMD_POST_INSTALL)
 $(LOCAL_TARGETS): PRIVATE_CMD_POST_CLEAN := $(LOCAL_AUTOTOOLS_CMD_POST_CLEAN)
 
+# Macros of this file have been defined
+autotools-macros := 1
