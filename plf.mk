@@ -34,5 +34,5 @@ plf-clean:
 	$(Q)rm -f $(PRODUCT_PLF)
 
 clean: plf-clean
+dirclean: plf-clean
 clobber: plf-clean
-

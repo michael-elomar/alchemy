@@ -39,3 +39,12 @@ $(BUILD_GRAPH_PDF): $(BUILD_GRAPH_DOT)
 .PHONY: build-graph
 build-graph: $(BUILD_GRAPH_SVG) $(BUILD_GRAPH_PDF)
 
+.PHONY: build-graph-clean
+build-graph-clean:
+	@rm -f $(BUILD_GRAPH_DOT)
+	@rm -f $(BUILD_GRAPH_SVG)
+	@rm -f $(BUILD_GRAPH_PDF)
+
+clean: build-graph-clean
+dirclean: build-graph-clean
+clobber: build-graph-clean
