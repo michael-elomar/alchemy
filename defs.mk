@@ -682,6 +682,24 @@ define generate-autoconf-file
 endef
 
 ###############################################################################
+## Search files matching an extension under LOCAL_PATH.
+###############################################################################
+
+# $1 : directory relative to LOCAL_PATH to search
+# $2 : extension to search (.c, .cpp ...)
+all-files-under = $(strip \
+	$(patsubst ./%,%, \
+		$(shell cd $(LOCAL_PATH); \
+			find $1 -name "*$2" -and -not -name ".*") \
+	))
+
+# $1 : directory relative to LOCAL_PATH to search
+all-c-files-under = $(call all-files-under,$1,.c)
+all-cpp-files-under = $(call all-files-under,$1,.cpp)
+all-cxx-files-under = $(call all-files-under,$1,.cxx)
+all-cc-files-under = $(call all-files-under,$1,.cc)
+
+###############################################################################
 ## Normalize a list of includes. It adds -I if needed.
 ## $1 : list of includes
 ###############################################################################
