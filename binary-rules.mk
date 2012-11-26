@@ -88,14 +88,13 @@ all_objects := \
 	$(s_objects) \
 	$(S_objects)
 
-# Get all static libraries this module depends on
+# Get libraries used by us and static libraries
+LOCAL_EXTERNAL_LIBRARIES := \
+	$(call module-get-static-depends,$(LOCAL_MODULE),EXTERNAL_LIBRARIES)
 LOCAL_STATIC_LIBRARIES := \
 	$(call module-get-static-depends,$(LOCAL_MODULE),STATIC_LIBRARIES)
-
 LOCAL_WHOLE_STATIC_LIBRARIES := \
 	$(call module-get-static-depends,$(LOCAL_MODULE),WHOLE_STATIC_LIBRARIES)
-
-# Get shared libraries used by static libraries
 LOCAL_SHARED_LIBRARIES := \
 	$(call module-get-static-depends,$(LOCAL_MODULE),SHARED_LIBRARIES)
 
@@ -112,25 +111,32 @@ all_shared_libraries := \
 	$(foreach lib,$(LOCAL_SHARED_LIBRARIES), \
 		$(call module-get-staging-filename,$(lib)))
 
-# all_libraries is used for the dependencies.
+# all_libraries is used for the dependencies at link time
+# external libraries are used as prerequisites in module.mk
 all_libraries := \
 	$(all_static_libraries) \
 	$(all_whole_static_libraries) \
-	$(all_shared_libraries) \
-	$(all_external_libraries)
+	$(all_shared_libraries)
+
+# List of our dependencies and from static
+LOCAL_LIBRARIES := \
+	$(LOCAL_EXTERNAL_LIBRARIES) \
+	$(LOCAL_STATIC_LIBRARIES) \
+	$(LOCAL_WHOLE_STATIC_LIBRARIES) \
+	$(LOCAL_SHARED_LIBRARIES)
 
 ###############################################################################
 ## Import of dependencies.
 ###############################################################################
 
-# Get all modules we depend on
-all_depends := $(call module-get-all-depends,$(LOCAL_MODULE))
-
 # Get list of exported stuff by our dependencies
+# Note: LDLIBS only get ours and import from static dependencies.
+# Other import are done on full dependency to make sure that include path
+# are propagated even for shared library import
 imported_CFLAGS        := $(call module-get-listed-export,$(all_depends),CFLAGS)
 imported_CPPFLAGS      := $(call module-get-listed-export,$(all_depends),CPPFLAGS)
 imported_C_INCLUDES    := $(call module-get-listed-export,$(all_depends),C_INCLUDES)
-imported_LDLIBS        := $(call module-get-listed-export,$(all_depends),LDLIBS)
+imported_LDLIBS        := $(call module-get-listed-export,$(LOCAL_LIBRARIES),LDLIBS)
 imported_PREREQUISITES := $(call module-get-listed-export,$(all_depends),PREREQUISITES)
 
 # The imported/exported compiler flags are prepended to their LOCAL_XXXX value
@@ -260,7 +266,7 @@ ifneq ("$(all_prerequisites)","")
 $(all_objects): | $(all_prerequisites)
 endif
 
-# Force recompilation if internal dependecies are changes
+# Force recompilation if internal dependencies are changes
 $(all_objects): $(all_internal_depends)
 
 # Clean objects
@@ -286,7 +292,7 @@ ifneq ("$(all_prerequisites)","")
 $(gch_file): | $(all_prerequisites)
 endif
 
-# Force recompilation if internal dependecies are changes
+# Force recompilation if internal dependencies are changes
 $(gch_file): $(all_internal_depends)
 
 # Generate the precompiled file
@@ -332,6 +338,5 @@ $(LOCAL_TARGETS): PRIVATE_PBUILD_HOOK := $(LOCAL_PBUILD_HOOK)
 $(LOCAL_TARGETS): PRIVATE_ALL_SHARED_LIBRARIES := $(all_shared_libraries)
 $(LOCAL_TARGETS): PRIVATE_ALL_STATIC_LIBRARIES := $(all_static_libraries)
 $(LOCAL_TARGETS): PRIVATE_ALL_WHOLE_STATIC_LIBRARIES := $(all_whole_static_libraries)
-$(LOCAL_TARGETS): PRIVATE_ALL_EXTERNAL_LIBRARIES := $(all_external_libraries)
 $(LOCAL_TARGETS): PRIVATE_ALL_OBJECTS := $(all_objects)
 

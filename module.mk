@@ -32,22 +32,34 @@ LOCAL_TARGETS := \
 	$(LOCAL_MODULE)-dirclean \
 	$(LOCAL_MODULE)-pre-install
 
-# Get external libraries used by static libraries
-LOCAL_EXTERNAL_LIBRARIES := \
-	$(call module-get-static-depends,$(LOCAL_MODULE),EXTERNAL_LIBRARIES)
+# Get all modules we depend on
+all_depends := $(call module-get-all-depends,$(LOCAL_MODULE))
 
-# List of external libraries that we need to depend on
-all_external_libraries := \
-	$(foreach lib,$(LOCAL_EXTERNAL_LIBRARIES), \
-		$(call module-get-build-filename,$(lib)))
+###############################################################################
+## Construct prerequisites.
+###############################################################################
 
 # List of all prerequisites (ours + dependencies)
+all_prerequisites :=
+
+## Determine external libraries that are needed as prerequisites.
+$(foreach __lib,$(all_depends), \
+	$(if $(call is-module-external,$(__lib)), \
+		$(eval all_prerequisites += \
+			$(call module-get-build-filename,$(__lib)) \
+		) \
+	) \
+)
+
 # Remove our build module from the list of global deps to avoid circular chain
-all_prerequisites := \
+all_prerequisites += \
 	$(filter-out $(LOCAL_BUILD_MODULE),$(TARGET_GLOBAL_PREREQUISITES)) \
 	$(LOCAL_PREREQUISITES) \
-	$(LOCAL_EXPORT_PREREQUISITES) \
-	$(all_external_libraries)
+	$(LOCAL_EXPORT_PREREQUISITES)
+
+###############################################################################
+## Skip some stuff to improve scanning.
+###############################################################################
 
 # Skip parsing dependencies if requested
 skip_include_deps := 0

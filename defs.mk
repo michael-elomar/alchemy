@@ -364,6 +364,16 @@ is-module-registered = $(strip \
 	))
 
 ###############################################################################
+## Check if a module is built externally (by autotools or custom rules).
+## $1 : module to check.
+###############################################################################
+is-module-external = $(strip \
+	$(eval __class := $(__modules.$1.MODULE_CLASS)) \
+	$(if $(call streq,$(__class),AUTOTOOLS),$(true), \
+		$(if $(__class),$(false),$(false)) \
+	))
+
+###############################################################################
 ## Check if a module will be built.
 ## $1 : module to check.
 ## Prebuild modules are considered as in the config (even if they are not
