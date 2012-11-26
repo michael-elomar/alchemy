@@ -9,9 +9,13 @@
 ###############################################################################
 ## Some useful macros.
 ###############################################################################
+
+# Empty variable and space (useful for pretty prinf of messages)
 empty :=
 space := $(empty) $(empty)
 space4 := $(space)$(space)$(space)$(space)
+
+# True/False values. Any non-empty test is considered as True
 true := T
 false :=
 
@@ -614,8 +618,8 @@ module-get-export = $(__modules.$1.EXPORT_$2)
 # Return the recorded value of LOCAL_EXPORT_$2, if any, for modules listed in $1.
 # $1 : list of module names.
 # $2 : export variable name without LOCAL_EXPORT_ prefix (e.g. 'CFLAGS').
-module-get-listed-export = \
-	$(strip $(foreach __mod,$1, \
+module-get-listed-export = $(strip \
+	$(foreach __mod,$1, \
 		$(call module-get-export,$(__mod),$2) \
 	))
 
@@ -626,8 +630,8 @@ module-get-autoconf = \
 
 # Return the autoconf.h files, if any, for modules listed in $1.
 # $1 : list of module names.
-module-get-listed-autoconf = \
-	$(strip $(foreach __mod,$1, \
+module-get-listed-autoconf = $(strip \
+	$(foreach __mod,$1, \
 		$(call module-get-autoconf,$(__mod)) \
 	))
 
@@ -726,8 +730,8 @@ check-flags = \
 ## Normalize a list of includes. It adds -I if needed.
 ## $1 : list of includes
 ###############################################################################
-normalize-c-includes = \
-	$(strip $(foreach __inc,$1, \
+normalize-c-includes = $(strip \
+	$(foreach __inc,$1, \
 		$(addprefix -I,$(patsubst -I%,%,$(__inc))) \
 	))
 
@@ -926,7 +930,7 @@ define do-copy-file
 $(Q)cp -af $< $@
 endef
 
-# Define a rule to copy a file.  For use via $(eval).
+# Define a rule to copy a file. For use via $(eval).
 # $(1) : source file
 # $(2) : destination file
 define copy-one-file

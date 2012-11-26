@@ -101,7 +101,12 @@ __clean-targets := clean dirclean clobber
 __query-targets := scan help help-modules dump dump-depends build-graph
 __config-targets := config config-check config-update xconfig menuconfig nconfig
 __fs-targets := final final-nostrip plf
-__skip_targets := $(__clean-targets) $(__query-targets) $(__config-targets) $(__fs-targets)
+__skip_targets := \
+	$(__clean-targets) \
+	$(__query-targets) \
+	$(__config-targets) \
+	$(__fs-targets)
+
 ifneq ("$(call is-targets-in-make-goals,$(__skip_targets))","")
   SKIP_DEPS_AND_CHECKS := 1
 endif
@@ -220,8 +225,8 @@ include $(USER_MAKEFILES_CACHE)
 else
 
 # Force not checking config if cache is not present. This is to avoid some
-# warnings due to the fact that no module could be registered
-# Another parsing of Alchemy will anyway be triggered after generation of the cache
+# warnings due to the fact that no module could be registered. Another parsing
+# of Alchemy will anyway be triggered after generation of the cache.
 ifeq ("$(wildcard $(USER_MAKEFILES_CACHE))","")
   CONFIG_DIR_AVAILABLE := 0
 endif
@@ -298,11 +303,12 @@ $(foreach __mod,$(ALL_BUILD_MODULES), \
 	) \
 )
 
-# Update module list, based on filtering, make sure items are only once in the list
+# Update module list, based on filtering
+# Sorting will ensure they appear only once as well
 ifeq ("$(__dofilter)","0")
   __modlist := $(ALL_BUILD_MODULES)
 else
-  __modlist := $(call uniq2,$(__modlist))
+  __modlist := $(sort $(__modlist))
 endif
 
 # Now, generate rules of selected modules
@@ -320,7 +326,8 @@ endif
 # Once all modules have been parsed, make sure nobody will reference LOCAL_XXX
 # variables anymore. In commands, PRIVATE_XXX variables shall be used.
 $(foreach __var,$(modules-LOCALS), \
-	$(eval override LOCAL_$(__var) = $$(error Do NOT use LOCAL_$(__var) in commands)) \
+	$(eval override LOCAL_$(__var) = \
+		$$(error Do NOT use LOCAL_$(__var) in commands)) \
 )
 
 ###############################################################################
@@ -351,22 +358,22 @@ all: $(ALL_BUILD_MODULES)
 
 .PHONY: clean
 clean: $(foreach __mod,$(ALL_BUILD_MODULES),$(__mod)-clean)
-	@rm -f $(AUTOCONF_MERGE_FILE)
-	@rm -f $(USER_MAKEFILES_CACHE)
+	$(Q)rm -f $(AUTOCONF_MERGE_FILE)
+	$(Q)rm -f $(USER_MAKEFILES_CACHE)
 	@echo "Done cleaning"
 
 .PHONY: dirclean
 dirclean: $(foreach __mod,$(ALL_BUILD_MODULES),$(__mod)-dirclean)
-	@rm -f $(AUTOCONF_MERGE_FILE)
-	@rm -f $(USER_MAKEFILES_CACHE)
+	$(Q)rm -f $(AUTOCONF_MERGE_FILE)
+	$(Q)rm -f $(USER_MAKEFILES_CACHE)
 	@echo "Done cleaning directories"
 
 .PHONY: clobber
 clobber:
 	@echo "Deleting build, staging and final directories..."
-	@rm -rf $(TARGET_OUT_BUILD)
-	@rm -rf $(TARGET_OUT_STAGING)
-	@rm -rf $(TARGET_OUT_FINAL)
+	$(Q)rm -rf $(TARGET_OUT_BUILD)
+	$(Q)rm -rf $(TARGET_OUT_STAGING)
+	$(Q)rm -rf $(TARGET_OUT_FINAL)
 
 # Dump the module database for debuging the build system
 .PHONY: dump
