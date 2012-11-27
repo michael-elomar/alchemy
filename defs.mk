@@ -332,11 +332,12 @@ is-module-registered = $(strip \
 ###############################################################################
 ## Check if a module is built externally (by autotools or custom rules).
 ## $1 : module to check.
+## AUTOTOOLS class or empty class means external.
 ###############################################################################
 is-module-external = $(strip \
 	$(eval __class := $(__modules.$1.MODULE_CLASS)) \
 	$(if $(call streq,$(__class),AUTOTOOLS),$(true), \
-		$(if $(__class),$(false),$(false)) \
+		$(if $(__class),$(false),$(true)) \
 	))
 
 ###############################################################################
