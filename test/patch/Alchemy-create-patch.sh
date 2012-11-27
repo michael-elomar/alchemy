@@ -5,8 +5,11 @@ if [ "$1" = "-n" ]; then
 	DRYRUN=1
 fi
 
+# Get full path to this script (either when executed or sourced)
+SCRIPT_PATH=$(cd $(dirname ${BASH_SOURCE}) && pwd)
+
 ORIG=$(pwd)
-PATCHDIR=${ORIG}/Alchemy/test/patch
+PATCHDIR=${SCRIPT_PATH}
 mkdir -p ${PATCHDIR}
 
 if [ "${DRYRUN}" = "0" ]; then
