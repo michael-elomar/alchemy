@@ -196,7 +196,9 @@ USER_MAKEFILES :=
 
 # Command to find files
 find-cmd = $(BUILD_SYSTEM)/scripts/findfiles.py \
-	--prune=.git --prune=.repo --prune=$(TARGET_OUT) \
+	--prune=.git --prune=.repo \
+	--prune=$(TARGET_OUT) \
+	--prune=$(BUILD_SYSTEM) \
 	$(foreach __d,$(TARGET_SCAN_PRUNE_DIRS),--prune=$(__d)) \
 	$(TOP_DIR) \
 	$(USER_MAKEFILE_NAME)
@@ -253,6 +255,19 @@ $(USER_MAKEFILES_CACHE):
 .PHONY: scan
 scan:
 	@$(create-user-makefiles-file)
+
+###############################################################################
+## If a module has set PBUILD_HOOK, include its package.
+###############################################################################
+
+__need-pbuild-hook = $(strip \
+	$(foreach __mod, $(__modules), \
+		$(__modules.$(__mod).PBUILD_HOOK) \
+	))
+
+$(if $(__need-pbuild-hook), \
+	$(eval include $(BUILD_SYSTEM)/pbuild-hook/atom.mk) \
+)
 
 ###############################################################################
 ## Module dependencies generation.
