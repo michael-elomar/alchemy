@@ -458,6 +458,17 @@ __module-check-c-includes = \
 ## recorded.
 ###############################################################################
 
+# Variable used to detect cycles in recursion. It will hold all modules
+# processed so far. If a module is already in the list, a loop is detected
+__depends-loop :=
+
+# Determine if a module is already in the recursion
+# $1 : module to check
+__is-in-depends-loop = $(strip \
+	$(foreach __i,$(__depends-loop), \
+		$(call streq,$1,$(__i)) \
+	))
+
 # Compute dependencies of all modules
 # Do direct dependencies first, then full
 # The dummy assignment is to discard output generated internally
@@ -473,10 +484,15 @@ modules-compute-depends = \
 		$(call __module-compute-depends-direct,$(__mod)) \
 	) \
 	$(foreach __mod,$(__modules), \
+		$(eval __depends-loop := $(empty)) \
 		$(eval __dummy := $(call __module-compute-depends-static,$(__mod),EXTERNAL_LIBRARIES)) \
+		$(eval __depends-loop := $(empty)) \
 		$(eval __dummy := $(call __module-compute-depends-static,$(__mod),STATIC_LIBRARIES)) \
+		$(eval __depends-loop := $(empty)) \
 		$(eval __dummy := $(call __module-compute-depends-static,$(__mod),WHOLE_STATIC_LIBRARIES)) \
+		$(eval __depends-loop := $(empty)) \
 		$(eval __dummy := $(call __module-compute-depends-static,$(__mod),SHARED_LIBRARIES)) \
+		$(eval __depends-loop := $(empty)) \
 		$(eval __dummy := $(call __module-compute-depends-all,$(__mod))) \
 	)
 
@@ -523,15 +539,18 @@ __module-add-depends-direct = \
 # Note : the result is ordered in way compatible to link. It means that if
 # a library A depends on library B, B will be after A. This order is guaranteed
 # even if the recursion and dependency is tricky as long as there is no cycle.
-# TODO: detect cycles, for now it will loop indefinitely.
 __module-compute-depends-static = \
+	$(if $(call __is-in-depends-loop,$1), \
+		$(error cyclic dependency detected: $(__depends-loop) $1) \
+	) \
 	$(eval $1.__var := __modules.$1.depends.$2) \
 	$(if $($($1.__var)),$($($1.__var)), \
 		$(eval $($1.__var) := $(strip \
 			$(call uniq2,$(call __module-compute-depends-static-internal,$1,$2))) \
 		) \
 		$($($1.__var)) \
-	)
+	) \
+	$(eval __depends-loop := $(filter-out $1,$(__depends-loop)))
 
 # Internal macro called by __module-compute-depends-static to do the recursion
 # by calling again __module-compute-depends-static.
@@ -551,13 +570,18 @@ __module-compute-depends-static-internal = \
 # Note : it recursively descends into libraries to get their dependencies.
 # See above the way we use 'local' variable.
 __module-compute-depends-all = \
+	$(if $(call __is-in-depends-loop,$1), \
+		$(error cyclic dependency detected: $(__depends-loop) $1) \
+	) \
+	$(eval __depends-loop += $1) \
 	$(eval $1.__var := __modules.$1.depends.all) \
 	$(if $($($1.__var)),$($($1.__var)), \
 		$(eval $($1.__var) := $(strip \
 			$(call uniq2,$(call __module-compute-depends-all-internal,$1))) \
 		) \
 		$($($1.__var)) \
-	)
+	) \
+	$(eval __depends-loop := $(filter-out $1,$(__depends-loop)))
 
 # Internal macro called by __module-compute-depends-all to do the recursion
 # by calling again __module-compute-depends-all.
