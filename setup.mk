@@ -14,11 +14,6 @@ ifneq ("$(words $(shell pwd))","1")
 $(error Top directory contains space characters)
 endif
 
-# Target OS
-ifndef TARGET_OS
-  $(error TARGET_OS is not defined)
-endif
-
 ###############################################################################
 ## Target configuration.
 ###############################################################################
