@@ -254,7 +254,7 @@ $(USER_MAKEFILES_CACHE):
 # Rule to force creation of list of makefiles
 .PHONY: scan
 scan:
-	@$(create-user-makefiles-file)
+	@$(create-user-makefiles-cache)
 
 ###############################################################################
 ## If a module has set PBUILD_HOOK, include its package.
