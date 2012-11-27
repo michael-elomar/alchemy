@@ -94,9 +94,7 @@ __generate-config-module-args = $(strip \
 # $1 : module name
 __has-autotools-deps = $(strip \
 	$(foreach __mod,$(__modules.$1.depends.all), \
-		$(if $(call streq,$(__modules.$(__mod).MODULE_CLASS),AUTOTOOLS), \
-			$(true), \
-		) \
+		$(call streq,$(__modules.$(__mod).MODULE_CLASS),AUTOTOOLS) \
 	))
 
 # Check if a single module shall be displayed in the config
@@ -108,9 +106,7 @@ __show-in-config = $(strip \
 			$(true), \
 			$(if $(call streq,$(__modules.$1.MODULE_CLASS),AUTOTOOLS), \
 				$(false), \
-				$(if $(call __has-autotools-deps,$1), \
-					$(false),$(true) \
-				) \
+				$(if $(call __has-autotools-deps,$1),$(false),$(true)) \
 			) \
 		) \
 	))

@@ -308,7 +308,7 @@ module-add = \
 is-targets-in-make-goals = $(strip \
 	$(foreach __t,$1, \
 		$(foreach __g,$(MAKECMDGOALS), \
-			$(if $(call streq,$(__g),$(__t)),$(true)) \
+			$(call streq,$(__g),$(__t)) \
 		) \
 	))
 
@@ -326,7 +326,7 @@ is-module-in-make-goals = $(strip \
 ###############################################################################
 is-module-registered = $(strip \
 	$(foreach __mod,$(__modules), \
-		$(if $(call streq,$(__mod),$1),$(true)) \
+		$(call streq,$(__mod),$1) \
 	))
 
 ###############################################################################
