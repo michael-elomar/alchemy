@@ -284,9 +284,12 @@ endif
 ## Pre-install customization
 ###############################################################################
 
+LOCAL_CMD_PRE_INSTALL := $(strip $(LOCAL_CMD_PRE_INSTALL))
+ifneq ("$(LOCAL_CMD_PRE_INSTALL)","")
+
 .PHONY: $(LOCAL_MODULE)-pre-install
 $(LOCAL_MODULE)-pre-install:
-	+$(Q)$(if $(PRIVATE_CMD_PRE_INSTALL), $(call $(PRIVATE_CMD_PRE_INSTALL)))
+	+$(Q)$(call $(PRIVATE_CMD_PRE_INSTALL)))
 
 $(LOCAL_TARGETS): PRIVATE_CMD_PRE_INSTALL := $(LOCAL_CMD_PRE_INSTALL)
 
@@ -299,3 +302,4 @@ else
 $(LOCAL_BUILD_MODULE): | $(LOCAL_MODULE)-pre-install
 endif
 
+endif
