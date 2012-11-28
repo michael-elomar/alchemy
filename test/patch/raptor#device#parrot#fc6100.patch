@@ -1,11 +1,13 @@
 diff --git a/BoardConfig.mk b/BoardConfig.mk
-index 41e42dc..01edce0 100644
+index 41e42dc..87e3a90 100644
 --- a/BoardConfig.mk
 +++ b/BoardConfig.mk
-@@ -76,3 +76,9 @@ ALSA_DEFAULT_SAMPLE_RATE := 48000
+@@ -76,3 +76,11 @@ ALSA_DEFAULT_SAMPLE_RATE := 48000
  # This define enables the compilation of OpenCore's command line TestApps
  #BUILD_PV_TEST_APPS :=1
  
++BOARD_USE_PARROT_AIO := true
++
 +# For alchemy build
 +BUILD_USE_ALCHEMY := true
 +# Not really clean... but appart getting everything under raptor root dir I don't see...
