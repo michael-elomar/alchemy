@@ -41,7 +41,7 @@ __dump-database-depends = \
 		$(info $(__mod):) \
 		$(foreach __field,$(modules-fields-depends), \
 			$(eval __fieldval := $(strip $(__modules.$(__mod).$(__field)))) \
-			$(call __dump-field,$(__field),$(__fieldval)) \
+			$(call __dump-database-field,$(__field),$(__fieldval)) \
 		) \
 	) \
 	$(info --------------------)
