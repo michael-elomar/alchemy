@@ -752,11 +752,11 @@ link-hook = $(strip \
 	$(if $(PRIVATE_PBUILD_HOOK), \
 		$(eval __depsdata := $(empty)) \
 		$(foreach __lib,$(__modules.$1.depends.all), \
-			$(eval __deps_data += $(__lib):$(__modules.$(__lib).PATH)) \
+			$(eval __depsdata += $(__lib):$(__modules.$(__lib).PATH)) \
 		)\
 		$(shell $(BUILD_SYSTEM)/pbuild-hook/pbuild-link-hook.sh \
 			"$(TARGET_NM)" "$(TARGET_CC) $(TARGET_GLOBAL_CFLAGS)" \
-			$1 $2 "$(__deps_data)" $3 \
+			$1 $2 "$(__depsdata)" $3 \
 		) \
 	))
 
