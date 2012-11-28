@@ -56,6 +56,19 @@ index cc6798f..c2eea97 100644
  
  PFD_ERR Pfd_Heaac_ParseInit(PFD_SONGDESC * Desc)
  {
+diff --git a/Sources/pfd/pfd_convert.c b/Sources/pfd/pfd_convert.c
+index 3b66ffe..2b64b7a 100644
+--- a/Sources/pfd/pfd_convert.c
++++ b/Sources/pfd/pfd_convert.c
+@@ -24,8 +24,6 @@
+ #include "pfd_types.h"
+ #include "pfd_def.h"
+ #include "pfd_private.h"
+-#include "mp3decifc.h"
+-#include "ivorbisfile.h"
+ 
+ /* @review: DOXYGEN */ 
+ U32 Pfd_ConvertToSamples(PFD_audiolength_t Position)
 diff --git a/Sources/pfd/pfd_types.h b/Sources/pfd/pfd_types.h
 index 8fc2c49..d85e279 100644
 --- a/Sources/pfd/pfd_types.h
