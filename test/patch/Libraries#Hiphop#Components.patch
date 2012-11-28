@@ -1,8 +1,8 @@
 diff --git a/SoftAT/Build/ConfigCK5050Set.in b/SoftAT/Build/ConfigCK5050Set.in
-index 699f1c9..a197f3b 100644
+index 699f1c9..5d5de86 100644
 --- a/SoftAT/Build/ConfigCK5050Set.in
 +++ b/SoftAT/Build/ConfigCK5050Set.in
-@@ -1,6 +1,44 @@
+@@ -1,6 +1,40 @@
  
  ####################################### CK5050 Software SUPPORT ######################################
  menu "CK5050 Software Support"
@@ -40,14 +40,10 @@ index 699f1c9..a197f3b 100644
 +		bool
 +		default y
 +
-+	config BUILD_RAP
-+		bool
-+		default y
-+
  	# hidden options depending on selected packages
  	config CK5050_SUPPORT_BLUETOOTH
  		bool
-@@ -241,7 +279,6 @@ menu "CK5050 Software Support"
+@@ -241,7 +275,6 @@ menu "CK5050 Software Support"
  				default y
  	
  			config CK5050_SUPPORT_PAN
@@ -55,7 +51,7 @@ index 699f1c9..a197f3b 100644
  				bool "CK5050_SUPPORT_PAN"
  				default y
  			if CK5050_SUPPORT_PAN
-@@ -305,13 +342,10 @@ menu "CK5050 Software Support"
+@@ -305,13 +338,10 @@ menu "CK5050 Software Support"
  	
  				if CK5050_SUPPORT_NETWORK_DEVICE
  					config CK5050_SUPPORT_NADI_DONGLE_3G
@@ -69,7 +65,7 @@ index 699f1c9..a197f3b 100644
  						bool "DUN"
  						default n
  						if CK5050_SUPPORT_NADI_DUN
-@@ -331,7 +365,6 @@ menu "CK5050 Software Support"
+@@ -331,7 +361,6 @@ menu "CK5050 Software Support"
  							"Management and configuration for RNDIS Host network interface."
  
  					config CK5050_SUPPORT_NADI_GSM_MODEM
@@ -77,7 +73,7 @@ index 699f1c9..a197f3b 100644
  						bool "Gsm Modem"
  						default n
  
-@@ -358,7 +391,6 @@ menu "CK5050 Software Support"
+@@ -358,7 +387,6 @@ menu "CK5050 Software Support"
  
  		menu "Network Interface"
  			config CK5050_SUPPORT_NETWORK_INTERFACE
@@ -85,7 +81,7 @@ index 699f1c9..a197f3b 100644
  				bool "CK5050_SUPPORT_NETWORK_INTERFACE"
  				default n
  				help
-@@ -474,7 +506,6 @@ menu "CK5050 Software Support"
+@@ -474,7 +502,6 @@ menu "CK5050 Software Support"
          config CK5050_SUPPORT_DEVI_IPOD
              bool "CK5050_SUPPORT_DEVI_IPOD"
              default y
@@ -93,7 +89,7 @@ index 699f1c9..a197f3b 100644
              help
                  "If activated, the host will be notified of plugged apple devices.
                  WARNING : This must be activated if you register IPod sources in Concertos."
-@@ -498,7 +529,6 @@ menu "CK5050 Software Support"
+@@ -498,7 +525,6 @@ menu "CK5050 Software Support"
          config CK5050_SUPPORT_DEVI_OTHER
              bool "CK5050_SUPPORT_DEVI_OTHER"
              default y
@@ -101,7 +97,7 @@ index 699f1c9..a197f3b 100644
              help
                  "If activated, the host will be notified of plugged devices other than IPods (such as USB keys, SD cards, etc ...)."
  
-@@ -508,7 +538,6 @@ menu "CK5050 Software Support"
+@@ -508,7 +534,6 @@ menu "CK5050 Software Support"
  
      	config CK5050_SUPPORT_UPNP
              bool "CK5050_SUPPORT_UPNP"
