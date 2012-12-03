@@ -60,14 +60,17 @@ AUTOTOOLS_CONFIGURE_ARGS := \
 # For native compilation, use staging as prefix and nothing for install dest dir
 ifeq ("$(TARGET_OS_FLAVOUR)","native")
   AUTOTOOLS_CONFIGURE_PREFIX := $(TARGET_OUT_STAGING)/usr
+  AUTOTOOLS_CONFIGURE_SYSCONFDIR := $(TARGET_OUT_STAGING)/etc
   AUTOTOOLS_INSTALL_DESTDIR :=
 else
   AUTOTOOLS_CONFIGURE_PREFIX := /usr
+  AUTOTOOLS_CONFIGURE_SYSCONFDIR := /etc
   AUTOTOOLS_INSTALL_DESTDIR := $(TARGET_OUT_STAGING)
 endif
 
 AUTOTOOLS_CONFIGURE_ARGS += \
 	--prefix="$(AUTOTOOLS_CONFIGURE_PREFIX)" \
+	--sysconfdir="$(AUTOTOOLS_CONFIGURE_SYSCONFDIR)"
 
 # Avoid triggering regeneration of configure/Makefile.in. The regeneration
 # could cause issues because it would remove the patches we made in libtool
