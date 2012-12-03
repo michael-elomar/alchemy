@@ -248,8 +248,11 @@ all_copy_files :=
 # Generate a rule to copy all files
 $(foreach __pair,$(LOCAL_COPY_FILES), \
 	$(eval __pair2 := $(subst :,$(space),$(__pair))) \
-	$(eval __src := $(addprefix $(LOCAL_PATH)/,$(word 1,$(__pair2)))) \
-	$(eval __dst := $(addprefix $(TARGET_OUT_STAGING)/,$(word 2,$(__pair2)))) \
+	$(eval __src := $(call copy-get-src-path,$(word 1,$(__pair2)))) \
+	$(eval __dst := $(call copy-get-dst-path,$(word 2,$(__pair2)))) \
+	$(if $(call is-path-dir,$(__dst)), \
+		$(eval __dst := $(__dst)$(notdir $(__src))) \
+	) \
 	$(eval all_copy_files += $(__dst)) \
 	$(eval $(call copy-one-file,$(__src),$(__dst))) \
 )

@@ -67,6 +67,16 @@ check-pwd-is-top-dir = \
 	$(if $(patsubst $(TOP_DIR)%,%,$(shell pwd)), \
 		$(error Not at the top directory))
 
+# Determine if a path is absolute.
+# It simply checks if the path starts with a '/'
+# $1 : path to check.
+is-path-absolute = $(strip $(call not,$(patsubst /%,,$1)))
+
+# Determine if a path is a directory. This check does not look in the
+# filesystem, it just checks if the path ends with a '/'.
+# $1 : path to check.
+is-path-dir = $(strip $(call not,$(patsubst %/,,$1)))
+
 # Compare 2 strings for equality.
 # $1 : first string.
 # $2 : second string.
@@ -206,7 +216,7 @@ modules-LOCALS += PREREQUISITES
 # ParrotBuild compatibility hook required
 modules-LOCALS += PBUILD_HOOK
 
-# Force modules that depends on this one to use whole-statid library
+# Force modules that depends on this one to use whole-static library
 modules-LOCALS += FORCE_WHOLE_STATIC_LIBRARY
 
 # Files and directories to delete during a clean
@@ -246,7 +256,7 @@ modules-LOCALS += EXPORT_CPPFLAGS
 modules-LOCALS += EXPORT_LDLIBS
 modules-LOCALS += EXPORT_PREREQUISITES
 
-# Module class : STATIC_LIBRARY SHARED_LIBRARY EXECUTABLE PREBUILT
+# Module class : STATIC_LIBRARY SHARED_LIBRARY EXECUTABLE PREBUILT AUTOTOOLS
 modules-LOCALS += MODULE_CLASS
 
 # List of files to copy
@@ -720,6 +730,24 @@ check-flags = \
 normalize-c-includes = $(strip \
 	$(foreach __inc,$1, \
 		$(addprefix -I,$(patsubst -I%,%,$(__inc))) \
+	))
+
+###############################################################################
+## Copy files helpers.
+###############################################################################
+
+# Get full source path for the copy.
+# $1 : path relative to LOCAL_PATH, or directly the full path.
+copy-get-src-path = $(strip \
+	$(if $(call is-path-absolute,$1), \
+		$1,$(addprefix $(LOCAL_PATH)/,$1) \
+	))
+
+# Get full destination path for the copy.
+# $1 : path relative to TARGET_OUT_STAGING, or directly the full path.
+copy-get-dst-path = $(strip \
+	$(if $(call is-path-absolute,$1), \
+		$1,$(addprefix $(TARGET_OUT_STAGING)/,$1) \
 	))
 
 ###############################################################################
