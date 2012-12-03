@@ -218,7 +218,7 @@ define create-user-makefiles-cache
 	) >&2;
 endef
 
-ifneq ("$(USE_SCAN_CACHE)","1")
+ifeq ("$(USE_SCAN_CACHE)","0")
 
 # Force regeneration of cache and include scanned files
 $(shell $(create-user-makefiles-cache))
