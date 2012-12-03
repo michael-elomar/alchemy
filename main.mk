@@ -195,7 +195,7 @@ USER_MAKEFILES_CACHE := $(TARGET_OUT_BUILD)/makefiles.mk
 USER_MAKEFILES :=
 
 # Command to find files
-find-cmd = $(BUILD_SYSTEM)/scripts/findfiles.py \
+find-cmd := $(BUILD_SYSTEM)/scripts/findfiles.py \
 	--prune=.git --prune=.repo \
 	--prune=$(TARGET_OUT) \
 	--prune=$(BUILD_SYSTEM) \
@@ -203,26 +203,39 @@ find-cmd = $(BUILD_SYSTEM)/scripts/findfiles.py \
 	$(TOP_DIR) \
 	$(USER_MAKEFILE_NAME)
 
-# Create a file that will contain all user makefiles available
-# Redirect everything to stderr so we can use it in a $(shell ...) below
-define create-user-makefiles-cache
-	( \
-		rm -f $(USER_MAKEFILES_CACHE); \
-		mkdir -p $$(dirname $(USER_MAKEFILES_CACHE)); \
-		touch $(USER_MAKEFILES_CACHE); \
-		echo "Scanning $(TOP_DIR) for makefiles..."; \
-		for f in `$(find-cmd)`; do \
-			echo "USER_MAKEFILES += $$f" >> $(USER_MAKEFILES_CACHE); \
-			echo "include $$f" >> $(USER_MAKEFILES_CACHE); \
-		done; \
-	) >&2;
-endef
+# Summary of what we found
+display-user-makefiles-summary = \
+	$(if $(call strneq,$(V),0), \
+		$(foreach __f,$(USER_MAKEFILES),$(info $(__f))) \
+	) \
+	$(info Found $(words $(USER_MAKEFILES)) makefiles)
 
+# Create a file that will contain all user makefiles available
+create-user-makefiles-cache = \
+	rm -f $(USER_MAKEFILES_CACHE); \
+	mkdir -p $$(dirname $(USER_MAKEFILES_CACHE)); \
+	touch $(USER_MAKEFILES_CACHE); \
+	$(info Scanning $(TOP_DIR) for makefiles...) \
+	for f in `$(find-cmd)`; do \
+		echo "USER_MAKEFILES += $$f" >> $(USER_MAKEFILES_CACHE); \
+		echo "include $$f" >> $(USER_MAKEFILES_CACHE); \
+	done
+
+# Determine if we need to re-create the cache
+do-create-cache := 0
 ifeq ("$(USE_SCAN_CACHE)","0")
+  do-create-cache := 1
+else ifneq ("$(call is-targets-in-make-goals,scan)","")
+  do-create-cache := 1
+endif
+
+ifneq ("$(do-create-cache)","0")
 
 # Force regeneration of cache and include scanned files
-$(shell $(create-user-makefiles-cache))
+# Assignation to dummy variable is to ignore any output of shell command
+dummy := $(shell $(create-user-makefiles-cache))
 include $(USER_MAKEFILES_CACHE)
+$(call display-user-makefiles-summary)
 
 else
 
@@ -237,24 +250,21 @@ endif
 # If it does not exists, it will trigger its creation
 ifeq ("$(call is-targets-in-make-goals,scan clobber)","")
   -include $(USER_MAKEFILES_CACHE)
+  $(call display-user-makefiles-summary)
 endif
 
 endif
-
-# Summary of what we found
-ifneq ("$(V)","0")
-$(foreach __f,$(USER_MAKEFILES),$(info $(__f)))
-endif
-$(info Found $(words $(USER_MAKEFILES)) makefiles)
 
 # Rule that will trigger creation of list of makefiles when needed
 $(USER_MAKEFILES_CACHE):
 	@$(create-user-makefiles-cache)
 
 # Rule to force creation of list of makefiles
+# This doesn't do a alot, everything is done above. Scan in make goals
+# triggers the creation of the cache of makefiles
 .PHONY: scan
 scan:
-	@$(create-user-makefiles-cache)
+	@echo "Scan done"
 
 ###############################################################################
 ## If a module has set PBUILD_HOOK, include its package.
