@@ -1,5 +1,5 @@
 diff --git a/utils/iptables/atom.mk b/utils/iptables/atom.mk
-index 325cb5b..0bcdfe1 100644
+index 7ed980b..3dff4f4 100644
 --- a/utils/iptables/atom.mk
 +++ b/utils/iptables/atom.mk
 @@ -10,7 +10,8 @@ LOCAL_AUTOTOOLS_ARCHIVE := $(LOCAL_MODULE)-$(LOCAL_AUTOTOOLS_VERSION).tar.bz2
@@ -10,5 +10,5 @@ index 325cb5b..0bcdfe1 100644
 +	lucie/iptables-1.4.11.1.patch \
 +	lucie/iptables-1.4.11.1-64bit.patch
  
- LOCAL_AUTOTOOLS_CONFIGURE_ARGS := \
- 	--sysconfdir=/etc
+ include $(BUILD_AUTOTOOLS)
+ 
