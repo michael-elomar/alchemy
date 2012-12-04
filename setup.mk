@@ -90,7 +90,8 @@ endif
 CCACHE := 
 ifeq ("$(USE_CCACHE)","1")
   ifneq ("$(shell which ccache)","")
-    CCACHE := CCACHE_SLOPPINESS=time_macros ccache
+    export CCACHE_SLOPPINESS := time_macros
+    CCACHE := ccache
     TARGET_GLOBAL_CFLAGS += -fpch-preprocess
   endif
 endif
