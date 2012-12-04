@@ -13,10 +13,11 @@ import re
 def killMake(p):
 	# Interrupt top level make, then everyone in the process group,
 	# then kill remaining Some time later
+	time.sleep(0.2)
 	os.kill(p.pid, signal.SIGINT)
-	time.sleep(1)
+	time.sleep(0.2)
 	os.killpg(p.pid, signal.SIGINT)
-	time.sleep(1)
+	time.sleep(0.2)
 	os.killpg(p.pid, signal.SIGKILL)
 
 #===============================================================================
@@ -24,6 +25,10 @@ def killMake(p):
 #===============================================================================
 def main():
 	p = None
+
+	# Remember which process group was associated with terminal to restore  it
+	# after we played with it
+	tcpgrp = os.tcgetpgrp(0)
 
 	# If MAKELEVEL is defined, we are in a sub-make so don't play with
 	# process groups or killing
@@ -54,11 +59,14 @@ def main():
 
 	# Only redirect stderr (redirecting stdout causes issues if a child process
 	# wants to use the terminal, like ncurses)
+	# Force locale to have english messages that we will try to detect
+	env = os.environ
+	env["LANG"] = "C"
 	cmdArgs = ["make"] + sys.argv[1:]
 	p = subprocess.Popen(cmdArgs,
 		stderr=subprocess.PIPE,
 		preexec_fn=preExec,
-		shell=False)
+		shell=False, env=env)
 
 	# Read from stderr redirected in a pipe
 	# only catch top level makefile errors (sub-make files error will eventually
@@ -85,12 +93,18 @@ def main():
 			# Will occur when interrupted during read, an EOF will be read next
 			pass
 
-	# Only prinf message once at the end
+	# Only print message once at the end
 	if errorDetected:
 		sys.stderr.write("\n\033[31mMAKE ERROR DETECTED\n\033[00m")
 
-	# Exit with same result as sub-process
+	# Wait for sub-process to terminate
 	p.wait()
+
+	# Restore stuff
+	signal.signal(signal.SIGTTOU, signal.SIG_IGN)
+	os.tcsetpgrp(0, tcpgrp)
+
+	# Exit with same result as sub-process
 	sys.exit(p.returncode)
 
 #===============================================================================
