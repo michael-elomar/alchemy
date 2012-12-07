@@ -12,16 +12,6 @@
 # (we add the -p option to preserve timestamp of installed files)
 AUTOTOOLS_INSTALL_BIN := $(shell which install)
 
-# This needs to be exported to be working properly (In case an already configured
-# package tries to reconfigure itself, it will need this)
-export PKG_CONFIG_PATH := $(TARGET_OUT_STAGING)/usr/lib/pkgconfig
-export PKG_CONFIG_LIBDIR := $(TARGET_OUT_STAGING)/usr/lib/pkgconfig
-ifeq ("$(TARGET_OS_FLAVOUR)","native")
-  export PKG_CONFIG_SYSROOT_DIR :=
-else
-  export PKG_CONFIG_SYSROOT_DIR := $(TARGET_OUT_STAGING)
-endif
-
 # Environment to use when executing configure script
 AUTOTOOLS_CONFIGURE_ENV := \
 	AR="$(TARGET_CROSS)ar" \
@@ -43,6 +33,17 @@ AUTOTOOLS_CONFIGURE_ENV := \
 	CXXFLAGS="$(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES)) $(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CPPFLAGS)" \
 	LDFLAGS="$(TARGET_GLOBAL_LDFLAGS) $(TARGET_GLOBAL_LDLIBS)" \
 	DYN_LDFLAGS="$(TARGET_GLOBAL_LDFLAGS_SHARED) $(TARGET_GLOBAL_LDLIBS_SHARED)"
+
+# Make sure pkg-config does not look on host
+AUTOTOOLS_CONFIGURE_ENV += \
+	PKG_CONFIG_PATH="$(TARGET_OUT_STAGING)/usr/lib/pkgconfig" \
+	PKG_CONFIG_LIBDIR="$(TARGET_OUT_STAGING)/usr/lib/pkgconfig"
+ifeq ("$(TARGET_OS_FLAVOUR)","native")
+  AUTOTOOLS_CONFIGURE_ENV += PKG_CONFIG_SYSROOT_DIR=""
+else
+  AUTOTOOLS_CONFIGURE_ENV += PKG_CONFIG_SYSROOT_DIR="$(TARGET_OUT_STAGING)"
+endif
+
 
 # Build triplet
 GNU_BUILD_NAME := $(shell $(HOST_CC) -dumpmachine)
