@@ -13,8 +13,9 @@ ifneq ("$(V)","0")
 $(info Generating rules for $(LOCAL_MODULE))
 endif
 
-# Do we need to copy build module to staging dir
+# Do we need to copy build module to staging/final dir
 copy_to_staging := 0
+copy_to_final := 0
 
 # Intermediate/Build directory
 build_dir := $(TARGET_OUT_BUILD)/$(LOCAL_MODULE)
@@ -129,6 +130,10 @@ $(LOCAL_TARGETS): PRIVATE_CLEAN_DIRS := $(LOCAL_CLEAN_DIRS)
 .PHONY: $(LOCAL_MODULE)
 $(LOCAL_MODULE): $(LOCAL_BUILD_MODULE)
 
+# Add direct dependencies. Mainly used for copy to staging/final dir to get
+# everything built for the module
+$(LOCAL_MODULE): $(call module-get-depends,$(LOCAL_MODULE))
+
 # Clean module
 .PHONY: $(LOCAL_MODULE)-clean
 $(LOCAL_MODULE)-clean: $(LOCAL_MODULE)-clean-common
@@ -196,6 +201,7 @@ $(LOCAL_BUILD_MODULE): $(all_objects) $(all_libraries)
 	$(transform-o-to-shared-lib)
 
 copy_to_staging := 1
+copy_to_final := 1
 
 endif
 
@@ -211,6 +217,7 @@ $(LOCAL_BUILD_MODULE): $(all_objects) $(all_libraries)
 	$(transform-o-to-executable)
 
 copy_to_staging := 1
+copy_to_final := 1
 
 endif
 
@@ -274,14 +281,39 @@ endif
 $(LOCAL_BUILD_MODULE): | $(all_prerequisites)
 
 ###############################################################################
-## Copy to staging dir
+## Copy to staging/final dir
 ###############################################################################
 
 ifeq ("$(copy_to_staging)","1")
+
 $(LOCAL_MODULE): $(LOCAL_STAGING_MODULE)
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(LOCAL_STAGING_MODULE)
 $(eval $(call copy-one-file,$(LOCAL_BUILD_MODULE),$(LOCAL_STAGING_MODULE)))
+
+# If final directory exists, also copy file in it
+# TODO: maybe add a setting to disable this feature ?
+# TODO: add to clean list ?
+ifeq ("$(copy_to_final)","1")
+
+ifneq ("$(wildcard $(TARGET_OUT_FINAL))","")
+
+LOCAL_FINAL_MODULE := $(LOCAL_STAGING_MODULE:$(TARGET_OUT_STAGING)/%=$(TARGET_OUT_FINAL)/%)
+$(LOCAL_MODULE): $(LOCAL_FINAL_MODULE)
+
+# Strip if needed, otherwise simply copy
+ifneq ("$(TARGET_STRIP)","")
+$(LOCAL_FINAL_MODULE): $(LOCAL_STAGING_MODULE)
+	@echo "Strip: $$(call path-from-top,$$<) => $$(call path-from-top,$$@)"
+	$(Q)$(TARGET_STRIP) -o $@ $<
+else
+$(eval $(call copy-one-file,$(LOCAL_STAGING_MODULE),$(LOCAL_FINAL_MODULE)))
 endif
+
+endif # ifneq ("$(wildcard $(TARGET_OUT_FINAL))","")
+
+endif # ifeq ("$(copy_to_final)","1")
+
+endif # ifeq ("$(copy_to_staging)","1")
 
 ###############################################################################
 ## Pre-install customization

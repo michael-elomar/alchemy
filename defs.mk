@@ -659,6 +659,9 @@ module-get-static-depends = \
 module-get-all-depends = \
 	$(__modules.$1.depends.all)
 
+module-get-depends = \
+	$(__modules.$1.depends)
+
 ###############################################################################
 ## Get path of module main target file (in build or staging directory).
 ## $1 : module name.
