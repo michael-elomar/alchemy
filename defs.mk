@@ -825,7 +825,7 @@ print-banner2 = \
 link-hook = $(strip \
 	$(if $(PRIVATE_PBUILD_HOOK), \
 		$(eval __depsdata := $(empty)) \
-		$(foreach __lib,$(__modules.$1.depends.all), \
+		$(foreach __lib,$(sort $1 $(__modules.$1.depends.all)), \
 			$(eval __depsdata += $(__lib):$(__modules.$(__lib).PATH)) \
 		)\
 		$(shell $(BUILD_SYSTEM)/pbuild-hook/pbuild-link-hook.sh \
