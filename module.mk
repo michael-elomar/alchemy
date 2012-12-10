@@ -139,11 +139,13 @@ $(LOCAL_MODULE): $(call module-get-depends,$(LOCAL_MODULE))
 $(LOCAL_MODULE)-clean: $(LOCAL_MODULE)-clean-common
 
 # Common part, delete registered files and directories
+# Note: the foreach generates a separate command for each file/dir thanks to
+# the $(endl) macro that insert a new line during expansion.
 .PHONY: $(LOCAL_MODULE)-clean-common
 $(LOCAL_MODULE)-clean-common:
 	@echo "Clean: $(PRIVATE_MODULE)"
-	$(Q)$(if $(PRIVATE_CLEAN_FILES),rm -f $(PRIVATE_CLEAN_FILES))
-	$(Q)$(if $(PRIVATE_CLEAN_DIRS),rm -rf $(PRIVATE_CLEAN_DIRS))
+	$(foreach __f,$(PRIVATE_CLEAN_FILES),$(Q)rm -f $(__f)$(endl))
+	$(foreach __d,$(PRIVATE_CLEAN_DIRS),$(Q)rm -rf $(__d)$(endl))
 
 # Clean + delete the build directory
 .PHONY: $(LOCAL_MODULE)-dirclean
