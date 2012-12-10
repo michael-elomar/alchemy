@@ -15,6 +15,13 @@ empty :=
 space := $(empty) $(empty)
 space4 := $(space)$(space)$(space)$(space)
 
+# Other special characters definition (useful to avoid parsing error in functions)
+dollar = $$
+comma = ,
+colon = :
+left-paren = (
+right-paren = )
+
 # True/False values. Any non-empty test is considered as True
 true := T
 false :=
@@ -280,11 +287,6 @@ modules-fields-depends := \
 	depends.WHOLE_STATIC_LIBRARIES \
 	depends.SHARED_LIBRARIES \
 	depends.all
-
-# the list of managed fields per module
-modules-fields := \
-	$(modules-fields-depends) \
-	$(modules-LOCALS)
 
 ###############################################################################
 ## Add a module in the build system and save its LOCAL_xxx variables.
