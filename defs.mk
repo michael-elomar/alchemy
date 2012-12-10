@@ -140,6 +140,7 @@ clear-vars = $(foreach __varname,$1,$(eval $(__varname) := $(empty)))
 ## List of LOCAL_XXX variables that can be set by makefiles.
 ###############################################################################
 modules-LOCALS :=
+modules-macros-LOCALS :=
 
 # Path of the root of module
 modules-LOCALS += PATH
@@ -309,6 +310,9 @@ module-add = \
 		$(foreach __local,$(modules-LOCALS), \
 			$(eval __modules.$(__mod).$(__local) := $(LOCAL_$(__local))) \
 		) \
+		$(foreach __local,$(modules-macros-LOCALS), \
+			$(call macro-copy,__modules.$(__mod).$(__local),LOCAL_$(__local)) \
+		) \
 	)
 
 ###############################################################################
@@ -379,6 +383,9 @@ is-module-in-build-config = $(strip \
 module-restore-locals = \
 	$(foreach __local,$(modules-LOCALS), \
 		$(eval LOCAL_$(__local) := $(__modules.$1.$(__local))) \
+	) \
+	$(foreach __local,$(modules-macros-LOCALS), \
+		$(call macro-copy,LOCAL_$(__local),__modules.$1.$(__local)) \
 	)
 
 ###############################################################################
@@ -751,6 +758,21 @@ copy-get-dst-path = $(strip \
 	$(if $(call is-path-absolute,$1), \
 		$1,$(addprefix $(TARGET_OUT_STAGING)/,$1) \
 	))
+
+###############################################################################
+## Copy a macro.
+## $1 : destination variable.
+## $1 : source variable.
+## This works by reevaluating the content of the macro in a new variable.
+###############################################################################
+macro-copy = \
+	$(eval define $1$(endl)$(value $2)$(endl)endef)
+
+###############################################################################
+## Determine if a macro is empty.
+## $1 : name of macro.
+###############################################################################
+macro-is-empty = $(call not,$(value $1))
 
 ###############################################################################
 ## Print some banners.

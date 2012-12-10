@@ -351,7 +351,7 @@ endif
 
 # Once all modules have been parsed, make sure nobody will reference LOCAL_XXX
 # variables anymore. In commands, PRIVATE_XXX variables shall be used.
-$(foreach __var,$(modules-LOCALS), \
+$(foreach __var,$(modules-LOCALS) $(modules-macros-LOCALS), \
 	$(eval override LOCAL_$(__var) = \
 		$$(error Do NOT use LOCAL_$(__var) in commands)) \
 )
