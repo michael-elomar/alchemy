@@ -104,44 +104,50 @@ endif
 # (mainly to improve perf)
 ifndef autotools-macros
 
-__default-unpack = \
-	tar -C $(PRIVATE_UNPACK_DIR) -xf $(PRIVATE_ARCHIVE)
+define __default-unpack
+	$(Q) tar -C $(PRIVATE_UNPACK_DIR) -xf $(PRIVATE_ARCHIVE)
+endef
 
-__default-configure = \
-	cd $(PRIVATE_OBJ_DIR) && \
+define __default-configure
+	$(Q) cd $(PRIVATE_OBJ_DIR) && \
 		$(AUTOTOOLS_CONFIGURE_ENV) $(PRIVATE_CONFIGURE_ENV) \
 		$(PRIVATE_SRC_DIR)/configure \
 		$(call configure-filter-args, \
 			$(PRIVATE_SRC_DIR)/configure,$(AUTOTOOLS_CONFIGURE_ARGS)) \
 		$(PRIVATE_CONFIGURE_ARGS)
+endef
 
-__default-make-build = \
-	$(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_BUILD_ENV) \
+define __default-make-build
+	$(Q) $(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_BUILD_ENV) \
 		$(MAKE) -C $(PRIVATE_OBJ_DIR) \
 		$(AUTOTOOLS_MAKE_ARGS) $(PRIVATE_MAKE_BUILD_ARGS)
+endef
 
-__default-make-install = \
-	$(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) \
+define __default-make-install
+	$(Q) $(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) \
 		$(MAKE) -C $(PRIVATE_OBJ_DIR) \
 		$(AUTOTOOLS_MAKE_ARGS) $(PRIVATE_MAKE_INSTALL_ARGS) install
+endef
 
 # Force success for command in case "uninstall" or "clean" is not supported
 # or Makefile not present
-__default-clean = \
-	if [ -d $(PRIVATE_OBJ_DIR) ]; then \
+define __default-clean
+	$(Q) if [ -f $(PRIVATE_OBJ_DIR)/Makefile ]; then \
 		$(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) \
-			$(MAKE) --ignore-errors -C $(PRIVATE_OBJ_DIR) \
+			$(MAKE) --keep-going --ignore-errors -C $(PRIVATE_OBJ_DIR) \
 			$(AUTOTOOLS_MAKE_ARGS) $(PRIVATE_MAKE_INSTALL_ARGS) \
 			uninstall || echo "Ignoring uninstall errors"; \
 		$(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) \
-			$(MAKE) --ignore-errors -C $(PRIVATE_OBJ_DIR) \
+			$(MAKE) --keep-going --ignore-errors -C $(PRIVATE_OBJ_DIR) \
 			$(AUTOTOOLS_MAKE_ARGS) \
 			clean || echo "Ignoring clean errors"; \
 	fi;
+endef
 
-__apply-patches = \
-	$(BUILD_SYSTEM)/scripts/apply-patches.sh \
+define __apply-patches
+	$(Q) $(BUILD_SYSTEM)/scripts/apply-patches.sh \
 		$(PRIVATE_SRC_DIR) $(PRIVATE_PATH) $(PRIVATE_PATCHES)
+endef
 
 # Patch libtool to make it work properly for cross-compilation.
 # Modify the libdir in .la files installed in staging dir so that they reference
@@ -150,8 +156,8 @@ __apply-patches = \
 # Use -rpath-link instead of -rpath to avoid hardcoding host path in binaries.
 # See this link for more information :
 # http://www.metastatic.org/text/libtool.html
-__libtool_patch = \
-	$(Q)for f in `find $(PRIVATE_OBJ_DIR) -name libtool -o -name ltmain.sh`; do \
+define __libtool_patch
+	$(Q) for f in `find $(PRIVATE_OBJ_DIR) -name libtool -o -name ltmain.sh`; do \
 		echo "Patching $$f"; \
 		$(if $(AUTOTOOLS_INSTALL_DESTDIR), \
 			sed -i -e "s|^libdir='\$$install_libdir'|libdir='\$${install_libdir:\+$(TARGET_OUT_STAGING)\$$install_libdir}'|1" $$f; \
@@ -159,38 +165,30 @@ __libtool_patch = \
 		sed -i -e "s|{wl}-rpath|{wl}-rpath-link|1" $$f; \
 		sed -i -e "s|{wl}--rpath|{wl}-rpath-link|1" $$f; \
 	done
+endef
 
-#		sed -i -e "s|runpath_var=LD_RUN_PATH|runpath_var=|1" $$f; \
-#		sed -i -e "s|need_relink=yes|need_relink=no|1" $$f; \
+# Execute commands.
+# $1 : Type of commands to execute. Ex : CMD_CONFIGURE, CMD_POST_CONFIGURE...
+# $2 : default macro if $1 is empty.
+#
+# Note : if the content of the variable is empty, the default one will be used.
+#        If the content is only one work, it is assumed to be the actual macro
+#        to be called (one more leval of macro call). Otherwise, macro is called
+#        directly.
+# Note : we access macros from the module database because we can't create
+#        PRIVATE_XXX target-specific variables for them.
+# Note : the part where we check for single word can be removed when all user
+# makefiles have been converted to use new way of defining commands.
+__autotools-cmd = \
+	$(eval __var := __modules.$(PRIVATE_MODULE).AUTOTOOLS_$1) \
+	$(if $(value $(__var)), \
+		$(if $(call streq,$(words $(value $(__var))),1), \
+			$($($(__var))),$($(__var)) \
+		), \
+		$(if $2,$($2)) \
+	)
 
-endif
 
-###############################################################################
-###############################################################################
-
-LOCAL_AUTOTOOLS_CMD_UNPACK := $(strip $(LOCAL_AUTOTOOLS_CMD_UNPACK))
-ifeq ("$(LOCAL_AUTOTOOLS_CMD_UNPACK)","")
-  LOCAL_AUTOTOOLS_CMD_UNPACK := __default-unpack
-endif
-
-LOCAL_AUTOTOOLS_CMD_CONFIGURE := $(strip $(LOCAL_AUTOTOOLS_CMD_CONFIGURE))
-ifeq ("$(LOCAL_AUTOTOOLS_CMD_CONFIGURE)","")
-  LOCAL_AUTOTOOLS_CMD_CONFIGURE := __default-configure
-endif
-
-LOCAL_AUTOTOOLS_CMD_BUILD := $(strip $(LOCAL_AUTOTOOLS_CMD_BUILD))
-ifeq ("$(LOCAL_AUTOTOOLS_CMD_BUILD)","")
-  LOCAL_AUTOTOOLS_CMD_BUILD := __default-make-build
-endif
-
-LOCAL_AUTOTOOLS_CMD_INSTALL := $(strip $(LOCAL_AUTOTOOLS_CMD_INSTALL))
-ifeq ("$(LOCAL_AUTOTOOLS_CMD_INSTALL)","")
-  LOCAL_AUTOTOOLS_CMD_INSTALL := __default-make-install
-endif
-
-LOCAL_AUTOTOOLS_CMD_CLEAN := $(strip $(LOCAL_AUTOTOOLS_CMD_CLEAN))
-ifeq ("$(LOCAL_AUTOTOOLS_CMD_CLEAN)","")
-  LOCAL_AUTOTOOLS_CMD_CLEAN := __default-clean
 endif
 
 ###############################################################################
@@ -208,9 +206,9 @@ $(unpacked_file): $(archive_file) $(addprefix $(LOCAL_PATH)/,$(patches))
 ifneq ("$(archive_file)","")
 	@echo "Unpacking $(call path-from-top,$<)"
 	@mkdir -p $(PRIVATE_UNPACK_DIR)
-	+$(Q)$(call $(PRIVATE_CMD_UNPACK))
-	+$(Q)$(if $(PRIVATE_PATCHES), $(call __apply-patches))
-	+$(Q)$(if $(PRIVATE_CMD_POST_UNPACK), $(call $(PRIVATE_CMD_POST_UNPACK)))
+	+$(call __autotools-cmd,CMD_UNPACK,__default-unpack)
+	+$(if $(PRIVATE_PATCHES),$(__apply-patches))
+	+$(call __autotools-cmd,CMD_POST_UNPACK)
 endif
 	@mkdir -p $(dir $@)
 	@touch $@
@@ -219,9 +217,9 @@ endif
 $(configured_file): $(unpacked_file)
 	@echo "Configuring $(PRIVATE_MODULE)"
 	@mkdir -p $(PRIVATE_OBJ_DIR)
-	+$(Q)$(call $(PRIVATE_CMD_CONFIGURE))
-	+$(Q)$(if $(PRIVATE_CMD_POST_CONFIGURE), $(call $(PRIVATE_CMD_POST_CONFIGURE)))
-	$(__libtool_patch)
+	+$(call __autotools-cmd,CMD_CONFIGURE,__default-configure)
+	+$(call __autotools-cmd,CMD_POST_CONFIGURE)
+	+$(__libtool_patch)
 	@mkdir -p $(dir $@)
 	@touch $@
 
@@ -229,16 +227,16 @@ $(configured_file): $(unpacked_file)
 $(built_file): $(configured_file)
 	@echo "Building $(PRIVATE_MODULE)"
 	@mkdir -p $(PRIVATE_OBJ_DIR)
-	+$(Q)$(call $(PRIVATE_CMD_BUILD))
-	+$(Q)$(if $(PRIVATE_CMD_POST_BUILD), $(call $(PRIVATE_CMD_POST_BUILD)))
+	+$(call __autotools-cmd,CMD_BUILD,__default-make-build)
+	+$(call __autotools-cmd,CMD_POST_BUILD)
 	@mkdir -p $(dir $@)
 	@touch $@
 
 # Installation
 $(installed_file): $(built_file)
 	@echo "Installing $(PRIVATE_MODULE)"
-	+$(Q)$(call $(PRIVATE_CMD_INSTALL))
-	+$(Q)$(if $(PRIVATE_CMD_POST_INSTALL), $(call $(PRIVATE_CMD_POST_INSTALL)))
+	+$(call __autotools-cmd,CMD_INSTALL,__default-make-install)
+	+$(call __autotools-cmd,CMD_POST_INSTALL)
 	@mkdir -p $(dir $@)
 	@touch $@
 
@@ -249,8 +247,8 @@ $(LOCAL_BUILD_MODULE): $(installed_file)
 
 # clean targets additional commands
 $(LOCAL_MODULE)-clean:
-	+$(Q)$(call $(PRIVATE_CMD_CLEAN))
-	+$(Q)$(if $(PRIVATE_CMD_POST_CLEAN), $(call $(PRIVATE_CMD_POST_CLEAN)))
+	+$(call __autotools-cmd,CMD_CLEAN,__default-clean)
+	+$(call __autotools-cmd,CMD_POST_CLEAN)
 
 ###############################################################################
 ## Rule-specific variable definitions.
@@ -262,27 +260,20 @@ $(LOCAL_MODULE)-clean:
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(installed_file)
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(built_file)
 
+# We don't create target-specific variables for macros because it does not
+# work when created with 'define ... endef'. They will be accessed directly
+# from module database
 $(LOCAL_TARGETS): PRIVATE_ARCHIVE := $(archive_file)
 $(LOCAL_TARGETS): PRIVATE_UNPACK_DIR := $(unpack_dir)
 $(LOCAL_TARGETS): PRIVATE_SRC_DIR := $(src_dir)
 $(LOCAL_TARGETS): PRIVATE_OBJ_DIR := $(obj_dir)
 $(LOCAL_TARGETS): PRIVATE_PATCHES := $(patches)
-$(LOCAL_TARGETS): PRIVATE_CONFIGURE_ENV  := $(LOCAL_AUTOTOOLS_CONFIGURE_ENV)
-$(LOCAL_TARGETS): PRIVATE_CONFIGURE_ARGS  := $(LOCAL_AUTOTOOLS_CONFIGURE_ARGS)
-$(LOCAL_TARGETS): PRIVATE_MAKE_BUILD_ENV  := $(LOCAL_AUTOTOOLS_MAKE_BUILD_ENV)
-$(LOCAL_TARGETS): PRIVATE_MAKE_BUILD_ARGS  := $(LOCAL_AUTOTOOLS_MAKE_BUILD_ARGS)
-$(LOCAL_TARGETS): PRIVATE_MAKE_INSTALL_ENV  := $(LOCAL_AUTOTOOLS_MAKE_INSTALL_ENV)
-$(LOCAL_TARGETS): PRIVATE_MAKE_INSTALL_ARGS  := $(LOCAL_AUTOTOOLS_MAKE_INSTALL_ARGS)
-$(LOCAL_TARGETS): PRIVATE_CMD_UNPACK := $(LOCAL_AUTOTOOLS_CMD_UNPACK)
-$(LOCAL_TARGETS): PRIVATE_CMD_CONFIGURE := $(LOCAL_AUTOTOOLS_CMD_CONFIGURE)
-$(LOCAL_TARGETS): PRIVATE_CMD_BUILD := $(LOCAL_AUTOTOOLS_CMD_BUILD)
-$(LOCAL_TARGETS): PRIVATE_CMD_INSTALL := $(LOCAL_AUTOTOOLS_CMD_INSTALL)
-$(LOCAL_TARGETS): PRIVATE_CMD_CLEAN := $(LOCAL_AUTOTOOLS_CMD_CLEAN)
-$(LOCAL_TARGETS): PRIVATE_CMD_POST_UNPACK := $(LOCAL_AUTOTOOLS_CMD_POST_UNPACK)
-$(LOCAL_TARGETS): PRIVATE_CMD_POST_CONFIGURE := $(LOCAL_AUTOTOOLS_CMD_POST_CONFIGURE)
-$(LOCAL_TARGETS): PRIVATE_CMD_POST_BUILD := $(LOCAL_AUTOTOOLS_CMD_POST_BUILD)
-$(LOCAL_TARGETS): PRIVATE_CMD_POST_INSTALL := $(LOCAL_AUTOTOOLS_CMD_POST_INSTALL)
-$(LOCAL_TARGETS): PRIVATE_CMD_POST_CLEAN := $(LOCAL_AUTOTOOLS_CMD_POST_CLEAN)
+$(LOCAL_TARGETS): PRIVATE_CONFIGURE_ENV := $(LOCAL_AUTOTOOLS_CONFIGURE_ENV)
+$(LOCAL_TARGETS): PRIVATE_CONFIGURE_ARGS := $(LOCAL_AUTOTOOLS_CONFIGURE_ARGS)
+$(LOCAL_TARGETS): PRIVATE_MAKE_BUILD_ENV := $(LOCAL_AUTOTOOLS_MAKE_BUILD_ENV)
+$(LOCAL_TARGETS): PRIVATE_MAKE_BUILD_ARGS := $(LOCAL_AUTOTOOLS_MAKE_BUILD_ARGS)
+$(LOCAL_TARGETS): PRIVATE_MAKE_INSTALL_ENV := $(LOCAL_AUTOTOOLS_MAKE_INSTALL_ENV)
+$(LOCAL_TARGETS): PRIVATE_MAKE_INSTALL_ARGS := $(LOCAL_AUTOTOOLS_MAKE_INSTALL_ARGS)
 
 # Macros of this file have been defined
 autotools-macros := 1
