@@ -158,6 +158,9 @@ modules-LOCALS += MODULE
 # Override the name of what will be generated
 modules-LOCALS += MODULE_FILENAME
 
+# Description of the module
+modules-LOCALS += DESCRIPTION
+
 # List of 'done' files indicating internal steps already done and that does not need
 # to be executed next time unless a force is requested
 # Name is relative to build directory

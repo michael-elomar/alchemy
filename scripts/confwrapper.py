@@ -66,21 +66,24 @@ class Module:
 	def __init__(self, arg):
 		fields = arg.split(ARG_FIELD_SEP)
 		self.name = ""
+		self.desc = ""
 		self.groupPath = ""
 		self.configPath = ""
 		self.configInPathList = []
 		if len(fields) > 0:
 			self.name = fields[0]
 		if len(fields) > 1:
-			self.groupPath = fields[1].rstrip("/")
+			self.desc = fields[1]
 		if len(fields) > 2:
-			self.configPath = fields[2]
+			self.groupPath = fields[2].rstrip("/")
 		if len(fields) > 3:
-			self.configInPathList = fields[3:]
+			self.configPath = fields[3]
+		if len(fields) > 4:
+			self.configInPathList = fields[4:]
 
 	def __repr__(self):
-		return "{name=%s,groupPath=%s,configPath=%s,configInPathList=%s}" % \
-				(self.name, self.groupPath, self.configPath, str(self.configInPathList))
+		return "{name=%s,self=%s,groupPath=%s,configPath=%s,configInPathList=%s}" % \
+				(self.name, self.desc, self.groupPath, self.configPath, str(self.configInPathList))
 
 #===============================================================================
 # Simplify tree of groups by moving up modules to first non-empty parent.
@@ -248,6 +251,8 @@ def writeFullConfigIn(outFile, group):
 		outFile.write("  default n\n")
 		outFile.write("  help\n")
 		outFile.write("    Build %s\n" % module.name)
+		if len(module.desc) != 0:
+			outFile.write("    %s\n" % module.desc)
 		outFile.write("\n")
 
 		if len(module.configInPathList) > 0:

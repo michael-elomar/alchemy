@@ -70,18 +70,26 @@ __get-module-config-in-files = $(strip \
 
 ###############################################################################
 ## Generate arguments suitable for an action on a module config.
-## $1 : module name
 ###############################################################################
+
+# Escape description so it can be inserted as a parameter in the command line
+# It removes completely ':' and escape quotes.
+# $1 : description
+__config-desc-escape = $(subst ",\",$(subst $(colon),$(empty),$1))
+
+# Generate arguments suitable for an action on a module config.
+# $1 : module name
 __generate-config-module-args = $(strip \
 	$(eval __mod := $1) \
+	$(eval __desc := $(call __config-desc-escape,$(__modules.$(__mod).DESCRIPTION))) \
 	$(eval __grouppath := $(call path-from-top,$(__modules.$(__mod).PATH))) \
 	$(eval __config := $(call __get-module-config,$(__mod))) \
 	$(eval __configInFiles := $(call __get-module-config-in-files,$(__mod))) \
-	$(eval __arg := $(__mod):$(__grouppath):$(__config)) \
+	$(eval __arg := $(__mod):$(__desc):$(__grouppath):$(__config)) \
 	$(foreach __f,$(__configInFiles), \
 		$(eval __arg := $(__arg):$(call fullpath,$(__f))) \
 	) \
-	$(__arg))
+	"$(__arg)")
 
 ###############################################################################
 ## Generate arguments suitable for an action on a full config.
