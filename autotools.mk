@@ -11,6 +11,15 @@ LOCAL_MODULE_CLASS := AUTOTOOLS
 LOCAL_MODULE_FILENAME := $(LOCAL_MODULE).done
 LOCAL_DONE_FILES := $(LOCAL_MODULE).done
 
+# Check if a module is using old LOCAL_AUTOTOOLS_DIR variable
+ifdef LOCAL_AUTOTOOLS_DIR
+ifneq ("$(LOCAL_AUTOTOOLS_DIR)","")
+  $(info $(LOCAL_PATH): module '$(LOCAL_MODULE)' is using deprecated variable 'LOCAL_AUTOTOOLS_DIR')
+  LOCAL_AUTOTOOLS_SUBDIR := $(LOCAL_AUTOTOOLS_DIR)
+  LOCAL_AUTOTOOLS_DIR := $(empty)
+endif
+endif
+
 # Check if a module is using old way of creating hooks.
 # Note : we check if variable contains only one word (previously used a the
 #        name of the actual macro with commands to execute), but accept if

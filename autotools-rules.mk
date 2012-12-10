@@ -24,7 +24,7 @@ unpack_dir := $(build_dir)
 
 # Where the source will actually be found once unpacked
 ifneq ("$(archive_file)","")
-  src_dir := $(unpack_dir)/$(LOCAL_AUTOTOOLS_DIR)
+  src_dir := $(unpack_dir)/$(LOCAL_AUTOTOOLS_SUBDIR)
 else
   src_dir := $(LOCAL_PATH)
 endif
