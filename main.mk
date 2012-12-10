@@ -261,7 +261,7 @@ $(USER_MAKEFILES_CACHE):
 	@$(create-user-makefiles-cache)
 
 # Rule to force creation of list of makefiles
-# This doesn't do a alot, everything is done above. Scan in make goals
+# This doesn't do a a lot, everything is done above. Scan in make goals
 # triggers the creation of the cache of makefiles
 .PHONY: scan
 scan:

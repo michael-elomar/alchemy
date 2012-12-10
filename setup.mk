@@ -86,7 +86,8 @@ else
   $(error Unsupported target OS : $(TARGET_OS))
 endif
 
-# To be able to use ccache with pre-complied headers, some env variables are required
+# To be able to use ccache with pre-compiled headers, some environment
+# variables are required
 CCACHE := 
 ifeq ("$(USE_CCACHE)","1")
   ifneq ("$(shell which ccache)","")

@@ -44,7 +44,6 @@ else
   AUTOTOOLS_CONFIGURE_ENV += PKG_CONFIG_SYSROOT_DIR="$(TARGET_OUT_STAGING)"
 endif
 
-
 # Build triplet
 GNU_BUILD_NAME := $(shell $(HOST_CC) -dumpmachine)
 
