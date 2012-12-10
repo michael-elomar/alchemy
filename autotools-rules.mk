@@ -188,6 +188,10 @@ __autotools-cmd = \
 		$(if $2,$($2)) \
 	)
 
+# Display a message
+# $1 : message
+__autotools-msg = \
+	$(call print-banner2,Autotools,$(PRIVATE_MODULE),$1)
 
 endif
 
@@ -204,7 +208,7 @@ $(unpacked_file): | $(all_prerequisites)
 # Unpack + patch
 $(unpacked_file): $(archive_file) $(addprefix $(LOCAL_PATH)/,$(patches))
 ifneq ("$(archive_file)","")
-	@echo "Unpacking $(call path-from-top,$<)"
+	$(call __autotools-msg,Unpacking $(call path-from-top,$<))
 	@mkdir -p $(PRIVATE_UNPACK_DIR)
 	+$(call __autotools-cmd,CMD_UNPACK,__default-unpack)
 	+$(if $(PRIVATE_PATCHES),$(__apply-patches))
@@ -215,7 +219,7 @@ endif
 
 # Configuration
 $(configured_file): $(unpacked_file)
-	@echo "Configuring $(PRIVATE_MODULE)"
+	$(call __autotools-msg,Configuring)
 	@mkdir -p $(PRIVATE_OBJ_DIR)
 	+$(call __autotools-cmd,CMD_CONFIGURE,__default-configure)
 	+$(call __autotools-cmd,CMD_POST_CONFIGURE)
@@ -225,7 +229,7 @@ $(configured_file): $(unpacked_file)
 
 # Build
 $(built_file): $(configured_file)
-	@echo "Building $(PRIVATE_MODULE)"
+	$(call __autotools-msg,Building)
 	@mkdir -p $(PRIVATE_OBJ_DIR)
 	+$(call __autotools-cmd,CMD_BUILD,__default-make-build)
 	+$(call __autotools-cmd,CMD_POST_BUILD)
@@ -234,7 +238,7 @@ $(built_file): $(configured_file)
 
 # Installation
 $(installed_file): $(built_file)
-	@echo "Installing $(PRIVATE_MODULE)"
+	$(call __autotools-msg,Installing)
 	+$(call __autotools-cmd,CMD_INSTALL,__default-make-install)
 	+$(call __autotools-cmd,CMD_POST_INSTALL)
 	@mkdir -p $(dir $@)
