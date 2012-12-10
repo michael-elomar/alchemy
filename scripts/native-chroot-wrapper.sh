@@ -25,9 +25,8 @@ fi
 
 # Program to execute
 OPT_PROG="/bin/sh -l"
-if [ "$@" != "" ]; then
-	OPT_PROG=$@
-	shift
+if [ "$*" != "" ]; then
+	OPT_PROG=$*
 fi
 
 # Need to be root to chroot, but then go back to initial user
