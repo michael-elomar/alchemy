@@ -752,6 +752,12 @@ normalize-c-includes = $(strip \
 		$(addprefix -I,$(patsubst -I%,%,$(__inc))) \
 	))
 
+# Same but convert path relative to top
+normalize-c-includes-rel = $(strip \
+	$(foreach __inc,$1, \
+		$(addprefix -I,$(call path-from-top,$(patsubst -I%,%,$(__inc)))) \
+	))
+
 ###############################################################################
 ## Copy files helpers.
 ###############################################################################
@@ -832,8 +838,8 @@ define transform-h-to-gch
 $(call print-banner1,"Precompile",$(PRIVATE_MODULE),$(call path-from-top,$<))
 $(call check-pwd-is-top-dir)
 $(Q)$(CCACHE) $(TARGET_CXX) \
-	$(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES)) \
-	$(call normalize-c-includes,$(PRIVATE_C_INCLUDES)) \
+	$(call normalize-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
+	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
 	$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CPPFLAGS) $(WARNINGS_CPPFLAGS) \
 	$(PRIVATE_CFLAGS) $(PRIVATE_CPPFLAGS) \
 	$(TARGET_PCH_FLAGS) -MMD -MP -o $@ \
@@ -849,8 +855,8 @@ define transform-cpp-to-o
 $(call print-banner1,"$(PRIVATE_MODE) C++",$(PRIVATE_MODULE),$(call path-from-top,$<))
 $(call check-pwd-is-top-dir)
 $(Q)$(CCACHE) $(TARGET_CXX) \
-	$(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES)) \
-	$(call normalize-c-includes,$(PRIVATE_C_INCLUDES)) \
+	$(call normalize-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
+	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_MODE)) \
 	$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CPPFLAGS) $(WARNINGS_CPPFLAGS) \
 	$(PRIVATE_CFLAGS) $(PRIVATE_CPPFLAGS) \
@@ -867,8 +873,8 @@ $(call print-banner1,"$(PRIVATE_MODE) C",$(PRIVATE_MODULE),$(call path-from-top,
 $(call check-pwd-is-top-dir)
 @mkdir -p $(dir $@)
 $(Q)$(CCACHE) $(TARGET_CC) \
-	$(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES)) \
-	$(call normalize-c-includes,$(PRIVATE_C_INCLUDES)) \
+	$(call normalize-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
+	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_MODE)) \
 	$(TARGET_GLOBAL_CFLAGS) $(WARNINGS_CFLAGS) \
 	$(PRIVATE_CFLAGS) \
@@ -885,8 +891,8 @@ $(call print-banner1,"Asm",$(PRIVATE_MODULE),$(call path-from-top,$<))
 $(call check-pwd-is-top-dir)
 @mkdir -p $(dir $@)
 $(Q)$(CCACHE) $(TARGET_CC) \
-	$(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES)) \
-	$(call normalize-c-includes,$(PRIVATE_C_INCLUDES)) \
+	$(call normalize-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
+	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_MODE)) \
 	$(TARGET_GLOBAL_CFLAGS) $(WARNINGS_CFLAGS) \
 	$(PRIVATE_CFLAGS) \
