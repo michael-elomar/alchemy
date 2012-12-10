@@ -23,7 +23,7 @@ LOCAL_COPY_FILES := \
 		bin/$(__f):usr/bin/$(__f) \
 	)
 
-$(call local-add-module)
+include $(BUILD_CUSTOM)
 
 endif
 

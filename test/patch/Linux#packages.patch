@@ -1,28 +1,30 @@
 diff --git a/utils/iptables/atom.mk b/utils/iptables/atom.mk
-index 7ed980b..3dff4f4 100644
+index c74ee03..6af43ee 100644
 --- a/utils/iptables/atom.mk
 +++ b/utils/iptables/atom.mk
-@@ -10,7 +10,8 @@ LOCAL_AUTOTOOLS_ARCHIVE := $(LOCAL_MODULE)-$(LOCAL_AUTOTOOLS_VERSION).tar.bz2
- LOCAL_AUTOTOOLS_DIR := $(LOCAL_MODULE)-$(LOCAL_AUTOTOOLS_VERSION)
+@@ -11,7 +11,8 @@ LOCAL_AUTOTOOLS_ARCHIVE := $(LOCAL_MODULE)-$(LOCAL_AUTOTOOLS_VERSION).tar.bz2
+ LOCAL_AUTOTOOLS_SUBDIR := $(LOCAL_MODULE)-$(LOCAL_AUTOTOOLS_VERSION)
  
  LOCAL_AUTOTOOLS_PATCHES := \
 -	lucie/iptables-1.4.11.1.patch
 +	lucie/iptables-1.4.11.1.patch \
 +	lucie/iptables-1.4.11.1-64bit.patch
  
- include $(BUILD_AUTOTOOLS)
- 
+ # Do some manual cleanup
+ define LOCAL_AUTOTOOLS_CMD_POST_CLEAN
 diff --git a/utils/udev/lucie/eglibc.h b/utils/udev/lucie/eglibc.h
-index 7314fd3..3376e1c 100644
+index 7314fd3..89bd0e5 100644
 --- a/utils/udev/lucie/eglibc.h
 +++ b/utils/udev/lucie/eglibc.h
-@@ -8,7 +8,12 @@
+@@ -8,7 +8,14 @@
  extern long int syscall(long int __sysno, ...);
  static inline int inotify_init1(int flags) {return syscall(360, flags);}
  
 -#define SOCK_CLOEXEC 02000000
 -#define IN_CLOEXEC   02000000
 +#include <sys/socket.h>
++#include <sys/inotify.h>
++
 +#ifndef SOCK_CLOEXEC
 +#  define SOCK_CLOEXEC 02000000
 +#endif
