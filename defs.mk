@@ -399,12 +399,20 @@ modules-check-depends = \
 		$(call __module-check-depends,$(__mod)) \
 	)
 
-# Check dependencies of a module
+# Check dependencies of a module.
+# It verifies that all dependencies are registered and displays an error or
+# warning if module is build or not.
+# It also verifies that dependencies are enabled in config if module is.
 # $1 : module name.
 __module-check-depends = \
+	$(eval __path := $(__modules.$1.PATH)) \
 	$(foreach __lib,$(__modules.$1.depends), \
-		$(if $(call is-module-registered,$(__lib)),$(empty), \
-			$(eval __path := $(__modules.$1.PATH)) \
+		$(if $(call is-module-registered,$(__lib)), \
+			$(if $(call is-module-in-build-config,$1), \
+				$(if $(call is-module-in-build-config,$(__lib)),$(empty), \
+					$(error $(__path): module '$1' depends on disabled module '$(__lib)') \
+				) \
+			), \
 			$(if $(call is-module-in-build-config,$1), \
 				$(error $(__path): module '$1' depends on unknown module '$(__lib)'), \
 				$(warning $(__path): module '$1' depends on unknown module '$(__lib)') \
