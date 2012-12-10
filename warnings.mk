@@ -33,6 +33,11 @@ WARNINGS_COMMON_FLAGS += -Wformat-nonliteral
 WARNINGS_COMMON_FLAGS += -Wformat-security
 WARNINGS_COMMON_FLAGS += -Winit-self
 
+# Too many noise under ecos.
+ifeq ("$(TARGET_OS)","ecos")
+WARNINGS_COMMON_FLAGS += -Wno-format
+endif
+
 # android specifies -Wstrict-aliasing=2
 # it generates too many false positive, use level 3 (default with -Wall or -Wstrict-aliasing)
 WARNINGS_COMMON_FLAGS += -Wstrict-aliasing=3
@@ -69,7 +74,6 @@ endif
 # 'function declaration is not a prototype'
 # if void is missing in function with no parameters
 WARNINGS_CFLAGS += -Wno-strict-prototypes
-
 
 # gcc >= 4.5.0
 ifneq ("$(USE_CLANG)","1")

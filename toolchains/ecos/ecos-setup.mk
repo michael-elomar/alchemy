@@ -20,10 +20,13 @@ TARGET_GLOBAL_C_INCLUDES += \
 
 TARGET_GLOBAL_CFLAGS += \
 	-mno-thumb-interwork \
+	-ffunction-sections \
+	-fdata-sections \
 	-fno-exceptions \
 	-D__ECOS__
 
 TARGET_GLOBAL_CPPFLAGS += \
+	-fno-rtti \
 	-fno-use-cxa-atexit \
 	-fno-exceptions \
 	-funwind-tables
