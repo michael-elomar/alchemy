@@ -153,6 +153,7 @@ BUILD_STATIC_LIBRARY := $(BUILD_SYSTEM)/static.mk
 BUILD_SHARED_LIBRARY := $(BUILD_SYSTEM)/shared.mk
 BUILD_EXECUTABLE := $(BUILD_SYSTEM)/executable.mk
 BUILD_AUTOTOOLS := $(BUILD_SYSTEM)/autotools.mk
+BUILD_CUSTOM := $(BUILD_SYSTEM)/custom.mk
 BUILD_PREBUILT := $(BUILD_SYSTEM)/prebuilt.mk
 
 # Shall be defined before including user makefiles
