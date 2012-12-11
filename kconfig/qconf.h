@@ -258,6 +258,7 @@ public:
 public slots:
 	void setInfo(struct menu *menu);
 	void saveSettings(void);
+	void setSource(const QString& name);
 	void setShowDebug(bool);
 
 signals:
