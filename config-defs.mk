@@ -82,10 +82,11 @@ __config-desc-escape = $(subst ",\",$(subst $(colon),$(empty),$1))
 __generate-config-module-args = $(strip \
 	$(eval __mod := $1) \
 	$(eval __desc := $(call __config-desc-escape,$(__modules.$(__mod).DESCRIPTION))) \
+	$(eval __depends := $(call module-get-depends,$(__mod))) \
 	$(eval __grouppath := $(call path-from-top,$(__modules.$(__mod).PATH))) \
 	$(eval __config := $(call __get-module-config,$(__mod))) \
 	$(eval __configInFiles := $(call __get-module-config-in-files,$(__mod))) \
-	$(eval __arg := $(__mod):$(__desc):$(__grouppath):$(__config)) \
+	$(eval __arg := $(__mod):$(__desc):$(__depends):$(__grouppath):$(__config)) \
 	$(foreach __f,$(__configInFiles), \
 		$(eval __arg := $(__arg):$(call fullpath,$(__f))) \
 	) \

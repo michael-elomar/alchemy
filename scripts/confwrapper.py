@@ -67,6 +67,7 @@ class Module:
 		fields = arg.split(ARG_FIELD_SEP)
 		self.name = ""
 		self.desc = ""
+		self.depends = []
 		self.groupPath = ""
 		self.configPath = ""
 		self.configInPathList = []
@@ -75,11 +76,13 @@ class Module:
 		if len(fields) > 1:
 			self.desc = fields[1]
 		if len(fields) > 2:
-			self.groupPath = fields[2].rstrip("/")
+			self.depends = fields[2].split()
 		if len(fields) > 3:
-			self.configPath = fields[3]
+			self.groupPath = fields[3].rstrip("/")
 		if len(fields) > 4:
-			self.configInPathList = fields[4:]
+			self.configPath = fields[4]
+		if len(fields) > 5:
+			self.configInPathList = fields[5:]
 
 	def __repr__(self):
 		return "{name=%s,self=%s,groupPath=%s,configPath=%s,configInPathList=%s}" % \
@@ -248,6 +251,8 @@ def writeFullConfigIn(outFile, group):
 		outFile.write("menuconfig %s\n" % buildDefine)
 
 		outFile.write("  bool '%s'\n" % module.name)
+		for dep in module.depends:
+			outFile.write("  select ALCHEMY_BUILD_%s\n" % getDefine(dep))
 		outFile.write("  default n\n")
 		outFile.write("  help\n")
 		outFile.write("    Build %s\n" % module.name)
