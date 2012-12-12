@@ -251,8 +251,8 @@ def writeFullConfigIn(outFile, group):
 		outFile.write("menuconfig %s\n" % buildDefine)
 
 		outFile.write("  bool '%s'\n" % module.name)
-		for dep in module.depends:
-			outFile.write("  select ALCHEMY_BUILD_%s\n" % getDefine(dep))
+#		for dep in module.depends:
+#			outFile.write("  select ALCHEMY_BUILD_%s\n" % getDefine(dep))
 		outFile.write("  default n\n")
 		outFile.write("  help\n")
 		outFile.write("    Build %s\n" % module.name)
