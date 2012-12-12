@@ -58,6 +58,13 @@ all_prerequisites += \
 	$(LOCAL_PREREQUISITES) \
 	$(LOCAL_EXPORT_PREREQUISITES)
 
+# Make sure PRIVATE_XXX variables of prerequisites are correct
+# Without this, the first module that needs the prerequisite will force its
+# PRIVATE_XXX variables leading to 'interresting' results
+LOCAL_TARGETS += \
+	$(LOCAL_PREREQUISITES) \
+	$(LOCAL_EXPORT_PREREQUISITES)
+
 ###############################################################################
 ## Skip some stuff to improve scanning.
 ###############################################################################
@@ -73,6 +80,7 @@ skip_ext_checks := 1
 ifeq ("$(SKIP_EXT_DEPS_AND_CHECKS)","0")
   skip_ext_checks := 0
 endif
+
 # If we are explicitely building this module, do not skip external checks
 ifneq ("$(call is-module-in-make-goals,$(LOCAL_MODULE))","")
   skip_ext_checks := 0
