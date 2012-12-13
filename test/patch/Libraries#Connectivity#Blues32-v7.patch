@@ -11,7 +11,7 @@ index 1ee4e36..e2c73fb 100644
  		If defined, all low power mode related functions will be enabled.
  		Works only on eCos platforms!
 diff --git a/Sources/Common/System/BLM_Config.h b/Sources/Common/System/BLM_Config.h
-index fe0b810..8a2686c 100644
+index e711ec0..e43b8b6 100644
 --- a/Sources/Common/System/BLM_Config.h
 +++ b/Sources/Common/System/BLM_Config.h
 @@ -12,7 +12,12 @@
@@ -20,7 +20,7 @@ index fe0b810..8a2686c 100644
  
 -#include "config.h"		//Include project configuration file
 +#ifdef ALCHEMY_BUILD
-+#  include "blues-config.h"
++#  include "blues-alchemy-config.h"
 +#else // !ALCHEMY_BUILD
 +#  include "config.h"		//Include project configuration file
 +#endif // !ALCHEMY_BUILD
