@@ -17,8 +17,6 @@ TARGET_GLOBAL_LDFLAGS ?=
 TARGET_GLOBAL_LDFLAGS_SHARED ?=
 TARGET_GLOBAL_LDLIBS ?=
 TARGET_GLOBAL_LDLIBS_SHARED ?=
-TARGET_GLOBAL_CFLAGS_arm ?=
-TARGET_GLOBAL_CFLAGS_thumb ?=
 TARGET_PCH_FLAGS ?=
 
 ###############################################################################
