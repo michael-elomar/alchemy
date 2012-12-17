@@ -1,94 +1,225 @@
 #!/usr/bin/env python
+#
+# This script wraps make to detect errors and interrupt make as soon as
+# possible.
+#
+# When running jobs in parallel, the first level of make does not stop
+# immediately other jobs when one has an error, leading to wait a long time
+# before reporting the final error. This can be hard to go up the output to
+# search for the real error.
+#
+# The stderr of make is redirected to scan it for errors and interrupt make
+# sub-process. However this leads to further issues.
+#
+# - To interrupted sub-process and all its process tree, it is necessary in
+# some situations to kill the complete process group. However doing so will
+# kill this script and its parent process. So the sub-process is put in its own
+# process group so that eventually all processes in it can be interrupted.
+#
+# - If the make sub-process tries to access the console (ncurses for example),
+# it will either stop or won't be able to read from stdin. This is because
+# the new process group is in the background. So we need to put it in the
+# foreground by changing the process group associated with the console (by
+# calling tcsetpgrp).
+#
+# - If the process group is stopped (Ctrl+Z), the parent shell will not take
+# control, thus the user won't be able to do anything. When we detect this
+# situation, we put back this script in the foreground, then propagate the stop
+# to our parent shell script.
+#
+# -If the make sub-process is in a disk wait operation (uninterruptible wait)
+# while Ctrl-Z is typed, this script is not notified by a SIGCHLD despite the
+# fact that all processes in the make sub-process group are stopped. When this
+# happens, the make sub-process is still the foreground, but stopped while
+# in io wait, indicated by a 'D+' state in 'ps' output. I don't see any
+# solution for the moment and it seems not related with this script because
+# the same behaviour is observed when make is executed from bash directly.
+# However, putting a shell as parent of make and so child of this script
+# seems eliminating this issue because the shell will rarely be in a disk wait.
+#
+# - When we are resumed for execution, we put again the make sub-process in the
+# foreground.
+#
+# The make sub-process is put in the foreground only if we were in the
+# foreground in the first place.
+# We also remember which process group shall be put as foreground at the end
+#
 
-import sys, os
+import sys, os, logging
+import optparse
 import subprocess
 import signal
 import time
 import re
 
 #===============================================================================
-# Kill make
-# p: make sub-process.
 #===============================================================================
-def killMake(p):
-	# Interrupt top level make, then everyone in the process group,
-	# then kill remaining Some time later
-	time.sleep(0.2)
-	os.kill(p.pid, signal.SIGINT)
-	time.sleep(0.2)
-	os.killpg(p.pid, signal.SIGINT)
-	time.sleep(0.2)
-	os.killpg(p.pid, signal.SIGKILL)
+class Job:
+	def __init__(self, jobCtrl):
+		self.jobCtrl = jobCtrl
+		self.process = None
+		self.pid = -1
+		self.pgid = -1
+		self.status = -1;
+		self.stopped = False
+
+	# Called in child process before 'exec' is done
+	def _preExec(self):
+		# Set process group
+		logging.debug("CHILD: setpgid(0, 0)")
+		os.setpgid(0, 0)
+		if self.jobCtrl.foreground:
+			logging.debug("CHILD: tcsetpgrp(0, %d)", os.getpgrp())
+			os.tcsetpgrp(0, os.getpgrp())
+
+		# Restore signal to default values
+		signal.signal(signal.SIGINT, signal.SIG_DFL)
+		signal.signal(signal.SIGTERM, signal.SIG_DFL)
+		signal.signal(signal.SIGTTOU, signal.SIG_DFL)
+		signal.signal(signal.SIGTTIN, signal.SIG_DFL)
+		signal.signal(signal.SIGTSTP, signal.SIG_DFL)
+		signal.signal(signal.SIGCHLD, signal.SIG_DFL)
+		signal.signal(signal.SIGCONT, signal.SIG_DFL)
+
+	# Launch the job process
+	def launch(self, cmdline,
+			stdin=None, stdout=None, stderr=None, env=None):
+		# Start sub-process, see in header why we use a shell
+		self.process = subprocess.Popen(cmdline,
+				stdin=stdin, stdout=stdout, stderr=stderr,
+				preexec_fn=self._preExec, shell=True, env=env)
+		# Get information (don't call os.getpgid() because of a race condition
+		# with the child)
+		self.pid = self.process.pid
+		self.pgid = self.pid
+
+	# Interrupt process, then everyone in the process group, then kill
+	def kill(self):
+		try:
+			time.sleep(0.2)
+			logging.debug("kill(%d, SIGINT)", self.pid)
+			os.kill(self.pid, signal.SIGINT)
+			time.sleep(0.2)
+			logging.debug("killpg(%d, SIGINT)", self.pgid)
+			os.killpg(self.pgid, signal.SIGINT)
+			time.sleep(0.2)
+			logging.debug("killpg(%d, SIGTERM)", self.pgid)
+			os.killpg(self.pgid, signal.SIGTERM)
+			time.sleep(0.2)
+			logging.debug("killpg(%d, SIGKILL)", self.pgid)
+			os.killpg(self.pgid, signal.SIGKILL)
+		except OSError as ex:
+			logging.debug("OSError: %s", str(ex))
+
+	# Update status after a succesful 'wait' operation
+	def updateStatus(self, status):
+		if os.WIFSTOPPED(status):
+			logging.debug("STOPPED")
+			self.stopped = True
+		elif os.WIFCONTINUED(status):
+			logging.debug("CONTINUED")
+			self.stopped = False
+		elif os.WIFSIGNALED(status):
+			logging.debug("SIGNALED")
+			self.process.returncode = -os.WTERMSIG(status)
+		elif os.WIFEXITED(status):
+			logging.debug("EXITED")
+			self.process.returncode = os.WEXITSTATUS(status)
+
+#===============================================================================
+#===============================================================================
+class JobCtrl:
+	def __init__(self):
+		# Remember which process group is associated with terminal
+		self.tcpgrp = os.tcgetpgrp(0)
+		self.foreground = (self.tcpgrp == os.getpgrp())
+		logging.debug("tcpgrp=%d foreground=%d", self.tcpgrp, self.foreground)
+		self.job = Job(self)
+
+	def signalHandler(self, signo, frame):
+		logging.debug("signalHandler: signo=%d", signo)
+		if signo == signal.SIGINT or signo == signal.SIGTERM:
+			self.job.kill()
+
+		elif signo == signal.SIGCHLD:
+			# Get status of child
+			(pid, status) = os.waitpid(self.job.pid,
+					os.WNOHANG + os.WCONTINUED + os.WUNTRACED)
+			logging.debug("waitpid: pid=%d status=%s", pid, status)
+			self.job.updateStatus(status)
+
+			if self.job.stopped:
+				# If sub-process was associated with console, change it to us
+				if os.tcgetpgrp(0) == self.job.pgid:
+					logging.debug("tcsetpgrp(0, %d)", os.getpgrp())
+					os.tcsetpgrp(0, os.getpgrp())
+				# Propagate the stop to our process group
+				logging.debug("killpg(0, SIGSTOP)")
+				os.killpg(0, signal.SIGSTOP)
+
+		elif signo == signal.SIGCONT:
+			# If we are associated with console, change it to sub-process
+			self.tcpgrp = os.tcgetpgrp(0)
+			self.foreground = (self.tcpgrp == os.getpgrp())
+			logging.debug("tcpgrp=%d foreground=%d", self.tcpgrp, self.foreground)
+			if self.foreground:
+				logging.debug("tcsetpgrp(0, %d)", self.job.pgid)
+				os.tcsetpgrp(0, self.job.pgid)
+			# Propagate continue to sub-process
+			logging.debug("killpg(%d, SIGCONT)", self.job.pgid)
+			os.killpg(self.job.pgid, signal.SIGCONT)
 
 #===============================================================================
 # Main function.
 #===============================================================================
 def main():
-	p = None
+	# Setup logging
+	setupLog()
 
-	# Remember which process group was associated with terminal to restore  it
-	# after we played with it
-	tcpgrp = os.tcgetpgrp(0)
-
-	# If MAKELEVEL is defined, we are in a sub-make so don't play with
-	# process groups or killing
-	useKillpg = (not "MAKELEVEL" in os.environ)
-
-	# Signal handler, kill subprocess
-	# SIGKILL is to kill whatever process that did not stop after SIGTERM
-	def signalHandler(sig, frame):
-		if p != None:
-			if useKillpg:
-				killMake(p)
-			else:
-				p.terminate()
-		else:
-			sys.exit(1)
+	# Create our job control object
+	jobCtrl = JobCtrl()
 
 	# Try to exit silently in case of interrupts...
-	signal.signal(signal.SIGINT, signalHandler)
-	signal.signal(signal.SIGTERM, signalHandler)
+	signal.signal(signal.SIGINT, jobCtrl.signalHandler)
+	signal.signal(signal.SIGTERM, jobCtrl.signalHandler)
 
-	# Make the new child leader of a new process group so we can kill all
-	# its children at once
-	def preExec():
-		if useKillpg:
-			signal.signal(signal.SIGTTOU, signal.SIG_IGN)
-			os.setpgid(0, 0)
-			os.tcsetpgrp(0, os.getpid())
+	# Job control
+	signal.signal(signal.SIGTTOU, signal.SIG_IGN)
+	signal.signal(signal.SIGTTIN, signal.SIG_IGN)
+	signal.signal(signal.SIGTSTP, signal.SIG_IGN)
+	signal.signal(signal.SIGCHLD, jobCtrl.signalHandler)
+	signal.signal(signal.SIGCONT, jobCtrl.signalHandler)
 
 	# Only redirect stderr (redirecting stdout causes issues if a child process
 	# wants to use the terminal, like ncurses)
 	# Force locale to have english messages that we will try to detect
 	env = os.environ
 	env["LANG"] = "C"
-	cmdArgs = ["make"] + sys.argv[1:]
-	p = subprocess.Popen(cmdArgs,
-		stderr=subprocess.PIPE,
-		preexec_fn=preExec,
-		shell=False, env=env)
+	cmdline = "make"
+	for arg in sys.argv[1:]:
+		cmdline += " " + arg
+	jobCtrl.job.launch(cmdline, stderr=subprocess.PIPE, env=env)
 
 	# Read from stderr redirected in a pipe
 	# only catch top level makefile errors (sub-make files error will eventually
 	# generate a top level error)
 	reError1 = re.compile(r"make: \*\*\* No rule to make target .*")
-	reError2 = re.compile(r"make: \*\*\* \[[^\[\]]*\] (Error|Erreur) [0-9]+")
+	reError2 = re.compile(r"make: \*\*\* \[[^\[\]]*\] Error [0-9]+")
 	errorDetected = False
 	while True:
 		try:
 			# Empty line means EOF detected, so exit loop
-			line = p.stderr.readline()
+			line = jobCtrl.job.process.stderr.readline()
 			if len(line) == 0:
+				logging.debug("EOF detected")
 				break
 			if not errorDetected:
 				sys.stderr.write(line)
 			# Check for make error
 			if reError1.match(line) or reError2.match(line):
+				logging.debug("error detected")
 				errorDetected = True
-				if useKillpg:
-					killMake(p)
-				else:
-					p.terminate()
+				jobCtrl.job.kill()
 		except IOError as ex:
 			# Will occur when interrupted during read, an EOF will be read next
 			pass
@@ -98,14 +229,34 @@ def main():
 		sys.stderr.write("\n\033[31mMAKE ERROR DETECTED\n\033[00m")
 
 	# Wait for sub-process to terminate
-	p.wait()
+	logging.debug("wait sub-process")
+	jobCtrl.job.process.wait()
 
 	# Restore stuff
-	signal.signal(signal.SIGTTOU, signal.SIG_IGN)
-	os.tcsetpgrp(0, tcpgrp)
+	if jobCtrl.tcpgrp != os.tcgetpgrp(0):
+		logging.debug("tcsetpgrp(0, %d)", jobCtrl.tcpgrp)
+		os.tcsetpgrp(0, jobCtrl.tcpgrp)
 
 	# Exit with same result as sub-process
-	sys.exit(p.returncode)
+	logging.debug("exit(%d)", jobCtrl.job.process.returncode)
+	sys.exit(jobCtrl.job.process.returncode)
+
+#===============================================================================
+# Setup logging system.
+#===============================================================================
+def setupLog():
+	logging.basicConfig(
+		level=logging.WARNING,
+		format="[%(levelname)s] %(message)s",
+		stream=sys.stderr)
+	logging.addLevelName(logging.CRITICAL, "C")
+	logging.addLevelName(logging.ERROR, "E")
+	logging.addLevelName(logging.WARNING, "W")
+	logging.addLevelName(logging.INFO, "I")
+	logging.addLevelName(logging.DEBUG, "D")
+
+	# Setup log level
+	logging.getLogger().setLevel(logging.WARNING)
 
 #===============================================================================
 # Entry point.
