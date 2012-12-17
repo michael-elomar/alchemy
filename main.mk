@@ -316,14 +316,24 @@ include $(BUILD_SYSTEM)/config-rules.mk
 # Now, really generate rules for modules.
 
 # Completely skip this for simple queries or clobber.
-# If a module is specified in goals, only include this one and its dependencies.
 ifeq ("$(call is-targets-in-make-goals,$(__query-targets) clobber)","")
+
+# Check that, if a registered module is specified in goals,
+# it is in the build config
+$(foreach __mod,$(ALL_MODULES), \
+	$(if $(call is-module-in-make-goals,$(__mod)), \
+		$(if $(call is-module-in-build-config,$(__mod)),, \
+			$(error $(__mod) is not enabled in the config) \
+		) \
+	) \
+)
 
 ifneq ("$(V)","0")
   $(info Generating rules: start)
 endif
 
 # Determine the list of modules to really include
+# If a module is specified in goals, only include this one and its dependencies.
 __dofilter := 0
 __modlist := $(empty)
 $(foreach __mod,$(ALL_BUILD_MODULES), \
@@ -353,8 +363,9 @@ endif
 
 endif
 
-# Once all modules have been parsed, make sure nobody will reference LOCAL_XXX
-# variables anymore. In commands, PRIVATE_XXX variables shall be used.
+# Once all module rules have been generated, make sure nobody will reference
+# LOCAL_XXX variables anymore.
+# In commands, PRIVATE_XXX variables shall be used.
 $(foreach __var,$(modules-LOCALS) $(modules-macros-LOCALS), \
 	$(eval override LOCAL_$(__var) = \
 		$$(error Do NOT use LOCAL_$(__var) in commands)) \
@@ -479,6 +490,7 @@ help-modules:
 ###############################################################################
 
 ifeq ("$(TARGET_OS)","linux")
+
 ifeq ("$(TARGET_OS_FLAVOUR)","native")
 
 NATIVE_WRAPPER_SCRIPT := native-wrapper.sh

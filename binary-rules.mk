@@ -57,7 +57,6 @@ $(call check-flags,LOCAL_CPPFLAGS,$(check-flags-debug),$(check-flags-debug-messa
 $(call check-flags,LOCAL_EXPORT_CFLAGS,$(check-flags-debug),$(check-flags-debug-message))
 $(call check-flags,LOCAL_EXPORT_CPPFLAGS,$(check-flags-debug),$(check-flags-debug-message))
 
-
 ###############################################################################
 ## List of sources, objects and libraries.
 ###############################################################################
