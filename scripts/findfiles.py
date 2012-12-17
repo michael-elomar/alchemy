@@ -4,17 +4,9 @@ import sys, os
 import optparse
 
 #===============================================================================
-# Main function.
+# Process a directory.
 #===============================================================================
-def main():
-	(options, args) = parseArgs()
-
-	# Extract arguments
-	topDir = os.path.abspath(args[0])
-	fileName = args[1]
-
-	# Go
-	resultList = []
+def processDir(resultList, topDir, fileName, options):
 	for dirPath, dirNames, fileNames in os.walk(topDir):
 		# Remove directories to skip from list
 		i = 0
@@ -31,6 +23,22 @@ def main():
 			resultList.append(os.path.join(dirPath, fileName))
 			if not options.deep:
 				del dirNames[:]
+
+#===============================================================================
+# Main function.
+#===============================================================================
+def main():
+	(options, args) = parseArgs()
+
+	# Extract arguments
+	topDir = os.path.abspath(args[0])
+	fileName = args[1]
+
+	# Go
+	resultList = []
+	processDir(resultList, topDir, fileName, options)
+	for topDir in options.addList:
+		processDir(resultList, topDir, fileName, options)
 
 	# Write results to stdout
 	resultList.sort()
@@ -52,6 +60,12 @@ def parseArgs():
 		default=[],
 		metavar="DIR",
 		help="Skip this directory during search. May be used multiple times.")
+	parser.add_option("--add",
+		dest="addList",
+		action="append",
+		default=[],
+		metavar="DIR",
+		help="Add this directory during search. May be used multiple times.")
 	parser.add_option("--deep",
 		dest="deep",
 		action="store_true",

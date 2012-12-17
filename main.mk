@@ -199,8 +199,12 @@ USER_MAKEFILES :=
 find-cmd := $(BUILD_SYSTEM)/scripts/findfiles.py \
 	--prune=.git --prune=.repo \
 	--prune=$(TARGET_OUT) \
+	--prune=$(TARGET_OUT_BUILD) \
+	--prune=$(TARGET_OUT_STAGING) \
+	--prune=$(TARGET_OUT_FINAL) \
 	--prune=$(BUILD_SYSTEM) \
 	$(foreach __d,$(TARGET_SCAN_PRUNE_DIRS),--prune=$(__d)) \
+	$(foreach __d,$(TARGET_SCAN_ADD_DIRS),--add=$(__d)) \
 	$(TOP_DIR) \
 	$(USER_MAKEFILE_NAME)
 

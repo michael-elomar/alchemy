@@ -37,8 +37,9 @@ TARGET_CONFIG_DIR ?= $(TOP_DIR)/Alchemy-config/$(TARGET_PRODUCT)-$(TARGET_PRODUC
 TARGET_DEFAULT_ARM_MODE ?= thumb
 TARGET_FORCE_STATIC_LIBRARIES ?= 0
 
-# Extra directories to skip during makefile scan
+# Extra directories to skip/add during makefile scan
 TARGET_SCAN_PRUNE_DIRS ?=
+TARGET_SCAN_ADD_DIRS ?=
 
 # Default : do NOT force external checks of module that have sub-makefiles
 # (autotools, linux kernel...)
