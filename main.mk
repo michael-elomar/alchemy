@@ -100,7 +100,7 @@ endif
 __clean-targets := clean dirclean clobber
 __query-targets := scan help help-modules dump dump-depends dump-xml build-graph
 __config-targets := config config-check config-update xconfig menuconfig nconfig
-__fs-targets := final final-nostrip plf
+__fs-targets := final final-nostrip plf image-plf image-cpio
 __skip_targets := \
 	$(__clean-targets) \
 	$(__query-targets) \
@@ -414,8 +414,8 @@ include $(BUILD_SYSTEM)/build-graph.mk
 # Final tree generation
 include $(BUILD_SYSTEM)/final.mk
 
-# Plf generation
-include $(BUILD_SYSTEM)/plf.mk
+# Image generation
+include $(BUILD_SYSTEM)/image.mk
 
 ###############################################################################
 ## Help rule.
