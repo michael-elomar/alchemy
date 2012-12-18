@@ -55,6 +55,7 @@ MSGBUILDER_CKCM_MSG_FILES += \
 MSGBUILDER_CKCM_CFLAGS += \
 	-D_PARROTOS_ \
 	-I$(__modules.ckcm.PATH)/ckcm/include
+LOCAL_LIBRARIES += ckcm
 LOCAL_PREREQUISITES += $(__modules.ckcm.PREREQUISITES)
 LOCAL_PREREQUISITES += $(__modules.ckcm.EXPORT_PREREQUISITES)
 endif
@@ -67,6 +68,7 @@ MSGBUILDER_CKCM_CFLAGS += \
 	-D_BLUES_ \
 	-I$(__modules.blues.PATH)/Sources/Common/System \
 	-I$(TARGET_OUT_BUILD)/blues/include
+LOCAL_LIBRARIES += blues
 LOCAL_PREREQUISITES += $(__modules.blues.PREREQUISITES)
 LOCAL_PREREQUISITES += $(__modules.blues.EXPORT_PREREQUISITES)
 endif
@@ -80,6 +82,7 @@ MSGBUILDER_CKCM_CFLAGS += \
 	-I$(__modules.concertos.PATH)/Include \
 	-I$(__modules.concertos.PATH)/Sources \
 	-I$(__modules.concertos.PATH)/Build
+LOCAL_LIBRARIES += concertos
 LOCAL_PREREQUISITES += $(__modules.concertos.PREREQUISITES)
 LOCAL_PREREQUISITES += $(__modules.concertos.EXPORT_PREREQUISITES)
 endif
@@ -92,6 +95,7 @@ MSGBUILDER_CKCM_CFLAGS += \
 	-D_CK5050_ \
 	-I$(__modules.softat.PATH)/Sources/System \
 	-I$(TARGET_OUT_BUILD)/softat
+LOCAL_LIBRARIES += softat
 LOCAL_PREREQUISITES += $(__modules.softat.PREREQUISITES)
 LOCAL_PREREQUISITES += $(__modules.softat.EXPORT_PREREQUISITES)
 endif
