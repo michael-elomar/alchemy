@@ -58,6 +58,8 @@ __get-module-config = $(strip \
 		$(custom.$1.config),$(CONFIG_ORIG_DIR)/$1.config \
 	))
 
+module-get-config = $(call __get-module-config,$1)
+
 ###############################################################################
 ## Get the list of path to Config.in files of a module.
 ## $1 : module name.
