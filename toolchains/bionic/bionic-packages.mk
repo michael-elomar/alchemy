@@ -65,3 +65,8 @@ LOCAL_MODULE := wpa_supplicant
 LOCAL_EXPORT_LDLIBS := -lwpa_client
 include $(BUILD_PREBUILT)
 
+include $(CLEAR_VARS)
+LOCAL_MODULE := libdl
+LOCAL_EXPORT_LDLIBS := -ldl
+include $(BUILD_PREBUILT)
+
