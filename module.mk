@@ -376,14 +376,11 @@ endif # ifeq ("$(copy_to_staging)","1")
 ## Pre-install customization
 ###############################################################################
 
-LOCAL_CMD_PRE_INSTALL := $(strip $(LOCAL_CMD_PRE_INSTALL))
-ifneq ("$(LOCAL_CMD_PRE_INSTALL)","")
+ifneq ("$(value LOCAL_CMD_PRE_INSTALL)","")
 
 .PHONY: $(LOCAL_MODULE)-pre-install
 $(LOCAL_MODULE)-pre-install:
-	+$(Q)$(call $(PRIVATE_CMD_PRE_INSTALL))
-
-$(LOCAL_TARGETS): PRIVATE_CMD_PRE_INSTALL := $(LOCAL_CMD_PRE_INSTALL)
+	+$(call macro-exec-cmd,CMD_PRE_INSTALL)
 
 # If a copy in staging is done do it before otherwise we can only hook before
 # build module is done...

@@ -240,7 +240,7 @@ modules-LOCALS += CLEAN_DIRS
 
 # Macro to be executed before installing binary in staging dir
 # It MUST be a macro that will execute commands, not directly commands
-modules-LOCALS += CMD_PRE_INSTALL
+modules-macros-LOCALS += CMD_PRE_INSTALL
 
 # Archive extraction + patch support
 modules-LOCALS += ARCHIVE
