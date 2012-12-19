@@ -29,7 +29,7 @@ else
   src_dir := $(LOCAL_PATH)
 endif
 
-# Patched to apply
+# Patches to apply
 patches := $(strip $(LOCAL_AUTOTOOLS_PATCHES))
 
 # Where the package will be configured and built
@@ -167,27 +167,6 @@ define __libtool_patch
 	done
 endef
 
-# Execute commands.
-# $1 : Type of commands to execute. Ex : CMD_CONFIGURE, CMD_POST_CONFIGURE...
-# $2 : default macro if $1 is empty.
-#
-# Note : if the content of the variable is empty, the default one will be used.
-#        If the content is only one work, it is assumed to be the actual macro
-#        to be called (one more leval of macro call). Otherwise, macro is called
-#        directly.
-# Note : we access macros from the module database because we can't create
-#        PRIVATE_XXX target-specific variables for them.
-# Note : the part where we check for single word can be removed when all user
-# makefiles have been converted to use new way of defining commands.
-__autotools-cmd = \
-	$(eval __var := __modules.$(PRIVATE_MODULE).AUTOTOOLS_$1) \
-	$(if $(value $(__var)), \
-		$(if $(call streq,$(words $(value $(__var))),1), \
-			$($($(__var))),$($(__var)) \
-		), \
-		$(if $2,$($2)) \
-	)
-
 # Display a message
 # $1 : message
 __autotools-msg = \
@@ -210,9 +189,9 @@ $(unpacked_file): $(archive_file) $(addprefix $(LOCAL_PATH)/,$(patches))
 ifneq ("$(archive_file)","")
 	$(call __autotools-msg,Unpacking $(call path-from-top,$<))
 	@mkdir -p $(PRIVATE_UNPACK_DIR)
-	+$(call __autotools-cmd,CMD_UNPACK,__default-unpack)
+	+$(call macro-exec-cmd,AUTOTOOLS_CMD_UNPACK,__default-unpack)
 	+$(if $(PRIVATE_PATCHES),$(__apply-patches))
-	+$(call __autotools-cmd,CMD_POST_UNPACK)
+	+$(call macro-exec-cmd,AUTOTOOLS_CMD_POST_UNPACK)
 endif
 	@mkdir -p $(dir $@)
 	@touch $@
@@ -221,8 +200,8 @@ endif
 $(configured_file): $(unpacked_file)
 	$(call __autotools-msg,Configuring)
 	@mkdir -p $(PRIVATE_OBJ_DIR)
-	+$(call __autotools-cmd,CMD_CONFIGURE,__default-configure)
-	+$(call __autotools-cmd,CMD_POST_CONFIGURE)
+	+$(call macro-exec-cmd,AUTOTOOLS_CMD_CONFIGURE,__default-configure)
+	+$(call macro-exec-cmd,AUTOTOOLS_CMD_POST_CONFIGURE)
 	+$(__libtool_patch)
 	@mkdir -p $(dir $@)
 	@touch $@
@@ -231,16 +210,16 @@ $(configured_file): $(unpacked_file)
 $(built_file): $(configured_file)
 	$(call __autotools-msg,Building)
 	@mkdir -p $(PRIVATE_OBJ_DIR)
-	+$(call __autotools-cmd,CMD_BUILD,__default-make-build)
-	+$(call __autotools-cmd,CMD_POST_BUILD)
+	+$(call macro-exec-cmd,AUTOTOOLS_CMD_BUILD,__default-make-build)
+	+$(call macro-exec-cmd,AUTOTOOLS_CMD_POST_BUILD)
 	@mkdir -p $(dir $@)
 	@touch $@
 
 # Installation
 $(installed_file): $(built_file)
 	$(call __autotools-msg,Installing)
-	+$(call __autotools-cmd,CMD_INSTALL,__default-make-install)
-	+$(call __autotools-cmd,CMD_POST_INSTALL)
+	+$(call macro-exec-cmd,AUTOTOOLS_CMD_INSTALL,__default-make-install)
+	+$(call macro-exec-cmd,AUTOTOOLS_CMD_POST_INSTALL)
 	@mkdir -p $(dir $@)
 	@touch $@
 
@@ -251,8 +230,8 @@ $(LOCAL_BUILD_MODULE): $(installed_file)
 
 # clean targets additional commands
 $(LOCAL_MODULE)-clean:
-	+$(call __autotools-cmd,CMD_CLEAN,__default-clean)
-	+$(call __autotools-cmd,CMD_POST_CLEAN)
+	+$(call macro-exec-cmd,AUTOTOOLS_CMD_CLEAN,__default-clean)
+	+$(call macro-exec-cmd,AUTOTOOLS_CMD_POST_CLEAN)
 
 ###############################################################################
 ## Rule-specific variable definitions.

@@ -797,6 +797,29 @@ macro-copy = \
 macro-is-empty = $(call not,$(value $1))
 
 ###############################################################################
+## Execute commands of a macro.
+## $1 : Type of commands to execute. Ex : AUTOTOOLS_CMD_CONFIGURE...
+## $2 : default macro if $1 is empty.
+##
+## Note : if the content of the variable is empty, the default one will be used.
+##        If the content is only one word, it is assumed to be the actual macro
+##        to be called (one more level of macro call). Otherwise, macro is
+##        called directly.
+## Note : we access macros from the module database because we can't create
+##        PRIVATE_XXX target-specific variables for them.
+## Note : the part where we check for single word can be removed when all user
+##        makefiles have been converted to use new way of defining commands.
+###############################################################################
+macro-exec-cmd = \
+	$(eval __var := __modules.$(PRIVATE_MODULE).$1) \
+	$(if $(value $(__var)), \
+		$(if $(call streq,$(words $(value $(__var))),1), \
+			$($($(__var))),$($(__var)) \
+		), \
+		$(if $2,$($2)) \
+	)
+
+###############################################################################
 ## Print some banners.
 ## $1 : operation.
 ## $2 : module.
