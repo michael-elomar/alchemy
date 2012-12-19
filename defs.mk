@@ -170,6 +170,10 @@ modules-LOCALS += DONE_FILES
 # All files are relative to LOCAL_PATH
 modules-LOCALS += SRC_FILES
 
+# Generated source files to compile
+# All files are relative to build directory
+modules-LOCALS += GENERATED_SRC_FILES
+
 # Static libraries that you want to include in your module
 # Names of modules in the build system, without path/prefix/suffix
 modules-LOCALS += STATIC_LIBRARIES
@@ -237,6 +241,14 @@ modules-LOCALS += CLEAN_DIRS
 # Macro to be executed before installing binary in staging dir
 # It MUST be a macro that will execute commands, not directly commands
 modules-LOCALS += CMD_PRE_INSTALL
+
+# Archive extraction + patch support
+modules-LOCALS += ARCHIVE
+modules-LOCALS += ARCHIVE_VERSION
+modules-LOCALS += ARCHIVE_SUBDIR
+modules-LOCALS += ARCHIVE_PATCHES
+modules-macros-LOCALS += ARCHIVE_CMD_UNPACK
+modules-macros-LOCALS += ARCHIVE_CMD_POST_UNPACK
 
 # Autotools customization
 modules-LOCALS += AUTOTOOLS_VERSION
