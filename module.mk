@@ -305,6 +305,9 @@ ifneq ("$(LOCAL_COPY_FILES)","")
 all_copy_files :=
 
 # Generate a rule to copy all files
+# Handle relative/absolute paths
+# Handle directory only for destination
+# Add an order-only dependency between sources and prerequisites
 $(foreach __pair,$(LOCAL_COPY_FILES), \
 	$(eval __pair2 := $(subst :,$(space),$(__pair))) \
 	$(eval __src := $(call copy-get-src-path,$(word 1,$(__pair2)))) \
@@ -314,9 +317,10 @@ $(foreach __pair,$(LOCAL_COPY_FILES), \
 	) \
 	$(eval all_copy_files += $(__dst)) \
 	$(eval $(call copy-one-file,$(__src),$(__dst))) \
+	$(eval $(__src): | $(filter-out $(__src),$(all_prerequisites))) \
 )
 
-# Add files to be copied as pre-requisites
+# Add files to be copied as a dependency
 $(LOCAL_BUILD_MODULE): $(all_copy_files)
 
 # Add rule to delete copied files during clean
