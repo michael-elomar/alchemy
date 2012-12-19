@@ -354,7 +354,7 @@ endif
 # recompilation in this case (NOT an order-only in here)
 ifneq ("$(LOCAL_ARCHIVE)","")
 ifneq ("$(all_gen_sources)","")
-$(addprefix $(build_dir)/,$(all_gen_sources)): $(unpacked_file))
+$(addprefix $(build_dir)/,$(all_gen_sources)): $(unpacked_file)
 endif
 endif
 
