@@ -350,6 +350,14 @@ ifneq ("$(all_prerequisites)","")
 $(all_objects): | $(all_prerequisites)
 endif
 
+# Generated sources will depends on unpaked archive (if needed) and force
+# recompilation in this case (NOT an order-only in here)
+ifneq ("$(LOCAL_ARCHIVE)","")
+ifneq ("$(all_gen_sources)","")
+$(addprefix $(build_dir)/,$(all_gen_sources)): $(unpacked_file))
+endif
+endif
+
 # Force recompilation if internal dependencies are changes
 $(all_objects): $(all_internal_depends)
 

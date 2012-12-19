@@ -185,6 +185,48 @@ $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(autoconf_file)
 endif
 
 ###############################################################################
+## Archive extraction + patches.
+## Partially redundant with autotools rules.
+###############################################################################
+ifneq ("$(LOCAL_ARCHIVE)","")
+
+archive_file := $(LOCAL_PATH)/$(LOCAL_ARCHIVE)
+patches := $(strip $(LOCAL_ARCHIVE_PATCHES))
+unpacked_file := $(build_dir)/$(LOCAL_MODULE).unpacked
+unpack_dir := $(build_dir)
+
+# Generated files to be compiled will also depends on 'unpacked_file' in
+# binary-rules.mk
+all_prerequisites += $(unpacked_file)
+
+define __archive-default-unpack
+	$(Q) tar -C $(PRIVATE_ARCHIVE_UNPACK_DIR) -xf $(PRIVATE_ARCHIVE)
+endef
+
+define __archive-apply-patches
+	$(Q) $(BUILD_SYSTEM)/scripts/apply-patches.sh \
+		$(PRIVATE_ARCHIVE_UNPACK_DIR)/$(PRIVATE_ARCHIVE_SUBDIR) \
+		$(PRIVATE_PATH) \
+		$(PRIVATE_ARCHIVE_PATCHES)
+endef
+
+$(unpacked_file): $(archive_file) $(addprefix $(LOCAL_PATH)/,$(patches))
+	$(call print-banner2,Archive,$(PRIVATE_MODULE),Unpacking $(call path-from-top,$<))
+	@mkdir -p $(PRIVATE_ARCHIVE_UNPACK_DIR)
+	+$(call macro-exec-cmd,ARCHIVE_CMD_UNPACK,__archive-default-unpack)
+	+$(if $(PRIVATE_ARCHIVE_PATCHES),$(__archive-apply-patches))
+	+$(call macro-exec-cmd,ARCHIVE_CMD_POST_UNPACK)
+	@mkdir -p $(dir $@)
+	@touch $@
+
+$(LOCAL_TARGETS): PRIVATE_ARCHIVE := $(archive_file)
+$(LOCAL_TARGETS): PRIVATE_ARCHIVE_UNPACK_DIR := $(unpack_dir)
+$(LOCAL_TARGETS): PRIVATE_ARCHIVE_SUBDIR := $(LOCAL_ARCHIVE_SUBDIR)
+$(LOCAL_TARGETS): PRIVATE_ARCHIVE_PATCHES := $(patches)
+
+endif
+
+###############################################################################
 ## Static library.
 ###############################################################################
 
