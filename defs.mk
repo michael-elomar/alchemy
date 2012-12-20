@@ -230,6 +230,7 @@ modules-LOCALS += PREREQUISITES
 
 # ParrotBuild compatibility hook required
 modules-LOCALS += PBUILD_HOOK
+modules-LOCALS += PBUILD_ALLOW_FORCE_STATIC
 
 # Force modules that depends on this one to use whole-static library
 modules-LOCALS += FORCE_WHOLE_STATIC_LIBRARY

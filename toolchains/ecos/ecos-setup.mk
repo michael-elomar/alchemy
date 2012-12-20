@@ -11,9 +11,8 @@ ifndef TARGET_CROSS
   TARGET_CROSS := /usr/local/gnutools-20080328/bin/arm-elf-
 endif
 
-# Force this
+# Force arm mode
 TARGET_DEFAULT_ARM_MODE := arm
-TARGET_FORCE_STATIC_LIBRARIES := 1
 
 TARGET_GLOBAL_C_INCLUDES += \
 	$(TARGET_OUT_STAGING)/ecos/include

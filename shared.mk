@@ -7,7 +7,16 @@
 ###############################################################################
 
 # check if we want to force static libraries
-ifeq ("$(TARGET_FORCE_STATIC_LIBRARIES)","1")
+force_static := 0
+ifeq ("$(TARGET_OS)","ecos")
+  force_static := 1
+else ifeq ("$(TARGET_PBUILD_FORCE_STATIC)","1")
+  ifeq ("$(LOCAL_PBUILD_ALLOW_FORCE_STATIC)","1")
+    force_static := 1
+  endif
+endif
+
+ifeq ("$(force_static)","1")
 LOCAL_MODULE_CLASS := STATIC_LIBRARY
 LOCAL_EXPORT_LDLIBS += $(LOCAL_LDLIBS)
 suffix := $(TARGET_STATIC_LIB_SUFFIX)
