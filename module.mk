@@ -317,7 +317,7 @@ $(foreach __pair,$(LOCAL_COPY_FILES), \
 	) \
 	$(eval all_copy_files += $(__dst)) \
 	$(eval $(call copy-one-file,$(__src),$(__dst))) \
-	$(eval $(__src): | $(filter-out $(__src),$(all_prerequisites))) \
+	$(eval $(__src): | $(filter-out $(__src) $(__dst),$(all_prerequisites))) \
 )
 
 # Add files to be copied as a dependency
