@@ -92,6 +92,7 @@ include $(BUILD_SYSTEM)/toolchains/$(TARGET_LIBC)/$(TARGET_LIBC)-setup.mk
 ###############################################################################
 TARGET_CC ?= $(TARGET_CROSS)gcc
 TARGET_CXX ?= $(TARGET_CROSS)g++
+TARGET_AS ?= $(TARGET_CROSS)as
 TARGET_AR ?= $(TARGET_CROSS)ar
 TARGET_LD ?= $(TARGET_CROSS)ld
 TARGET_NM ?= $(TARGET_CROSS)nm

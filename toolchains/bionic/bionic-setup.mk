@@ -6,5 +6,5 @@
 ## This file contains additional setup for bionic (android).
 ###############################################################################
 
-# Flags shall be given through environment as thery are very, very android
+# Flags shall be given through environment as they are very, very android
 # specific and hard to extract.

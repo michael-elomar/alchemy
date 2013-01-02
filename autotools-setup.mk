@@ -14,13 +14,13 @@ AUTOTOOLS_INSTALL_BIN := $(shell which install)
 
 # Environment to use when executing configure script
 AUTOTOOLS_CONFIGURE_ENV := \
-	AR="$(TARGET_CROSS)ar" \
-	AS="$(TARGET_CROSS)as" \
-	LD="$(TARGET_CROSS)ld" \
-	NM="$(TARGET_CROSS)nm" \
-	CC="$(CCACHE) $(TARGET_CROSS)gcc" \
-	GCC="$(CCACHE) $(TARGET_CROSS)gcc" \
-	CXX="$(CCACHE) $(TARGET_CROSS)g++" \
+	AR="$(TARGET_AR)" \
+	AS="$(TARGET_AS)" \
+	LD="$(TARGET_LD)" \
+	NM="$(TARGET_NM)" \
+	CC="$(CCACHE) $(TARGET_CC)" \
+	GCC="$(CCACHE) $(TARGET_CC)" \
+	CXX="$(CCACHE) $(TARGET_CXX)" \
 	CPP="$(TARGET_CROSS)cpp" \
 	INSTALL="$(AUTOTOOLS_INSTALL_BIN) -p" \
 	RANLIB="$(TARGET_CROSS)ranlib" \
