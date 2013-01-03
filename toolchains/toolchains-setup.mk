@@ -28,8 +28,7 @@ TARGET_PCH_FLAGS ?=
 TARGET_GLOBAL_CFLAGS += \
 	-pipe \
 	-O2 -g \
-	-ffunction-sections \
-	-fno-common
+	-ffunction-sections
 
 # TODO: check for these flags
 #TARGET_GLOBAL_CFLAGS += \
