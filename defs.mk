@@ -1020,11 +1020,13 @@ endef
 ## Commands for copying files.
 ###############################################################################
 
-# Copy a single file from one place to another, preserving permissions/links and
-# overwriting any existing file.
+# Copy a single file from one place to another
+# use '-a' to preserve permissions/links and
+# use '--remove-destination' to overwrite any existing file to make sure
+# existing symlinks are correctly overwritten.
 define do-copy-file
 @mkdir -p $(dir $@)
-$(Q)cp -af $< $@
+$(Q)cp -a --remove-destination $< $@
 endef
 
 # Define a rule to copy a file. For use via $(eval).
