@@ -36,8 +36,8 @@ AUTOTOOLS_CONFIGURE_ENV := \
 
 # Make sure pkg-config does not look on host
 AUTOTOOLS_CONFIGURE_ENV += \
-	PKG_CONFIG_PATH="$(TARGET_OUT_STAGING)/usr/lib/pkgconfig" \
-	PKG_CONFIG_LIBDIR="$(TARGET_OUT_STAGING)/usr/lib/pkgconfig"
+	PKG_CONFIG_PATH="$(TARGET_OUT_STAGING)/usr/lib/pkgconfig:$(TARGET_OUT_STAGING)/lib/pkgconfig" \
+	PKG_CONFIG_LIBDIR="$(TARGET_OUT_STAGING)/usr/lib/pkgconfig:$(TARGET_OUT_STAGING)/lib/pkgconfig"
 ifeq ("$(TARGET_OS_FLAVOUR)","native")
   AUTOTOOLS_CONFIGURE_ENV += PKG_CONFIG_SYSROOT_DIR=""
 else
