@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# simple shell wrapper around alchemake.py
+ALCHEMY_HOME=/usr/lib/Alchemy
+exec ${ALCHEMY_HOME}/scripts/alchemake.py -f ${ALCHEMY_HOME}/main.mk $*

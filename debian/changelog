@@ -1,0 +1,9 @@
+parrot-tools-alchemy (1.0.0) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Ivan Djelic (Parrot) <ivan.djelic@parrot.com>  Fri, 04 Jan 2013 11:11:29 +0200
+
+Local variables:
+mode: debian-changelog
+End:
