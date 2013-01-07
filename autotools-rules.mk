@@ -191,8 +191,8 @@ ifneq ("$(archive_file)","")
 	@mkdir -p $(PRIVATE_UNPACK_DIR)
 	+$(call macro-exec-cmd,AUTOTOOLS_CMD_UNPACK,__default-unpack)
 	+$(if $(PRIVATE_PATCHES),$(__apply-patches))
-	+$(call macro-exec-cmd,AUTOTOOLS_CMD_POST_UNPACK)
 endif
+	+$(call macro-exec-cmd,AUTOTOOLS_CMD_POST_UNPACK)
 	@mkdir -p $(dir $@)
 	@touch $@
 
