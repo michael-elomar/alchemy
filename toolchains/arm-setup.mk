@@ -44,6 +44,10 @@ ifeq ("$(TARGET_CPU)","p6i")
   TARGET_GLOBAL_CFLAGS += -mtune=arm926ej-s -mcpu=arm926ej-s
 endif
 
+ifeq ("$(TARGET_CPU)","p7")
+  TARGET_GLOBAL_CFLAGS += $(cflags_armv7neon)
+endif
+
 ifeq ("$(TARGET_CPU)","omap3")
   TARGET_GLOBAL_CFLAGS += $(cflags_armv7neon)
   TARGET_GLOBAL_LDFLAGS += $(ldflags_armv7neon)
