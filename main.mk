@@ -411,10 +411,17 @@ dirclean: $(foreach __mod,$(ALL_BUILD_MODULES),$(__mod)-dirclean)
 
 .PHONY: clobber
 clobber:
-	@echo "Deleting build, staging and final directories..."
+	@echo "Deleting build directory..."
 	$(Q)rm -rf $(TARGET_OUT_BUILD)
+	@echo "Deleting staging directory..."
 	$(Q)rm -rf $(TARGET_OUT_STAGING)
+ifneq ("$(TARGET_OS_FLAVOUR)","native-chroot")
+ifneq ("$(TARGET_OS_FLAVOUR)","native")
+	@echo "Deleting final directory..."
 	$(Q)rm -rf $(TARGET_OUT_FINAL)
+endif
+endif
+	@echo "Done deleting directories..."
 
 # Dummy target to check internal variables
 .PHONY: check
