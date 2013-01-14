@@ -159,6 +159,7 @@ $(LOCAL_MODULE)-clean-common:
 .PHONY: $(LOCAL_MODULE)-dirclean
 $(LOCAL_MODULE)-dirclean: $(LOCAL_MODULE)-clean
 	$(Q)rm -rf $(PRIVATE_BUILD_DIR)
+	+$(call macro-exec-cmd,CMD_POST_DIRCLEAN)
 
 ###############################################################################
 ## Configuration file management.
