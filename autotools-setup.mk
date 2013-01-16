@@ -12,6 +12,16 @@
 # (we add the -p option to preserve timestamp of installed files)
 AUTOTOOLS_INSTALL_BIN := $(shell which install)
 
+# Make sure pkg-config does not look on host
+PKG_CONFIG_ENV := \
+	PKG_CONFIG_PATH="$(TARGET_OUT_STAGING)/usr/lib/pkgconfig:$(TARGET_OUT_STAGING)/lib/pkgconfig" \
+	PKG_CONFIG_LIBDIR="$(TARGET_OUT_STAGING)/usr/lib/pkgconfig:$(TARGET_OUT_STAGING)/lib/pkgconfig"
+ifeq ("$(TARGET_OS_FLAVOUR)","native")
+  PKG_CONFIG_ENV += PKG_CONFIG_SYSROOT_DIR=""
+else
+  PKG_CONFIG_ENV += PKG_CONFIG_SYSROOT_DIR="$(TARGET_OUT_STAGING)"
+endif
+
 # Environment to use when executing configure script
 AUTOTOOLS_CONFIGURE_ENV := \
 	AR="$(TARGET_AR)" \
@@ -32,17 +42,8 @@ AUTOTOOLS_CONFIGURE_ENV := \
 	CFLAGS="$(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES)) $(TARGET_GLOBAL_CFLAGS)" \
 	CXXFLAGS="$(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES)) $(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CPPFLAGS)" \
 	LDFLAGS="$(TARGET_GLOBAL_LDFLAGS) $(TARGET_GLOBAL_LDLIBS)" \
-	DYN_LDFLAGS="$(TARGET_GLOBAL_LDFLAGS_SHARED) $(TARGET_GLOBAL_LDLIBS_SHARED)"
-
-# Make sure pkg-config does not look on host
-AUTOTOOLS_CONFIGURE_ENV += \
-	PKG_CONFIG_PATH="$(TARGET_OUT_STAGING)/usr/lib/pkgconfig:$(TARGET_OUT_STAGING)/lib/pkgconfig" \
-	PKG_CONFIG_LIBDIR="$(TARGET_OUT_STAGING)/usr/lib/pkgconfig:$(TARGET_OUT_STAGING)/lib/pkgconfig"
-ifeq ("$(TARGET_OS_FLAVOUR)","native")
-  AUTOTOOLS_CONFIGURE_ENV += PKG_CONFIG_SYSROOT_DIR=""
-else
-  AUTOTOOLS_CONFIGURE_ENV += PKG_CONFIG_SYSROOT_DIR="$(TARGET_OUT_STAGING)"
-endif
+	DYN_LDFLAGS="$(TARGET_GLOBAL_LDFLAGS_SHARED) $(TARGET_GLOBAL_LDLIBS_SHARED)" \
+	$(PKG_CONFIG_ENV)
 
 # Build triplet
 GNU_BUILD_NAME := $(shell $(HOST_CC) -dumpmachine)
@@ -78,7 +79,8 @@ AUTOTOOLS_CONFIGURE_ARGS += \
 	--disable-maintainer-mode
 
 # Environment to use when executing make
-AUTOTOOLS_MAKE_ENV :=
+# Use PKG_CONFIG_ENV in case a package needs automatic reconfiguration
+AUTOTOOLS_MAKE_ENV := $(PKG_CONFIG_ENV)
 
 # Arguments to give to make
 AUTOTOOLS_MAKE_ARGS := DESTDIR="$(AUTOTOOLS_INSTALL_DESTDIR)"
