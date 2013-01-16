@@ -14,13 +14,19 @@ PLFTOOL ?= plftool
 MK_KERNEL_PLF ?= mk_kernel_plf
 IMAGE_FILE_PLF := $(TARGET_OUT)/$(TARGET_PRODUCT).plf
 
+ifneq ("$(wildcard $(TARGET_OUT_STAGING)/zImage)","")
+  KERNEL_ZIMAGE := TARGET_OUT_STAGING)/zImage
+else ifneq ("$(wildcard $(TARGET_OUT_STAGING)/boot/zImage)","")
+  KERNEL_ZIMAGE := TARGET_OUT_STAGING)/boot/zImage
+endif
+
 .PHONY: image-plf
 image-plf:
 	@echo "Image plf: start"
 	$(Q) rm -f $(IMAGE_FILE_PLF)
 	$(Q) $(MK_KERNEL_PLF) \
 		"ignore-boot.cfg" \
-		$(TARGET_OUT_STAGING)/zImage \
+		$(KERNEL_ZIMAGE) \
 		$(TARGET_OUT_BUILD)/linux/.config \
 		$(TARGET_OUT)/kernel.plf
 	$(Q) $(PLFTOOL) -a u_data=$(TARGET_OUT)/kernel.plf $(IMAGE_FILE_PLF)
