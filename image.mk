@@ -15,9 +15,9 @@ MK_KERNEL_PLF ?= mk_kernel_plf
 IMAGE_FILE_PLF := $(TARGET_OUT)/$(TARGET_PRODUCT).plf
 
 ifneq ("$(wildcard $(TARGET_OUT_STAGING)/zImage)","")
-  KERNEL_ZIMAGE := TARGET_OUT_STAGING)/zImage
+  KERNEL_ZIMAGE := $(TARGET_OUT_STAGING)/zImage
 else ifneq ("$(wildcard $(TARGET_OUT_STAGING)/boot/zImage)","")
-  KERNEL_ZIMAGE := TARGET_OUT_STAGING)/boot/zImage
+  KERNEL_ZIMAGE := $(TARGET_OUT_STAGING)/boot/zImage
 endif
 
 .PHONY: image-plf
