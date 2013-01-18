@@ -176,6 +176,14 @@ def main():
 	# Setup logging
 	setupLog()
 
+	# If not on a terminal, do NOT use job control, simply execute make...
+	if not os.isatty(0):
+		logging.warning("Not using job control")
+		process = subprocess.Popen(["make"] + sys.argv[1:], shell=False)
+		process.wait()
+		sys.exit(process.returncode)
+		return
+
 	# Create our job control object
 	jobCtrl = JobCtrl()
 
