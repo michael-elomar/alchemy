@@ -1,21 +1,8 @@
 ###############################################################################
 ## This makefile handles compatibility with ParrotBuild system.
-## - Pal log.
-## - Library description.
-## - Message builder.
 ###############################################################################
 
 LOCAL_PATH := $(call my-dir)
-
-include $(CLEAR_VARS)
-
-LOCAL_MODULE := pbuild-hook
-
-LOCAL_SRC_FILES := \
-	pbuild-stub.c
-
-include $(BUILD_STATIC_LIBRARY)
-
 ###############################################################################
 ## This part will generate message.xml from a list of known modules using this
 ## feature.
