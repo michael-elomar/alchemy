@@ -2,4 +2,12 @@
 
 # simple shell wrapper around alchemake.py
 ALCHEMY_HOME=/usr/lib/Alchemy
+if [ "${ALCHEMY_WORKSPACE_DIR}" != "" -a -d "${ALCHEMY_WORKSPACE_DIR}" ]; then
+	if [ "${PWD##${ALCHEMY_WORKSPACE_DIR}}" = "${PWD}" ]; then
+		echo "ERROR: trying to use alchemake outside ALCHEMY_WORKSPACE_DIR=${ALCHEMY_WORKSPACE_DIR}"
+		exit 1
+	fi
+	cd ${ALCHEMY_WORKSPACE_DIR}
+fi
+
 exec ${ALCHEMY_HOME}/scripts/alchemake.py -f ${ALCHEMY_HOME}/main.mk $*
