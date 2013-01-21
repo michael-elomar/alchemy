@@ -113,6 +113,11 @@ SKIP_DEPS_AND_CHECKS := 0
 # their .done file).
 SKIP_EXT_DEPS_AND_CHECKS := 0
 
+# Include product env file
+ifdef TARGET_CONFIG_DIR
+-include $(TARGET_CONFIG_DIR)/product.mk
+endif
+
 # Setup configuration
 include $(BUILD_SYSTEM)/setup.mk
 
