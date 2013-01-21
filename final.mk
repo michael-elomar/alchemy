@@ -21,6 +21,10 @@ ifneq ("$(TARGET_SKEL)","")
   MAKEFINAL_ARGS += --skel="$(TARGET_SKEL)"
 endif
 
+ifneq ("$(TARGET_SKEL_DIRS)","")
+  $(foreach d,$(TARGET_SKEL_DIRS),$(eval MAKEFINAL_ARGS += --skel="$(d)"))
+endif
+
 ifneq ("$(TOOLCHAIN_LIBC)","")
   MAKEFINAL_ARGS += --toolchain-libc="$(TOOLCHAIN_LIBC)"
 endif

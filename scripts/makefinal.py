@@ -291,8 +291,8 @@ def main():
 	processDir(options.stagingDir, options, False)
 
 	# process skeleton directory (with empty dirs)
-	if options.skelDir != None:
-		processDir(options.skelDir, options, True)
+	for skelDir in options.skelDirs:
+		processDir(skelDir, options, True)
 
 	# process libc  directory
 	if options.toolchainLibcDir != None:
@@ -317,8 +317,9 @@ def parseArgs():
 		default=None,
 		help="strip program to use to remove symbols")
 	parser.add_option("--skel",
-		dest="skelDir",
-		default=None,
+		dest="skelDirs",
+		default=[],
+		action="append",
 		help="path to skeleton tree to merge in final tree")
 	parser.add_option("--toolchain-libc",
 		dest="toolchainLibcDir",

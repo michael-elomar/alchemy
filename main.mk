@@ -96,10 +96,16 @@ ifdef ALCHMEY_TARGET_SKEL
   TARGET_SKEL := $(ALCHMEY_TARGET_SKEL)
 endif
 
+# Import skel dis from env
+ifdef ALCHEMY_TARGET_SKEL_DIRS
+  TARGET_SKEL_DIRS := $(ALCHEMY_TARGET_SKEL_DIRS)
+endif
+
 # Import scan prune dirs from env
 ifdef ALCHEMY_TARGET_SCAN_PRUNE_DIRS
   TARGET_SCAN_PRUNE_DIRS := $(ALCHEMY_TARGET_SCAN_PRUNE_DIRS)
 endif
+
 
 # Import use colors from env
 ifdef ALCHEMY_USE_COLORS
