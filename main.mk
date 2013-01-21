@@ -64,11 +64,43 @@ fullpath = $(strip $(shell readlink -m -n $1))
 my-dir = $(call fullpath,$(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST)))))
 
 ###############################################################################
-## Build system setup.
+## Env system setup.
 ###############################################################################
 
 # Directories (full path)
-TOP_DIR := $(shell pwd)
+ALCHEMY_WORKSPACE_DIR ?= $(shell pwd)
+TOP_DIR := $(ALCHEMY_WORKSPACE_DIR)
+
+# Import target product from env
+ifdef ALCHEMY_TARGET_PRODUCT
+  TARGET_PRODUCT := $(ALCHEMY_TARGET_PRODUCT)
+endif
+
+# Import target product variant from env
+ifdef ALCHEMY_TARGET_PRODUCT_VARIANT
+  TARGET_PRODUCT_VARIANT := $(ALCHEMY_TARGET_PRODUCT_VARIANT)
+endif
+
+# Import target product variant config dir from env
+ifdef ALCHEMY_TARGET_CONFIG_DIR
+  TARGET_CONFIG_DIR := $(ALCHEMY_TARGET_CONFIG_DIR)
+endif
+
+# Import scan prune dirs from env
+ifdef ALCHEMY_TARGET_SCAN_PRUNE_DIRS
+  TARGET_SCAN_PRUNE_DIRS := $(ALCHEMY_TARGET_SCAN_PRUNE_DIRS)
+endif
+
+
+# Import use colors from env
+ifdef ALCHEMY_USE_COLORS
+  USE_COLORS := $(ALCHEMY_USE_COLORS)
+endif
+
+###############################################################################
+## Build system setup.
+###############################################################################
+
 BUILD_SYSTEM := $(call my-dir)
 
 # Set this variable to 1 to skip a lot of things like dependencies check and
@@ -164,9 +196,14 @@ AUTOCONF_MERGE_FILE := $(TARGET_OUT_BUILD)/autoconf-merge.h
 ###############################################################################
 msg = $(info $(CLR_CYAN)$1$(CLR_DEFAULT))
 $(info ----------------------------------------------------------------------)
-$(call msg,+ HOST_OS = $(HOST_OS))
+$(call msg,+ ALCHEMY_WORKSPACE_DIR = $(ALCHEMY_WORKSPACE_DIR))
+$(call msg,+ TARGET_PRODUCT = $(TARGET_PRODUCT))
+$(call msg,+ TARGET_PRODUCT_VARIANT = $(TARGET_PRODUCT_VARIANT))
 $(call msg,+ TARGET_OS = $(TARGET_OS))
+$(call msg,+ TARGET_OS_FLAVOUR = $(TARGET_OS_FLAVOUR))
+$(call msg,+ TARGET_LIBC = $(TARGET_LIBC))
 $(call msg,+ TARGET_ARCH = $(TARGET_ARCH))
+$(call msg,+ TARGET_CPU = $(TARGET_CPU))
 $(call msg,+ TARGET_OUT_BUILD = $(TARGET_OUT_BUILD))
 $(call msg,+ TARGET_OUT_STAGING = $(TARGET_OUT_STAGING))
 $(call msg,+ TARGET_OUT_FINAL = $(TARGET_OUT_FINAL))
