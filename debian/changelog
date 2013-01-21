@@ -1,3 +1,9 @@
+parrot-tools-alchemy (1.0.1) unstable; urgency=low
+
+  * Upstream snapshot of 0593e148d404381c952a162bae25d1a2f4f55c3b.
+
+ -- Ivan Djelic (Parrot) <ivan.djelic@parrot.com>  Thu, 17 Jan 2013 11:11:29 +0200
+
 parrot-tools-alchemy (1.0.0) unstable; urgency=low
 
   * Initial Release.
