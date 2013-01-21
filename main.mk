@@ -81,16 +81,25 @@ ifdef ALCHEMY_TARGET_PRODUCT_VARIANT
   TARGET_PRODUCT_VARIANT := $(ALCHEMY_TARGET_PRODUCT_VARIANT)
 endif
 
-# Import target product variant config dir from env
+# Import target config dir from env
 ifdef ALCHEMY_TARGET_CONFIG_DIR
   TARGET_CONFIG_DIR := $(ALCHEMY_TARGET_CONFIG_DIR)
+endif
+
+# Import target out dir from env
+ifdef ALCHEMY_TARGET_OUT
+  TARGET_OUT := $(ALCHEMY_TARGET_OUT)
+endif
+
+# Import target skel from env
+ifdef ALCHMEY_TARGET_SKEL
+  TARGET_SKEL := $(ALCHMEY_TARGET_SKEL)
 endif
 
 # Import scan prune dirs from env
 ifdef ALCHEMY_TARGET_SCAN_PRUNE_DIRS
   TARGET_SCAN_PRUNE_DIRS := $(ALCHEMY_TARGET_SCAN_PRUNE_DIRS)
 endif
-
 
 # Import use colors from env
 ifdef ALCHEMY_USE_COLORS
