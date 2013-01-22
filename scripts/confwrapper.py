@@ -30,11 +30,11 @@ ARG_FIELD_SEP = ":"
 # Suffix for temp files
 TEMP_SUFFIX = ".alchemy"
 
-# Path to kconfig binaries
-KCONFIG_BIN_DIR = os.path.join(SCRIPT_PATH, "../kconfig/bin-linux-" + ARCH)
-
 # Title we wand to display (also saved in config files)
 KCONFIG_TITLE = "Alchemy Configuration"
+
+# Sufix of tools when installed on host
+KCONFIG_INSTALLED_SUFFIX = "-parrot"
 
 #===============================================================================
 # Group class.
@@ -87,6 +87,19 @@ class Module:
 	def __repr__(self):
 		return "{name=%s,self=%s,groupPath=%s,configPath=%s,configInPathList=%s}" % \
 				(self.name, self.desc, self.groupPath, self.configPath, str(self.configInPathList))
+
+#===============================================================================
+# Get the full path to a kconfig binary.
+#===============================================================================
+def getKconfigPath(name):
+	# Use the one in alchemy tree if available
+	binDir = os.path.join(SCRIPT_PATH, "../kconfig/bin-linux-" + ARCH)
+	path = os.path.join(binDir, name)
+	if os.path.exists(path):
+		return path
+
+	# Use the one installed on the host
+	return name + KCONFIG_INSTALLED_SUFFIX;
 
 #===============================================================================
 # Simplify tree of groups by moving up modules to first non-empty parent.
@@ -621,8 +634,7 @@ def execConf(configInPath, configPath):
 
 	# Construct command line, simulate accepting all new options to their
 	# default values by piping 'yes' as input
-	cmdline = "yes \"\" | %s --oldconfig %s" % \
-			(os.path.join(KCONFIG_BIN_DIR, "conf"), configInPath)
+	cmdline = "yes \"\" | %s --oldconfig %s" % (getKconfigPath("conf"), configInPath)
 
 	# Setup environment
 	# KCONFIG_CONFIG : name of .config file to use as input/ouput
@@ -656,8 +668,7 @@ def execConfUi(confUi, configInPath, configPath):
 	logging.info("Executing %s %s %s", confUi, configInPath, configPath)
 
 	# Construct command line
-	cmdline = "%s %s" % \
-			(os.path.join(KCONFIG_BIN_DIR, confUi), configInPath)
+	cmdline = "%s %s" % (getKconfigPath(confUi), configInPath)
 
 	# Setup environment
 	# KCONFIG_CONFIG : name of .config file to use as input/ouput
