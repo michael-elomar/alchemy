@@ -31,6 +31,12 @@ TARGET_OUT_BUILD ?= $(TARGET_OUT)/build
 TARGET_OUT_STAGING ?= $(TARGET_OUT)/staging
 TARGET_OUT_FINAL ?= $(TARGET_OUT)/final
 TARGET_SKEL ?=
+TARGET_SKEL_DIRS ?=
+
+# TODO: remove when all projects have been migrated
+ifneq ("$(TARGET_SKEL)","")
+$(warning Please use 'TARGET_SKEL_DIRS' instead of 'TARGET_SKEL')
+endif
 
 TARGET_CONFIG_DIR ?= $(TOP_DIR)/Alchemy-config/$(TARGET_PRODUCT)-$(TARGET_PRODUCT_VARIANT)
 
