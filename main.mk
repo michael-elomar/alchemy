@@ -338,7 +338,7 @@ __need-pbuild-hook = $(strip \
 	))
 
 $(if $(__need-pbuild-hook), \
-	$(eval include $(BUILD_SYSTEM)/pbuild-hook/atom.mk) \
+	$(eval include $(BUILD_SYSTEM)/pbuild-hook/pbuild-hook.mk) \
 )
 
 ###############################################################################

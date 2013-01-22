@@ -3,6 +3,7 @@
 ###############################################################################
 
 LOCAL_PATH := $(call my-dir)
+
 ###############################################################################
 ## This part will generate message.xml from a list of known modules using this
 ## feature.
