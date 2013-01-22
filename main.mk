@@ -92,11 +92,6 @@ ifdef ALCHEMY_TARGET_OUT
   TARGET_OUT := $(ALCHEMY_TARGET_OUT)
 endif
 
-# Import target skel from env
-ifdef ALCHMEY_TARGET_SKEL
-  TARGET_SKEL := $(ALCHMEY_TARGET_SKEL)
-endif
-
 # Import skel dis from env
 ifdef ALCHEMY_TARGET_SKEL_DIRS
   TARGET_SKEL_DIRS := $(ALCHEMY_TARGET_SKEL_DIRS)
