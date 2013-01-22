@@ -170,6 +170,9 @@ imported_C_INCLUDES    := $(call module-get-listed-export,$(all_depends),C_INCLU
 imported_LDLIBS        := $(call module-get-listed-export,$(LOCAL_LIBRARIES),LDLIBS)
 imported_PREREQUISITES := $(call module-get-listed-export,$(all_depends),PREREQUISITES)
 
+# Add includes of modules listed in LOCAL_DEPENDS_HEADERS
+imported_C_INCLUDES += $(call module-get-listed-export,$(LOCAL_DEPENDS_HEADERS),C_INCLUDES)
+
 # The imported/exported compiler flags are prepended to their LOCAL_XXXX value
 # (this allows the module to override them).
 LOCAL_CFLAGS     := $(strip $(imported_CFLAGS) $(LOCAL_EXPORT_CFLAGS) $(LOCAL_CFLAGS))

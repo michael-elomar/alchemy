@@ -194,6 +194,9 @@ modules-LOCALS += EXTERNAL_LIBRARIES
 # General libraries to add in dependency based on their actual class (STATIC/SHARED/EXTERNAL).
 modules-LOCALS += LIBRARIES
 
+# Modules whose headers are required to build
+modules-LOCALS += DEPENDS_HEADERS
+
 # Other modules required (at runtime for example). But not required for build
 modules-LOCALS += DEPENDS_MODULES
 
@@ -308,6 +311,7 @@ modules-fields-depends := \
 	depends.WHOLE_STATIC_LIBRARIES \
 	depends.SHARED_LIBRARIES \
 	depends.other \
+	depends.headers \
 	depends.all
 
 ###############################################################################
@@ -432,6 +436,7 @@ __module-check-depends = \
 	$(eval __path := $(__modules.$1.PATH)) \
 	$(call __module-check-depends-direct,$1) \
 	$(call __module-check-depends-other,$1) \
+	$(call __module-check-depends-headers,$1) \
 	$(call __module-check-libs-class,$1,WHOLE_STATIC_LIBRARIES,STATIC_LIBRARY) \
 	$(call __module-check-libs-class,$1,STATIC_LIBRARIES,STATIC_LIBRARY) \
 	$(call __module-check-libs-class,$1,SHARED_LIBRARIES,SHARED_LIBRARY)
@@ -467,6 +472,14 @@ __module-check-depends-other = \
 		) \
 	)
 
+# Make sure headers dependencies are OK
+# $1 : module name.
+__module-check-depends-headers = \
+	$(foreach __lib,$(__modules.$1.depends.headers), \
+		$(if $(call is-module-registered,$(__lib)),$(empty), \
+			$(error $(__path): module '$1' depends on headers of unknown module '$(__lib)') \
+		) \
+	)
 
 # $1 : module name of owner.
 # $2 : dependency to check (WHOLE_STATIC_LIBRARIES,STATIC_LIBRARIES,SHARED_LIBRARIES).
@@ -590,6 +603,7 @@ __module-compute-depends-direct = \
 	$(call __module-add-depends-direct,$1,$(__modules.$1.WHOLE_STATIC_LIBRARIES)) \
 	$(call __module-add-depends-direct,$1,$(__modules.$1.SHARED_LIBRARIES)) \
 	$(call __module-add-depends-direct,$1,$(__modules.$1.EXTERNAL_LIBRARIES)) \
+	$(eval __modules.$1.depends.headers := $(__modules.$1.DEPENDS_HEADERS)) \
 	$(eval __modules.$1.depends.other := $(__modules.$1.DEPENDS_MODULES))
 
 # Add direct dependencies to a module
