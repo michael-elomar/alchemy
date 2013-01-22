@@ -31,6 +31,7 @@ USE_CLANG ?= 0
 USE_CCACHE ?= 0
 USE_SCAN_CACHE ?= 0
 USE_COLORS ?= 0
+USE_BUILD_DEPS_CHECK_IN_CONFIG ?= 0
 
 # Quiet command if V is 0
 ifeq ("$(V)","0")

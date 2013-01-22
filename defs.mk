@@ -194,6 +194,9 @@ modules-LOCALS += EXTERNAL_LIBRARIES
 # General libraries to add in dependency based on their actual class (STATIC/SHARED/EXTERNAL).
 modules-LOCALS += LIBRARIES
 
+# Other modules required (at runtime for example). But not required for build
+modules-LOCALS += DEPENDS_MODULES
+
 # Additional include directories to pass into the C/C++ compilers
 # Format : <fullpath> (-I will be prepended automatically)
 modules-LOCALS += C_INCLUDES
@@ -304,6 +307,7 @@ modules-fields-depends := \
 	depends.STATIC_LIBRARIES \
 	depends.WHOLE_STATIC_LIBRARIES \
 	depends.SHARED_LIBRARIES \
+	depends.other \
 	depends.all
 
 ###############################################################################
@@ -426,6 +430,15 @@ modules-check-depends = \
 # $1 : module name.
 __module-check-depends = \
 	$(eval __path := $(__modules.$1.PATH)) \
+	$(call __module-check-depends-direct,$1) \
+	$(call __module-check-depends-other,$1) \
+	$(call __module-check-libs-class,$1,WHOLE_STATIC_LIBRARIES,STATIC_LIBRARY) \
+	$(call __module-check-libs-class,$1,STATIC_LIBRARIES,STATIC_LIBRARY) \
+	$(call __module-check-libs-class,$1,SHARED_LIBRARIES,SHARED_LIBRARY)
+
+# Check direct dependencies
+# $1 : module name.
+__module-check-depends-direct = \
 	$(foreach __lib,$(__modules.$1.depends), \
 		$(if $(call is-module-registered,$(__lib)), \
 			$(if $(call is-module-in-build-config,$1), \
@@ -438,10 +451,22 @@ __module-check-depends = \
 				$(warning $(__path): module '$1' depends on unknown module '$(__lib)') \
 			) \
 		) \
-	) \
-	$(call __module-check-libs-class,$1,WHOLE_STATIC_LIBRARIES,STATIC_LIBRARY) \
-	$(call __module-check-libs-class,$1,STATIC_LIBRARIES,STATIC_LIBRARY) \
-	$(call __module-check-libs-class,$1,SHARED_LIBRARIES,SHARED_LIBRARY) \
+	)
+
+# Make sure runtime dependencies (other) are OK, but only warn
+# $1 : module name.
+__module-check-depends-other = \
+	$(foreach __lib,$(__modules.$1.depends.other), \
+		$(if $(call is-module-registered,$(__lib)), \
+			$(if $(call is-module-in-build-config,$1), \
+				$(if $(call is-module-in-build-config,$(__lib)),$(empty), \
+					$(warning $(__path): module '$1' depends on disabled module '$(__lib)') \
+				) \
+			), \
+			$(warning $(__path): module '$1' depends on unknown module '$(__lib)') \
+		) \
+	)
+
 
 # $1 : module name of owner.
 # $2 : dependency to check (WHOLE_STATIC_LIBRARIES,STATIC_LIBRARIES,SHARED_LIBRARIES).
@@ -521,12 +546,9 @@ __is-in-depends-loop = $(strip \
 # The dummy assignment is to discard output generated internally
 modules-compute-depends = \
 	$(foreach __mod,$(__modules), \
-		$(eval __modules.$(__mod).depends := $(empty)) \
-		$(eval __modules.$(__mod).depends.EXTERNAL_LIBRARIES := $(empty)) \
-		$(eval __modules.$(__mod).depends.STATIC_LIBRARIES := $(empty)) \
-		$(eval __modules.$(__mod).depends.WHOLE_STATIC_LIBRARIES := $(empty)) \
-		$(eval __modules.$(__mod).depends.SHARED_LIBRARIES := $(empty)) \
-		$(eval __modules.$(__mod).depends.all := $(empty)) \
+		$(foreach __field,$(modules-fields-depends), \
+			$(eval __modules.$(__mod).$(__field) := $(empty)) \
+		) \
 		$(call __module-update-depends-direct,$(__mod)) \
 		$(call __module-compute-depends-direct,$(__mod)) \
 	) \
@@ -567,7 +589,8 @@ __module-compute-depends-direct = \
 	$(call __module-add-depends-direct,$1,$(__modules.$1.STATIC_LIBRARIES)) \
 	$(call __module-add-depends-direct,$1,$(__modules.$1.WHOLE_STATIC_LIBRARIES)) \
 	$(call __module-add-depends-direct,$1,$(__modules.$1.SHARED_LIBRARIES)) \
-	$(call __module-add-depends-direct,$1,$(__modules.$1.EXTERNAL_LIBRARIES))
+	$(call __module-add-depends-direct,$1,$(__modules.$1.EXTERNAL_LIBRARIES)) \
+	$(eval __modules.$1.depends.other := $(__modules.$1.DEPENDS_MODULES))
 
 # Add direct dependencies to a module
 # $1 : module name.
@@ -671,16 +694,32 @@ module-get-listed-autoconf = $(strip \
 
 ###############################################################################
 ## Dependency helpers.
+## $1: module name.
 ###############################################################################
 
+# Get dependencies due to static libraries
 module-get-static-depends = \
 	$(__modules.$1.depends.$2)
 
+# Get all dependencies for the build
 module-get-all-depends = \
 	$(__modules.$1.depends.all)
 
+# Get direct dependencies
 module-get-depends = \
 	$(__modules.$1.depends)
+
+# Get dependencies for configuration
+# Put build dependencies only if requested
+# FIXME: configurable until all modules remove conditional deps in atom.mk
+ifeq ("$(USE_BUILD_DEPS_CHECK_IN_CONFIG)","0")
+module-get-config-depends = \
+	$(__modules.$1.depends.other)
+else
+module-get-config-depends = \
+	$(__modules.$1.depends) \
+	$(__modules.$1.depends.other)
+endif
 
 ###############################################################################
 ## Get path of module main target file (in build or staging directory).
