@@ -37,6 +37,7 @@ TARGET_SKEL_DIRS ?=
 ifneq ("$(TARGET_SKEL)","")
 $(warning Please use 'TARGET_SKEL_DIRS' instead of 'TARGET_SKEL')
 endif
+TARGET_SKEL_DIRS += $(TARGET_SKEL)
 
 TARGET_CONFIG_DIR ?= $(TOP_DIR)/Alchemy-config/$(TARGET_PRODUCT)-$(TARGET_PRODUCT_VARIANT)
 

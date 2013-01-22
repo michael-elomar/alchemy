@@ -17,10 +17,6 @@ ifneq ("$(TARGET_STRIP)","")
   MAKEFINAL_ARGS += --strip="$(TARGET_STRIP)"
 endif
 
-ifneq ("$(TARGET_SKEL)","")
-  MAKEFINAL_ARGS += --skel="$(TARGET_SKEL)"
-endif
-
 ifneq ("$(TARGET_SKEL_DIRS)","")
   $(foreach d,$(TARGET_SKEL_DIRS),$(eval MAKEFINAL_ARGS += --skel="$(d)"))
 endif
