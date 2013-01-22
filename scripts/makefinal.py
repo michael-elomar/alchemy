@@ -31,6 +31,16 @@ EXCLUDE_FILES = [
 	".gitignore",
 	"Image", "zImage", "bzImage", "uImage", "kernel.plf"]
 
+# Linux folders/links
+LINUX_BASIC_SKEL = [
+	["debugfs", None],
+	["dev", None],
+	["home", None],
+	["proc", None],
+	["sys", None],
+	["tmp", None],
+]
+
 #==============================================================================
 # Execute a command and get its output
 #==============================================================================
@@ -126,14 +136,10 @@ def doCopyDirect(dstFileName, srcFileName, doStrip, options):
 		os.system("cp -af \"%s\" \"%s\"" % (srcFileName, dstFileName))
 
 #===============================================================================
-# Copy a file.
+# Copy a file/link.
 #===============================================================================
 def doCopy(dstFileName, srcFileName, options):
 	relPath = os.path.relpath(dstFileName, options.finalDir)
-	if os.path.islink(srcFileName):
-		logging.info("Link : %s", relPath)
-	else:
-		logging.info("File : %s", relPath)
 
 	# do we need to strip ?
 	# FIXME: stripping kernel modules under android causes issues
@@ -160,6 +166,10 @@ def doCopy(dstFileName, srcFileName, options):
 	# nothing to do if destination is already OK
 	if doAction == False:
 		return
+	if os.path.islink(srcFileName):
+		logging.info("Link : %s", relPath)
+	else:
+		logging.info("File : %s", relPath)
 
 	# make sure destination directory exists
 	dstDirName = os.path.split(dstFileName)[0]
@@ -218,8 +228,8 @@ def processDir(rootDir, options, withEmptyDir):
 				srcDirName = os.path.join(dirPath, dirName)
 				relPath = os.path.relpath(srcDirName, rootDir)
 				dstDirName = os.path.join(options.finalDir, relPath)
-				logging.info("Directory : %s", relPath)
 				if not os.path.exists(dstDirName):
+					logging.info("Directory : %s", relPath)
 					os.makedirs(dstDirName, 0755)
 
 		# copy files
@@ -260,6 +270,21 @@ def processToolchainLibc(libcDir, options):
 			relPath = os.path.relpath(srcFileName, libcDir)
 			dstFileName = os.path.join(options.finalDir, relPath)
 			doCopy(dstFileName, srcFileName, options)
+
+#===============================================================================
+# Process linux basic skel.
+#===============================================================================
+def processLinuxBasicSkel(options):
+	for entry in LINUX_BASIC_SKEL:
+		if entry[1] == None:
+			dstDirName = os.path.join(options.finalDir, entry[0])
+			logging.info("Directory : %s", entry[0])
+			if not os.path.exists(dstDirName):
+				os.makedirs(dstDirName, 0755)
+		else:
+			dstLnkName = os.path.join(options.finalDir, entry[0])
+			logging.info("Link : %s", entry[0])
+			os.system("ln -sf \"%s\" \"%s\"" % (entry[1], dstLnkName))
 
 #===============================================================================
 # Main function.
@@ -303,6 +328,10 @@ def main():
 		doCopy(os.path.join(options.finalDir, "usr/bin/gdbserver"),
 			options.toolchainGdbserverName, options)
 
+	# process linux basic skel
+	if options.linuxBasicSkel:
+		processLinuxBasicSkel(options)
+
 	if options.makefile != None:
 		writeMakefileFooter(options)
 
@@ -329,6 +358,11 @@ def parseArgs():
 		dest="toolchainGdbserverName",
 		default=None,
 		help="path to toolchain gdbserver binary to merge in final tree")
+	parser.add_option("--linux-basic-skel",
+		dest="linuxBasicSkel",
+		action="store_true",
+		default=False,
+		help="Create a basic linux skel (proc, dev, tmp...)")
 	parser.add_option("-q",
 		dest="quiet",
 		action="store_true",

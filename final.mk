@@ -33,6 +33,13 @@ ifneq ("$(TOOLCHAIN_GDBSERVER)","")
   MAKEFINAL_ARGS += --toolchain-gdbserver="$(TOOLCHAIN_GDBSERVER)"
 endif
 
+# Create very minimal skeleton for linux (some absolute required directories)
+ifeq ("$(TARGET_OS)","linux")
+ifneq ("$(TARGET_OS_FLAVOUR)","native")
+  MAKEFINAL_ARGS += --linux-basic-skel
+endif
+endif
+
 ###############################################################################
 ## Hooks.
 ###############################################################################
