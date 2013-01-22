@@ -165,6 +165,7 @@ $(LOCAL_MODULE)-dirclean: $(LOCAL_MODULE)-clean
 ## Configuration file management.
 ###############################################################################
 
+config_file := $(call __get-module-config,$(LOCAL_MODULE))
 autoconf_file := $(call module-get-autoconf,$(LOCAL_MODULE))
 ifneq ("$(autoconf_file)","")
 
