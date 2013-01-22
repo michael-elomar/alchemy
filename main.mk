@@ -166,7 +166,7 @@ endif
 __clean-targets := clean dirclean clobber
 __query-targets := scan help help-modules dump dump-depends dump-xml build-graph
 __config-targets := config config-check config-update xconfig menuconfig nconfig
-__fs-targets := final final-nostrip plf image-plf image-cpio
+__fs-targets := final plf image-plf image-cpio
 __skip_targets := \
 	$(__clean-targets) \
 	$(__query-targets) \
