@@ -165,14 +165,6 @@ $(LOCAL_MODULE)-dirclean: $(LOCAL_MODULE)-clean
 ## Configuration file management.
 ###############################################################################
 
-# Check validity of config file
-config_file := $(call __get-module-config,$(LOCAL_MODULE))
-ifneq ("$(config_file)","")
-ifeq ("$(SKIP_DEPS_AND_CHECKS)","0")
-$(config_file): __config-check-$(LOCAL_MODULE)
-endif
-endif
-
 autoconf_file := $(call module-get-autoconf,$(LOCAL_MODULE))
 ifneq ("$(autoconf_file)","")
 
