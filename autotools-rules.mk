@@ -39,10 +39,20 @@ else
   obj_dir := $(build_dir)/obj
 endif
 
-# Delete some aditionnal 'done' files if a skip of external checks is not done
+# Delete some additionnal 'done' files if a skip of external checks is not done
 ifeq ("$(skip_ext_checks)","0")
 $(call delete-one-done-file,$(built_file))
 $(call delete-one-done-file,$(installed_file))
+endif
+
+# Dependencies for reconfiguration
+# Note: if configure file is in an archive the wildcard test will fail the
+# first time, but it is not a problem. The important thing is to detect by
+# ourself that the configure file is newer to make sure we apply all patches.
+ifneq ("$(wildcard $(src_dir)/configure)","")
+  configure_file := $(src_dir)/configure
+else
+  configure_file := $(empty)
 endif
 
 ###############################################################################
@@ -197,7 +207,7 @@ endif
 	@touch $@
 
 # Configuration
-$(configured_file): $(unpacked_file)
+$(configured_file): $(unpacked_file) $(configure_file)
 	$(call __autotools-msg,Configuring)
 	@mkdir -p $(PRIVATE_OBJ_DIR)
 	+$(call macro-exec-cmd,AUTOTOOLS_CMD_CONFIGURE,__default-configure)
@@ -228,8 +238,12 @@ $(LOCAL_BUILD_MODULE): $(installed_file)
 	@mkdir -p $(dir $@)
 	@touch $@
 
-# clean targets additional commands
+# Clean targets additional commands
+# Simulate that some files are up to date to avoid internal reconfiguration
+# that will likely fail because env or libtool patches are not correct
 $(LOCAL_MODULE)-clean:
+	$(Q) touch $$(find $(PRIVATE_OBJ_DIR) -name config.status)
+	$(Q) touch $$(find $(PRIVATE_OBJ_DIR) -name Makefile)
 	+$(call macro-exec-cmd,AUTOTOOLS_CMD_CLEAN,__default-clean)
 	+$(call macro-exec-cmd,AUTOTOOLS_CMD_POST_CLEAN)
 
