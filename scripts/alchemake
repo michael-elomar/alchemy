@@ -2,7 +2,7 @@
 # simple shell wrapper around alchemake.py
 
 # Set our home
-if [ "${ALCHEMY_HOME}" != "" ]; then
+if [ "${ALCHEMY_HOME}" = "" ]; then
 	ALCHEMY_HOME=/usr/lib/Alchemy
 fi
 
