@@ -1,7 +1,13 @@
 #!/bin/sh
-
 # simple shell wrapper around alchemake.py
-ALCHEMY_HOME=/usr/lib/Alchemy
+
+# Set our home
+if [ "${ALCHEMY_HOME}" != "" ]; then
+	ALCHEMY_HOME=/usr/lib/Alchemy
+fi
+
+# Check that if ALCHEMY_WORKSPACE_DIR is given it is a directory parent
+# of current directory
 if [ "${ALCHEMY_WORKSPACE_DIR}" != "" -a -d "${ALCHEMY_WORKSPACE_DIR}" ]; then
 	if [ "${PWD##${ALCHEMY_WORKSPACE_DIR}}" = "${PWD}" ]; then
 		echo "ERROR: trying to use alchemake outside ALCHEMY_WORKSPACE_DIR=${ALCHEMY_WORKSPACE_DIR}"
