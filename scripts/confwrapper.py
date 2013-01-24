@@ -189,6 +189,15 @@ def safeRename(old, new):
 	os.rename(old, new)
 
 #===============================================================================
+# Create a file, creating missing directories if needed.
+#===============================================================================
+def safeCreateFile(path):
+	dirPath = os.path.dirname(path)
+	if not os.path.isdir(dirPath):
+		os.makedirs(dirPath)
+	return open(path, "w")
+
+#===============================================================================
 # Get the path to use for config edition.
 # path : original config path.
 #===============================================================================
@@ -442,7 +451,7 @@ def processFullConfig(inFile, modules, mainConfigPath):
 				moduleConfigPath = line[idx+1:].strip("\"\'")
 				logging.debug("New module config: %s", moduleConfigPath)
 				try:
-					moduleConfigFile = open(getEditConfigPath(moduleConfigPath), "w")
+					moduleConfigFile = safeCreateFile(getEditConfigPath(moduleConfigPath))
 					writeConfigHeader(moduleConfigFile, module)
 				except IOError as ex:
 					logging.error("Unable to create file: %s [err=%d %s]",
@@ -468,7 +477,7 @@ def processFullConfig(inFile, modules, mainConfigPath):
 
 	# Create main configuration file
 	try:
-		mainConfigFile = open(getEditConfigPath(mainConfigPath), "w")
+		mainConfigFile = safeCreateFile(getEditConfigPath(mainConfigPath))
 	except IOError as ex:
 		logging.error("Unable to create file: %s [err=%d %s]",
 			getEditConfigPath(mainConfigPath), ex.errno, ex.strerror)
