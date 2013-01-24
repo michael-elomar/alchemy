@@ -153,6 +153,9 @@ unexport TARGET_ARCH
 ###############################################################################
 
 TARGET_CC_PATH := $(shell which $(TARGET_CC))
+ifeq ("$(TARGET_CC_PATH)","")
+$(error Unable to find compiler: $(TARGET_CC))
+endif
 
 ifneq ("$(USE_CLANG)","1")
 TARGET_CC_VERSION := $(shell $(TARGET_CC) --version | head -1 | sed "s/.*\([0-9]\.[0-9]\.[0-9]\).*/\1/")
