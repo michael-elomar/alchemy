@@ -242,8 +242,8 @@ $(LOCAL_BUILD_MODULE): $(installed_file)
 # Simulate that some files are up to date to avoid internal reconfiguration
 # that will likely fail because env or libtool patches are not correct
 $(LOCAL_MODULE)-clean:
-	$(Q) touch $$(find $(PRIVATE_OBJ_DIR) -name config.status)
-	$(Q) touch $$(find $(PRIVATE_OBJ_DIR) -name Makefile)
+	$(Q) if [ -d $(PRIVATE_OBJ_DIR) ]; then find $(PRIVATE_OBJ_DIR) -name config.status -exec touch {} \; ; fi
+	$(Q) if [ -d $(PRIVATE_OBJ_DIR) ]; then find $(PRIVATE_OBJ_DIR) -name Makefile -exec touch {} \; ; fi
 	+$(call macro-exec-cmd,AUTOTOOLS_CMD_CLEAN,__default-clean)
 	+$(call macro-exec-cmd,AUTOTOOLS_CMD_POST_CLEAN)
 
