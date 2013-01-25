@@ -1,3 +1,7 @@
+parrot-tools-alchemy (1.0.2) unstable; urgency=low
+
+ -- Yves-Marie Morgan (Parrot) <yves-marie.morgan@parrot.com>  Fri, 25 Jan 2013 13:26:34 +0100
+
 parrot-tools-alchemy (1.0.1) unstable; urgency=low
 
   * Upstream snapshot of 0593e148d404381c952a162bae25d1a2f4f55c3b.
