@@ -11,3 +11,9 @@
 # diff files from config
 test/config/*/*.diff
 
+# Debian stuff
+debian/files
+debian/*.debhelper.log
+debian/*.substvars
+debian/*/
+
