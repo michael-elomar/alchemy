@@ -1,7 +1,12 @@
-#!/bin/bash
+#!/bin/sh
 
-readonly binaries=$(file $(find -type f) | /bin/grep 'ELF' | cut -d: -f1)
+# Exclude some directories during search
+readonly FIND_PATTERN='-path */proc -prune -o -path */dev -prune -o -print'
 
+# List of binaries
+binaries=$(file $(find ${FIND_PATTERN} -type f) | /bin/grep 'ELF' | cut -d: -f1)
+
+# Get libs needed by binaries
 libs=""
 rpath=""
 for bin in ${binaries}; do
@@ -12,15 +17,24 @@ for bin in ${binaries}; do
 	fi
 done
 
-libs="$(echo "${libs}" | sort | uniq)"
-echo ${libs}
+# Use tr to split libs on several lines, then sort and remove duplicates
+libs="$(echo "${libs}" | tr [:space:] '\n' | sort | uniq)"
 
+# Check that all libraries exist
+missing="no"
 for lib in ${libs}; do
-	res="$(find -name ${lib})"
+	res="$(find ${FIND_PATTERN} -name ${lib})"
 	if test -z "${res}"; then
 		echo "Missing ${lib}"
+		missing="yes"
 	fi
 done
 
-echo ${rpath}
+if [ "${missing}" = "no" ]; then
+	echo "No libraries missing"
+fi
 
+if [ "${rpath}" != "" ]; then
+	echo "Some binaries uses DT_RPATH"
+	echo ${rpath}
+fi

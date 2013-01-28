@@ -1,10 +1,10 @@
-#!/bin/bash
+#!/bin/sh
 
 # This script assumes it is copied in the staging or final dir
 # Folders bin, usr/bin, lib, /usr/lib are subdirectories there
 
-# Get full path to this script (either when executed or sourced)
-SCRIPT_PATH=$(cd $(dirname ${BASH_SOURCE}) && pwd)
+# Get full path to this script
+SCRIPT_PATH=$(cd $(dirname $0) && pwd)
 SYSROOT=${SCRIPT_PATH}
 
 # List of directory to mount as a binding with host
@@ -38,7 +38,7 @@ fi
 
 # Check if a directory is actually mounted as a binding with host
 # $1: directory to check
-function is_mounted()
+is_mounted()
 {
 	mount | grep "/$1 on ${SYSROOT}/$1" > /dev/null
 	return $?
@@ -46,7 +46,7 @@ function is_mounted()
 
 # Mount a directory as a binding with host
 # $1: directory to mount
-function do_mount()
+do_mount()
 {
 	echo "Mounting /$d as ${SYSROOT}/$1"
 	mkdir -p ${SYSROOT}/$1
@@ -56,7 +56,7 @@ function do_mount()
 
 # Un-mount a directory that was a binding with host
 # $1: directory to un-mount
-function do_umount()
+do_umount()
 {
 	sudo umount ${SYSROOT}/$1
 	return $?
@@ -98,4 +98,3 @@ if [ "${OPT_ROOT}" = "0" ]; then
 else
 	sudo chroot ${SYSROOT} ${OPT_PROG}
 fi
-

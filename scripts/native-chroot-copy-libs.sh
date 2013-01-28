@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Check arguments
 if [ "$#" != "2" ]; then
@@ -12,10 +12,32 @@ readonly ARCH=$2
 
 # Assume a multi-arch compatible system
 if [ "${ARCH}" = "x64" ]; then
-	readonly ARCHDIR=x86_64-linux-gnu
+	readonly ARCHDIR="x86_64-linux-gnu"
 else
-	readonly ARCHDIR=i386-linux-gnu
+	readonly ARCHDIR="i386-linux-gnu"
 fi
+
+# Copy a file if needed
+# $1: source file
+# $2: destination path
+copy_file()
+{
+	local readonly src=$1
+	local readonly dst=$2/$(basename ${src})
+	if [ ${src} -nt ${dst} ]; then
+		cp -af ${src} ${dst}
+	fi
+}
+
+# Copy files matching a pattern
+# $1: source file pattern
+# $2: destination path
+copy_file_pattern()
+{
+	for f in $1; do
+		copy_file $f $2
+	done
+}
 
 mkdir -p ${SYSROOT}/lib
 mkdir -p ${SYSROOT}/usr/lib
@@ -25,28 +47,28 @@ lib_names=" \
   libc libpthread libm librt libdl libutil \
   libresolv libnss_files \
 "
-
-# copy them
 for n in ${lib_names}; do
-	cp -af /lib/${ARCHDIR}/${n}.so* ${SYSROOT}/lib
-	cp -af /lib/${ARCHDIR}/${n}-*.so ${SYSROOT}/lib
+	copy_file_pattern "/lib/${ARCHDIR}/${n}.so*" "${SYSROOT}/lib"
+	copy_file_pattern "/lib/${ARCHDIR}/${n}-*.so" "${SYSROOT}/lib"
 done
 
 # Linker and libgcc
-cp -af /lib/${ARCHDIR}/ld-*.so ${SYSROOT}/lib
-cp -af /lib/${ARCHDIR}/ld-linux.so* ${SYSROOT}/lib
-cp -af /lib/${ARCHDIR}/libgcc_s.so* ${SYSROOT}/lib
+copy_file_pattern "/lib/${ARCHDIR}/ld-*.so" "${SYSROOT}/lib"
+copy_file_pattern "/lib/${ARCHDIR}/ld-linux*.so*" "${SYSROOT}/lib"
+copy_file_pattern "/lib/${ARCHDIR}/libgcc_s.so*" "${SYSROOT}/lib"
+
+# Link /lib64 -> /lib
+if [ "${ARCH}" = "x64" ]; then
+	ln -sf lib ${SYSROOT}/lib64
+fi
 
 # /usr/lib libraries
 usr_lib_names="libstdc++ libICE libSM"
-
-# copy them
 for n in ${usr_lib_names}; do
-	cp -af /usr/lib/${ARCHDIR}/${n}.so* ${SYSROOT}/usr/lib
+	copy_file_pattern "/usr/lib/${ARCHDIR}/${n}.so*" "${SYSROOT}/usr/lib"
 done
 
 # gdbserver
 if [ -f /usr/bin/gdbserver ]; then
-	cp -af /usr/bin/gdbserver ${SYSROOT}/usr/bin
+	copy_file "/usr/bin/gdbserver" "${SYSROOT}/usr/bin"
 fi
-

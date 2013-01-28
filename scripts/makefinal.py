@@ -151,13 +151,11 @@ def doCopy(dstFileName, srcFileName, options):
 		and canStrip(srcFileName):
 		doStrip = True
 
-	# check if we need to do something
+	# check if we need to do something, do not follow symlinks
 	doAction = False
-	if not os.path.exists(dstFileName):
+	if not os.path.lexists(dstFileName):
 		doAction = True
-	elif os.path.islink(srcFileName):
-		doAction = True
-	else:
+	elif not os.path.islink(srcFileName):
 		srcStat = os.stat(srcFileName)
 		dstStat = os.stat(dstFileName)
 		if srcStat.st_mtime > dstStat.st_mtime:
@@ -278,8 +276,8 @@ def processLinuxBasicSkel(options):
 	for entry in LINUX_BASIC_SKEL:
 		if entry[1] == None:
 			dstDirName = os.path.join(options.finalDir, entry[0])
-			logging.info("Directory : %s", entry[0])
 			if not os.path.exists(dstDirName):
+				logging.info("Directory : %s", entry[0])
 				os.makedirs(dstDirName, 0755)
 		else:
 			dstLnkName = os.path.join(options.finalDir, entry[0])
@@ -408,4 +406,3 @@ def setupLog(options):
 #===============================================================================
 if __name__ == "__main__":
 	main()
-
