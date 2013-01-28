@@ -19,21 +19,21 @@ $(BUILD_GRAPH_DOT): .FORCE
 		echo 'graph [ ratio=.5 ];'; \
 		$(foreach __mod1,$(__modules), \
 			$(if $(call is-module-in-build-config,$(__mod1)), \
-				$(foreach __mod2,$(__modules.$(__mod1).depends), \
+				$(foreach __mod2,$(call module-get-depends,$(__mod1))), \
 					echo \"$(__mod1)\" -\> \"$(__mod2)\"; \
 				) \
 			) \
 		) \
 		echo '}'; \
 	) > $@
-	
+
 $(BUILD_GRAPH_SVG): $(BUILD_GRAPH_DOT)
 	@echo "Generating $(call path-from-top,$@)"
-	$(Q)dot -Tsvg -Nshape=box -o $@ $<
+	$(Q) dot -Tsvg -Nshape=box -o $@ $<
 
 $(BUILD_GRAPH_PDF): $(BUILD_GRAPH_DOT)
 	@echo "Generating $(call path-from-top,$@)"
-	$(Q)dot -Tpdf -Nshape=box -o $@ $<
+	$(Q) dot -Tpdf -Nshape=box -o $@ $<
 
 
 .PHONY: build-graph

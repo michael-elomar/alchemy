@@ -101,10 +101,10 @@ __generate-config-module-args = $(strip \
 ## any module that has a dependency on it.
 ###############################################################################
 
-# Check if a module has a dependecny on an autotools module
+# Check if a module has a dependency on an autotools module
 # $1 : module name
 __has-autotools-deps = $(strip \
-	$(foreach __mod,$(__modules.$1.depends.all), \
+	$(foreach __mod,$(call module-get-all-depends,$1)), \
 		$(call streq,$(__modules.$(__mod).MODULE_CLASS),AUTOTOOLS) \
 	))
 
