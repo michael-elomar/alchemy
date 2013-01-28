@@ -40,7 +40,9 @@ endif
 
 # android specifies -Wstrict-aliasing=2
 # it generates too many false positive, use level 3 (default with -Wall or -Wstrict-aliasing)
-WARNINGS_COMMON_FLAGS += -Wstrict-aliasing=3
+ifneq ("$(USE_CLANG)","1")
+  WARNINGS_COMMON_FLAGS += -Wstrict-aliasing=3
+endif
 
 # Too many false positives with clang compiler
 ifneq ("$(USE_CLANG)","1")

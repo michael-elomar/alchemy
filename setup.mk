@@ -148,6 +148,11 @@ TARGET_GLOBAL_LDFLAGS += -Wl,-rpath-link=$(TARGET_OUT_STAGING)/usr/lib
 # For arm/thumb it is done above
 TARGET_GLOBAL_CFLAGS_$(TARGET_ARCH) ?=
 
+# Don't emit warning for unused driver arguments
+ifeq ("$(USE_CLANG)","1")
+  TARGET_GLOBAL_CFLAGS += -Qunused-arguments
+endif
+
 ###############################################################################
 ## Default rules of makefile add TARGET_ARCH in CFLAGS.
 ## As it is not the way we use it, prevent export of this variable
