@@ -8,7 +8,7 @@
 
 WARNINGS_COMMON_FLAGS :=
 WARNINGS_CFLAGS :=
-WARNINGS_CPPFLAGS :=
+WARNINGS_CXXFLAGS :=
 
 # show option associated with warning (clang or gcc >= 4.0.0)
 ifeq ("$(USE_CLANG)","1")
@@ -85,15 +85,15 @@ endif
 # c++ specific
 
 # Too many warnings for the moment
-#WARNINGS_CPPFLAGS += -Wctor-dtor-privacy
-WARNINGS_CPPFLAGS += -Wno-ctor-dtor-privacy
+#WARNINGS_CXXFLAGS += -Wctor-dtor-privacy
+WARNINGS_CXXFLAGS += -Wno-ctor-dtor-privacy
 
 # Too many warnings for the moment
-#WARNINGS_CPPFLAGS += -Wnon-virtual-dtor
-WARNINGS_CPPFLAGS += -Wno-non-virtual-dtor
+#WARNINGS_CXXFLAGS += -Wnon-virtual-dtor
+WARNINGS_CXXFLAGS += -Wno-non-virtual-dtor
 
-WARNINGS_CPPFLAGS += -Wreorder
-WARNINGS_CPPFLAGS += -Woverloaded-virtual
+WARNINGS_CXXFLAGS += -Wreorder
+WARNINGS_CXXFLAGS += -Woverloaded-virtual
 
 ###############################################################################
 ## Extra warnings.
@@ -119,4 +119,4 @@ endif
 ###############################################################################
 
 WARNINGS_CFLAGS += $(WARNINGS_COMMON_FLAGS)
-WARNINGS_CPPFLAGS += $(WARNINGS_COMMON_FLAGS)
+WARNINGS_CXXFLAGS += $(WARNINGS_COMMON_FLAGS)

@@ -39,9 +39,9 @@ endif
 check-flags-arm-mode := -marm -mthumb
 check-flags-arm-mode-message := please use LOCAL_ARM_MODE
 $(call check-flags,LOCAL_CFLAGS,$(check-flags-arm-mode),$(check-flags-arm-mode-message))
-$(call check-flags,LOCAL_CPPFLAGS,$(check-flags-arm-mode),$(check-flags-arm-mode-message))
+$(call check-flags,LOCAL_CXXFLAGS,$(check-flags-arm-mode),$(check-flags-arm-mode-message))
 $(call check-flags,LOCAL_EXPORT_CFLAGS,$(check-flags-arm-mode),$(check-flags-arm-mode-message))
-$(call check-flags,LOCAL_EXPORT_CPPFLAGS,$(check-flags-arm-mode),$(check-flags-arm-mode-message))
+$(call check-flags,LOCAL_EXPORT_CXXFLAGS,$(check-flags-arm-mode),$(check-flags-arm-mode-message))
 
 endif
 
@@ -49,13 +49,13 @@ endif
 ## Generic checks.
 ###############################################################################
 
-# Do not put -O0 in flags, use debug setup makefil
+# Do not put -O0 in flags, use debug setup makefile
 check-flags-debug := -O0
 check-flags-debug-message := please use custom $(debug-setup-makefile) in top dir
 $(call check-flags,LOCAL_CFLAGS,$(check-flags-debug),$(check-flags-debug-message))
-$(call check-flags,LOCAL_CPPFLAGS,$(check-flags-debug),$(check-flags-debug-message))
+$(call check-flags,LOCAL_CXXFLAGS,$(check-flags-debug),$(check-flags-debug-message))
 $(call check-flags,LOCAL_EXPORT_CFLAGS,$(check-flags-debug),$(check-flags-debug-message))
-$(call check-flags,LOCAL_EXPORT_CPPFLAGS,$(check-flags-debug),$(check-flags-debug-message))
+$(call check-flags,LOCAL_EXPORT_CXXFLAGS,$(check-flags-debug),$(check-flags-debug-message))
 
 ###############################################################################
 ## List of sources, objects and libraries.
@@ -165,7 +165,7 @@ LOCAL_LIBRARIES := \
 # Other import are done on full dependency to make sure that include path
 # are propagated even for shared library import
 imported_CFLAGS        := $(call module-get-listed-export,$(all_depends),CFLAGS)
-imported_CPPFLAGS      := $(call module-get-listed-export,$(all_depends),CPPFLAGS)
+imported_CXXFLAGS      := $(call module-get-listed-export,$(all_depends),CXXFLAGS)
 imported_C_INCLUDES    := $(call module-get-listed-export,$(all_depends),C_INCLUDES)
 imported_LDLIBS        := $(call module-get-listed-export,$(LOCAL_LIBRARIES),LDLIBS)
 imported_PREREQUISITES := $(call module-get-listed-export,$(all_depends),PREREQUISITES)
@@ -176,7 +176,7 @@ imported_C_INCLUDES += $(call module-get-listed-export,$(LOCAL_DEPENDS_HEADERS),
 # The imported/exported compiler flags are prepended to their LOCAL_XXXX value
 # (this allows the module to override them).
 LOCAL_CFLAGS     := $(strip $(imported_CFLAGS) $(LOCAL_EXPORT_CFLAGS) $(LOCAL_CFLAGS))
-LOCAL_CPPFLAGS   := $(strip $(imported_CPPFLAGS) $(LOCAL_EXPORT_CPPFLAGS) $(LOCAL_CPPFLAGS))
+LOCAL_CXXFLAGS   := $(strip $(imported_CXXFLAGS) $(LOCAL_EXPORT_CXXFLAGS) $(LOCAL_CXXFLAGS))
 
 # The imported/exported include directories are appended to their LOCAL_XXX value
 # (this allows the module to override them)
@@ -213,7 +213,7 @@ all_internal_depends := $(LOCAL_PATH)/$(USER_MAKEFILE_NAME)
 ###############################################################################
 
 debug_CFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),CFLAGS)
-debug_CPPFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),CPPFLAGS)
+debug_CXXFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),CXXFLAGS)
 debug_LDFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),LDFLAGS)
 
 ifneq ("$(debug_CFLAGS)","")
@@ -223,11 +223,11 @@ ifneq ("$(debug_CFLAGS)","")
   LOCAL_CFLAGS += $(debug_CFLAGS)
 endif
 
-ifneq ("$(debug_CPPFLAGS)","")
+ifneq ("$(debug_CXXFLAGS)","")
   ifneq ("$(V)","0")
-    $(info Adding '$(debug_CPPFLAGS)' to '$(LOCAL_MODULE)' CPPFLAGS)
+    $(info Adding '$(debug_CXXFLAGS)' to '$(LOCAL_MODULE)' CXXFLAGS)
   endif
-  LOCAL_CPPFLAGS += $(debug_CPPFLAGS)
+  LOCAL_CXXFLAGS += $(debug_CXXFLAGS)
 endif
 
 ifneq ("$(debug_LDFLAGS)","")
@@ -424,7 +424,7 @@ $(foreach __mod,$(LOCAL_STATIC_LIBRARIES) $(LOCAL_WHOLE_STATIC_LIBRARIES), \
 
 $(LOCAL_TARGETS): PRIVATE_CFLAGS := $(LOCAL_CFLAGS)
 $(LOCAL_TARGETS): PRIVATE_C_INCLUDES := $(LOCAL_C_INCLUDES)
-$(LOCAL_TARGETS): PRIVATE_CPPFLAGS := $(LOCAL_CPPFLAGS)
+$(LOCAL_TARGETS): PRIVATE_CXXFLAGS := $(LOCAL_CXXFLAGS)
 $(LOCAL_TARGETS): PRIVATE_ARFLAGS := $(LOCAL_ARFLAGS)
 $(LOCAL_TARGETS): PRIVATE_LDFLAGS := $(LOCAL_LDFLAGS)
 $(LOCAL_TARGETS): PRIVATE_LDLIBS := $(LOCAL_LDLIBS)
@@ -434,4 +434,3 @@ $(LOCAL_TARGETS): PRIVATE_ALL_SHARED_LIBRARIES := $(all_shared_libraries)
 $(LOCAL_TARGETS): PRIVATE_ALL_STATIC_LIBRARIES := $(all_static_libraries)
 $(LOCAL_TARGETS): PRIVATE_ALL_WHOLE_STATIC_LIBRARIES := $(all_whole_static_libraries)
 $(LOCAL_TARGETS): PRIVATE_ALL_OBJECTS := $(all_objects)
-

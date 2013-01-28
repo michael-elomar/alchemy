@@ -24,7 +24,7 @@ TARGET_GLOBAL_CFLAGS += \
 	-fno-exceptions \
 	-D__ECOS__
 
-TARGET_GLOBAL_CPPFLAGS += \
+TARGET_GLOBAL_CXXFLAGS += \
 	-fno-rtti \
 	-fno-use-cxa-atexit \
 	-fno-exceptions \
@@ -33,4 +33,3 @@ TARGET_GLOBAL_CPPFLAGS += \
 TARGET_GLOBAL_LDFLAGS += \
 	-Wl,-static \
 	-nostdlib \
-

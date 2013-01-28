@@ -129,8 +129,8 @@ TARGET_GLOBAL_C_INCLUDES := \
 
 # TODO : is it really the place and where to do it ?
 TARGET_GLOBAL_CFLAGS += -DALCHEMY_BUILD
-ifeq ("$(findstring -D__STDC_LIMIT_MACROS,$(TARGET_GLOBAL_CPPFLAGS))","")
-  TARGET_GLOBAL_CPPFLAGS += -D__STDC_LIMIT_MACROS
+ifeq ("$(findstring -D__STDC_LIMIT_MACROS,$(TARGET_GLOBAL_CXXFLAGS))","")
+  TARGET_GLOBAL_CXXFLAGS += -D__STDC_LIMIT_MACROS
 endif
 
 # Add staging dirs to linker as well

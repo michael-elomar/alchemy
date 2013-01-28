@@ -208,7 +208,7 @@ modules-LOCALS += C_INCLUDES
 modules-LOCALS += CFLAGS
 
 # Additional flags to pass into only the C++ compiler
-modules-LOCALS += CPPFLAGS
+modules-LOCALS += CXXFLAGS
 
 # Additional flags to pass into the static library generator
 modules-LOCALS += ARFLAGS
@@ -284,7 +284,7 @@ modules-macros-LOCALS += AUTOTOOLS_CMD_POST_CLEAN
 # Exported stuff (will be added in modules depending on this one)
 modules-LOCALS += EXPORT_C_INCLUDES
 modules-LOCALS += EXPORT_CFLAGS
-modules-LOCALS += EXPORT_CPPFLAGS
+modules-LOCALS += EXPORT_CXXFLAGS
 modules-LOCALS += EXPORT_LDLIBS
 modules-LOCALS += EXPORT_PREREQUISITES
 
@@ -315,6 +315,22 @@ modules-fields-depends := \
 	depends.all
 
 ###############################################################################
+## Check for usage of CPPFLAGS instead of CXXFLAGS.
+## Correctly save same in CXXFLAGS but warn user.
+###############################################################################
+check-cppflags-compat = \
+	$(if $(LOCAL_CPPFLAGS), \
+		$(eval LOCAL_CXXFLAGS += $(LOCAL_CPPFLAGS)) \
+		$(eval __msg := Please use LOCAL_CXXFLAGS instead of LOCAL_CPPFLAGS) \
+		$(warning $(LOCAL_PATH): module '$(__mod)': $(__msg)) \
+	) \
+	$(if $(LOCAL_EXPORT_CPPFLAGS), \
+		$(eval LOCAL_EXPORT_CXXFLAGS += $(LOCAL_EXPORT_CPPFLAGS)) \
+		$(eval __msg := Please use LOCAL_EXPORT_CXXFLAGS instead of LOCAL_EXPORT_CPPFLAGS) \
+		$(warning $(LOCAL_PATH): module '$(__mod)': $(__msg)) \
+	)
+
+###############################################################################
 ## Add a module in the build system and save its LOCAL_xxx variables.
 ## All LOCAL_xxx variables will be saved in module database.
 ###############################################################################
@@ -341,7 +357,8 @@ module-add = \
 		$(foreach __local,$(modules-macros-LOCALS), \
 			$(call macro-copy,__modules.$(__mod).$(__local),LOCAL_$(__local)) \
 		) \
-	)
+	) \
+	$(check-cppflags-compat)
 
 ###############################################################################
 ## Check if a list of targets is given in make goals.
@@ -751,7 +768,7 @@ module-get-staging-filename = \
 ###############################################################################
 ## Debug cutomization access.
 ## $1 : module name.
-## $2 : field name (CFLAGS, CPPFLAGS, LDFLAGS).
+## $2 : field name (CFLAGS, CXXFLAGS, LDFLAGS).
 ###############################################################################
 module-get-debug-flags = $(strip \
 	$(if $(call strneq,$(origin debug.$1.$2),undefined), \
@@ -936,8 +953,8 @@ $(call check-pwd-is-top-dir)
 $(Q)$(CCACHE) $(TARGET_CXX) \
 	$(call normalize-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
-	$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CPPFLAGS) $(WARNINGS_CPPFLAGS) \
-	$(PRIVATE_CFLAGS) $(PRIVATE_CPPFLAGS) \
+	$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CXXFLAGS) $(WARNINGS_CXXFLAGS) \
+	$(PRIVATE_CFLAGS) $(PRIVATE_CXXFLAGS) \
 	$(TARGET_PCH_FLAGS) -MMD -MP -o $@ \
 	$(call path-from-top,$<)
 endef
@@ -953,9 +970,9 @@ $(call check-pwd-is-top-dir)
 $(Q)$(CCACHE) $(TARGET_CXX) \
 	$(call normalize-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
-	$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CPPFLAGS) $(WARNINGS_CPPFLAGS) \
+	$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CXXFLAGS) $(WARNINGS_CXXFLAGS) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_MODE)) \
-	$(PRIVATE_CFLAGS) $(PRIVATE_CPPFLAGS) \
+	$(PRIVATE_CFLAGS) $(PRIVATE_CXXFLAGS) \
 	-c -MMD -MP -o $@ \
 	$(call path-from-top,$<)
 endef

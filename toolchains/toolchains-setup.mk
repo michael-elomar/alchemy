@@ -11,13 +11,21 @@
 ###############################################################################
 TARGET_GLOBAL_C_INCLUDES ?=
 TARGET_GLOBAL_CFLAGS ?=
-TARGET_GLOBAL_CPPFLAGS ?=
+TARGET_GLOBAL_CXXFLAGS ?=
 TARGET_GLOBAL_ARFLAGS ?=
 TARGET_GLOBAL_LDFLAGS ?=
 TARGET_GLOBAL_LDFLAGS_SHARED ?=
 TARGET_GLOBAL_LDLIBS ?=
 TARGET_GLOBAL_LDLIBS_SHARED ?=
 TARGET_PCH_FLAGS ?=
+
+# Compatibility: use provided variable and make sure no user makefile use it.
+ifdef TARGET_GLOBAL_CPPFLAGS
+  TARGET_GLOBAL_CXXFLAGS += $(TARGET_GLOBAL_CPPFLAGS)
+  $(warning Please use TARGET_GLOBAL_CXXFLAGS instead of TARGET_GLOBAL_CPPFLAGS)
+endif
+override TARGET_GLOBAL_CPPFLAGS = \
+	$(error Use TARGET_GLOBAL_CXXFLAGS instead of TARGET_GLOBAL_CPPFLAGS)
 
 ###############################################################################
 ## Generic setup.
@@ -83,7 +91,7 @@ endif
 ###############################################################################
 ## Include specific libc setup.
 ###############################################################################
- 
+
 include $(BUILD_SYSTEM)/toolchains/$(TARGET_LIBC)/$(TARGET_LIBC)-setup.mk
 
 ###############################################################################
