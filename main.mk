@@ -164,6 +164,9 @@ endif
 ifneq ("$(findstring -dirclean,$(MAKECMDGOALS))","")
   SKIP_DEPS_AND_CHECKS := 1
 endif
+ifneq ("$(findstring -path,$(MAKECMDGOALS))","")
+  SKIP_DEPS_AND_CHECKS := 1
+endif
 ifneq ("$(findstring -config,$(MAKECMDGOALS))","")
   SKIP_DEPS_AND_CHECKS := 1
 endif
@@ -533,4 +536,3 @@ all: $(TARGET_OUT_STAGING)/$(NATIVE_CHROOT_WRAPPER_SCRIPT)
 endif
 
 endif
-

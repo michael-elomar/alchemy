@@ -31,6 +31,7 @@ LOCAL_TARGETS := \
 	$(LOCAL_BUILD_MODULE) \
 	$(LOCAL_MODULE)-clean \
 	$(LOCAL_MODULE)-dirclean \
+	$(LOCAL_MODULE)-path \
 	$(LOCAL_MODULE)-pre-install
 
 # Get all modules we depend on
@@ -160,6 +161,11 @@ $(LOCAL_MODULE)-clean-common:
 $(LOCAL_MODULE)-dirclean: $(LOCAL_MODULE)-clean
 	$(Q)rm -rf $(PRIVATE_BUILD_DIR)
 	+$(call macro-exec-cmd,CMD_POST_DIRCLEAN)
+
+# Display the path of the module
+.PHONY: $(LOCAL_MODULE)-path
+$(LOCAL_MODULE)-path:
+	@echo "$(PRIVATE_MODULE): $(PRIVATE_PATH)"
 
 ###############################################################################
 ## Configuration file management.
