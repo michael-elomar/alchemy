@@ -12,8 +12,10 @@
 
 PLFTOOL ?= plftool
 MK_KERNEL_PLF ?= mk_kernel_plf
-IMAGE_FILE_PLF := $(TARGET_OUT)/$(TARGET_PRODUCT).plf
+IMAGE_FILE_PLF := $(TARGET_OUT)/$(TARGET_PRODUCT_FULL_NAME).plf
 
+# zImage can be found at 2 places
+# TODO: migrate all atom.mk of kernel so that thet use boot directory
 ifneq ("$(wildcard $(TARGET_OUT_STAGING)/zImage)","")
   KERNEL_ZIMAGE := $(TARGET_OUT_STAGING)/zImage
 else ifneq ("$(wildcard $(TARGET_OUT_STAGING)/boot/zImage)","")
@@ -53,7 +55,7 @@ plf-clean: image-plf-clean
 ## Image in cpio format.
 ###############################################################################
 
-IMAGE_FILE_CPIO := $(TARGET_OUT)/$(TARGET_PRODUCT).cpio
+IMAGE_FILE_CPIO := $(TARGET_OUT)/$(TARGET_PRODUCT_FULL_NAME).cpio
 IMAGE_FILE_CPIO_GZ := $(IMAGE_FILE_CPIO).gz
 
 .PHONY: image-cpio
@@ -74,4 +76,3 @@ image-cpio-clean:
 clean: image-cpio-clean
 dirclean: image-cpio-clean
 clobber: image-cpio-clean
-

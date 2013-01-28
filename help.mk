@@ -17,6 +17,7 @@ help:
 	@echo "  clobber : delete output directory (build, staging, final)."
 	@echo "  scan    : force a rescan of workspace in case the makefile cache is used."
 	@echo "  final   : generate the final tree from the staging directory."
+	@echo "  plf     : generate the plf image fomr the final tree."
 	@echo ""
 	@echo "Module targets:"
 	@echo "  <module>         : build specified module."
