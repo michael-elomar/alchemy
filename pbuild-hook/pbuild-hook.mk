@@ -14,6 +14,9 @@ LOCAL_PATH := $(call my-dir)
 ## However, a limited number of modules are handled.
 ###############################################################################
 
+# This requires at least the ckcm module to exist
+ifneq ("$(call is-module-registered,ckcm)","")
+
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := msgbuilder
@@ -32,13 +35,13 @@ MSGBUILDER_BIN := $(MSGBUILDER_BUILD_DIR)/msgbuilder
 MSGBUILDER_OBJ :=
 
 # Source files and flags to create the msgbuilder host executable
-MSGBUILDER_CKCM_MSG_FILES :=
+MSGBUILDER_CKCM_MSG_FILES := $(__modules.ckcm.PATH)/msgbuilder/msgbuilder.c
 MSGBUILDER_CKCM_CFLAGS := -DNATIVE_COMPILER -I$(LOCAL_PATH)
 
 # ParrotOS in ckcm
+ifneq ("$(call is-module-registered,ckcm)","")
 ifneq ("$(call is-module-in-build-config,ckcm)","")
 MSGBUILDER_CKCM_MSG_FILES += \
-	$(__modules.ckcm.PATH)/msgbuilder/msgbuilder.c \
 	$(__modules.ckcm.PATH)/ckcm/src/Parrotos_Msgs.ckcm.c
 MSGBUILDER_CKCM_CFLAGS += \
 	-D_PARROTOS_ \
@@ -47,8 +50,10 @@ LOCAL_LIBRARIES += ckcm
 LOCAL_PREREQUISITES += $(__modules.ckcm.PREREQUISITES)
 LOCAL_PREREQUISITES += $(__modules.ckcm.EXPORT_PREREQUISITES)
 endif
+endif
 
 # Blues
+ifneq ("$(call is-module-registered,blues)","")
 ifneq ("$(call is-module-in-build-config,blues)","")
 MSGBUILDER_CKCM_MSG_FILES += \
 	$(__modules.blues.PATH)/Sources/Common/System/Blues_Msgs_generated.ckcm.c
@@ -60,8 +65,10 @@ LOCAL_LIBRARIES += blues
 LOCAL_PREREQUISITES += $(__modules.blues.PREREQUISITES)
 LOCAL_PREREQUISITES += $(__modules.blues.EXPORT_PREREQUISITES)
 endif
+endif
 
 # Concertos
+ifneq ("$(call is-module-registered,concertos)","")
 ifneq ("$(call is-module-in-build-config,concertos)","")
 MSGBUILDER_CKCM_MSG_FILES += \
 	$(__modules.concertos.PATH)/Build/Concertos_Msgs.ckcm.c
@@ -74,8 +81,10 @@ LOCAL_LIBRARIES += concertos
 LOCAL_PREREQUISITES += $(__modules.concertos.PREREQUISITES)
 LOCAL_PREREQUISITES += $(__modules.concertos.EXPORT_PREREQUISITES)
 endif
+endif
 
 # SoftAT
+ifneq ("$(call is-module-registered,softat)","")
 ifneq ("$(call is-module-in-build-config,softat)","")
 MSGBUILDER_CKCM_MSG_FILES += \
 	$(__modules.softat.PATH)/Sources/System/SYST_CK505X_Msgs.ckcm.c
@@ -86,6 +95,7 @@ MSGBUILDER_CKCM_CFLAGS += \
 LOCAL_LIBRARIES += softat
 LOCAL_PREREQUISITES += $(__modules.softat.PREREQUISITES)
 LOCAL_PREREQUISITES += $(__modules.softat.EXPORT_PREREQUISITES)
+endif
 endif
 
 # Compile one file
@@ -140,3 +150,4 @@ LOCAL_CLEAN_FILES := \
 
 include $(BUILD_CUSTOM)
 
+endif
