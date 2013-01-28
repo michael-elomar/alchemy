@@ -147,18 +147,3 @@ TARGET_GLOBAL_CFLAGS_$(TARGET_ARCH) ?=
 ## As it is not the way we use it, prevent export of this variable
 ###############################################################################
 unexport TARGET_ARCH
-
-###############################################################################
-## Determine compiler path and version.
-###############################################################################
-
-TARGET_CC_PATH := $(shell which $(TARGET_CC))
-ifeq ("$(TARGET_CC_PATH)","")
-$(error Unable to find compiler: $(TARGET_CC))
-endif
-
-ifneq ("$(USE_CLANG)","1")
-TARGET_CC_VERSION := $(shell $(TARGET_CC) --version | head -1 | sed "s/.*\([0-9]\.[0-9]\.[0-9]\).*/\1/")
-else
-TARGET_CC_VERSION := $(shell $(TARGET_CC) --version | head -1 | sed "s/.*\([0-9]\.[0-9]\).*/\1/")
-endif

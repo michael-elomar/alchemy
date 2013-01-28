@@ -101,6 +101,20 @@ TARGET_STRIP ?= $(TARGET_CROSS)strip
 TOOLCHAIN_LIBC ?=
 TOOLCHAIN_GDBSERVER ?=
 
+# Determine compiler path
+TARGET_CC_PATH := $(shell which $(TARGET_CC))
+
+# Check compiler path
+ifeq ("$(TARGET_CC_PATH)","")
+$(error Unable to find compiler: $(TARGET_CC))
+endif
+
 # Machine targetted by toolchain to be used by autotools
 TOOLCHAIN_TARGET_NAME ?= $(shell $(TARGET_CC) -dumpmachine)
 
+# Determine compiler version.
+ifneq ("$(USE_CLANG)","1")
+TARGET_CC_VERSION := $(shell $(TARGET_CC) --version | head -1 | sed "s/.*\([0-9]\.[0-9]\.[0-9]\).*/\1/")
+else
+TARGET_CC_VERSION := $(shell $(TARGET_CC) --version | head -1 | sed "s/.*\([0-9]\.[0-9]\).*/\1/")
+endif

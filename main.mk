@@ -129,29 +129,11 @@ ifdef TARGET_CONFIG_DIR
 -include $(TARGET_CONFIG_DIR)/product.mk
 endif
 
-# Setup configuration
-include $(BUILD_SYSTEM)/setup.mk
-
 # Setup macros definitions
 include $(BUILD_SYSTEM)/defs.mk
 
-###############################################################################
-# Check versions of host tools.
-###############################################################################
-
-# Need make v3.81 at least (for lastword, info...)
-ifeq ("$(call check-version,$(MAKE_VERSION),3.81)","")
-  $(error 'make' version >= 3.81 is required)
-endif
-
-# Need pkg-config v0.24 at least (for PKG_CONFIG_SYSROOT_DIR support)
-ifeq ("$(shell which pkg-config)","")
-  $(error 'pkg-config' is required)
-endif
-PKGCONFIG_VERSION := $(shell pkg-config --version)
-ifeq ("$(call check-version,$(PKGCONFIG_VERSION),0.24)","")
-  $(error 'pkg-config' version >= 0.24 is required)
-endif
+# Setup configuration
+include $(BUILD_SYSTEM)/setup.mk
 
 ###############################################################################
 # Optimizations for some goals.
@@ -253,6 +235,9 @@ ifneq ("$(wildcard $(TOP_DIR)/$(debug-setup-makefile))","")
   endif
   include $(TOP_DIR)/$(debug-setup-makefile)
 endif
+
+# Do some checking
+include $(BUILD_SYSTEM)/check.mk
 
 ###############################################################################
 ## Makefile scan and includes.

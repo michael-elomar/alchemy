@@ -9,6 +9,5 @@
 ###############################################################################
 ## Include specific libc packages.
 ###############################################################################
- 
-include $(BUILD_SYSTEM)/toolchains/$(TARGET_LIBC)/$(TARGET_LIBC)-packages.mk
 
+include $(BUILD_SYSTEM)/toolchains/$(TARGET_LIBC)/$(TARGET_LIBC)-packages.mk
