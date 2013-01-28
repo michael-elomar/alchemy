@@ -353,6 +353,10 @@ ALL_BUILD_MODULES := \
 	$(foreach __mod,$(sort $(__modules)), \
 		$(if $(call is-module-in-build-config,$(__mod)),$(__mod)))
 
+$(shell mkdir -p $(TARGET_OUT_BUILD))
+$(shell echo "$(sort $(ALL_MODULES))" > $(TARGET_OUT_BUILD)/modules)
+$(shell echo "$(sort $(ALL_BUILD_MODULES))" > $(TARGET_OUT_BUILD)/build-modules)
+
 # Recompute all dependencies between modules
 $(call modules-compute-depends)
 
