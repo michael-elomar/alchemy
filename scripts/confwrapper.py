@@ -85,7 +85,7 @@ class Module:
 			self.configInPathList = fields[5:]
 
 	def __repr__(self):
-		return "{name=%s,self=%s,groupPath=%s,configPath=%s,configInPathList=%s}" % \
+		return "{name=%s,desc=%s,groupPath=%s,configPath=%s,configInPathList=%s}" % \
 				(self.name, self.desc, self.groupPath, self.configPath, str(self.configInPathList))
 
 #===============================================================================
