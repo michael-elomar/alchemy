@@ -12,4 +12,4 @@ ifeq ("$(LOCAL_MODULE_FILENAME)","")
 LOCAL_MODULE_FILENAME := $(LOCAL_MODULE).done
 endif
 
-$(local-add-module)
+$(module-add)

@@ -16,4 +16,4 @@ ifeq ("$(LOCAL_MODULE_FILENAME)","")
 LOCAL_MODULE_FILENAME := $(LOCAL_MODULE)$(TARGET_EXE_SUFFIX)
 endif
 
-$(local-add-module)
+$(module-add)

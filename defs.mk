@@ -1120,5 +1120,7 @@ local-get-path = $(call my-dir)
 # Get build directory
 local-get-build-dir = $(call module-get-build-dir,$(LOCAL_MODULE))
 
-# Register module
-local-add-module = $(module-add)
+# Register module (deprecated)
+local-add-module = \
+	$(warning Please use include $$(BUILD_CUSTOM) instead of local-add-module) \
+	$(module-add)

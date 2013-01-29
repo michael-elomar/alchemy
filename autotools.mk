@@ -36,4 +36,4 @@ $(foreach __var,$(__autotools-cmd-vars), \
 	) \
 )
 
-$(local-add-module)
+$(module-add)

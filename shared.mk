@@ -33,4 +33,4 @@ ifeq ("$(LOCAL_MODULE_FILENAME)","")
 LOCAL_MODULE_FILENAME := $(LOCAL_MODULE)$(suffix)
 endif
 
-$(local-add-module)
+$(module-add)
