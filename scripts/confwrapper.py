@@ -37,27 +37,81 @@ KCONFIG_TITLE = "Alchemy Configuration"
 KCONFIG_INSTALLED_SUFFIX = "-parrot"
 
 #===============================================================================
-# Group class.
+# Menu class.
 #===============================================================================
-class Group:
+class Menu:
 	def __init__(self, parent, name):
 		self.parent = parent
 		self.name = name
-		self.subGroups = []
+		self.subMenus = []
 		self.modules = []
 		if parent != None:
-			parent.subGroups.append(self)
+			parent.subMenus.append(self)
 
-	# Get subgroup having given name, creating it if needed
-	def getSubGroup(self, name):
-		for group in self.subGroups:
-			if group.name == name:
-				return group
-		return Group(self, name)
+	# Get sub-menu having given name, creating it if needed
+	def getSubMenu(self, name):
+		for menu in self.subMenus:
+			if menu.name == name:
+				return menu
+		return Menu(self, name)
+
+	def __lt__(self, other):
+		return self.name < other.name
+
+	def sort(self):
+		# Sort each sub-menu recursively, then list itself, then list of modules
+		for subMenu in self.subMenus:
+			subMenu.sort()
+		self.subMenus.sort()
+		self.modules.sort()
+
+	class Iterator:
+		def __init__(self, menu):
+			self.menu = menu
+			self.idx1 = 0
+			self.idx2 = 0
+
+		def __iter__(self):
+			return self
+
+		def next(self):
+			item = None
+			# If first list is finished, use second list until its end
+			if self.idx1 >= len(self.menu.subMenus):
+				if self.idx2 >= len(self.menu.modules):
+					raise StopIteration()
+				else:
+					item = self.menu.modules[self.idx2]
+					self.idx2 += 1
+					return item
+
+			# If second list is finished, use firts list until its end
+			if self.idx2 >= len(self.menu.modules):
+				if self.idx1 >= len(self.menu.subMenus):
+					raise StopIteration()
+				else:
+					item = self.menu.subMenus[self.idx1]
+					self.idx1 += 1
+					return item
+
+			# Use item that comes first
+			item1 = self.menu.subMenus[self.idx1]
+			item2 = self.menu.modules[self.idx2]
+			if item1.name < item2.name:
+				item = item1
+				self.idx1 += 1
+			else:
+				item = item2
+				self.idx2 += 1
+
+			return item
+
+	def __iter__(self):
+		return self.Iterator(self)
 
 	def __repr__(self):
-		return "{name=%s,subGroups=%s,modules=%s}" % \
-				(self.name, str(self.subGroups), str(self.modules))
+		return "{name=%s,subMenus=%s,modules=%s}" % \
+				(self.name, str(self.subMenus), str(self.modules))
 
 #===============================================================================
 # Encapsulate module information.
@@ -65,28 +119,21 @@ class Group:
 class Module:
 	def __init__(self, arg):
 		fields = arg.split(ARG_FIELD_SEP)
-		self.name = ""
-		self.desc = ""
-		self.depends = []
-		self.groupPath = ""
-		self.configPath = ""
-		self.configInPathList = []
-		if len(fields) > 0:
-			self.name = fields[0]
-		if len(fields) > 1:
-			self.desc = fields[1]
-		if len(fields) > 2:
-			self.depends = fields[2].split()
-		if len(fields) > 3:
-			self.groupPath = fields[3].rstrip("/")
-		if len(fields) > 4:
-			self.configPath = fields[4]
-		if len(fields) > 5:
-			self.configInPathList = fields[5:]
+		self.name = fields[0]
+		self.desc = fields[1]
+		self.depends = fields[2].split()
+		self.path = fields[3].rstrip("/")
+		self.configPath = fields[4]
+		self.configInPathList = fields[5:]
+
+	def __lt__(self, other):
+		return self.name < other.name
 
 	def __repr__(self):
-		return "{name=%s,desc=%s,groupPath=%s,configPath=%s,configInPathList=%s}" % \
-				(self.name, self.desc, self.groupPath, self.configPath, str(self.configInPathList))
+		return ("{name=%s,desc=%s,depends=%s,path=%s," + \
+				"configPath=%s,configInPathList=%s}") % \
+				(self.name, self.desc, self.depends, self.path,
+				self.configPath, str(self.configInPathList))
 
 #===============================================================================
 # Get the full path to a kconfig binary.
@@ -102,49 +149,50 @@ def getKconfigPath(name):
 	return name + KCONFIG_INSTALLED_SUFFIX;
 
 #===============================================================================
-# Simplify tree of groups by moving up modules to first non-empty parent.
+# Simplify tree of menus by moving up modules to first non-empty parent.
 #===============================================================================
-def simplifyGroupTree(group):
-	# If we have only one sub-group and no modules, move up our sub group
-	if len(group.subGroups) == 1 and len(group.modules) == 0:
-		group.modules = group.subGroups[0].modules
-		if group.name != "":
-			group.name += "/" + group.subGroups[0].name
+def simplifyMenuTree(menu):
+	# If we have only one sub-menu and no modules, move up our sub-menu
+	if len(menu.subMenus) == 1 and len(menu.modules) == 0:
+		menu.modules = menu.subMenus[0].modules
+		if menu.name != "":
+			menu.name += "/" + menu.subMenus[0].name
 		else:
-			group.name = group.subGroups[0].name
-		group.subGroups = group.subGroups[0].subGroups
-		# Start again with this group
-		simplifyGroupTree(group)
+			menu.name = menu.subMenus[0].name
+		menu.subMenus = menu.subMenus[0].subMenus
+		# Start again with this menu
+		simplifyMenuTree(menu)
 
-	# If we have no sub-groups and only one module, move up if no previous up
+	# If we have no sub-menus and only one module, move up if no previous up
 	# were done (name does not have '/' )
-	if len(group.subGroups) == 0 and len(group.modules) == 1 \
-			and group.name.find("/") < 0 and group.parent != None:
-		group.parent.modules.append(group.modules[0])
-		group.parent.subGroups.remove(group)
+	if len(menu.subMenus) == 0 and len(menu.modules) == 1 \
+			and menu.name.find("/") < 0 and menu.parent != None:
+		menu.parent.modules.append(menu.modules[0])
+		menu.parent.subMenus.remove(menu)
 
 	# Go down (make a copy of list before as we may change it)
-	for subGroup in group.subGroups[:]:
-		simplifyGroupTree(subGroup)
+	for subMenu in menu.subMenus[:]:
+		simplifyMenuTree(subMenu)
 
 #===============================================================================
-# Build the tree of groups of modules.
+# Build the tree of menus of modules.
 # modules: list of modules to put in tree.
 #===============================================================================
-def buildGroupTree(modules):
+def buildMenuTree(modules):
 	# Create root first
-	groupRoot = Group(None, "")
+	menuRoot = Menu(None, "")
 	for module in modules:
-		# Get group path, split it in components
-		components = module.groupPath.split("/")
-		group = groupRoot
+		# Get path, split it in components
+		components = module.path.split("/")
+		menu = menuRoot
 		for component in components:
-			# Get next subgroup, creating it if needed
-			group = group.getSubGroup(component)
-		# Add module in this group
-		group.modules.append(module)
-	simplifyGroupTree(groupRoot)
-	return groupRoot
+			# Get next sub-menu, creating it if needed
+			menu = menu.getSubMenu(component)
+		# Add module in this menu
+		menu.modules.append(module)
+	simplifyMenuTree(menuRoot)
+	menuRoot.sort()
+	return menuRoot
 
 #===============================================================================
 # Expand a list of strings as a string with items separated by comma.
@@ -253,55 +301,63 @@ def writeModuleConfigIn(outFile, module):
 
 #===============================================================================
 # Write the config.in file for the full configuration. It recursively descends
-# in group to creat the file.
+# in menu to create the file.
 # outFile : output file object.
-# group : group to process.
+# menu : menu to process.
 #===============================================================================
-def writeFullConfigIn(outFile, group):
+def writeFullConfigIn(outFile, menu):
 
-	# Start new group
-	if group.name != "":
-		outFile.write("menu '%s'\n" % group.name)
+	# Start new menu
+	if menu.name != "":
+		outFile.write("menu '%s'\n" % menu.name)
 
-	# Descend in sub group first
-	for subGroup in group.subGroups:
-		writeFullConfigIn(outFile, subGroup)
+	# Iterate over menu items (either sub-menus or modules)
+	for item in menu:
 
-	# Process modules
-	for module in group.modules:
-		buildDefine = "ALCHEMY_BUILD_" + getDefine(module.name)
-		outFile.write("menuconfig %s\n" % buildDefine)
+		if isinstance(item, Menu):
 
-		outFile.write("  bool '%s'\n" % module.name)
-		for dep in module.depends:
-			outFile.write("  select ALCHEMY_BUILD_%s\n" % getDefine(dep))
-		outFile.write("  default n\n")
-		outFile.write("  help\n")
-		outFile.write("    Build %s\n" % module.name)
-		if len(module.desc) != 0:
-			outFile.write("    %s\n" % module.desc)
-		outFile.write("\n")
+			# Descend in sub-menu
+			subMenu = item
+			writeFullConfigIn(outFile, subMenu)
 
-		if len(module.configInPathList) > 0:
-			outFile.write("if %s\n" % buildDefine)
-			outFile.write("\n")
-			outFile.write("config ALCHEMY_FILE_%s\n" % getDefine(module.name))
-			outFile.write("  string\n")
-			outFile.write("  default '%s'\n" % module.configPath)
-			outFile.write("\n")
-			for configInPath in module.configInPathList:
-				outFile.write("source %s\n" % configInPath)
-			outFile.write("\n")
-			outFile.write("config ALCHEMY_ENDFILE_%s\n" % getDefine(module.name))
-			outFile.write("  string\n")
-			outFile.write("  default ''\n")
-			outFile.write("\n")
-			outFile.write("endif\n")
+		elif isinstance(item, Module):
+
+			# Process module
+			module = item
+			moduleDefine = getDefine(module.name)
+			buildDefine = "ALCHEMY_BUILD_" + moduleDefine
+			outFile.write("menuconfig %s\n" % buildDefine)
+
+			outFile.write("  bool '%s'\n" % module.name)
+			for dep in module.depends:
+				outFile.write("  select ALCHEMY_BUILD_%s\n" % getDefine(dep))
+			outFile.write("  default n\n")
+			outFile.write("  help\n")
+			outFile.write("    Build %s\n" % module.name)
+			if len(module.desc) != 0:
+				outFile.write("    %s\n" % module.desc)
 			outFile.write("\n")
 
-	# End of group
-	if group.name != "":
-			outFile.write("endmenu\n")
+			if len(module.configInPathList) > 0:
+				outFile.write("if %s\n" % buildDefine)
+				outFile.write("\n")
+				outFile.write("config ALCHEMY_FILE_%s\n" % moduleDefine)
+				outFile.write("  string\n")
+				outFile.write("  default '%s'\n" % module.configPath)
+				outFile.write("\n")
+				for configInPath in module.configInPathList:
+					outFile.write("source %s\n" % configInPath)
+				outFile.write("\n")
+				outFile.write("config ALCHEMY_ENDFILE_%s\n" % moduleDefine)
+				outFile.write("  string\n")
+				outFile.write("  default ''\n")
+				outFile.write("\n")
+				outFile.write("endif\n")
+				outFile.write("\n")
+
+	# End of menu
+	if menu.name != "":
+		outFile.write("endmenu\n")
 
 #===============================================================================
 # Write the header of the config file.
@@ -338,57 +394,67 @@ def prepareModuleConfig(module):
 	prepareConfig(module.configPath)
 
 #===============================================================================
-# Write a group of module configuration. It recursively descend in the tree.
+# Write a menu of module configuration. It recursively descend in the tree.
 # outFile : output file object.
-# group : group to write.
+# menu : menu to write.
 # mainConfig : main configuration file content.
 #===============================================================================
-def writeConfigGroup(outFile, group, mainConfig):
-	# Sub groups
-	for subGroup in group.subGroups:
-		writeConfigGroup(outFile, subGroup, mainConfig)
+def writeConfigMenu(outFile, menu, mainConfig):
 
-	# Modules
-	for module in group.modules:
-		moduleBuildDefine = "CONFIG_ALCHEMY_BUILD_" + getDefine(module.name)
-		moduleBuildDefineSet = moduleBuildDefine + "=y"
-		moduleBuildDefineNotSet = "# " + moduleBuildDefine + " is not set"
-		# Determine if module is set or not
-		if moduleBuildDefineNotSet in mainConfig >= 0:
-			outFile.write(moduleBuildDefineNotSet + "\n")
-		else:
-			# Only write the module as set it it was before
-			if moduleBuildDefineSet in mainConfig >= 0:
-				outFile.write(moduleBuildDefineSet + "\n")
-			# However, always write module configuration
-			# (if some can be configured though)
-			if len(module.configInPathList) > 0:
-				moduleFileDefine = "CONFIG_ALCHEMY_FILE_" + getDefine(module.name)
-				moduleEndFileDefine = "CONFIG_ALCHEMY_ENDFILE_" + getDefine(module.name)
-				outFile.write("%s=\"%s\"\n" % (moduleFileDefine, module.configPath))
-				# Read module configuration file
-				moduleConfig = []
-				try:
-					moduleConfigFile = open(module.configPath, "r")
-					moduleConfig = moduleConfigFile.read().split("\n")
-					moduleConfigFile.close()
-				except IOError as ex:
-					logging.error("Unable to open file: %s [err=%d %s]",
-						module.configPath, ex.errno, ex.strerror)
-				# Skip the 8 first lines, as well as empty last line
-				# (header + extra menu added by generateModuleConfigIn)
-				lastEmpty = (len(moduleConfig) > 0 and len(moduleConfig[-1]) == 0)
-				for line in (moduleConfig[8:-1] if lastEmpty else moduleConfig[8:]):
-					outFile.write(line + "\n")
-				outFile.write("%s=\"\"\n" % moduleEndFileDefine)
+	# Iterate over menu items (either sub-menus or modules)
+	for item in menu:
+
+		if isinstance(item, Menu):
+
+			# Sub-menu
+			subMenu = item
+			writeConfigMenu(outFile, subMenu, mainConfig)
+
+		elif isinstance(item, Module):
+
+			# Module
+			module = item
+			moduleDefine = getDefine(module.name)
+			moduleBuildDefine = "CONFIG_ALCHEMY_BUILD_" + moduleDefine
+			moduleBuildDefineSet = moduleBuildDefine + "=y"
+			moduleBuildDefineNotSet = "# " + moduleBuildDefine + " is not set"
+			# Determine if module is set or not
+			if moduleBuildDefineNotSet in mainConfig >= 0:
+				outFile.write(moduleBuildDefineNotSet + "\n")
+			else:
+				# Only write the module as set it it was before
+				if moduleBuildDefineSet in mainConfig >= 0:
+					outFile.write(moduleBuildDefineSet + "\n")
+				# However, always write module configuration
+				# (if some can be configured though)
+				if len(module.configInPathList) > 0:
+					moduleFileDefine = "CONFIG_ALCHEMY_FILE_" + moduleDefine
+					moduleEndFileDefine = "CONFIG_ALCHEMY_ENDFILE_" + moduleDefine
+					outFile.write("%s=\"%s\"\n" % \
+							(moduleFileDefine, module.configPath))
+					# Read module configuration file
+					moduleConfig = []
+					try:
+						moduleConfigFile = open(module.configPath, "r")
+						moduleConfig = moduleConfigFile.read().split("\n")
+						moduleConfigFile.close()
+					except IOError as ex:
+						logging.error("Unable to open file: %s [err=%d %s]",
+							module.configPath, ex.errno, ex.strerror)
+					# Skip the 8 first lines, as well as empty last line
+					# (header + extra menu added by generateModuleConfigIn)
+					lastEmpty = (len(moduleConfig) > 0 and len(moduleConfig[-1]) == 0)
+					for line in (moduleConfig[8:-1] if lastEmpty else moduleConfig[8:]):
+						outFile.write(line + "\n")
+					outFile.write("%s=\"\"\n" % moduleEndFileDefine)
 
 #===============================================================================
 # Prepare the full configuration for edition.
 # outFile : output file object.
-# group : root of group with modules.
+# menu : root of menu with modules.
 # mainConfigPath : main config path.
 #===============================================================================
-def prepareFullConfig(outFile, group, mainConfigPath):
+def prepareFullConfig(outFile, menu, mainConfigPath):
 	# Read main configuration file
 	mainConfig = []
 	try:
@@ -399,9 +465,9 @@ def prepareFullConfig(outFile, group, mainConfigPath):
 		logging.error("Unable to open file: %s [err=%d %s]",
 			mainConfigPath, ex.errno, ex.strerror)
 
-	# Write header followed by groups
+	# Write header followed by menus
 	writeConfigHeader(outFile)
-	writeConfigGroup(outFile, group, mainConfig)
+	writeConfigMenu(outFile, menu, mainConfig)
 
 #===============================================================================
 # Process ful configuration after its edition.
@@ -451,11 +517,13 @@ def processFullConfig(inFile, modules, mainConfigPath):
 				moduleConfigPath = line[idx+1:].strip("\"\'")
 				logging.debug("New module config: %s", moduleConfigPath)
 				try:
-					moduleConfigFile = safeCreateFile(getEditConfigPath(moduleConfigPath))
+					moduleConfigFile = safeCreateFile(
+							getEditConfigPath(moduleConfigPath))
 					writeConfigHeader(moduleConfigFile, module)
 				except IOError as ex:
 					logging.error("Unable to create file: %s [err=%d %s]",
-						getEditConfigPath(moduleConfigPath), ex.errno, ex.strerror)
+							getEditConfigPath(moduleConfigPath),
+							ex.errno, ex.strerror)
 		# End of file
 		elif line.startswith("CONFIG_ALCHEMY_ENDFILE_"):
 			if moduleConfigFile != None:
@@ -560,7 +628,8 @@ def checkModuleConfig(module, doWriteDiff):
 	result = checkConfig(module.name, module.configPath)
 	if not result and doWriteDiff:
 		message("%s config is old (%s), see diff in: %s",
-			module.name, module.configPath, getDiffConfigPath(module.configPath))
+				module.name, module.configPath,
+				getDiffConfigPath(module.configPath))
 		writeDiffConfig(module.configPath)
 	elif not result:
 		message("%s config is old (%s)", module.name, module.configPath)
@@ -714,8 +783,8 @@ def main():
 	for arg in args[1:]:
 		modules.append(Module(arg))
 
-	# Build tree of groups of modules
-	groupRoot = buildGroupTree(modules)
+	# Build tree of menus of modules
+	menuRoot = buildMenuTree(modules)
 
 	# If only one module, check it has some configuration data
 	if options.main == None:
@@ -732,7 +801,7 @@ def main():
 		writeModuleConfigIn(configInFile, modules[0])
 	else:
 		logging.info("Generating full 'config.in' file as %s", configInPath)
-		writeFullConfigIn(configInFile, groupRoot)
+		writeFullConfigIn(configInFile, menuRoot)
 	configInFile.close()
 
 	# prepare input config file
@@ -744,7 +813,7 @@ def main():
 		(fullConfigFd, fullConfigPath) = tempfile.mkstemp(suffix=TEMP_SUFFIX)
 		fullConfigFile = os.fdopen(fullConfigFd, "w")
 		logging.info("Generating full '.config' file as %s", fullConfigPath)
-		prepareFullConfig(fullConfigFile, groupRoot, options.main)
+		prepareFullConfig(fullConfigFile, menuRoot, options.main)
 		fullConfigFile.close()
 
 	# Cleanup function (in main context)
