@@ -161,6 +161,9 @@ modules-LOCALS += MODULE_FILENAME
 # Description of the module
 modules-LOCALS += DESCRIPTION
 
+# Category path of the module
+modules-LOCALS += CATEGORY_PATH
+
 # List of 'done' files indicating internal steps already done and that does not need
 # to be executed next time unless a force is requested
 # Name is relative to build directory

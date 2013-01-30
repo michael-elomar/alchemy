@@ -86,13 +86,14 @@ __generate-config-module-args = $(strip \
 	$(eval __desc := $(call __config-desc-escape,$(__modules.$(__mod).DESCRIPTION))) \
 	$(eval __depends := $(call module-get-config-depends,$(__mod))) \
 	$(eval __modPath := $(call path-from-top,$(__modules.$(__mod).PATH))) \
+	$(eval __categoryPath := $(__modules.$(__mod).CATEGORY_PATH)) \
 	$(eval __configInFiles := $(call __get-module-config-in-files,$(__mod))) \
 	$(if $(__configInFiles), \
 		$(eval __configPath := $(call __get-module-config,$(__mod))), \
 		$(eval __configPath := $(empty)) \
 	) \
 	$(eval __arg := $(__mod):$(__desc):$(__depends):$(__modPath)) \
-	$(eval __arg := $(__arg):$(__configPath)) \
+	$(eval __arg := $(__arg):$(__categoryPath):$(__configPath)) \
 	$(foreach __f,$(__configInFiles), \
 		$(eval __arg := $(__arg):$(call fullpath,$(__f))) \
 	) \

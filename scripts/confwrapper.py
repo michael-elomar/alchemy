@@ -65,6 +65,15 @@ class Menu:
 		self.subMenus.sort()
 		self.modules.sort()
 
+	def canSimplify(self):
+		for subMenu in self.subMenus:
+			if not subMenu.canSimplify():
+				return False
+		for module in self.modules:
+			if not module.canSimplify():
+				return False
+		return True
+
 	class Iterator:
 		def __init__(self, menu):
 			self.menu = menu
@@ -123,17 +132,21 @@ class Module:
 		self.desc = fields[1]
 		self.depends = fields[2].split()
 		self.path = fields[3].rstrip("/")
-		self.configPath = fields[4]
-		self.configInPathList = fields[5:]
+		self.categoryPath = fields[4].rstrip("/")
+		self.configPath = fields[5]
+		self.configInPathList = fields[6:]
 
 	def __lt__(self, other):
 		return self.name < other.name
 
+	def canSimplify(self):
+		return self.categoryPath == ""
+
 	def __repr__(self):
 		return ("{name=%s,desc=%s,depends=%s,path=%s," + \
-				"configPath=%s,configInPathList=%s}") % \
+				"categoryPath=%s,configPath=%s,configInPathList=%s}") % \
 				(self.name, self.desc, self.depends, self.path,
-				self.configPath, str(self.configInPathList))
+				self.categoryPath, self.configPath, str(self.configInPathList))
 
 #===============================================================================
 # Get the full path to a kconfig binary.
@@ -152,6 +165,8 @@ def getKconfigPath(name):
 # Simplify tree of menus by moving up modules to first non-empty parent.
 #===============================================================================
 def simplifyMenuTree(menu):
+	if not menu.canSimplify():
+		return
 	# If we have only one sub-menu and no modules, move up our sub-menu
 	if len(menu.subMenus) == 1 and len(menu.modules) == 0:
 		menu.modules = menu.subMenus[0].modules
@@ -183,7 +198,10 @@ def buildMenuTree(modules):
 	menuRoot = Menu(None, "")
 	for module in modules:
 		# Get path, split it in components
-		components = module.path.split("/")
+		if module.categoryPath != "":
+			components = module.categoryPath.split("/")
+		else:
+			components = module.path.split("/")
 		menu = menuRoot
 		for component in components:
 			# Get next sub-menu, creating it if needed
