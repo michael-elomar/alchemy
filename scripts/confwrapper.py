@@ -437,35 +437,34 @@ def writeConfigMenu(outFile, menu, mainConfig):
 			moduleBuildDefineSet = moduleBuildDefine + "=y"
 			moduleBuildDefineNotSet = "# " + moduleBuildDefine + " is not set"
 			# Determine if module is set or not
-			if moduleBuildDefineNotSet in mainConfig:
+			if moduleBuildDefineNotSet in mainConfig >= 0:
 				outFile.write(moduleBuildDefineNotSet + "\n")
 			else:
 				# Only write the module as set it it was before
-				if moduleBuildDefineSet in mainConfig:
+				if moduleBuildDefineSet in mainConfig >= 0:
 					outFile.write(moduleBuildDefineSet + "\n")
-
-			# However, always write module configuration
-			# (if some can be configured though)
-			if len(module.configInPathList) > 0:
-				moduleFileDefine = "CONFIG_ALCHEMY_FILE_" + moduleDefine
-				moduleEndFileDefine = "CONFIG_ALCHEMY_ENDFILE_" + moduleDefine
-				outFile.write("%s=\"%s\"\n" % \
-						(moduleFileDefine, module.configPath))
-				# Read module configuration file
-				moduleConfig = []
-				try:
-					moduleConfigFile = open(module.configPath, "r")
-					moduleConfig = moduleConfigFile.read().split("\n")
-					moduleConfigFile.close()
-				except IOError as ex:
-					logging.error("Unable to open file: %s [err=%d %s]",
-						module.configPath, ex.errno, ex.strerror)
-				# Skip the 8 first lines, as well as empty last line
-				# (header + extra menu added by generateModuleConfigIn)
-				lastEmpty = (len(moduleConfig) > 0 and len(moduleConfig[-1]) == 0)
-				for line in (moduleConfig[8:-1] if lastEmpty else moduleConfig[8:]):
-					outFile.write(line + "\n")
-				outFile.write("%s=\"\"\n" % moduleEndFileDefine)
+				# However, always write module configuration
+				# (if some can be configured though)
+				if len(module.configInPathList) > 0:
+					moduleFileDefine = "CONFIG_ALCHEMY_FILE_" + moduleDefine
+					moduleEndFileDefine = "CONFIG_ALCHEMY_ENDFILE_" + moduleDefine
+					outFile.write("%s=\"%s\"\n" % \
+							(moduleFileDefine, module.configPath))
+					# Read module configuration file
+					moduleConfig = []
+					try:
+						moduleConfigFile = open(module.configPath, "r")
+						moduleConfig = moduleConfigFile.read().split("\n")
+						moduleConfigFile.close()
+					except IOError as ex:
+						logging.error("Unable to open file: %s [err=%d %s]",
+							module.configPath, ex.errno, ex.strerror)
+					# Skip the 8 first lines, as well as empty last line
+					# (header + extra menu added by generateModuleConfigIn)
+					lastEmpty = (len(moduleConfig) > 0 and len(moduleConfig[-1]) == 0)
+					for line in (moduleConfig[8:-1] if lastEmpty else moduleConfig[8:]):
+						outFile.write(line + "\n")
+					outFile.write("%s=\"\"\n" % moduleEndFileDefine)
 
 #===============================================================================
 # Prepare the full configuration for edition.
