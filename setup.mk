@@ -38,6 +38,7 @@ TARGET_OUT_STAGING ?= $(TARGET_OUT)/staging
 TARGET_OUT_FINAL ?= $(TARGET_OUT)/final
 TARGET_SKEL ?=
 TARGET_SKEL_DIRS ?=
+TARGET_NOSTRIP_FINAL ?= 0
 
 # TODO: remove when all projects have been migrated
 ifneq ("$(TARGET_SKEL)","")

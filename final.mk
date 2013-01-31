@@ -14,7 +14,9 @@ MAKEFINAL_SCRIPT := $(BUILD_SYSTEM)/scripts/makefinal.py
 MAKEFINAL_ARGS := 
 
 ifneq ("$(TARGET_STRIP)","")
+ifeq ("$(TARGET_NOSTRIP_FINAL)","0")
   MAKEFINAL_ARGS += --strip="$(TARGET_STRIP)"
+endif
 endif
 
 ifneq ("$(TARGET_SKEL_DIRS)","")
