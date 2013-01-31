@@ -19,7 +19,7 @@ $(BUILD_GRAPH_DOT): .FORCE
 		echo 'graph [ ratio=.5 ];'; \
 		$(foreach __mod1,$(__modules), \
 			$(if $(call is-module-in-build-config,$(__mod1)), \
-				$(foreach __mod2,$(call module-get-depends,$(__mod1))), \
+				$(foreach __mod2,$(call module-get-depends,$(__mod1)), \
 					echo \"$(__mod1)\" -\> \"$(__mod2)\"; \
 				) \
 			) \
