@@ -431,7 +431,12 @@ int conf_read(const char *name)
 		} else if (!sym_has_value(sym) && !(sym->flags & SYMBOL_WRITE))
 			/* no previous value and not saved */
 			continue;
-		conf_unsaved++;
+		/* YMM: do not treat as unsaved, symbols with values, we want them
+		 * to activate saved features
+		 */
+		if (!sym_has_value(sym)) {
+			conf_unsaved++;
+		}
 		/* maybe print value in verbose mode... */
 	}
 
@@ -441,9 +446,11 @@ int conf_read(const char *name)
 			 * as new, if they should become visible, but that
 			 * doesn't quite work if the Kconfig and the saved
 			 * configuration disagree.
+			 * YMM: never reset values, we want to keep them if they were
+			 * saved.
 			 */
-			if (sym->visible == no && !conf_unsaved)
-				sym->flags &= ~SYMBOL_DEF_USER;
+			/*if (sym->visible == no && !conf_unsaved)
+				sym->flags &= ~SYMBOL_DEF_USER;*/
 			switch (sym->type) {
 			case S_STRING:
 			case S_INT:

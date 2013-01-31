@@ -436,35 +436,40 @@ def writeConfigMenu(outFile, menu, mainConfig):
 			moduleBuildDefine = "CONFIG_ALCHEMY_BUILD_" + moduleDefine
 			moduleBuildDefineSet = moduleBuildDefine + "=y"
 			moduleBuildDefineNotSet = "# " + moduleBuildDefine + " is not set"
+
 			# Determine if module is set or not
-			if moduleBuildDefineNotSet in mainConfig >= 0:
+			if moduleBuildDefineNotSet in mainConfig:
 				outFile.write(moduleBuildDefineNotSet + "\n")
-			else:
-				# Only write the module as set it it was before
-				if moduleBuildDefineSet in mainConfig >= 0:
-					outFile.write(moduleBuildDefineSet + "\n")
-				# However, always write module configuration
-				# (if some can be configured though)
-				if len(module.configInPathList) > 0:
-					moduleFileDefine = "CONFIG_ALCHEMY_FILE_" + moduleDefine
-					moduleEndFileDefine = "CONFIG_ALCHEMY_ENDFILE_" + moduleDefine
-					outFile.write("%s=\"%s\"\n" % \
-							(moduleFileDefine, module.configPath))
-					# Read module configuration file
-					moduleConfig = []
-					try:
-						moduleConfigFile = open(module.configPath, "r")
-						moduleConfig = moduleConfigFile.read().split("\n")
-						moduleConfigFile.close()
-					except IOError as ex:
+			elif moduleBuildDefineSet in mainConfig:
+				outFile.write(moduleBuildDefineSet + "\n")
+
+			# However, always write module configuration
+			# (if some can be configured though)
+			if len(module.configInPathList) > 0:
+				moduleFileDefine = "CONFIG_ALCHEMY_FILE_" + moduleDefine
+				moduleEndFileDefine = "CONFIG_ALCHEMY_ENDFILE_" + moduleDefine
+				outFile.write("%s=\"%s\"\n" % \
+						(moduleFileDefine, module.configPath))
+				# Read module configuration file
+				moduleConfig = []
+				try:
+					moduleConfigFile = open(module.configPath, "r")
+					moduleConfig = moduleConfigFile.read().split("\n")
+					moduleConfigFile.close()
+				except IOError as ex:
+					# Display error inly if module was set...
+					if moduleBuildDefineSet in mainConfig:
 						logging.error("Unable to open file: %s [err=%d %s]",
 							module.configPath, ex.errno, ex.strerror)
-					# Skip the 8 first lines, as well as empty last line
-					# (header + extra menu added by generateModuleConfigIn)
-					lastEmpty = (len(moduleConfig) > 0 and len(moduleConfig[-1]) == 0)
-					for line in (moduleConfig[8:-1] if lastEmpty else moduleConfig[8:]):
-						outFile.write(line + "\n")
-					outFile.write("%s=\"\"\n" % moduleEndFileDefine)
+					else:
+						logging.debug("Unable to open file: %s [err=%d %s]",
+							module.configPath, ex.errno, ex.strerror)
+				# Skip the 8 first lines, as well as empty last line
+				# (header + extra menu added by generateModuleConfigIn)
+				lastEmpty = (len(moduleConfig) > 0 and len(moduleConfig[-1]) == 0)
+				for line in (moduleConfig[8:-1] if lastEmpty else moduleConfig[8:]):
+					outFile.write(line + "\n")
+				outFile.write("%s=\"\"\n" % moduleEndFileDefine)
 
 #===============================================================================
 # Prepare the full configuration for edition.
@@ -645,12 +650,12 @@ def checkModuleConfig(module, doWriteDiff):
 		return True
 	result = checkConfig(module.name, module.configPath)
 	if not result and doWriteDiff:
-		message("%s config is old (%s), see diff in: %s",
+		message("%s config is not up to date (%s), see diff in: %s",
 				module.name, module.configPath,
 				getDiffConfigPath(module.configPath))
 		writeDiffConfig(module.configPath)
 	elif not result:
-		message("%s config is old (%s)", module.name, module.configPath)
+		message("%s config is not up to date (%s)", module.name, module.configPath)
 	logging.debug("Delete %s", getEditConfigPath(module.configPath))
 	safeUnlink(getEditConfigPath(module.configPath))
 	return result
@@ -674,11 +679,11 @@ def updateModuleConfig(module):
 def checkMainConfig(mainConfigPath, doWriteDiff):
 	result = checkConfig("main", mainConfigPath)
 	if not result and doWriteDiff:
-		message("%s config is old (%s), see diff in: %s",
+		message("%s config is not up to date (%s), see diff in: %s",
 			"main", mainConfigPath, getDiffConfigPath(mainConfigPath))
 		writeDiffConfig(mainConfigPath)
 	elif not result:
-		message("%s config is old (%s)", "main", mainConfigPath)
+		message("%s config is not up to date (%s)", "main", mainConfigPath)
 	logging.debug("Delete %s", mainConfigPath, getEditConfigPath(mainConfigPath))
 	safeUnlink(getEditConfigPath(mainConfigPath))
 	return result
