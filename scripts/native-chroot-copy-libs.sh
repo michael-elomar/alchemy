@@ -1,5 +1,5 @@
 #!/bin/sh
-
+set -x
 # Check arguments
 if [ "$#" != "2" ]; then
 	echo "Usage: $0 <final-dir> <arch>"
@@ -24,7 +24,7 @@ copy_file()
 {
 	local readonly src=$1
 	local readonly dst=$2/$(basename ${src})
-	if [ ${src} -nt ${dst} ]; then
+	if [ ! -e ${dst} -o ${src} -nt ${dst} ]; then
 		cp -af ${src} ${dst}
 	fi
 }
