@@ -113,7 +113,7 @@ void menu_set_type(int type)
 {
 	struct symbol *sym = current_entry->sym;
 
-	if (sym->type == type)
+	if ((int)sym->type == type)
 		return;
 	if (sym->type == S_UNKNOWN) {
 		sym->type = type;

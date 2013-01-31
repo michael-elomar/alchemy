@@ -15,6 +15,9 @@ PARSER_BUILD_DIR := $(call local-get-build-dir)
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/parser
 LOCAL_SRC_FILES := parser/zconf.c
 
+# Too many warning diue to gperf generated code
+LOCAL_CFLAGS := -Wno-missing-field-initializers
+
 LOCAL_PREREQUISITES := \
 	$(PARSER_BUILD_DIR)/zconf.lex.c \
 	$(PARSER_BUILD_DIR)/zconf.hash.c \
@@ -114,6 +117,9 @@ LOCAL_LIBRARIES := parser
 
 QCONF_MOC := $(shell pkg-config QtCore --variable=moc_location)
 LOCAL_PREREQUISITES := $(QCONF_BUILD_DIR)/qconf.moc
+
+# Too many warnings due to compat stuff
+LOCAL_CFLAGS += -Wno-overloaded-virtual
 
 $(QCONF_BUILD_DIR)/qconf.moc: qconf.h
 	@mkdir -p $(dir $@)

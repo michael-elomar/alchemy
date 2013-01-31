@@ -312,7 +312,7 @@ void end_dialog(int x, int y)
 void print_title(WINDOW *dialog, const char *title, int width)
 {
 	if (title) {
-		int tlen = MIN(width - 2, strlen(title));
+		int tlen = MIN(width - 2, (int)strlen(title));
 		wattrset(dialog, dlg.title.atr);
 		mvwaddch(dialog, 0, (width - tlen) / 2 - 1, ' ');
 		mvwaddnstr(dialog, 0, (width - tlen)/2, title, tlen);
@@ -364,7 +364,7 @@ void print_autowrap(WINDOW * win, const char *prompt, int width, int y, int x)
 			wlen = strlen(word);
 			if (wlen > room ||
 			    (newl && wlen < 4 && sp
-			     && wlen + 1 + strlen(sp) > room
+			     && wlen + 1 + (int)strlen(sp) > room
 			     && (!(sp2 = strchr(sp, ' '))
 				 || wlen + 1 + (sp2 - sp) > room))) {
 				cur_y++;
@@ -477,7 +477,7 @@ int first_alpha(const char *string, const char *exempt)
 {
 	int i, in_paren = 0, c;
 
-	for (i = 0; i < strlen(string); i++) {
+	for (i = 0; i < (int)strlen(string); i++) {
 		c = tolower(string[i]);
 
 		if (strchr("<[(", c))

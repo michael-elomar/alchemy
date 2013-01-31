@@ -179,7 +179,7 @@ do_resize:
 	/* Find length of longest item in order to center checklist */
 	check_x = 0;
 	item_foreach()
-		check_x = MAX(check_x, strlen(item_str()) + 4);
+		check_x = MAX(check_x, (int)strlen(item_str()) + 4);
 	check_x = MIN(check_x, list_width);
 
 	check_x = (list_width - check_x) / 2;

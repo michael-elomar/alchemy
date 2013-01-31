@@ -1768,7 +1768,7 @@ static const char *progname;
 
 static void usage(void)
 {
-	printf(_("%s <config>\n"), progname);
+	printf("%s <config>\n", progname);
 	exit(0);
 }
 
