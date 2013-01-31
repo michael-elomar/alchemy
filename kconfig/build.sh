@@ -24,7 +24,8 @@ elif [ "$1" = "clobber" ]; then
 	make -f ../main.mk clobber
 	rm -rf ${TARGET_OUT}
 else
-	make -f ../main.mk all final
+	make -f ../main.mk all
+	make -f ../main.mk final
 	rm -f ${TARGET_OUT_FINAL}/native-wrapper.sh
 fi
 
