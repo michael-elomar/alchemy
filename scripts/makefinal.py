@@ -175,7 +175,7 @@ def doCopy(dstFileName, srcFileName, options):
 		os.makedirs(dstDirName, 0755)
 
 	# do the copy by wanted method
-	if options.makefile != None:
+	if options.makefile != None and not os.path.islink(srcFileName):
 		doCopyByMakefile(dstFileName, srcFileName, doStrip, options)
 	else:
 		doCopyDirect(dstFileName, srcFileName, doStrip, options)
@@ -195,6 +195,7 @@ def writeMakefileHeader(options):
 		options.makefile.write("STRIP := %s\n" % options.strip)
 	options.makefile.write("PWD := $(shell pwd)\n")
 	options.makefile.write("ALL :=\n")
+	options.makefile.write("V ?= 0\n")
 	options.makefile.write("ifeq (\"$(V)\",\"0\")\n")
 	options.makefile.write("  Q := @\n")
 	options.makefile.write("endif\n")
