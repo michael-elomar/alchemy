@@ -24,8 +24,6 @@ ifdef TARGET_GLOBAL_CPPFLAGS
   TARGET_GLOBAL_CXXFLAGS += $(TARGET_GLOBAL_CPPFLAGS)
   $(warning Please use TARGET_GLOBAL_CXXFLAGS instead of TARGET_GLOBAL_CPPFLAGS)
 endif
-override TARGET_GLOBAL_CPPFLAGS = \
-	$(error Use TARGET_GLOBAL_CXXFLAGS instead of TARGET_GLOBAL_CPPFLAGS)
 
 ###############################################################################
 ## Generic setup.
