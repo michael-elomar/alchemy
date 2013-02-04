@@ -432,9 +432,9 @@ int conf_read(const char *name)
 			/* no previous value and not saved */
 			continue;
 		/* YMM: do not treat as unsaved, symbols with values, we want them
-		 * to activate saved features
+		 * to activate saved features. Unless a symbol was auto selected.
 		 */
-		if (!sym_has_value(sym)) {
+		if (!sym_has_value(sym) || (sym->flags & SYMBOL_WRITE)) {
 			conf_unsaved++;
 		}
 		/* maybe print value in verbose mode... */
