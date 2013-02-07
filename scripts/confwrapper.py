@@ -539,14 +539,17 @@ def processFullConfig(inFile, modules, mainConfigPath):
 			if idx >= 0:
 				moduleConfigPath = line[idx+1:].strip("\"\'")
 				logging.debug("New module config: %s", moduleConfigPath)
-				try:
-					moduleConfigFile = safeCreateFile(
-							getEditConfigPath(moduleConfigPath))
-					writeConfigHeader(moduleConfigFile, module)
-				except IOError as ex:
-					logging.error("Unable to create file: %s [err=%d %s]",
-							getEditConfigPath(moduleConfigPath),
-							ex.errno, ex.strerror)
+				if not moduleStatus[module.name]:
+					logging.debug("  disabled)")
+				else:
+					try:
+						moduleConfigFile = safeCreateFile(
+								getEditConfigPath(moduleConfigPath))
+						writeConfigHeader(moduleConfigFile, module)
+					except IOError as ex:
+						logging.error("Unable to create file: %s [err=%d %s]",
+								getEditConfigPath(moduleConfigPath),
+								ex.errno, ex.strerror)
 		# End of file
 		elif line.startswith("CONFIG_ALCHEMY_ENDFILE_"):
 			if moduleConfigFile != None:
@@ -554,6 +557,9 @@ def processFullConfig(inFile, modules, mainConfigPath):
 			moduleConfigFile = None
 		elif moduleConfigFile != None:
 			moduleConfigFile.write(line + "\n")
+		# Skip lines of disabled modules
+		elif module != None and not moduleStatus[module.name]:
+			pass
 		# Ignore empty lines and comments silently (almost)
 		elif len(line) == 0 or line.startswith("#"):
 			logging.debug("Skipping line: %s", line)
