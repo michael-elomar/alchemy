@@ -32,8 +32,7 @@ ifneq ("$(USE_CLANG)","1")
 ifeq ("$(call check-version,$(TARGET_CC_VERSION),4.5.0)","")
 ifneq ("$(findstring -mcpu=cortex-a9,$(TARGET_GLOBAL_CFLAGS))","")
   $(warning This version of gcc does not support '-mcpu=cortex-a9' option)
-  TARGET_GLOBAL_CFLAGS := $(filter-out,-mcpu=cortex-a9,$(TARGET_GLOBAL_CFLAGS))
+  TARGET_GLOBAL_CFLAGS := $(filter-out -mcpu=cortex-a9,$(TARGET_GLOBAL_CFLAGS))
 endif
 endif
 endif
-
