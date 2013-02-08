@@ -186,31 +186,6 @@ ifneq ("$(SKIP_DEPS_AND_CHECKS)","0")
 endif
 
 ###############################################################################
-## Setup part2 (may use optimization flags from above).
-###############################################################################
-
-# Setup autotools definitions (shall be after inclusion of defs.mk)
-include $(BUILD_SYSTEM)/autotools-setup.mk
-
-# Setup warnings flags
-include $(BUILD_SYSTEM)/warnings.mk
-
-# Setup configuration definitions
-include $(BUILD_SYSTEM)/config-defs.mk
-
-# Names of makefiles that can be included by user Makefiles
-CLEAR_VARS := $(BUILD_SYSTEM)/clearvars.mk
-BUILD_STATIC_LIBRARY := $(BUILD_SYSTEM)/static.mk
-BUILD_SHARED_LIBRARY := $(BUILD_SYSTEM)/shared.mk
-BUILD_EXECUTABLE := $(BUILD_SYSTEM)/executable.mk
-BUILD_AUTOTOOLS := $(BUILD_SYSTEM)/autotools.mk
-BUILD_CUSTOM := $(BUILD_SYSTEM)/custom.mk
-BUILD_PREBUILT := $(BUILD_SYSTEM)/prebuilt.mk
-
-# Shall be defined before including user makefiles
-AUTOCONF_MERGE_FILE := $(TARGET_OUT_BUILD)/autoconf-merge.h
-
-###############################################################################
 ## Display configuration.
 ###############################################################################
 msg = $(info $(CLR_CYAN)$1$(CLR_DEFAULT))
@@ -230,6 +205,22 @@ $(call msg,+ TARGET_CC_PATH = $(TARGET_CC_PATH))
 $(call msg,+ TARGET_CC_VERSION = $(TARGET_CC_VERSION))
 $(info ----------------------------------------------------------------------)
 
+# Do some checking
+include $(BUILD_SYSTEM)/check.mk
+
+###############################################################################
+## Setup part2 (may use optimization flags from above).
+###############################################################################
+
+# Setup autotools definitions (shall be after inclusion of defs.mk)
+include $(BUILD_SYSTEM)/autotools-setup.mk
+
+# Setup warnings flags
+include $(BUILD_SYSTEM)/warnings.mk
+
+# Setup configuration definitions
+include $(BUILD_SYSTEM)/config-defs.mk
+
 # User specific debug setup makefile
 debug-setup-makefile := Alchemy-debug-setup.mk
 ifneq ("$(wildcard $(TOP_DIR)/$(debug-setup-makefile))","")
@@ -239,8 +230,17 @@ ifneq ("$(wildcard $(TOP_DIR)/$(debug-setup-makefile))","")
   include $(TOP_DIR)/$(debug-setup-makefile)
 endif
 
-# Do some checking
-include $(BUILD_SYSTEM)/check.mk
+# Names of makefiles that can be included by user Makefiles
+CLEAR_VARS := $(BUILD_SYSTEM)/clearvars.mk
+BUILD_STATIC_LIBRARY := $(BUILD_SYSTEM)/static.mk
+BUILD_SHARED_LIBRARY := $(BUILD_SYSTEM)/shared.mk
+BUILD_EXECUTABLE := $(BUILD_SYSTEM)/executable.mk
+BUILD_AUTOTOOLS := $(BUILD_SYSTEM)/autotools.mk
+BUILD_CUSTOM := $(BUILD_SYSTEM)/custom.mk
+BUILD_PREBUILT := $(BUILD_SYSTEM)/prebuilt.mk
+
+# Shall be defined before including user makefiles
+AUTOCONF_MERGE_FILE := $(TARGET_OUT_BUILD)/autoconf-merge.h
 
 ###############################################################################
 ## Makefile scan and includes.

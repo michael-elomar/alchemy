@@ -48,7 +48,6 @@ TARGET_SKEL_DIRS += $(TARGET_SKEL)
 
 TARGET_CONFIG_DIR ?= $(TOP_DIR)/Alchemy-config/$(TARGET_PRODUCT)-$(TARGET_PRODUCT_VARIANT)
 
-TARGET_DEFAULT_ARM_MODE ?= thumb
 TARGET_PBUILD_FORCE_STATIC ?= 0
 
 # Extra directories to skip/add during makefile scan
