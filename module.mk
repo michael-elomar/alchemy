@@ -313,13 +313,13 @@ endif
 
 ifneq ("$(LOCAL_COPY_FILES)","")
 
-# List of all destination files
-all_copy_files :=
+# List of all source/destination files
+all_copy_files_src :=
+all_copy_files_dst :=
 
 # Generate a rule to copy all files
 # Handle relative/absolute paths
 # Handle directory only for destination
-# Add an order-only dependency between sources and prerequisites
 $(foreach __pair,$(LOCAL_COPY_FILES), \
 	$(eval __pair2 := $(subst :,$(space),$(__pair))) \
 	$(eval __src := $(call copy-get-src-path,$(word 1,$(__pair2)))) \
@@ -327,16 +327,23 @@ $(foreach __pair,$(LOCAL_COPY_FILES), \
 	$(if $(call is-path-dir,$(__dst)), \
 		$(eval __dst := $(__dst)$(notdir $(__src))) \
 	) \
-	$(eval all_copy_files += $(__dst)) \
+	$(eval all_copy_files_src += $(__src)) \
+	$(eval all_copy_files_dst += $(__dst)) \
 	$(eval $(call copy-one-file,$(__src),$(__dst))) \
-	$(eval $(__src): | $(filter-out $(__src) $(__dst),$(all_prerequisites))) \
+)
+
+# Add an order-only dependency between sources and prerequisites
+all_copy_files_prerequisites := \
+	$(filter-out $(all_copy_files_src) $(all_copy_files_dst),$(all_prerequisites))
+$(foreach __src,$(all_copy_files_src), \
+	$(eval $(__src): | $(all_copy_files_prerequisites)) \
 )
 
 # Add files to be copied as a dependency
-$(LOCAL_BUILD_MODULE): $(all_copy_files)
+$(LOCAL_BUILD_MODULE): $(all_copy_files_dst)
 
 # Add rule to delete copied files during clean
-$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(all_copy_files)
+$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(all_copy_files_dst)
 
 endif
 
