@@ -8,3 +8,6 @@
 
 # Flags shall be given through environment as they are very, very android
 # specific and hard to extract.
+
+TARGET_GLOBAL_C_INCLUDES += \
+	$(BUILD_SYSTEM)/toolchains/bionic/include
