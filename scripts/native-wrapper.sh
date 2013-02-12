@@ -2,6 +2,13 @@
 
 # This script assumes it is copied in the staging or final dir
 # Folders bin, usr/bin, lib, /usr/lib are subdirectories there
+# 
+# If sourced, PATH and LD_LIBRARY_PATH are updated so programs can be executed
+# from shell.
+#
+# If executed, first argument is the program to execute and remaining argumants
+# are treated as the program argument.
+
 
 # Get full path to this script (either when executed or sourced)
 SCRIPT_PATH=$(cd $(dirname ${BASH_SOURCE}) && pwd)

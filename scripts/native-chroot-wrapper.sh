@@ -13,10 +13,10 @@ readonly UMOUNT_POINTS="dev/pts dev proc"
 
 # Help ?
 if [ "$1" = "--help" ]; then
-	echo "usage: $0 [--help|--root] prog..."
-	echo "       $0 [--mount|--umount]"
-	echo "  --help  : display this help message"
+	echo "usage: $0 [--root] prog..."
+	echo "       $0 [--help|--mount|--umount]"
 	echo "  --root  : switch to root user"
+	echo "  --help  : display this help message"
 	echo "  --mount : mount proc, dev and dev/pts as a binding with host"
 	echo "  --umount: un-mount proc, dev and dev/pts"
 	echo "  prog... : program to execute (default: /bin/sh)"
@@ -40,7 +40,7 @@ fi
 # $1: directory to check
 is_mounted()
 {
-	mount | grep "/$1 on ${SYSROOT}/$1" > /dev/null
+	mount | grep "on ${SYSROOT}/$1 type" > /dev/null
 	return $?
 }
 
