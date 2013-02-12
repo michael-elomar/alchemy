@@ -511,9 +511,19 @@ include $(BUILD_SYSTEM)/help.mk
 
 ifeq ("$(TARGET_OS)","linux")
 
-ifeq ("$(TARGET_OS_FLAVOUR)","native")
+NATIVE_WRAPPER_SCRIPT :=
+NATIVE_CHROOT_WRAPPER_SCRIPT :=
 
-NATIVE_WRAPPER_SCRIPT := native-wrapper.sh
+ifeq ("$(TARGET_OS_FLAVOUR)","native")
+  NATIVE_WRAPPER_SCRIPT := native-wrapper.sh
+endif
+
+ifeq ("$(TARGET_OS_FLAVOUR)","native-chroot")
+  NATIVE_WRAPPER_SCRIPT := native-wrapper.sh
+  NATIVE_CHROOT_WRAPPER_SCRIPT := native-chroot-wrapper.sh
+endif
+
+ifneq ("$(NATIVE_WRAPPER_SCRIPT)","")
 
 $(eval $(call copy-one-file, \
 	$(BUILD_SYSTEM)/scripts/$(NATIVE_WRAPPER_SCRIPT), \
@@ -523,9 +533,7 @@ all: $(TARGET_OUT_STAGING)/$(NATIVE_WRAPPER_SCRIPT)
 
 endif
 
-ifeq ("$(TARGET_OS_FLAVOUR)","native-chroot")
-
-NATIVE_CHROOT_WRAPPER_SCRIPT := native-chroot-wrapper.sh
+ifneq ("$(NATIVE_CHROOT_WRAPPER_SCRIPT)","")
 
 $(eval $(call copy-one-file, \
 	$(BUILD_SYSTEM)/scripts/$(NATIVE_CHROOT_WRAPPER_SCRIPT), \
