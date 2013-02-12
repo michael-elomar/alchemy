@@ -17,7 +17,12 @@ TARGET_GLOBAL_LDLIBS += -lpthread -lrt
 TARGET_GLOBAL_LDLIBS_SHARED += -lpthread -lrt
 
 # Gcc sysroot
-gcc-sysroot := $(shell $(TARGET_CROSS)gcc -print-sysroot)
+# We use cflags as well as arm/thumb mode to select correct variant
+gcc-sysroot-flags := $(TARGET_GLOBAL_CFLAGS)
+ifeq ("$(TARGET_ARCH)","arm")
+  gcc-sysroot-flags += $(TARGET_GLOBAL_CFLAGS_$(TARGET_DEFAULT_ARM_MODE))
+endif
+gcc-sysroot := $(shell $(TARGET_CROSS)gcc $(gcc-sysroot-flags) -print-sysroot)
 
 # Get libc/gdbserver to copy
 ifneq ("$(gcc-sysroot)","")
