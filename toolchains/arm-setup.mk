@@ -12,16 +12,14 @@ TARGET_DEFAULT_ARM_MODE ?= thumb
 
 # Allow mix thumb/arm mode
 ifneq ("$(TARGET_OS)","ecos")
-ifneq ("$(TARGET_DEFAULT_ARM_MODE)",arm)
-TARGET_GLOBAL_CFLAGS += \
-	-mthumb-interwork
+ifneq ("$(TARGET_DEFAULT_ARM_MODE)","arm")
+  TARGET_GLOBAL_CFLAGS += -mthumb-interwork
 endif
 endif
 
 # Required for compilation of shared libraries
 ifneq ("$(TARGET_OS)","ecos")
-TARGET_GLOBAL_CFLAGS += \
-	-fPIC
+  TARGET_GLOBAL_CFLAGS += -fPIC
 endif
 
 # arm v5te flags (to be used in cpu flags below)
@@ -79,7 +77,7 @@ TARGET_GLOBAL_CFLAGS_arm ?= \
 	-finline-limit=300
 
 # Thumb mode specific flags
-ifneq ("$(TARGET_DEFAULT_ARM_MODE)",arm)
+ifneq ("$(TARGET_DEFAULT_ARM_MODE)","arm")
 TARGET_GLOBAL_CFLAGS_thumb ?= \
 	-mthumb \
 	-Os \
