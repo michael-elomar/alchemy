@@ -1,5 +1,5 @@
 #!/bin/sh
-set -x
+
 # Check arguments
 if [ "$#" != "2" ]; then
 	echo "Usage: $0 <final-dir> <arch>"
