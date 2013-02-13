@@ -42,8 +42,13 @@ def main():
 
 	# Write results to stdout
 	resultList.sort()
+	printList = []
 	for result in resultList:
-		sys.stdout.write(result + "\n")
+		if result in printList:
+			sys.stderr.write("warning: %s already found\n" %  result)
+		else:
+			sys.stdout.write(result + "\n")
+			printList.append(result)
 
 #===============================================================================
 # Setup option parser and parse command line.
