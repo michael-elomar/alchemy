@@ -376,13 +376,13 @@ LOCAL_FINAL_MODULE := $(LOCAL_STAGING_MODULE:$(TARGET_OUT_STAGING)/%=$(TARGET_OU
 $(LOCAL_MODULE): $(LOCAL_FINAL_MODULE)
 
 # Strip if needed, otherwise simply copy
-ifneq ("$(TARGET_STRIP)","")
+ifeq ("$(TARGET_NOSTRIP_FINAL)","1")
+$(eval $(call copy-one-file,$(LOCAL_STAGING_MODULE),$(LOCAL_FINAL_MODULE)))
+else
 $(LOCAL_FINAL_MODULE): $(LOCAL_STAGING_MODULE)
 	@echo "Strip: $(call path-from-top,$<) => $(call path-from-top,$@)"
 	@mkdir -p $(dir $@)
 	$(Q)$(TARGET_STRIP) -o $@ $<
-else
-$(eval $(call copy-one-file,$(LOCAL_STAGING_MODULE),$(LOCAL_FINAL_MODULE)))
 endif
 
 endif # ifneq ("$(wildcard $(TARGET_OUT_FINAL))","")
