@@ -155,6 +155,9 @@ __skip_targets := \
 	$(__config-targets) \
 	$(__fs-targets)
 
+# No optimization if 'all' is also given
+ifeq ("$(call is-targets-in-make-goals,all)","")
+
 ifneq ("$(call is-targets-in-make-goals,$(__skip_targets))","")
   SKIP_DEPS_AND_CHECKS := 1
 endif
@@ -178,6 +181,8 @@ ifneq ("$(findstring -menuconfig,$(MAKECMDGOALS))","")
 endif
 ifneq ("$(findstring -nconfig,$(MAKECMDGOALS))","")
   SKIP_DEPS_AND_CHECKS := 1
+endif
+
 endif
 
 # No reason to do external checks if we are skipping our own deps and checks...
@@ -397,14 +402,17 @@ endif
 
 # Determine the list of modules to really include
 # If a module is specified in goals, only include this one and its dependencies.
+# If 'all' is also given do not do the filter
 __dofilter := 0
 __modlist := $(empty)
+ifeq ("$(call is-targets-in-make-goals,all)","")
 $(foreach __mod,$(ALL_BUILD_MODULES), \
 	$(if $(call is-module-in-make-goals,$(__mod)), \
 		$(eval __dofilter := 1) \
 		$(eval __modlist += $(__mod) $(call module-get-all-depends,$(__mod))) \
 	) \
 )
+endif
 
 # Update module list, based on filtering
 # Sorting will ensure they appear only once as well
