@@ -1,3 +1,15 @@
+parrot-tools-alchemy (1.0.3) unstable; urgency=low
+
+  * Make sure everything is working if 'all' is given with another goal.
+  * Get correct sysroot based on cflags.
+  * When reactivating a module, keep its saved config.
+  * Add 'category path' feature.
+  * Use CXXFLAGS instead of CPPFLAGS.
+  * Update arm setup.
+  * Display warning when the same atom.mk is found several times.
+
+ -- Yves-Marie Morgan (Parrot) <yves-marie.morgan@parrot.com>  Tue, 19 Feb 2013 14:59:15 +0100
+
 parrot-tools-alchemy (1.0.2) unstable; urgency=low
 
   * Upstream release.
