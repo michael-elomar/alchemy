@@ -266,7 +266,7 @@ def writeMakefileFooter(options):
 #===============================================================================
 # Process a directory and copy dirs/files to final directory.
 #===============================================================================
-def processDir(rootDir, options, withEmptyDir):
+def processDir(rootDir, options, withEmptyDir, onlyLinks):
 	for (dirPath, dirNames, fileNames) in os.walk(rootDir):
 		# exclude some directories
 		for dirName in EXCLUDE_DIRS:
@@ -275,7 +275,7 @@ def processDir(rootDir, options, withEmptyDir):
 					os.path.relpath(os.path.join(dirPath, dirName), rootDir))
 				dirNames.remove(dirName)
 
-		# create directories (usefull for empty directories)
+		# create directories (useful for empty directories)
 		if withEmptyDir:
 			for dirName in dirNames:
 				srcDirName = os.path.join(dirPath, dirName)
@@ -298,8 +298,9 @@ def processDir(rootDir, options, withEmptyDir):
 				logging.debug("Exclude file : %s", relPath) 
 				continue
 			# go
-			dstFileName = getRealPath(options.finalDir, relPath)
-			doCopy(dstFileName, srcFileName, options)
+			if not onlyLinks or os.path.islink(srcFileName):
+				dstFileName = getRealPath(options.finalDir, relPath)
+				doCopy(dstFileName, srcFileName, options)
 
 #===============================================================================
 # Process toolchain libc directory.
@@ -365,12 +366,16 @@ def main():
 	if options.makefile != None:
 		writeMakefileHeader(options)
 
-	# process staging directory (without empty dirs)
-	processDir(options.stagingDir, options, False)
-
-	# process skeleton directory (with empty dirs)
+	# process links of skeleton directory (with empty dirs)
 	for skelDir in options.skelDirs:
-		processDir(skelDir, options, True)
+		processDir(skelDir, options, True, True)
+
+	# process staging directory (without empty dirs)
+	processDir(options.stagingDir, options, False, False)
+
+	# process skeleton directory (without empty dirs and with all files)
+	for skelDir in options.skelDirs:
+		processDir(skelDir, options, False, False)
 
 	# process libc  directory
 	if options.toolchainLibcDir != None:
