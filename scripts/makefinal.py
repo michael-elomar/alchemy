@@ -6,6 +6,10 @@
 #
 # Generate the final directory by copying files from staging directory
 #
+# It also incorporate skeletons and toolchain libraries.
+#
+# It takes care of resolving links relative to final dir when copying files
+# to avoid surprises...
 
 import sys, os, logging
 import subprocess
@@ -83,7 +87,57 @@ def canStrip(filePath):
 	return result
 
 #===============================================================================
-# Copy a file using a makefile (do do strip in parallel).
+# Resolve links using finalDir as root for absolute path.
+#
+# Taken from os.path._resolve_link
+#===============================================================================
+def resolveLink(finalDir, path):
+	pathSeen = set()
+	while os.path.islink(path):
+		if path in pathSeen:
+			# Already seen this path, so we must have a symlink loop
+			return None
+		pathSeen.add(path)
+		# Resolve where the link points to
+		resolved = os.readlink(path)
+		if not os.path.isabs(resolved):
+			dir = os.path.dirname(path)
+			path = os.path.normpath(os.path.join(dir, resolved))
+		elif resolved[0] == "/":
+			# Remove leading '/' and join with final dir
+			path = os.path.normpath(os.path.join(finalDir, resolved[1:]))
+		else:
+			# Absolute path not starting with '/' ???
+			return None
+	return path
+
+#===============================================================================
+# Get the realpath of a file by processing links relative to finalDir in case
+# they points to absolute path
+#
+# Taken from os.path.realpath
+#===============================================================================
+def getRealPath(finalDir, path):
+	# First, make it absolute
+	if not os.path.isabs(path):
+		path = os.path.join(finalDir, path)
+	bits = ["/"] + path.split("/")[1:]
+
+	for i in range(2, len(bits) + 1):
+		component = os.path.join(*bits[0:i])
+		# Resolve symbolic links.
+		if os.path.islink(component):
+			resolved = resolveLink(finalDir, component)
+			if resolved is None:
+				# Infinite loop -- return original component + rest of the path
+				return os.path.abspath(os.path.join(*([component] + bits[i:])))
+			else:
+				return getRealPath(finalDir, os.path.join(*([resolved] + bits[i:])))
+
+	return os.path.abspath(path)
+
+#===============================================================================
+# Copy a file using a makefile (to do strip in parallel).
 #===============================================================================
 def doCopyByMakefile(dstFileName, srcFileName, doStrip, options):
 	srcFileNameEsc = srcFileName
@@ -226,7 +280,7 @@ def processDir(rootDir, options, withEmptyDir):
 			for dirName in dirNames:
 				srcDirName = os.path.join(dirPath, dirName)
 				relPath = os.path.relpath(srcDirName, rootDir)
-				dstDirName = os.path.join(options.finalDir, relPath)
+				dstDirName = getRealPath(options.finalDir, relPath)
 				if not os.path.exists(dstDirName):
 					logging.info("Directory : %s", relPath)
 					os.makedirs(dstDirName, 0755)
@@ -244,7 +298,7 @@ def processDir(rootDir, options, withEmptyDir):
 				logging.debug("Exclude file : %s", relPath) 
 				continue
 			# go
-			dstFileName = os.path.join(options.finalDir, relPath)
+			dstFileName = getRealPath(options.finalDir, relPath)
 			doCopy(dstFileName, srcFileName, options)
 
 #===============================================================================
@@ -258,7 +312,7 @@ def processToolchainLibc(libcDir, options):
 		if re.match(r".*\.so.*", fileName):
 			srcFileName = os.path.join(libDir, fileName)
 			relPath = os.path.relpath(srcFileName, libcDir)
-			dstFileName = os.path.join(options.finalDir, relPath)
+			dstFileName = getRealPath(options.finalDir, relPath)
 			doCopy(dstFileName, srcFileName, options)
 
 	# copy 'libstdc++' from 'usr/lib' directory
@@ -267,7 +321,7 @@ def processToolchainLibc(libcDir, options):
 		if re.match(r"libstdc\+\+.*\.so.*", fileName):
 			srcFileName = os.path.join(usrLibDir, fileName)
 			relPath = os.path.relpath(srcFileName, libcDir)
-			dstFileName = os.path.join(options.finalDir, relPath)
+			dstFileName = getRealPath(options.finalDir, relPath)
 			doCopy(dstFileName, srcFileName, options)
 
 #===============================================================================
@@ -276,12 +330,12 @@ def processToolchainLibc(libcDir, options):
 def processLinuxBasicSkel(options):
 	for entry in LINUX_BASIC_SKEL:
 		if entry[1] == None:
-			dstDirName = os.path.join(options.finalDir, entry[0])
+			dstDirName = getRealPath(options.finalDir, entry[0])
 			if not os.path.exists(dstDirName):
 				logging.info("Directory : %s", entry[0])
 				os.makedirs(dstDirName, 0755)
 		else:
-			dstLnkName = os.path.join(options.finalDir, entry[0])
+			dstLnkName = getRealPath(options.finalDir, entry[0])
 			logging.info("Link : %s", entry[0])
 			os.system("ln -sf \"%s\" \"%s\"" % (entry[1], dstLnkName))
 
@@ -324,7 +378,7 @@ def main():
 
 	# process gdbserver binary
 	if options.toolchainGdbserverName:
-		doCopy(os.path.join(options.finalDir, "usr/bin/gdbserver"),
+		doCopy(getRealPath(options.finalDir, "usr/bin/gdbserver"),
 			options.toolchainGdbserverName, options)
 
 	# process linux basic skel
