@@ -94,7 +94,7 @@ class Menu:
 					self.idx2 += 1
 					return item
 
-			# If second list is finished, use firts list until its end
+			# If second list is finished, use first list until its end
 			if self.idx2 >= len(self.menu.modules):
 				if self.idx1 >= len(self.menu.subMenus):
 					raise StopIteration()

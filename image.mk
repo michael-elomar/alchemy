@@ -15,7 +15,7 @@ MK_KERNEL_PLF ?= mk_kernel_plf
 IMAGE_FILE_PLF := $(TARGET_OUT)/$(TARGET_PRODUCT_FULL_NAME).plf
 
 # zImage can be found at 2 places
-# TODO: migrate all atom.mk of kernel so that thet use boot directory
+# TODO: migrate all atom.mk of kernel so that they use boot directory
 ifneq ("$(wildcard $(TARGET_OUT_STAGING)/zImage)","")
   KERNEL_ZIMAGE := $(TARGET_OUT_STAGING)/zImage
 else ifneq ("$(wildcard $(TARGET_OUT_STAGING)/boot/zImage)","")
