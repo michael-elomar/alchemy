@@ -325,6 +325,15 @@ def processToolchainLibc(libcDir, options):
 			dstFileName = getRealPath(options.finalDir, relPath)
 			doCopy(dstFileName, srcFileName, options)
 
+	# copy 'ldd' from 'usr/bin" directory
+	usrBinDir = os.path.join(libcDir, "usr/bin")
+	for fileName in os.listdir(usrBinDir):
+		if re.match(r"ldd", fileName):
+			srcFileName = os.path.join(usrBinDir, fileName)
+			relPath = os.path.relpath(srcFileName, libcDir)
+			dstFileName = getRealPath(options.finalDir, relPath)
+			doCopy(dstFileName, srcFileName, options)
+
 #===============================================================================
 # Process linux basic skel.
 #===============================================================================
