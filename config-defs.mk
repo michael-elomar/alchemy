@@ -6,8 +6,18 @@
 ## Configuration management, defines.
 ###############################################################################
 
+# TARGET_xxx variables to pass as environment for confwrapper
+CONFWRAPPER_ENV := \
+	TARGET_PRODUCT="$(TARGET_PRODUCT)" \
+	TARGET_PRODUCT_VARIANT="$(TARGET_PRODUCT_VARIANT)" \
+	TARGET_OS="$(TARGET_OS)" \
+	TARGET_OS_FLAVOUR="$(TARGET_OS_FLAVOUR)" \
+	TARGET_LIBC="$(TARGET_LIBC)" \
+	TARGET_ARCH="$(TARGET_ARCH)" \
+	TARGET_CPU="$(TARGET_CPU)"
+
 # Tools
-CONFWRAPPER := $(BUILD_SYSTEM)/scripts/confwrapper.py
+CONFWRAPPER := $(CONFWRAPPER_ENV) $(BUILD_SYSTEM)/scripts/confwrapper.py
 
 # Directory where original configurations are stored
 CONFIG_ORIG_DIR := $(TARGET_CONFIG_DIR)

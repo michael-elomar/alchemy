@@ -33,8 +33,19 @@ TEMP_SUFFIX = ".alchemy"
 # Title we wand to display (also saved in config files)
 KCONFIG_TITLE = "Alchemy Configuration"
 
-# Sufix of tools when installed on host
+# Suffix of tools when installed on host
 KCONFIG_INSTALLED_SUFFIX = "-parrot"
+
+# TARGET_xxx variables to get from environment and to add in config file
+TARGET_VARIABLES = [
+	"TARGET_PRODUCT",
+	"TARGET_PRODUCT_VARIANT",
+	"TARGET_OS",
+	"TARGET_OS_FLAVOUR",
+	"TARGET_LIBC",
+	"TARGET_ARCH",
+	"TARGET_CPU",
+]
 
 #===============================================================================
 # Menu class.
@@ -306,6 +317,18 @@ def findModule(modules, moduleDefine):
 	return None
 
 #===============================================================================
+# Write the config.in file for the TARGET_xxx environment variables.
+# outFile : output file object.
+#===============================================================================
+def writeTargetVarConfigIn(outFile):
+	for var in TARGET_VARIABLES:
+		val = os.getenv(var, "")
+		outFile.write("config %s\n" % var)
+		outFile.write("  string\n")
+		outFile.write("  default '%s'\n" % val)
+		outFile.write("\n")
+
+#===============================================================================
 # Write the config.in file for a module.
 # outFile : output file object.
 # module : module to generate.
@@ -395,6 +418,14 @@ def writeConfigHeader(outFile, module=None):
 		outFile.write("#\n")
 		outFile.write("# %s\n" % module.name)
 		outFile.write("#\n")
+
+#===============================================================================
+# Write TARGET_xxx variables in config file.
+#===============================================================================
+def writeConfigTargetVar(outFile):
+	for var in TARGET_VARIABLES:
+		val = os.getenv(var, "")
+		outFile.write("CONFIG_%s=\"%s\"\n" % (var, val))
 
 #===============================================================================
 # Copy configuration file to '.new' file for edition.
@@ -490,6 +521,7 @@ def prepareFullConfig(outFile, menu, mainConfigPath):
 
 	# Write header followed by menus
 	writeConfigHeader(outFile)
+	writeConfigTargetVar(outFile)
 	writeConfigMenu(outFile, menu, mainConfig)
 
 #===============================================================================
@@ -563,6 +595,9 @@ def processFullConfig(inFile, modules, mainConfigPath):
 		# Ignore empty lines and comments silently (almost)
 		elif len(line) == 0 or line.startswith("#"):
 			logging.debug("Skipping line: %s", line)
+		# Skip lines for target variables
+		elif line.startswith("CONFIG_TARGET_"):
+			pass
 		# The 4 first lines are the header, and are silently skipped
 		elif lineIdx >= 4:
 			logging.warning("Skipping line: %s", line)
@@ -827,9 +862,11 @@ def main():
 	if options.main == None:
 		logging.info("Generating %s 'config.in' file as %s",
 			 modules[0].name, configInPath)
+		writeTargetVarConfigIn(configInFile)
 		writeModuleConfigIn(configInFile, modules[0])
 	else:
 		logging.info("Generating full 'config.in' file as %s", configInPath)
+		writeTargetVarConfigIn(configInFile)
 		writeFullConfigIn(configInFile, menuRoot)
 	configInFile.close()
 
