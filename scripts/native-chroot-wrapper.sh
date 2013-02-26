@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # This script assumes it is copied in the staging or final dir
 # Folders bin, usr/bin, lib, /usr/lib are subdirectories there
