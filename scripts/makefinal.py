@@ -357,8 +357,8 @@ def main():
 	setupLog(options)
 
 	# get parameters
-	options.stagingDir = args[0]
-	options.finalDir = args[1]
+	options.stagingDir =args[0]
+	options.finalDir = os.path.realpath(args[1])
 	logging.info("staging-dir : %s", options.stagingDir)
 	logging.info("final-dir : %s", options.finalDir)
 
