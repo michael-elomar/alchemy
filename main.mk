@@ -510,6 +510,9 @@ include $(BUILD_SYSTEM)/final.mk
 # Image generation
 include $(BUILD_SYSTEM)/image.mk
 
+# Gdb helpers
+include $(BUILD_SYSTEM)/gdb.mk
+
 # Help
 include $(BUILD_SYSTEM)/help.mk
 
