@@ -7,6 +7,9 @@ import optparse
 # Process a directory.
 #===============================================================================
 def processDir(resultList, topDir, fileName, options):
+	# Check that the directory is not in the prune list
+	if topDir in options.pruneList:
+		return
 	for dirPath, dirNames, fileNames in os.walk(topDir):
 		# Remove directories to skip from list
 		i = 0
