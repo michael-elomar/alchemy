@@ -45,6 +45,9 @@ LINUX_BASIC_SKEL = [
 	["tmp", None],
 ]
 
+class CopyType:
+	(ONLY_LINKS, NO_LINKS, ALL) = range(0, 3)
+
 #==============================================================================
 # Execute a command and get its output
 #==============================================================================
@@ -266,7 +269,7 @@ def writeMakefileFooter(options):
 #===============================================================================
 # Process a directory and copy dirs/files to final directory.
 #===============================================================================
-def processDir(rootDir, options, withEmptyDir, onlyLinks):
+def processDir(rootDir, options, withEmptyDir, copyType):
 	for (dirPath, dirNames, fileNames) in os.walk(rootDir):
 		# exclude some directories
 		for dirName in EXCLUDE_DIRS:
@@ -298,7 +301,9 @@ def processDir(rootDir, options, withEmptyDir, onlyLinks):
 				logging.debug("Exclude file : %s", relPath) 
 				continue
 			# go
-			if not onlyLinks or os.path.islink(srcFileName):
+			if copyType == CopyType.ALL \
+				or (copyType == CopyType.NO_LINKS and not os.path.islink(srcFileName)) \
+				or (copyType == CopyType.ONLY_LINKS and os.path.islink(srcFileName)):
 				dstFileName = getRealPath(options.finalDir, relPath)
 				doCopy(dstFileName, srcFileName, options)
 
@@ -375,16 +380,16 @@ def main():
 	if options.makefile != None:
 		writeMakefileHeader(options)
 
-	# process links of skeleton directory (with empty dirs)
+	# process links of skeleton directory (with empty dirs and links)
 	for skelDir in options.skelDirs:
-		processDir(skelDir, options, True, True)
+		processDir(skelDir, options, True, CopyType.ONLY_LINKS)
 
-	# process staging directory (without empty dirs)
-	processDir(options.stagingDir, options, False, False)
+	# process staging directory (without empty dirs and with all files)
+	processDir(options.stagingDir, options, False, CopyType.ALL)
 
-	# process skeleton directory (without empty dirs and with all files)
+	# process skeleton directory (without empty dirs and without links)
 	for skelDir in options.skelDirs:
-		processDir(skelDir, options, False, False)
+		processDir(skelDir, options, False, CopyType.NO_LINKS)
 
 	# process libc  directory
 	if options.toolchainLibcDir != None:
