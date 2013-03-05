@@ -154,31 +154,6 @@ ifeq ("$(USE_CLANG)","1")
 endif
 
 ###############################################################################
-## Test flags.
-###############################################################################
-
-# gcov flags
-ifeq ("$(USE_GCOV)","1")
-  TARGET_GLOBAL_CFLAGS += -DUSE_COVERAGE_TEST
-  TARGET_GLOBAL_CFLAGS += -fprofile-arcs -ftest-coverage
-  TARGET_GLOBAL_LDLIBS += -lgcov
-  TARGET_GLOBAL_LDLIBS_SHARED += -lgcov
-endif
-
-# valgrind flags
-# TODO: check for valgrind headers and set HAVE_VALGRIND_HEADERS
-ifeq ("$(USE_VALGRIND)","1")
-  TARGET_GLOBAL_CFLAGS += -DUSE_VALGRIND
-endif
-
-# electric fence flags
-ifeq ("$(USE_EFENCE)","1")
-  TARGET_GLOBAL_CFLAGS += -DUSE_EFENCE
-  TARGET_GLOBAL_LDLIBS += -lefence
-  TARGET_GLOBAL_LDLIBS_SHARED += -lefence
-endif
-
-###############################################################################
 ## Default rules of makefile add TARGET_ARCH in CFLAGS.
 ## As it is not the way we use it, prevent export of this variable
 ###############################################################################
