@@ -24,10 +24,6 @@ endif
 WARNINGS_COMMON_FLAGS += -Wall
 WARNINGS_COMMON_FLAGS += -Wextra
 WARNINGS_COMMON_FLAGS += -Wno-unused -Wno-unused-parameter -Wunused-value -Wunused-variable -Wunused-label
-#WARNINGS_COMMON_FLAGS += -Wshadow
-#WARNINGS_COMMON_FLAGS += -Wswitch-default
-#WARNINGS_COMMON_FLAGS += -Wwrite-strings
-#WARNINGS_COMMON_FLAGS += -Wundef
 WARNINGS_COMMON_FLAGS += -Wpointer-arith
 WARNINGS_COMMON_FLAGS += -Wformat-nonliteral
 WARNINGS_COMMON_FLAGS += -Wformat-security
@@ -69,9 +65,6 @@ endif
 
 # C specific
 
-#WARNINGS_CFLAGS += -Wmissing-declarations
-#WARNINGS_CFLAGS += -Wmissing-prototypes
-
 # ecos forces it, remove it, not useful only problems found are :
 # 'function declaration is not a prototype'
 # if void is missing in function with no parameters
@@ -103,6 +96,15 @@ WARNINGS_CXXFLAGS += -Woverloaded-virtual
 
 ifeq ("$(W)","1")
 
+# TODO: To be put back in W=0 mode
+WARNINGS_COMMON_FLAGS += -Wshadow
+WARNINGS_COMMON_FLAGS += -Wswitch-default
+WARNINGS_COMMON_FLAGS += -Wwrite-strings
+WARNINGS_COMMON_FLAGS += -Wundef
+WARNINGS_CFLAGS += -Wmissing-declarations
+WARNINGS_CFLAGS += -Wmissing-prototypes
+
+# Possibly many false positives so only in W=1
 WARNINGS_COMMON_FLAGS += -Wconversion
 WARNINGS_COMMON_FLAGS += -Wswitch-enum
 WARNINGS_COMMON_FLAGS += -Wcast-qual
