@@ -217,23 +217,17 @@ debug_CXXFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),CXXFLAGS)
 debug_LDFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),LDFLAGS)
 
 ifneq ("$(debug_CFLAGS)","")
-  ifneq ("$(V)","0")
-    $(info Adding '$(debug_CFLAGS)' to '$(LOCAL_MODULE)' CFLAGS)
-  endif
+  $(info Debug: Adding '$(debug_CFLAGS)' to '$(LOCAL_MODULE)' CFLAGS)
   LOCAL_CFLAGS += $(debug_CFLAGS)
 endif
 
 ifneq ("$(debug_CXXFLAGS)","")
-  ifneq ("$(V)","0")
-    $(info Adding '$(debug_CXXFLAGS)' to '$(LOCAL_MODULE)' CXXFLAGS)
-  endif
+  $(info Debug: Adding '$(debug_CXXFLAGS)' to '$(LOCAL_MODULE)' CXXFLAGS)
   LOCAL_CXXFLAGS += $(debug_CXXFLAGS)
 endif
 
 ifneq ("$(debug_LDFLAGS)","")
-  ifneq ("$(V)","0")
-    $(info Adding '$(debug_LDFLAGS)' to '$(LOCAL_MODULE)' LDFLAGS)
-  endif
+  $(info Debug: Adding '$(debug_LDFLAGS)' to '$(LOCAL_MODULE)' LDFLAGS)
   LOCAL_LDFLAGS += $(debug_LDFLAGS)
 endif
 

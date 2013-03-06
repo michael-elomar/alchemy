@@ -96,13 +96,25 @@ endif
 ###############################################################################
 
 debug_CFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),CFLAGS)
+debug_CXXFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),CXXFLAGS)
+debug_LDFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),LDFLAGS)
 
+# Add CFLAGS to CXXFLAGS as well
 ifneq ("$(debug_CFLAGS)","")
-  ifneq ("$(V)","0")
-    $(info Adding '$(debug_CFLAGS)' to '$(LOCAL_MODULE)' CFLAGS)
-  endif
+  $(info Debug: Adding '$(debug_CFLAGS)' to '$(LOCAL_MODULE)' CFLAGS and CXXFLAGS)
   LOCAL_AUTOTOOLS_CONFIGURE_ENV += CFLAGS="$$CFLAGS $(debug_CFLAGS)"
   LOCAL_AUTOTOOLS_CONFIGURE_ENV += CXXFLAGS="$$CXXFLAGS $(debug_CFLAGS)"
+endif
+
+ifneq ("$(debug_CXXFLAGS)","")
+  $(info Debug: Adding '$(debug_CXXFLAGS)' to '$(LOCAL_MODULE)' CXXFLAGS)
+  LOCAL_AUTOTOOLS_CONFIGURE_ENV += CXXFLAGS="$$CXXFLAGS $(debug_CFLAGS)"
+endif
+
+ifneq ("$(debug_LDFLAGS)","")
+  $(info Debug: Adding '$(debug_LDFLAGS)' to '$(LOCAL_MODULE)' LDFLAGS)
+  LOCAL_AUTOTOOLS_CONFIGURE_ENV += LDFLAGS="$$LDFLAGS $(debug_LDFLAGS)"
+  LOCAL_AUTOTOOLS_CONFIGURE_ENV += DYN_LDFLAGS="$$DYN_LDFLAGS $(debug_LDFLAGS)"
 endif
 
 ###############################################################################
