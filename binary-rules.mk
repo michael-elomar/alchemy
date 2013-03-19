@@ -198,15 +198,13 @@ LOCAL_CFLAGS += $(addprefix -include ,$(all_autoconf))
 # Inport prerequisites
 all_prerequisites += $(imported_PREREQUISITES)
 
-# All autoconf files are prerequisites
-all_prerequisites += $(all_autoconf)
-
 # Notify that we build with dependencies
 LOCAL_CFLAGS += $(foreach __mod,$(all_depends), \
 	-DBUILD_$(call get-define,$(__mod)))
 
 # User makefile is an internal dependencies
 all_internal_depends := $(LOCAL_PATH)/$(USER_MAKEFILE_NAME)
+all_internal_depends += $(all_autoconf)
 
 ###############################################################################
 ## Add debug flags.
@@ -355,7 +353,7 @@ $(addprefix $(build_dir)/,$(all_gen_sources)): $(unpacked_file)
 endif
 endif
 
-# Force recompilation if internal dependencies are changes
+# Force recompilation if internal dependencies are changed
 $(all_objects): $(all_internal_depends)
 
 # Clean objects
