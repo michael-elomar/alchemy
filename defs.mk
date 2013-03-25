@@ -954,8 +954,8 @@ define transform-h-to-gch
 $(call print-banner1,"Precompile",$(PRIVATE_MODULE),$(call path-from-top,$<))
 $(call check-pwd-is-top-dir)
 $(Q)$(CCACHE) $(TARGET_CXX) \
-	$(call normalize-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
+	$(call normalize-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CXXFLAGS) $(WARNINGS_CXXFLAGS) \
 	$(PRIVATE_CFLAGS) $(PRIVATE_CXXFLAGS) \
 	$(TARGET_PCH_FLAGS) -MMD -MP -o $@ \
@@ -971,8 +971,8 @@ define transform-cpp-to-o
 $(call print-banner1,"$(PRIVATE_MODE) C++",$(PRIVATE_MODULE),$(call path-from-top,$<))
 $(call check-pwd-is-top-dir)
 $(Q)$(CCACHE) $(TARGET_CXX) \
-	$(call normalize-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
+	$(call normalize-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CXXFLAGS) $(WARNINGS_CXXFLAGS) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_MODE)) \
 	$(PRIVATE_CFLAGS) $(PRIVATE_CXXFLAGS) \
@@ -989,8 +989,8 @@ $(call print-banner1,"$(PRIVATE_MODE) C",$(PRIVATE_MODULE),$(call path-from-top,
 $(call check-pwd-is-top-dir)
 @mkdir -p $(dir $@)
 $(Q)$(CCACHE) $(TARGET_CC) \
-	$(call normalize-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
+	$(call normalize-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(TARGET_GLOBAL_CFLAGS) $(WARNINGS_CFLAGS) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_MODE)) \
 	$(PRIVATE_CFLAGS) \
@@ -1007,8 +1007,8 @@ $(call print-banner1,"Asm",$(PRIVATE_MODULE),$(call path-from-top,$<))
 $(call check-pwd-is-top-dir)
 @mkdir -p $(dir $@)
 $(Q)$(CCACHE) $(TARGET_CC) \
-	$(call normalize-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
+	$(call normalize-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(TARGET_GLOBAL_CFLAGS) $(WARNINGS_CFLAGS) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_MODE)) \
 	$(PRIVATE_CFLAGS) \
