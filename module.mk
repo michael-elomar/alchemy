@@ -167,6 +167,12 @@ $(LOCAL_MODULE)-dirclean: $(LOCAL_MODULE)-clean
 $(LOCAL_MODULE)-path:
 	@echo "$(PRIVATE_MODULE): $(PRIVATE_PATH)"
 
+# If the user makefile is modified, this will trigger a check of the module
+# Prebuilt modules migth not be defined in an user makefile so skip this for them
+ifneq ("$(LOCAL_MODULE_CLASS)","PREBUILT")
+$(LOCAL_BUILD_MODULE): $(LOCAL_PATH)/$(USER_MAKEFILE_NAME)
+endif
+
 ###############################################################################
 ## Configuration file management.
 ###############################################################################

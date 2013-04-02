@@ -258,6 +258,14 @@ $(LOCAL_MODULE)-clean:
 	+$(call macro-exec-cmd,AUTOTOOLS_CMD_CLEAN,__default-clean)
 	+$(call macro-exec-cmd,AUTOTOOLS_CMD_POST_CLEAN)
 
+# If the user makefile is changed, restart at the configure step
+# The touch of configure script ensures recompilation of parent dependencies
+ifneq ("$(configure_file)","")
+$(info $(LOCAL_MODULE):$(LOCAL_PATH)/$(USER_MAKEFILE_NAME))
+$(configure_file): $(LOCAL_PATH)/$(USER_MAKEFILE_NAME)
+	@touch $@
+endif
+
 ###############################################################################
 ## Rule-specific variable definitions.
 ###############################################################################

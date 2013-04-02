@@ -148,6 +148,10 @@ LOCAL_CLEAN_FILES := \
 	$(MSGBUILDER_OBJ:.o=.d) \
 	$(MSGBUILDER_XML_FILE)
 
+# We don't have any atom.mk but internally the build system will add a dependency
+# ont it, make it happy
+$(LOCAL_PATH)/atom.mk:
+
 include $(BUILD_CUSTOM)
 
 endif
