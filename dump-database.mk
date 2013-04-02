@@ -20,8 +20,8 @@ DUMP_DATABASE_XML_FILE := $(TARGET_OUT)/alchemy-database.xml
 # This will dump everything
 __dump-database = \
 	$(info --------------------) \
-	$(info Modules: $(sort $(__modules))) \
-	$(foreach __mod,$(sort $(__modules)), \
+	$(info Modules: $(__modules)) \
+	$(foreach __mod,$(__modules), \
 		$(info --------------------) \
 		$(info $(__mod):) \
 		$(info $(space4)BUILD:$(if $(call is-module-in-build-config,$(__mod)),yes,no)) \
@@ -37,8 +37,8 @@ __dump-database = \
 # This will only dump dependencies
 __dump-database-depends = \
 	$(info --------------------) \
-	$(info Modules: $(sort $(__modules))) \
-	$(foreach __mod,$(sort $(__modules)), \
+	$(info Modules: $(__modules)) \
+	$(foreach __mod,$(__modules), \
 		$(info --------------------) \
 		$(info $(__mod):) \
 		$(foreach __field,$(modules-fields-depends), \
@@ -74,7 +74,7 @@ __dump-database-macro = \
 __dump-database-xml = \
 	$(call __write-xml,<?xml version='1.0' encoding='UTF-8'?>) \
 	$(call __write-xml,<modules>) \
-	$(foreach __mod,$(sort $(__modules)), \
+	$(foreach __mod,$(__modules), \
 		$(eval __build := $(if $(call is-module-in-build-config,$(__mod)),yes,no)) \
 		$(call __write-xml,$(space4)<module name='$(__mod)' build='$(__build)'>) \
 		$(foreach __field,$(modules-fields-depends) $(modules-LOCALS), \

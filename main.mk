@@ -346,18 +346,20 @@ include $(BUILD_SYSTEM)/pbuild-hook/pbuild-hook.mk
 ## Module dependencies generation.
 ###############################################################################
 
+# Now that all modules have been registered, sort the variable
+__modules := $(sort $(__modules))
+
 # All modules
-ALL_MODULES := \
-	$(foreach __mod,$(sort $(__modules)),$(__mod))
+ALL_MODULES := $(__modules)
 
 # All modules to actually build
 ALL_BUILD_MODULES := \
-	$(foreach __mod,$(sort $(__modules)), \
+	$(foreach __mod,$(ALL_MODULES), \
 		$(if $(call is-module-in-build-config,$(__mod)),$(__mod)))
 
 $(shell mkdir -p $(TARGET_OUT_BUILD))
-$(shell echo "$(sort $(ALL_MODULES))" > $(TARGET_OUT_BUILD)/modules)
-$(shell echo "$(sort $(ALL_BUILD_MODULES))" > $(TARGET_OUT_BUILD)/build-modules)
+$(shell echo "$(ALL_MODULES)" > $(TARGET_OUT_BUILD)/modules)
+$(shell echo "$(ALL_BUILD_MODULES)" > $(TARGET_OUT_BUILD)/build-modules)
 
 # Recompute all dependencies between modules
 $(call modules-compute-depends)
@@ -442,7 +444,7 @@ $(foreach __var,$(modules-LOCALS) $(modules-macros-LOCALS), \
 
 # List of all available autoconf.h files
 __autoconf-list := $(strip \
-	$(foreach __mod,$(sort $(ALL_BUILD_MODULES)), \
+	$(foreach __mod,$(ALL_BUILD_MODULES), \
 		$(call module-get-autoconf,$(__mod)) \
 	))
 

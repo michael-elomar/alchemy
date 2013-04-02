@@ -139,7 +139,7 @@ __show-in-config = $(strip \
 
 # No arguments
 __generate-config-args = $(strip \
-	$(foreach __mod,$(sort $(__modules)), \
+	$(foreach __mod,$(__modules), \
 		$(if $(call __show-in-config,$(__mod)), \
 			$(call __generate-config-module-args,$(__mod)) \
 		) \
