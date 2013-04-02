@@ -108,6 +108,10 @@ uniq2 = \
 		$(if $(filter $(__f),$(__r)),,$(__f)) \
 	)
 
+# Determine if a variable has been defined
+# $1 : name of the variable (not its content)
+is-var-defined = $(call strneq,$(origin $1),undefined)
+
 ###############################################################################
 ## Use some colors if requested.
 ###############################################################################
@@ -383,13 +387,11 @@ is-module-in-make-goals = $(strip \
 	$(call is-targets-in-make-goals,$1 $1-clean $1-dirclean))
 
 ###############################################################################
-## Check if a module is registered.
+## Check if a module is registered. It simply verifies that the variable
+## __modules.$1.PATH has been set.
 ## $1 : module to check.
 ###############################################################################
-is-module-registered = $(strip \
-	$(foreach __mod,$(__modules), \
-		$(call streq,$(__mod),$1) \
-	))
+is-module-registered = $(call is-var-defined,__modules.$1.PATH)
 
 ###############################################################################
 ## Check if a module is built externally (by autotools or custom rules).
@@ -412,14 +414,17 @@ is-module-external = $(strip \
 ## If no configuration directory present, always return true.
 ###############################################################################
 is-module-in-build-config = $(strip \
-	$(if $(call streq,$(__modules.$1.MODULE_CLASS),PREBUILT),$(true), \
-		$(eval __var := CONFIG_ALCHEMY_BUILD_$(call get-define,$1)) \
-		$(if $(call streq,$(CONFIG_DIR_AVAILABLE),0),$(true), \
-			$(if $(call streq,$(origin $(__var)),undefined), \
-				$(false), \
-				$(if $($(__var)),$(true)) \
+	$(if $(call is-module-registered,$1), \
+		$(if $(call streq,$(__modules.$1.MODULE_CLASS),PREBUILT),$(true), \
+			$(eval __var := CONFIG_ALCHEMY_BUILD_$(call get-define,$1)) \
+			$(if $(call streq,$(CONFIG_DIR_AVAILABLE),0),$(true), \
+				$(if $(call is-var-defined,$(__var)), \
+					$(if $($(__var)),$(true),$(false)), \
+					$(false) \
+				) \
 			) \
-		) \
+		), \
+		$(false) \
 	))
 
 ###############################################################################
@@ -774,7 +779,7 @@ module-get-staging-filename = \
 ## $2 : field name (CFLAGS, CXXFLAGS, LDFLAGS).
 ###############################################################################
 module-get-debug-flags = $(strip \
-	$(if $(call strneq,$(origin debug.$1.$2),undefined), \
+	$(if $(call is-var-defined,debug.$1.$2), \
 		$(debug.$1.$2) \
 	))
 

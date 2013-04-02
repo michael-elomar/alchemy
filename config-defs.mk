@@ -64,7 +64,7 @@ __check-module-configurable = $(strip \
 ## $1 : module name.
 ###############################################################################
 __get-module-config = $(strip \
-	$(if $(call strneq,$(origin custom.$1.config),undefined), \
+	$(if $(call is-var-defined,custom.$1.config), \
 		$(custom.$1.config),$(CONFIG_ORIG_DIR)/$1.config \
 	))
 
