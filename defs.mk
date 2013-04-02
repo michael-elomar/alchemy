@@ -372,7 +372,8 @@ modules-check-variables = \
 # $1 : module name.
 __module-check-variables = \
 	$(call __module-check-src-files,$1) \
-	$(call __module-check-c-includes,$1)
+	$(call __module-check-c-includes,$1,$(__modules.$1.C_INCLUDES),uses) \
+	$(call __module-check-c-includes,$1,$(__modules.$1.EXPORT_C_INCLUDES),exports) \
 
 # Check that all files listed in LOCAL_SRC_FILES exist
 # $1 : module name.
@@ -384,13 +385,18 @@ __module-check-src-files = \
 		) \
 	)
 
-# Check that all directory listed in LOCAL_C_INCLUDES exist
+# Check that all directory listed in LOCAL_C_INCLUDES exist. Only check the
+# ones relative to LOCAL_PATH (others may not exist yet if in build/staging)
+# $1 : module name.
+# $2 : list of include directory to check.
+# $3 : message : 'uses' or 'exports'
 __module-check-c-includes = \
 	$(eval __path := $(__modules.$1.PATH)) \
-	$(foreach __inc,$(__modules.$1.C_INCLUDES), \
-		$(eval __inc2 := $(patsubst -I%,%,$(__inc))) \
-		$(if $(wildcard $(__inc2)),$(empty), \
-			$(warning $(__path): module '$1' uses missing include '$(__inc2)') \
+	$(foreach __inc,$(patsubst -I%,%,$2), \
+		$(if $(call not,$(patsubst $(__path)%,,$(__inc))), \
+			$(if $(wildcard $(__inc)),$(empty), \
+				$(warning $(__path): module '$1' $3 missing include '$(__inc)') \
+			) \
 		) \
 	)
 
