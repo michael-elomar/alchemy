@@ -113,9 +113,9 @@ endif
 
 # Pre-compiled header generation flag
 ifneq ("$(USE_CLANG)","1")
-  TARGET_PCH_FLAGS := -c
+  TARGET_GLOBAL_PCH_FLAGS := -c
 else
-  TARGET_PCH_FLAGS := -x c++-header
+  TARGET_GLOBAL_PCH_FLAGS := -x c++-header
 endif
 
 ###############################################################################

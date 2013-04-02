@@ -958,7 +958,7 @@ $(Q)$(CCACHE) $(TARGET_CXX) \
 	$(call normalize-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CXXFLAGS) $(WARNINGS_CXXFLAGS) \
 	$(PRIVATE_CFLAGS) $(PRIVATE_CXXFLAGS) \
-	$(TARGET_PCH_FLAGS) -MMD -MP -o $@ \
+	$(TARGET_GLOBAL_PCH_FLAGS) -MMD -MP -o $@ \
 	$(call path-from-top,$<)
 endef
 
