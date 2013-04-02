@@ -130,6 +130,7 @@ ifdef TARGET_CONFIG_DIR
 endif
 
 # Setup macros definitions
+include $(BUILD_SYSTEM)/variables.mk
 include $(BUILD_SYSTEM)/defs.mk
 
 # Setup configuration
@@ -433,7 +434,7 @@ endif
 # Once all module rules have been generated, make sure nobody will reference
 # LOCAL_XXX variables anymore.
 # In commands, PRIVATE_XXX variables shall be used.
-$(foreach __var,$(modules-LOCALS) $(modules-macros-LOCALS), \
+$(foreach __var,$(vars-LOCAL) $(macros-LOCAL), \
 	$(eval override LOCAL_$(__var) = \
 		$$(error Do NOT use LOCAL_$(__var) in commands)) \
 )

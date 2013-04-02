@@ -25,10 +25,10 @@ __dump-database = \
 		$(info --------------------) \
 		$(info $(__mod):) \
 		$(info $(space4)BUILD:$(if $(call is-module-in-build-config,$(__mod)),yes,no)) \
-		$(foreach __field,$(modules-fields-depends) $(modules-LOCALS), \
+		$(foreach __field,$(modules-fields-depends) $(vars-LOCAL), \
 			$(call __dump-database-field,$(__field),$(strip $(__modules.$(__mod).$(__field)))) \
 		) \
-		$(foreach __field,$(modules-macros-LOCALS), \
+		$(foreach __field,$(macros-LOCAL), \
 			$(call __dump-database-macro,$(__field),$(value __modules.$(__mod).$(__field))) \
 		) \
 	) \
@@ -77,10 +77,10 @@ __dump-database-xml = \
 	$(foreach __mod,$(__modules), \
 		$(eval __build := $(if $(call is-module-in-build-config,$(__mod)),yes,no)) \
 		$(call __write-xml,$(space4)<module name='$(__mod)' build='$(__build)'>) \
-		$(foreach __field,$(modules-fields-depends) $(modules-LOCALS), \
+		$(foreach __field,$(modules-fields-depends) $(vars-LOCAL), \
 			$(call __dump-database-field-xml,$(__field),$(strip $(__modules.$(__mod).$(__field)))) \
 		) \
-		$(foreach __field,$(modules-macros-LOCALS), \
+		$(foreach __field,$(macros-LOCAL), \
 			$(call __dump-database-field-xml,$(__field),$(value __modules.$(__mod).$(__field))) \
 		) \
 		$(call __write-xml,$(space4)</module>) \

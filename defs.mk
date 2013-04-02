@@ -148,169 +148,8 @@ __modules := $(empty)
 clear-vars = $(foreach __varname,$1,$(eval $(__varname) := $(empty)))
 
 ###############################################################################
-## List of LOCAL_XXX variables that can be set by makefiles.
+## The list of fields related to dependency
 ###############################################################################
-modules-LOCALS :=
-modules-macros-LOCALS :=
-
-# Path of the root of module
-modules-LOCALS += PATH
-
-# Name of what's supposed to be generated
-modules-LOCALS += MODULE
-
-# Override the name of what will be generated
-modules-LOCALS += MODULE_FILENAME
-
-# Description of the module
-modules-LOCALS += DESCRIPTION
-
-# Category path of the module
-modules-LOCALS += CATEGORY_PATH
-
-# List of 'done' files indicating internal steps already done and that does not need
-# to be executed next time unless a force is requested
-# Name is relative to build directory
-modules-LOCALS += DONE_FILES
-
-# Source files to compile
-# All files are relative to LOCAL_PATH
-modules-LOCALS += SRC_FILES
-
-# Generated source files to compile
-# All files are relative to build directory
-modules-LOCALS += GENERATED_SRC_FILES
-
-# Static libraries that you want to include in your module
-# Names of modules in the build system, without path/prefix/suffix
-modules-LOCALS += STATIC_LIBRARIES
-
-# Static libraries that you want to include as a whole in your module
-# To generate a '.so' from a '.a' for ex
-# Names of modules in the build system, without path/prefix/suffix
-modules-LOCALS += WHOLE_STATIC_LIBRARIES
-
-# Libraries you directly link against
-# Names of modules in the build system, without path/prefix/suffix
-modules-LOCALS += SHARED_LIBRARIES
-
-# External libraries (not built directly by the build system rules)
-# Used as dependencies to trigger indirect build.
-modules-LOCALS += EXTERNAL_LIBRARIES
-
-# General libraries to add in dependency based on their actual class (STATIC/SHARED/EXTERNAL).
-modules-LOCALS += LIBRARIES
-
-# Modules whose headers are required to build
-modules-LOCALS += DEPENDS_HEADERS
-
-# Other modules required (at runtime for example). But not required for build
-modules-LOCALS += DEPENDS_MODULES
-
-# Additional include directories to pass into the C/C++ compilers
-# Format : <fullpath> (-I will be prepended automatically)
-modules-LOCALS += C_INCLUDES
-
-# Additional flags to pass into the C or C++ compiler
-modules-LOCALS += CFLAGS
-
-# Additional flags to pass into only the C++ compiler
-modules-LOCALS += CXXFLAGS
-
-# Additional flags to pass into the static library generator
-modules-LOCALS += ARFLAGS
-
-# Additional flags to pass into the linker
-modules-LOCALS += LDFLAGS
-
-# Additional libraries to pass into the linker
-# Format : -l<name>
-modules-LOCALS += LDLIBS
-
-# Precompiled file
-# Relative to LOCAL_PATH
-modules-LOCALS += PRECOMPILED_FILE
-
-# Arm compilation mode (arm or thumb)
-modules-LOCALS += ARM_MODE
-
-# Paths to config.in files to configure the module
-# Relative to LOCAL_PATH
-modules-LOCALS += CONFIG_FILES
-
-# List of prerequisites for all objects
-modules-LOCALS += PREREQUISITES
-
-# ParrotBuild compatibility hook required
-modules-LOCALS += PBUILD_HOOK
-modules-LOCALS += PBUILD_ALLOW_FORCE_STATIC
-
-# Force modules that depends on this one to use whole-static library
-modules-LOCALS += FORCE_WHOLE_STATIC_LIBRARY
-
-# Files and directories to delete during a clean
-modules-LOCALS += CLEAN_FILES
-modules-LOCALS += CLEAN_DIRS
-
-# Macro to be executed before installing binary in staging dir
-modules-macros-LOCALS += CMD_PRE_INSTALL
-
-# Macro to be executed after dirclean is done
-modules-macros-LOCALS += CMD_POST_DIRCLEAN
-
-# Archive extraction + patch support
-modules-LOCALS += ARCHIVE
-modules-LOCALS += ARCHIVE_VERSION
-modules-LOCALS += ARCHIVE_SUBDIR
-modules-LOCALS += ARCHIVE_PATCHES
-modules-macros-LOCALS += ARCHIVE_CMD_UNPACK
-modules-macros-LOCALS += ARCHIVE_CMD_POST_UNPACK
-
-# Autotools customization
-modules-LOCALS += AUTOTOOLS_VERSION
-modules-LOCALS += AUTOTOOLS_ARCHIVE
-modules-LOCALS += AUTOTOOLS_SUBDIR
-modules-LOCALS += AUTOTOOLS_PATCHES
-modules-LOCALS += AUTOTOOLS_CONFIGURE_ENV
-modules-LOCALS += AUTOTOOLS_CONFIGURE_ARGS
-modules-LOCALS += AUTOTOOLS_MAKE_BUILD_ENV
-modules-LOCALS += AUTOTOOLS_MAKE_BUILD_ARGS
-modules-LOCALS += AUTOTOOLS_MAKE_INSTALL_ENV
-modules-LOCALS += AUTOTOOLS_MAKE_INSTALL_ARGS
-modules-macros-LOCALS += AUTOTOOLS_CMD_UNPACK
-modules-macros-LOCALS += AUTOTOOLS_CMD_CONFIGURE
-modules-macros-LOCALS += AUTOTOOLS_CMD_BUILD
-modules-macros-LOCALS += AUTOTOOLS_CMD_INSTALL
-modules-macros-LOCALS += AUTOTOOLS_CMD_CLEAN
-modules-macros-LOCALS += AUTOTOOLS_CMD_POST_UNPACK
-modules-macros-LOCALS += AUTOTOOLS_CMD_POST_CONFIGURE
-modules-macros-LOCALS += AUTOTOOLS_CMD_POST_BUILD
-modules-macros-LOCALS += AUTOTOOLS_CMD_POST_INSTALL
-modules-macros-LOCALS += AUTOTOOLS_CMD_POST_CLEAN
-
-# Exported stuff (will be added in modules depending on this one)
-modules-LOCALS += EXPORT_C_INCLUDES
-modules-LOCALS += EXPORT_CFLAGS
-modules-LOCALS += EXPORT_CXXFLAGS
-modules-LOCALS += EXPORT_LDLIBS
-modules-LOCALS += EXPORT_PREREQUISITES
-
-# Module class : STATIC_LIBRARY SHARED_LIBRARY EXECUTABLE PREBUILT AUTOTOOLS
-modules-LOCALS += MODULE_CLASS
-
-# List of files to copy
-# Format <src>:<dst>
-# src : source (relative to module path)
-# dst : destination (relative to staging dir)
-modules-LOCALS += COPY_FILES
-
-# Other variables used internally
-modules-LOCALS += BUILD_MODULE
-modules-LOCALS += STAGING_MODULE
-modules-LOCALS += DESTDIR
-modules-LOCALS += TARGETS
-
-# The list of fields related to dependency
 modules-fields-depends := \
 	depends \
 	depends.EXTERNAL_LIBRARIES \
@@ -358,10 +197,10 @@ module-add = \
 	) \
 	$(if $(call streq,$(__add),1), \
 		$(eval __modules += $(__mod)) \
-		$(foreach __local,$(modules-LOCALS), \
+		$(foreach __local,$(vars-LOCAL), \
 			$(eval __modules.$(__mod).$(__local) := $(LOCAL_$(__local))) \
 		) \
-		$(foreach __local,$(modules-macros-LOCALS), \
+		$(foreach __local,$(macros-LOCAL), \
 			$(call macro-copy,__modules.$(__mod).$(__local),LOCAL_$(__local)) \
 		) \
 	) \
@@ -434,10 +273,10 @@ is-module-in-build-config = $(strip \
 ## $1 : name of module to restore.
 ###############################################################################
 module-restore-locals = \
-	$(foreach __local,$(modules-LOCALS), \
+	$(foreach __local,$(vars-LOCAL), \
 		$(eval LOCAL_$(__local) := $(__modules.$1.$(__local))) \
 	) \
-	$(foreach __local,$(modules-macros-LOCALS), \
+	$(foreach __local,$(macros-LOCAL), \
 		$(call macro-copy,LOCAL_$(__local),__modules.$1.$(__local)) \
 	)
 
