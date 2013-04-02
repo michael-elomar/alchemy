@@ -34,6 +34,6 @@ export LD_LIBRARY_PATH=${SYSROOT}/lib:${SYSROOT}/usr/lib:${LD_LIBRARY_PATH}
 
 # execute given command line (only if not sourced)
 if [ "${BASH_SOURCE}" = "$0" ]; then
-	$@
+	"$@"
 fi
 

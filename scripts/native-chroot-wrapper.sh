@@ -32,8 +32,8 @@ fi
 
 # Program to execute
 OPT_PROG="/bin/sh -l"
-if [ "$*" != "" ]; then
-	OPT_PROG=$*
+if [ "$#" != "0" ]; then
+	OPT_PROG="$@"
 fi
 
 # Check if a directory is actually mounted as a binding with host
