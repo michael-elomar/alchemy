@@ -328,8 +328,10 @@ all_copy_files_dst :=
 # Handle directory only for destination
 $(foreach __pair,$(LOCAL_COPY_FILES), \
 	$(eval __pair2 := $(subst :,$(space),$(__pair))) \
-	$(eval __src := $(call copy-get-src-path,$(word 1,$(__pair2)))) \
-	$(eval __dst := $(call copy-get-dst-path,$(word 2,$(__pair2)))) \
+	$(eval __w1 := $(word 1,$(__pair2))) \
+	$(eval __w2 := $(word 2,$(__pair2))) \
+	$(eval __src := $(call copy-get-src-path,$(__w1))) \
+	$(eval __dst := $(call copy-get-dst-path,$(__w2))) \
 	$(if $(call is-path-dir,$(__dst)), \
 		$(eval __dst := $(__dst)$(notdir $(__src))) \
 	) \
@@ -350,6 +352,34 @@ $(LOCAL_BUILD_MODULE): $(all_copy_files_dst)
 
 # Add rule to delete copied files during clean
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(all_copy_files_dst)
+
+endif
+
+###############################################################################
+## Links to create.
+###############################################################################
+
+ifneq ("$(LOCAL_CREATE_LINKS)","")
+
+# List of all links
+all_create_links :=
+
+# Generate a rule to create links
+$(foreach __pair,$(LOCAL_CREATE_LINKS), \
+	$(eval __pair2 := $(subst :,$(space),$(__pair))) \
+	$(eval __w1 := $(word 1,$(__pair2))) \
+	$(eval __w2 := $(word 2,$(__pair2))) \
+	$(eval __name := $(TARGET_OUT_STAGING)/$(__w1)) \
+	$(eval __target := $(__w2)) \
+	$(eval all_create_links += $(__name)) \
+	$(eval $(call create-one-link,$(__name),$(__target))) \
+)
+
+# Add links to be created as a dependency
+$(LOCAL_BUILD_MODULE): $(all_create_links)
+
+# Add rule to delete created links during clean
+$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(all_create_links)
 
 endif
 

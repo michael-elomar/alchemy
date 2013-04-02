@@ -959,22 +959,31 @@ endef
 ## Commands for copying files.
 ###############################################################################
 
-# Copy a single file from one place to another
+# Define a rule to copy a file. For use via $(eval) so use $$@ and $$<.
 # use '-a' to preserve permissions/links and
 # use '--remove-destination' to overwrite any existing file to make sure
 # existing symlinks are correctly overwritten.
-define do-copy-file
-@mkdir -p $(dir $@)
-$(Q)cp -a --remove-destination $< $@
-endef
-
-# Define a rule to copy a file. For use via $(eval).
 # $(1) : source file
 # $(2) : destination file
 define copy-one-file
 $(2): $(1)
 	@echo "Copy: $$(call path-from-top,$$<) => $$(call path-from-top,$$@)"
-	$$(do-copy-file)
+	@mkdir -p $$(dir $$@)
+	$(Q)cp -a --remove-destination $$< $$@
+endef
+
+###############################################################################
+## Commands for creating links.
+###############################################################################
+
+# Define a rule to create a link. For use via $(eval) so use $$@ and $$<.
+# $(1) : name of link
+# $(2) : target of link
+define create-one-link
+$(1):
+	@echo "Link: $$(call path-from-top,$$@) => $(2)"
+	@mkdir -p $$(dir $$@)
+	$(Q)ln -s -f $(2) $$@
 endef
 
 ###############################################################################
