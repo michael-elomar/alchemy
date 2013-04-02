@@ -286,16 +286,15 @@ module-restore-locals = \
 ## recorded.
 ###############################################################################
 
-# Check dependencies of all modules
+# Check dependencies of all modules. Only if module will be built
 modules-check-depends = \
 	$(foreach __mod,$(__modules), \
-		$(call __module-check-depends,$(__mod)) \
+		$(if $(call is-module-in-build-config,$(__mod)), \
+			$(call __module-check-depends,$(__mod)) \
+		) \
 	)
 
 # Check dependencies of a module.
-# It verifies that all dependencies are registered and displays an error or
-# warning if module is build or not.
-# It also verifies that dependencies are enabled in config if module is.
 # $1 : module name.
 __module-check-depends = \
 	$(eval __path := $(__modules.$1.PATH)) \
@@ -311,33 +310,26 @@ __module-check-depends = \
 __module-check-depends-direct = \
 	$(foreach __lib,$(__modules.$1.depends), \
 		$(if $(call is-module-registered,$(__lib)), \
-			$(if $(call is-module-in-build-config,$1), \
-				$(if $(call is-module-in-build-config,$(__lib)),$(empty), \
-					$(error $(__path): module '$1' depends on disabled module '$(__lib)') \
-				) \
+			$(if $(call is-module-in-build-config,$(__lib)),$(empty), \
+				$(error $(__path): module '$1' depends on disabled module '$(__lib)') \
 			), \
-			$(if $(call is-module-in-build-config,$1), \
-				$(error $(__path): module '$1' depends on unknown module '$(__lib)'), \
-				$(warning $(__path): module '$1' depends on unknown module '$(__lib)') \
-			) \
+			$(error $(__path): module '$1' depends on unknown module '$(__lib)') \
 		) \
 	)
 
-# Make sure runtime dependencies (other) are OK, but only warn
+# Make sure runtime dependencies (other) are OK. Print warning only
 # $1 : module name.
 __module-check-depends-other = \
 	$(foreach __lib,$(__modules.$1.depends.other), \
 		$(if $(call is-module-registered,$(__lib)), \
-			$(if $(call is-module-in-build-config,$1), \
-				$(if $(call is-module-in-build-config,$(__lib)),$(empty), \
-					$(warning $(__path): module '$1' depends on disabled module '$(__lib)') \
-				) \
+			$(if $(call is-module-in-build-config,$(__lib)),$(empty), \
+				$(warning $(__path): module '$1' requires disabled module '$(__lib)') \
 			), \
-			$(warning $(__path): module '$1' depends on unknown module '$(__lib)') \
+			$(warning $(__path): module '$1' requires unknown module '$(__lib)') \
 		) \
 	)
 
-# Make sure headers dependencies are OK
+# Make sure headers dependencies are OK.
 # $1 : module name.
 __module-check-depends-headers = \
 	$(foreach __lib,$(__modules.$1.depends.headers), \
@@ -361,20 +353,19 @@ __module-check-libs-class = \
 __module-check-lib-class = \
 	$(if $(call strneq,$(__modules.$2.MODULE_CLASS),$3), \
 		$(eval __path := $(__modules.$1.PATH)) \
-		$(if $(call is-module-in-build-config,$1), \
-			$(error $(__path): module '$1' depends on module '$2' which is not of class '$3'), \
-			$(warning $(__path): module '$1' depends on module '$2' which is not of class '$3') \
-		) \
+		$(error $(__path): module '$1' depends on module '$2' which is not of class '$3') \
 	)
 
 ###############################################################################
 ## Used to make some internal checks.
 ###############################################################################
 
-# Check variables of all modules
+# Check variables of all modules. Only if module will be built
 modules-check-variables = \
 	$(foreach __mod,$(__modules), \
-		$(call __module-check-variables,$(__mod)) \
+		$(if $(call is-module-in-build-config,$(__mod)), \
+			$(call __module-check-variables,$(__mod)) \
+		) \
 	)
 
 # Check variables of a module
