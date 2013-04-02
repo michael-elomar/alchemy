@@ -143,6 +143,8 @@ TARGET_GLOBAL_LDFLAGS_SHARED += -L$(TARGET_OUT_STAGING)/usr/lib
 # because they are not in the standard places
 TARGET_GLOBAL_LDFLAGS += -Wl,-rpath-link=$(TARGET_OUT_STAGING)/lib
 TARGET_GLOBAL_LDFLAGS += -Wl,-rpath-link=$(TARGET_OUT_STAGING)/usr/lib
+TARGET_GLOBAL_LDFLAGS_SHARED += -Wl,-rpath-link=$(TARGET_OUT_STAGING)/lib
+TARGET_GLOBAL_LDFLAGS_SHARED += -Wl,-rpath-link=$(TARGET_OUT_STAGING)/usr/lib
 
 # Make sure the architecture specific flags is defined
 # For arm/thumb it is done above
