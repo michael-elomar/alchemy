@@ -184,3 +184,69 @@ vars-LOCAL += BUILD_MODULE
 vars-LOCAL += STAGING_MODULE
 vars-LOCAL += DESTDIR
 vars-LOCAL += TARGETS
+
+###############################################################################
+## List of TARGET_XXX variables that can be used by makefiles.
+## They shall NOT be modified by makefiles
+###############################################################################
+vars-TARGET :=
+
+# Global settings
+vars-TARGET += PRODUCT
+vars-TARGET += PRODUCT_VARIANT
+vars-TARGET += OS
+vars-TARGET += OS_FLAVOUR
+vars-TARGET += ARCH
+vars-TARGET += CPU
+vars-TARGET += LIBC
+vars-TARGET += DEFAULT_ARM_MODE
+
+# Folders
+vars-TARGET += OUT
+vars-TARGET += OUT_BUILD
+vars-TARGET += OUT_STAGING
+vars-TARGET += OUT_FINAL
+vars-TARGET += CONFIG_DIR
+vars-TARGET += SKEL
+vars-TARGET += SKEL_DIRS
+vars-TARGET += SCAN_PRUNE_DIRS
+
+# Other specialized settings
+vars-TARGET += PBUILD_FORCE_STATIC
+vars-TARGET += NOSTRIP_FINAL
+vars-TARGET += FORCE_EXTERNAL_CHECKS
+
+# Tools
+vars-TARGET += CROSS
+vars-TARGET += CC
+vars-TARGET += CXX
+vars-TARGET += AR
+vars-TARGET += AS
+vars-TARGET += LD
+vars-TARGET += NM
+vars-TARGET += STRIP
+
+# Flags for tools
+vars-TARGET += GLOBAL_C_INCLUDES
+vars-TARGET += GLOBAL_CFLAGS
+vars-TARGET += GLOBAL_CXXFLAGS
+vars-TARGET += GLOBAL_CFLAGS_arm
+vars-TARGET += GLOBAL_CFLAGS_thumb
+vars-TARGET += GLOBAL_LDFLAGS
+vars-TARGET += GLOBAL_LDLIBS
+vars-TARGET += GLOBAL_LDFLAGS_SHARED
+vars-TARGET += GLOBAL_LDLIBS_SHARED
+vars-TARGET += GLOBAL_ARFLAGS
+vars-TARGET += GLOBAL_PCH_FLAGS
+
+# Internal settings
+vars-TARGET += STATIC_LIB_SUFFIX
+vars-TARGET += SHARED_LIB_SUFFIX
+vars-TARGET += EXE_SUFFIX
+vars-TARGET += PRODUCT_FULL_NAME
+vars-TARGET += CC_PATH
+vars-TARGET += CC_VERSION
+
+# This variable can be modified by some makefiles (os that needs to install
+# headers prior to start anything)
+#vars-TARGET += GLOBAL_PREREQUISITES

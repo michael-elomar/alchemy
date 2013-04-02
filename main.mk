@@ -287,10 +287,14 @@ create-user-makefiles-cache = \
 	mkdir -p $$(dirname $(USER_MAKEFILES_CACHE)); \
 	touch $(USER_MAKEFILES_CACHE); \
 	$(info Scanning $(TOP_DIR) for makefiles...) \
-	for f in `$(find-cmd)`; do \
-		echo "USER_MAKEFILES += $$f" >> $(USER_MAKEFILES_CACHE); \
-		echo "include $$f" >> $(USER_MAKEFILES_CACHE); \
-	done
+	( \
+		for f in `$(find-cmd)`; do \
+			echo "USER_MAKEFILES += $$f"; \
+			echo "\$$(call user-makefile-before-include,$$f)"; \
+			echo "include $$f"; \
+			echo "\$$(call user-makefile-after-include,$$f)"; \
+		done \
+	) >> $(USER_MAKEFILES_CACHE);
 
 # Determine if we need to re-create the cache
 do-create-cache := 0

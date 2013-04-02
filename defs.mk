@@ -770,6 +770,32 @@ macro-exec-cmd = \
 	)
 
 ###############################################################################
+## Macros to be called before and after inclusion of user makefiles.
+## It checks that user makefile does not overwrite internal variables.
+###############################################################################
+
+# Save TARGET_XXX variables
+user-makefile-before-include = \
+	$(foreach __var,$(vars-TARGET), \
+		$(if $(call is-var-defined,TARGET_$(__var)), \
+			$(eval saved-TARGET_$(__var) := $(TARGET_$(__var))) \
+		) \
+	)
+
+# Make sure that TARGET_XXX have not been modified
+user-makefile-after-include = \
+	$(foreach __var,$(vars-TARGET), \
+		$(if $(call is-var-defined,TARGET_$(__var)), \
+			$(eval __old := $(saved-TARGET_$(__var))) \
+			$(eval __new := $(TARGET_$(__var))) \
+			$(if $(call strneq,$(__old),$(__new)), \
+				$(warning $1: attempt to modify TARGET_$(__var)) \
+				$(eval TARGET_$(__var) := $(__old)) \
+			) \
+		) \
+	)
+
+###############################################################################
 ## Print some banners.
 ## $1 : operation.
 ## $2 : module.
