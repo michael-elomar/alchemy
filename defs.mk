@@ -204,7 +204,8 @@ module-add = \
 			$(call macro-copy,__modules.$(__mod).$(__local),LOCAL_$(__local)) \
 		) \
 	) \
-	$(check-cppflags-compat)
+	$(check-cppflags-compat) \
+	$(call install-headers-setup,$(LOCAL_MODULE))
 
 ###############################################################################
 ## Check if a list of targets is given in make goals.
@@ -712,6 +713,25 @@ copy-get-dst-path = $(strip \
 	$(if $(call is-path-absolute,$1), \
 		$1,$(addprefix $(TARGET_OUT_STAGING)/,$1) \
 	))
+
+###############################################################################
+## Setup installed headers in LOCAL_COPY_FILES and LOCAL_EXPORT_PREREQUISITES.
+## $1 : module name.
+###############################################################################
+install-headers-setup = \
+	$(foreach __pair,$(__modules.$1.INSTALL_HEADERS), \
+		$(eval __pair2 := $(subst :,$(space),$(__pair))) \
+		$(eval __w1 := $(word 1,$(__pair2))) \
+		$(eval __w2 := $(word 2,$(__pair2))) \
+		$(if $(__w2),$(empty),$(eval __w2 := usr/include/)) \
+		$(eval __src := $(call copy-get-src-path,$(__w1))) \
+		$(eval __dst := $(call copy-get-dst-path,$(__w2))) \
+		$(if $(call is-path-dir,$(__dst)), \
+			$(eval __dst := $(__dst)$(notdir $(__src))) \
+		) \
+		$(eval __modules.$1.COPY_FILES += $(__w1):$(__w2)) \
+		$(eval __modules.$1.EXPORT_PREREQUISITES += $(__dst)) \
+	)
 
 ###############################################################################
 ## Copy a macro.
