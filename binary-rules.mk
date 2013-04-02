@@ -24,15 +24,21 @@ ifeq ("$(TARGET_ARCH)","arm")
 
 # Make sure LOCAL_ARM_MODE is valid
 # If not set, use default mode
-# Convert to upper case for further use
 LOCAL_ARM_MODE := $(strip $(LOCAL_ARM_MODE))
 ifeq ("$(LOCAL_ARM_MODE)","")
   LOCAL_ARM_MODE := $(TARGET_DEFAULT_ARM_MODE)
 endif
+
 ifneq ("$(LOCAL_ARM_MODE)","arm")
 ifneq ("$(LOCAL_ARM_MODE)","thumb")
   $(error $(LOCAL_PATH): LOCAL_ARM_MODE is not valid : $(LOCAL_ARM_MODE))
 endif
+endif
+
+# If default mode is not thumb, do not allow thumb, so the only practical use of
+# this variable is to allow arm if default is thumb, not the other way around
+ifneq ("$(TARGET_DEFAULT_ARM_MODE)","thumb")
+  LOCAL_ARM_MODE := $(TARGET_DEFAULT_ARM_MODE)
 endif
 
 # Check that -marm or -mthumb is not forced in compilation flags
