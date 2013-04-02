@@ -16,4 +16,10 @@ if [ "${ALCHEMY_WORKSPACE_DIR}" != "" -a -d "${ALCHEMY_WORKSPACE_DIR}" ]; then
 	cd ${ALCHEMY_WORKSPACE_DIR}
 fi
 
-exec ${ALCHEMY_HOME}/scripts/alchemake.py -f ${ALCHEMY_HOME}/main.mk $*
+# With no workspace, simply wrap make, otherwise use alchemy main Makefile
+# Use "$@" to requote given arguments
+if [ "${ALCHEMY_WORKSPACE_DIR}" != "" ]; then
+	exec ${ALCHEMY_HOME}/scripts/alchemake.py -f ${ALCHEMY_HOME}/main.mk "$@"
+else
+	exec ${ALCHEMY_HOME}/scripts/alchemake.py "$@"
+fi
