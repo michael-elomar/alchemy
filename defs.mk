@@ -469,7 +469,8 @@ __module-compute-depends-direct = \
 	$(call __module-add-depends-direct,$1,$(__modules.$1.SHARED_LIBRARIES)) \
 	$(call __module-add-depends-direct,$1,$(__modules.$1.EXTERNAL_LIBRARIES)) \
 	$(eval __modules.$1.depends.headers := $(__modules.$1.DEPENDS_HEADERS)) \
-	$(eval __modules.$1.depends.other := $(__modules.$1.DEPENDS_MODULES))
+	$(eval __modules.$1.depends.other := $(__modules.$1.DEPENDS_MODULES)) \
+	$(eval __modules.$1.depends.other += $(__modules.$1.REQUIRED_MODULES))
 
 # Add direct dependencies to a module
 # $1 : module name.
