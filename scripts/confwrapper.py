@@ -8,6 +8,7 @@ import tempfile
 import re
 import signal
 import shutil
+import difflib
 
 # Full path to this script
 SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -289,21 +290,18 @@ def getDiffConfigPath(origPath):
 	return origPath + ".diff"
 
 #===============================================================================
-# Write a 'diff' file.
-# path1 : first file to compare.
-# path2 : second file to compare.
-# diffPath : file path to resulting 'diff' file.
-#===============================================================================
-def writeDiff(path1, path2, diffPath):
-	os.system("diff -u %s %s > %s" % (path1, path2, diffPath))
-
-#===============================================================================
-# Write a 'diff' file of a configuration afeter edition.
+# Write a 'diff' file of a configuration after edition.
 # configPath : original config path.
+# diff : diff to write.
 #===============================================================================
-def writeDiffConfig(configPath):
-	writeDiff(configPath, getEditConfigPath(configPath),
-		getDiffConfigPath(configPath))
+def writeDiffConfig(configPath, diff):
+	try:
+		diffFile = open(getDiffConfigPath(configPath), "w")
+		diffFile.writelines(diff)
+		diffFile.close()
+	except IOError as ex:
+		logging.error("Unable to create file: %s [err=%d %s]",
+			getDiffConfigPath(configPath), ex.errno, ex.strerror)
 
 #===============================================================================
 # Find a module by its define name.
@@ -629,35 +627,69 @@ def processFullConfig(inFile, modules, mainConfigPath):
 # Check if a configuration is up to date.
 # name : name to display in log messages.
 # configPath : current configuration name.
-# return True if config is up to date, False otherwise.
+# ignoreCommented : ignore lines that add/removed commented settings.
+# return a diff if config is not up to date, None otherwise.
 #===============================================================================
-def checkConfig(name, configPath):
+def checkConfig(name, configPath, ignoreCommented):
 	logging.debug("Checking %s config: %s", name, configPath)
+
+	forceOK = False
+	forceKO = False
 
 	# Try to open new configuration file
 	# If no new file, assume configuration is up to date
 	try:
 		newFile = open(getEditConfigPath(configPath), "r")
+		newContent = newFile.readlines()
+		newFile.close()
 	except IOError:
 		logging.debug("New %s config does not exist", name)
-		return True
+		newFile = None
+		newContent = []
+		forceOK = True
 
 	# Try to open current configuration file
 	# If no current file, assume configuration is not up to date
 	try:
 		currentFile = open(configPath, "r")
+		currentContent = currentFile.readlines()
+		currentFile.close()
 	except IOError:
 		logging.debug("Current %s config does not exist", name)
-		newFile.close()
-		return False
+		currentFile = None
+		currentContent = []
+		forceKO = True
 
-	# Read content, close files and Compare content
-	newContent = newFile.read()
-	currentContent = currentFile.read()
-	newFile.close()
-	currentFile.close()
-	result = (newContent == currentContent)
-	logging.debug("%s config is %s", name, "up to date" if result else "old")
+	# Compare content, we create a new list because unified_diff is a
+	# generator and so can only be iterated once
+	result = None
+	diff = list(difflib.unified_diff(currentContent, newContent,
+			configPath, getEditConfigPath(configPath)))
+	for line in diff:
+		# Skip header, line informations and context
+		if line.startswith("+++ ") \
+				or line.startswith("--- ") \
+				or line.startswith("@@ ") \
+				or line.startswith(" "):
+			continue
+		# Ignore added or removed lines that are commented
+		elif ignoreCommented and (line.startswith("+#") or line.startswith("-#")):
+			continue
+		# Config is not up to date
+		else:
+			result = diff
+
+	# Force result if needed
+	if forceOK:
+		result = None
+	elif forceKO:
+		result = diff
+
+	# Return result
+	if result == None:
+		logging.debug("%s config is up to date", name)
+	else:
+		logging.debug("%s config is not up to date", name)
 	return result
 
 #===============================================================================
@@ -668,8 +700,9 @@ def checkConfig(name, configPath):
 def updateConfig(name, configPath):
 	logging.debug("Updating %s config: %s", name, configPath)
 
-	# Check configuration
-	if checkConfig(name, configPath):
+	# Check configuration, do NOT ignore commented lines for the update
+	diff = checkConfig(name, configPath, False)
+	if diff == None:
 		# Delete new configuration
 		logging.debug("Delete new %s config", name)
 		safeUnlink(getEditConfigPath(configPath))
@@ -689,17 +722,18 @@ def checkModuleConfig(module, doWriteDiff):
 	# Skip modules with nothing configurable
 	if len(module.configInPathList) == 0:
 		return True
-	result = checkConfig(module.name, module.configPath)
-	if not result and doWriteDiff:
+	# Check config, ignore commented lines
+	diff = checkConfig(module.name, module.configPath, True)
+	if diff != None and doWriteDiff:
 		message("%s config is not up to date (%s), see diff in: %s",
 				module.name, module.configPath,
 				getDiffConfigPath(module.configPath))
-		writeDiffConfig(module.configPath)
-	elif not result:
+		writeDiffConfig(module.configPath, diff)
+	elif diff != None:
 		message("%s config is not up to date (%s)", module.name, module.configPath)
 	logging.debug("Delete %s", getEditConfigPath(module.configPath))
 	safeUnlink(getEditConfigPath(module.configPath))
-	return result
+	return (diff == None)
 
 #===============================================================================
 # Update a module config.
@@ -718,16 +752,17 @@ def updateModuleConfig(module):
 # return True if config is up to date, False otherwise.
 #===============================================================================
 def checkMainConfig(mainConfigPath, doWriteDiff):
-	result = checkConfig("main", mainConfigPath)
-	if not result and doWriteDiff:
+	# Check config, ignore commented lines
+	diff = checkConfig("main", mainConfigPath, True)
+	if diff != None and doWriteDiff:
 		message("%s config is not up to date (%s), see diff in: %s",
 			"main", mainConfigPath, getDiffConfigPath(mainConfigPath))
-		writeDiffConfig(mainConfigPath)
-	elif not result:
+		writeDiffConfig(mainConfigPath, diff)
+	elif diff != None:
 		message("%s config is not up to date (%s)", "main", mainConfigPath)
 	logging.debug("Delete %s", mainConfigPath, getEditConfigPath(mainConfigPath))
 	safeUnlink(getEditConfigPath(mainConfigPath))
-	return result
+	return (diff == None)
 
 #===============================================================================
 # Update the main config.
