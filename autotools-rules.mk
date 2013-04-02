@@ -92,29 +92,49 @@ configure-filter-args = $(strip \
 endif
 
 ###############################################################################
-## Add debug flags.
+## Add compilation/debug flags.
 ###############################################################################
 
+# Compilation flags
+add_CFLAGS := $(LOCAL_CFLAGS) $(call normalize-c-includes,$(LOCAL_C_INCLUDES))
+add_CXXFLAGS := $(add_CFLAGS) $(LOCAL_CXXFLAGS)
+add_LDFLAGS := $(LOCAL_LDFLAGS)
+
+# Debug flags
 debug_CFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),CFLAGS)
 debug_CXXFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),CXXFLAGS)
 debug_LDFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),LDFLAGS)
 
-# Add CFLAGS to CXXFLAGS as well
+# Print debug messages
 ifneq ("$(debug_CFLAGS)","")
   $(info Debug: Adding '$(debug_CFLAGS)' to '$(LOCAL_MODULE)' CFLAGS and CXXFLAGS)
-  LOCAL_AUTOTOOLS_CONFIGURE_ENV += CFLAGS="$$CFLAGS $(debug_CFLAGS)"
-  LOCAL_AUTOTOOLS_CONFIGURE_ENV += CXXFLAGS="$$CXXFLAGS $(debug_CFLAGS)"
+  add_CFLAGS += $(debug_CFLAGS)
+  add_CXXFLAGS += $(debug_CFLAGS)
 endif
 
 ifneq ("$(debug_CXXFLAGS)","")
   $(info Debug: Adding '$(debug_CXXFLAGS)' to '$(LOCAL_MODULE)' CXXFLAGS)
-  LOCAL_AUTOTOOLS_CONFIGURE_ENV += CXXFLAGS="$$CXXFLAGS $(debug_CFLAGS)"
+  add_CXXFLAGS += $(debug_CXXFLAGS)
 endif
 
 ifneq ("$(debug_LDFLAGS)","")
   $(info Debug: Adding '$(debug_LDFLAGS)' to '$(LOCAL_MODULE)' LDFLAGS)
-  LOCAL_AUTOTOOLS_CONFIGURE_ENV += LDFLAGS="$$LDFLAGS $(debug_LDFLAGS)"
-  LOCAL_AUTOTOOLS_CONFIGURE_ENV += DYN_LDFLAGS="$$DYN_LDFLAGS $(debug_LDFLAGS)"
+  add_LDFLAGS += $(debug_LDFLAGS)
+endif
+
+# Add flags in environment
+ifneq ("$(add_CFLAGS)","")
+  LOCAL_AUTOTOOLS_CONFIGURE_ENV += CFLAGS="$$CFLAGS $(add_CFLAGS)"
+  LOCAL_AUTOTOOLS_CONFIGURE_ENV += CPPFLAGS="$$CPPFLAGS $(add_CFLAGS)"
+endif
+
+ifneq ("$(add_CXXFLAGS)","")
+  LOCAL_AUTOTOOLS_CONFIGURE_ENV += CXXFLAGS="$$CXXFLAGS $(add_CFLAGS)"
+endif
+
+ifneq ("$(add_LDFLAGS)","")
+  LOCAL_AUTOTOOLS_CONFIGURE_ENV += LDFLAGS="$$LDFLAGS $(add_LDFLAGS)"
+  LOCAL_AUTOTOOLS_CONFIGURE_ENV += DYN_LDFLAGS="$$DYN_LDFLAGS $(add_LDFLAGS)"
 endif
 
 ###############################################################################
