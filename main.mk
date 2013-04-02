@@ -336,17 +336,10 @@ scan:
 	@echo "Scan done"
 
 ###############################################################################
-## If a module has set PBUILD_HOOK, include its package.
+## pbuild-hook management.
 ###############################################################################
 
-__need-pbuild-hook = $(strip \
-	$(foreach __mod, $(__modules), \
-		$(__modules.$(__mod).PBUILD_HOOK) \
-	))
-
-$(if $(__need-pbuild-hook), \
-	$(eval include $(BUILD_SYSTEM)/pbuild-hook/pbuild-hook.mk) \
-)
+include $(BUILD_SYSTEM)/pbuild-hook/pbuild-hook.mk
 
 ###############################################################################
 ## Module dependencies generation.
