@@ -233,7 +233,7 @@ ifneq ("$(archive_file)","")
 	+$(call macro-exec-cmd,AUTOTOOLS_CMD_UNPACK,__default-unpack)
 	+$(if $(PRIVATE_PATCHES),$(__apply-patches))
 endif
-	+$(call macro-exec-cmd,AUTOTOOLS_CMD_POST_UNPACK)
+	+$(call macro-exec-cmd,AUTOTOOLS_CMD_POST_UNPACK,empty)
 	@mkdir -p $(dir $@)
 	@touch $@
 
@@ -242,7 +242,7 @@ $(configured_file): $(unpacked_file) $(configure_file)
 	$(call __autotools-msg,Configuring)
 	@mkdir -p $(PRIVATE_OBJ_DIR)
 	+$(call macro-exec-cmd,AUTOTOOLS_CMD_CONFIGURE,__default-configure)
-	+$(call macro-exec-cmd,AUTOTOOLS_CMD_POST_CONFIGURE)
+	+$(call macro-exec-cmd,AUTOTOOLS_CMD_POST_CONFIGURE,empty)
 	+$(__libtool_patch)
 	@mkdir -p $(dir $@)
 	@touch $@
@@ -252,7 +252,7 @@ $(built_file): $(configured_file)
 	$(call __autotools-msg,Building)
 	@mkdir -p $(PRIVATE_OBJ_DIR)
 	+$(call macro-exec-cmd,AUTOTOOLS_CMD_BUILD,__default-make-build)
-	+$(call macro-exec-cmd,AUTOTOOLS_CMD_POST_BUILD)
+	+$(call macro-exec-cmd,AUTOTOOLS_CMD_POST_BUILD,empty)
 	@mkdir -p $(dir $@)
 	@touch $@
 
@@ -260,7 +260,7 @@ $(built_file): $(configured_file)
 $(installed_file): $(built_file)
 	$(call __autotools-msg,Installing)
 	+$(call macro-exec-cmd,AUTOTOOLS_CMD_INSTALL,__default-make-install)
-	+$(call macro-exec-cmd,AUTOTOOLS_CMD_POST_INSTALL)
+	+$(call macro-exec-cmd,AUTOTOOLS_CMD_POST_INSTALL,empty)
 	@mkdir -p $(dir $@)
 	@touch $@
 
@@ -276,7 +276,7 @@ $(LOCAL_MODULE)-clean:
 	$(Q) if [ -d $(PRIVATE_OBJ_DIR) ]; then find $(PRIVATE_OBJ_DIR) -name config.status -exec touch {} \; ; fi
 	$(Q) if [ -d $(PRIVATE_OBJ_DIR) ]; then find $(PRIVATE_OBJ_DIR) -name Makefile -exec touch {} \; ; fi
 	+$(call macro-exec-cmd,AUTOTOOLS_CMD_CLEAN,__default-clean)
-	+$(call macro-exec-cmd,AUTOTOOLS_CMD_POST_CLEAN)
+	+$(call macro-exec-cmd,AUTOTOOLS_CMD_POST_CLEAN,empty)
 
 # If the user makefile is changed, restart at the configure step
 # The touch of configure script ensures recompilation of parent dependencies

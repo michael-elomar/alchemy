@@ -160,7 +160,7 @@ $(LOCAL_MODULE)-clean-common:
 .PHONY: $(LOCAL_MODULE)-dirclean
 $(LOCAL_MODULE)-dirclean: $(LOCAL_MODULE)-clean
 	$(Q)rm -rf $(PRIVATE_BUILD_DIR)
-	+$(call macro-exec-cmd,CMD_POST_DIRCLEAN)
+	+$(call macro-exec-cmd,CMD_POST_DIRCLEAN,empty)
 
 # Display the path of the module
 .PHONY: $(LOCAL_MODULE)-path
@@ -221,7 +221,7 @@ $(unpacked_file): $(archive_file) $(addprefix $(LOCAL_PATH)/,$(patches))
 	@mkdir -p $(PRIVATE_ARCHIVE_UNPACK_DIR)
 	+$(call macro-exec-cmd,ARCHIVE_CMD_UNPACK,__archive-default-unpack)
 	+$(if $(PRIVATE_ARCHIVE_PATCHES),$(__archive-apply-patches))
-	+$(call macro-exec-cmd,ARCHIVE_CMD_POST_UNPACK)
+	+$(call macro-exec-cmd,ARCHIVE_CMD_POST_UNPACK,empty)
 	@mkdir -p $(dir $@)
 	@touch $@
 
@@ -405,7 +405,7 @@ ifneq ("$(value LOCAL_CMD_PRE_INSTALL)","")
 
 .PHONY: $(LOCAL_MODULE)-pre-install
 $(LOCAL_MODULE)-pre-install:
-	+$(call macro-exec-cmd,CMD_PRE_INSTALL)
+	+$(call macro-exec-cmd,CMD_PRE_INSTALL,empty)
 
 # If a copy in staging is done do it before otherwise we can only hook before
 # build module is done...
