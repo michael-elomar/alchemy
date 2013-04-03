@@ -737,8 +737,14 @@ install-headers-setup = \
 ## $1 : source variable.
 ## This works by reevaluating the content of the macro in a new variable.
 ###############################################################################
-macro-copy = \
-	$(eval define $1$(endl)$(value $2)$(endl)endef)
+macro-copy = $(eval define $1$(endl)$(value $2)$(endl)endef)
+
+###############################################################################
+## Compare 2 macros.
+## $1 : first variable.
+## $2 : second variable.
+###############################################################################
+macro-compare = $(call streq,$(value $1),$(value $2))
 
 ###############################################################################
 ## Determine if a macro is empty.
@@ -772,13 +778,18 @@ macro-exec-cmd = \
 ###############################################################################
 ## Macros to be called before and after inclusion of user makefiles.
 ## It checks that user makefile does not overwrite internal variables.
+##
+## Use macro-copy/macro-compare in case some variables contains stuff that
+## should not be done while being evaluated.
+## For example the variable TARGET_GLOBAL_CFLAGS_thumb may contains an error
+## message displayed when used while TARGET_DEFAULT_ARM_MODE is 'arm'.
 ###############################################################################
 
 # Save TARGET_XXX variables
 user-makefile-before-include = \
 	$(foreach __var,$(vars-TARGET), \
 		$(if $(call is-var-defined,TARGET_$(__var)), \
-			$(eval saved-TARGET_$(__var) := $(TARGET_$(__var))) \
+			$(call macro-copy,saved-TARGET_$(__var),TARGET_$(__var)) \
 		) \
 	)
 
@@ -786,11 +797,9 @@ user-makefile-before-include = \
 user-makefile-after-include = \
 	$(foreach __var,$(vars-TARGET), \
 		$(if $(call is-var-defined,TARGET_$(__var)), \
-			$(eval __old := $(saved-TARGET_$(__var))) \
-			$(eval __new := $(TARGET_$(__var))) \
-			$(if $(call strneq,$(__old),$(__new)), \
+			$(if $(call macro-compare,TARGET_$(__var),saved-TARGET_$(__var)),$(empty), \
 				$(warning $1: attempt to modify TARGET_$(__var)) \
-				$(eval TARGET_$(__var) := $(__old)) \
+				$(call macro-copy,TARGET_$(__var),saved-TARGET_$(__var)) \
 			) \
 		) \
 	)
