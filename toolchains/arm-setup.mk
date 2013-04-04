@@ -63,6 +63,11 @@ ifeq ("$(TARGET_CPU)","omap3")
   TARGET_GLOBAL_LDFLAGS += -Wl,--fix-cortex-a8
 endif
 
+ifeq ("$(TARGET_CPU)","omap4")
+  TARGET_GLOBAL_CFLAGS += $(cflags_armv7neon)
+  TARGET_GLOBAL_CFLAGS += -mtune=cortex-a9 -mcpu=cortex-a9
+endif
+
 ###############################################################################
 ## Arm/thumb mode flags.
 ## Taken from Android build system setup.
