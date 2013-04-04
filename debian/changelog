@@ -1,3 +1,18 @@
+parrot-tools-alchemy (1.0.4) unstable; urgency=low
+
+  * Resolve symlinks relative to final directory.
+  * USE_BUILD_DEPS_CHECK_IN_CONFIG is now enabled by default.
+  * Add BUILD_META_PACKAGE.
+  * Do not fail config check if commented lines are added/removed.
+  * Allow override of CFLAGS/C_INCLUDES of autotools.
+  * Add LOCAL_INSTALL_HEADERS.
+  * Add LOCAL_CREATE_LINKS.
+  * Add LOCAL_REQUIRED_MODULES.
+  * Only do some checks if modules are built.
+  * Make sure no atom.mk tries to modify a TARGET_XXX variable
+
+ -- Yves-Marie Morgan (Parrot) <yves-marie.morgan@parrot.com>  Thu, 04 Apr 2013 11:46:55 +0200
+
 parrot-tools-alchemy (1.0.3) unstable; urgency=low
 
   * Make sure everything is working if 'all' is given with another goal.
