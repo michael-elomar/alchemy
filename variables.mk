@@ -210,6 +210,7 @@ vars-TARGET += CONFIG_DIR
 vars-TARGET += SKEL
 vars-TARGET += SKEL_DIRS
 vars-TARGET += SCAN_PRUNE_DIRS
+vars-TARGET += SCAN_ADD_DIRS
 
 # Other specialized settings
 vars-TARGET += PBUILD_FORCE_STATIC
