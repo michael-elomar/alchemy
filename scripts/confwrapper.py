@@ -466,13 +466,17 @@ def writeConfigMenu(outFile, menu, mainConfig):
 			moduleBuildDefineSet = moduleBuildDefine + "=y"
 			moduleBuildDefineNotSet = "# " + moduleBuildDefine + " is not set"
 
-			# Determine if module is set or not
+			# Determine if module is set or not. Do NOT force a value if we
+			# don't have one otherwise the UI will not see that there might be
+			# some changes to save...
 			if moduleBuildDefineNotSet in mainConfig:
 				outFile.write(moduleBuildDefineNotSet + "\n")
 			elif moduleBuildDefineSet in mainConfig:
 				outFile.write(moduleBuildDefineSet + "\n")
 
-			# However, always write module configuration
+			# However, always write module configuration. If module is enabled,
+			# it will get the one we have. kconfig has been patched to handle
+			# this use case without considering the config as not up to date.
 			# (if some can be configured though)
 			if len(module.configInPathList) > 0:
 				moduleFileDefine = "CONFIG_ALCHEMY_FILE_" + moduleDefine
@@ -532,6 +536,7 @@ def processFullConfig(inFile, modules, mainConfigPath):
 	logging.debug("Processing full config")
 
 	reConfigBuild = re.compile(r"(# )?CONFIG_ALCHEMY_BUILD_([^= ]*)[= ].*")
+	reConfigFile = re.compile(r"CONFIG_ALCHEMY_FILE_([^= ]*)[= ].*")
 	moduleStatus = {}
 	module = None
 	moduleConfigFile = None
@@ -565,12 +570,26 @@ def processFullConfig(inFile, modules, mainConfigPath):
 			if moduleConfigFile != None:
 				moduleConfigFile.close()
 			moduleConfigFile = None
+			# Make sure it is for the current module...
+			# It happens when a new module with a config file is not yet saved
+			# in full config, its CONFIG_ALCHEMY_BUILD_ is not present but its
+			# CONFIG_ALCHEMY_FILE_ is (see writeConfigMenu)
+			match = reConfigFile.match(line)
+			idx = line.find("=")
+			if match == None:
+				modulefile = None
+				logging.warning("Unable to extract module name from: %s", line)
+			else:
+				modulefile = findModule(modules, match.group(1))
+
 			idx = line.find("=")
 			if idx >= 0:
 				moduleConfigPath = line[idx+1:].strip("\"\'")
 				logging.debug("New module config: %s", moduleConfigPath)
-				if not moduleStatus[module.name]:
-					logging.debug("  disabled)")
+				if module != modulefile:
+					logging.debug("  disabled (not saved yet)")
+				elif not moduleStatus[module.name]:
+					logging.debug("  disabled")
 				else:
 					try:
 						moduleConfigFile = safeCreateFile(
