@@ -238,7 +238,8 @@ endif
 	@touch $@
 
 # Configuration
-$(configured_file): $(unpacked_file) $(configure_file)
+# If the user makefile is changed, restart at the configure step
+$(configured_file): $(unpacked_file) $(configure_file) $(LOCAL_PATH)/$(USER_MAKEFILE_NAME)
 	$(call __autotools-msg,Configuring)
 	@mkdir -p $(PRIVATE_OBJ_DIR)
 	+$(call macro-exec-cmd,AUTOTOOLS_CMD_CONFIGURE,__default-configure)
@@ -277,13 +278,6 @@ $(LOCAL_MODULE)-clean:
 	$(Q) if [ -d $(PRIVATE_OBJ_DIR) ]; then find $(PRIVATE_OBJ_DIR) -name Makefile -exec touch {} \; ; fi
 	+$(call macro-exec-cmd,AUTOTOOLS_CMD_CLEAN,__default-clean)
 	+$(call macro-exec-cmd,AUTOTOOLS_CMD_POST_CLEAN,empty)
-
-# If the user makefile is changed, restart at the configure step
-# The touch of configure script ensures recompilation of parent dependencies
-ifneq ("$(configure_file)","")
-$(configure_file): $(LOCAL_PATH)/$(USER_MAKEFILE_NAME)
-	@touch $@
-endif
 
 ###############################################################################
 ## Rule-specific variable definitions.
