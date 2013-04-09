@@ -175,6 +175,8 @@ def doCopyByMakefile(dstFileName, srcFileName, doStrip, options):
 			(dstFileName, srcFileName))
 		options.makefile.write("\t$(Q)chmod $$(stat --printf '%%a' \"%s\") \"%s\"" % \
 			(srcFileName, dstFileName))
+		options.makefile.write("\t$(Q)touch -d@$$(stat --printf '%%Y' \"%s\") \"%s\"" % \
+			(srcFileName, dstFileName))
 	else:
 		options.makefile.write("\t$(Q)cp -af \"%s\" \"%s\"\n" % \
 			(srcFileName, dstFileName))
@@ -189,6 +191,7 @@ def doCopyDirect(dstFileName, srcFileName, doStrip, options):
 	if doStrip:
 		os.system("%s -o \"%s\" \"%s\"" % (options.strip, dstFileName, srcFileName))
 		os.system("chmod $(stat --printf '%%a' \"%s\") \"%s\"" % (srcFileName, dstFileName))
+		os.system("touch -d@$(stat --printf '%%Y' \"%s\") \"%s\"" % (srcFileName, dstFileName))
 	else:
 		os.system("cp -af \"%s\" \"%s\"" % (srcFileName, dstFileName))
 
