@@ -1,10 +1,15 @@
 #!/bin/sh
 
 # Exclude some directories during search
-readonly FIND_PATTERN='-path */proc -prune -o -path */dev -prune -o -print'
+readonly FIND_PATTERN="-path */proc -prune -o -path */dev -prune"
 
 # List of binaries
-binaries=$(file $(find ${FIND_PATTERN} -type f) | /bin/grep 'ELF' | cut -d: -f1)
+binaries=$( \
+		find \( ${FIND_PATTERN} -o -type f \) -print0 | \
+		xargs --null file | \
+		/bin/grep 'ELF' |
+		cut -d: -f1
+	)
 
 # Get libs needed by binaries
 libs=""
@@ -23,7 +28,7 @@ libs="$(echo "${libs}" | tr [:space:] '\n' | sort | uniq)"
 # Check that all libraries exist
 missing="no"
 for lib in ${libs}; do
-	res="$(find ${FIND_PATTERN} -name ${lib})"
+	res="$(find \( ${FIND_PATTERN} -o -type f -o -type l \) -a -name ${lib})"
 	if test -z "${res}"; then
 		echo "Missing ${lib}"
 		missing="yes"
