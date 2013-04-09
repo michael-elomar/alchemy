@@ -7,10 +7,18 @@
 ###############################################################################
 
 # Name of files indicating steps done
-unpacked_file := $(build_dir)/$(LOCAL_MODULE).unpacked
-configured_file := $(build_dir)/$(LOCAL_MODULE).configured
-built_file := $(build_dir)/$(LOCAL_MODULE).built
-installed_file := $(build_dir)/$(LOCAL_MODULE).installed
+# Using version allow to switch without having some dependencies troubles
+ifneq ("$(LOCAL_AUTOTOOLS_VERSION)","")
+  unpacked_file := $(build_dir)/$(LOCAL_MODULE)-$(LOCAL_AUTOTOOLS_VERSION).unpacked
+  configured_file := $(build_dir)/$(LOCAL_MODULE)-$(LOCAL_AUTOTOOLS_VERSION).configured
+  built_file := $(build_dir)/$(LOCAL_MODULE)-$(LOCAL_AUTOTOOLS_VERSION).built
+  installed_file := $(build_dir)/$(LOCAL_MODULE)-$(LOCAL_AUTOTOOLS_VERSION).installed
+else
+  unpacked_file := $(build_dir)/$(LOCAL_MODULE).unpacked
+  configured_file := $(build_dir)/$(LOCAL_MODULE).configured
+  built_file := $(build_dir)/$(LOCAL_MODULE).built
+  installed_file := $(build_dir)/$(LOCAL_MODULE).installed
+endif
 
 # Archive file (optional)
 ifneq ("$(strip $(LOCAL_AUTOTOOLS_ARCHIVE))","")
