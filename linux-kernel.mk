@@ -77,9 +77,12 @@ linux-copy-image = \
 	fi;
 
 # Copy config in build dir
+linux-copy-config = \
+	mkdir -p $(LINUX_BUILD_DIR); \
+	cp -af $(LINUX_CONFIG_FILE) $(LINUX_BUILD_DIR)/.config
+
 $(LINUX_BUILD_DIR)/.config: $(LINUX_CONFIG_FILE)
-	@mkdir -p $(dir $@)
-	@cp -af $< $@
+	@$(linux-copy-config)
 
 # Avoid compiling kernel at same time than header installation by adding a prerequisite
 $(LINUX_BUILD_DIR)/$(LOCAL_MODULE_FILENAME): $(LINUX_BUILD_DIR)/.config $(LINUX_HEADERS_DONE_FILE)
@@ -160,10 +163,15 @@ linux-clean:
 	$(Q)rm -f $(LINUX_HEADERS_DONE_FILE)
 
 # Default rule to invoke kernel specific targets (like cscope, tags, help ...)
+# Do NOT put a dependency for this pattern rule to avoid subtle troubles.
+# For example, depending on linux config file will trigger this rule for this
+# makefile (named linux-kernel.mk) that matches the pattern.
+# The macro linux-copy-config is called to make sure it is really there...
 .PHONY: linux-%
-linux-%: $(LINUX_BUILD_DIR)/.config
-	@echo "Building linux kernel $(subst linux-,,$@) target"
-	$(Q)$(MAKE) $(LINUX_MAKE_ARGS) $(subst linux-,,$@)
+linux-%:
+	@$(linux-copy-config)
+	@echo "Building linux kernel $* target"
+	$(Q)$(MAKE) $(LINUX_MAKE_ARGS) $*
 
 # Register as a custom build in the system
 include $(BUILD_CUSTOM)
