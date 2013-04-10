@@ -45,6 +45,9 @@ LINUX_BASIC_SKEL = [
 	["tmp", None],
 ]
 
+# Shebang patch
+PATCH_SHEBANG = "sed -e 's|^\#! */bin/bash$|\#!/bin/sh|'"
+
 class CopyType:
 	(ONLY_LINKS, NO_LINKS, ALL) = range(0, 3)
 
@@ -140,9 +143,31 @@ def getRealPath(finalDir, path):
 	return os.path.abspath(path)
 
 #===============================================================================
+# Get the commands to be executed for the copy.
+#===============================================================================
+def getCopyCmds(dstFileName, srcFileName, options, doStrip=False, doPatchShebang=False):
+	cmds = []
+	if not doStrip and not doPatchShebang:
+		# Simple copy
+		cmds.append("cp -af \"%s\" \"%s\"" % (srcFileName, dstFileName))
+	else:
+		if doStrip:
+			cmds.append("%s -o \"%s\" \"%s\"" % \
+				(options.strip, dstFileName, srcFileName))
+		elif doPatchShebang:
+			cmds.append("%s \"%s\" > \"%s\"" %
+				(PATCH_SHEBANG, srcFileName, dstFileName))
+		# Restore mode and timestamp
+		cmds.append("chmod $(stat --printf '%%a' \"%s\") \"%s\"" % \
+			(srcFileName, dstFileName))
+		cmds.append("touch -d@$(stat --printf '%%Y' \"%s\") \"%s\"" % \
+			(srcFileName, dstFileName))
+	return cmds
+
+#===============================================================================
 # Copy a file using a makefile (to do strip in parallel).
 #===============================================================================
-def doCopyByMakefile(dstFileName, srcFileName, doStrip, options):
+def doCopyByMakefile(dstFileName, srcFileName, options, doStrip=False, doPatchShebang=False):
 	srcFileNameEsc = srcFileName
 	dstFileNameEsc = dstFileName
 	# if source file contains ' ', ':' or '=' it doesn't work great
@@ -168,37 +193,26 @@ def doCopyByMakefile(dstFileName, srcFileName, doStrip, options):
 	options.makefile.write("%s: %s\n" % (dstFileNameEsc, srcFileNameEsc))
 
 	# commands, see doCopy for more info
+	cmds = getCopyCmds(dstFileName, srcFileName, options, doStrip, doPatchShebang)
 	options.makefile.write("\t@mkdir -p \"%s\"\n" % os.path.dirname(dstFileName))
 	options.makefile.write("\t@echo Alchemy install: %s\n" % os.path.relpath(dstFileName))
-	if doStrip:
-		options.makefile.write("\t$(Q)$(STRIP) -o \"%s\" \"%s\"\n" % \
-			(dstFileName, srcFileName))
-		options.makefile.write("\t$(Q)chmod $$(stat --printf '%%a' \"%s\") \"%s\"" % \
-			(srcFileName, dstFileName))
-		options.makefile.write("\t$(Q)touch -d@$$(stat --printf '%%Y' \"%s\") \"%s\"" % \
-			(srcFileName, dstFileName))
-	else:
-		options.makefile.write("\t$(Q)cp -af \"%s\" \"%s\"\n" % \
-			(srcFileName, dstFileName))
+	for cmd in cmds:
+		options.makefile.write("\t$(Q)%s\n" % cmd)
 	options.makefile.write("\n")
 
 #===============================================================================
 # Copy a file by directly making a copy.
 #===============================================================================
-def doCopyDirect(dstFileName, srcFileName, doStrip, options):
-	# copy and strip executables
-	# make sure we restore permission bits after strip operation
-	if doStrip:
-		os.system("%s -o \"%s\" \"%s\"" % (options.strip, dstFileName, srcFileName))
-		os.system("chmod $(stat --printf '%%a' \"%s\") \"%s\"" % (srcFileName, dstFileName))
-		os.system("touch -d@$(stat --printf '%%Y' \"%s\") \"%s\"" % (srcFileName, dstFileName))
-	else:
-		os.system("cp -af \"%s\" \"%s\"" % (srcFileName, dstFileName))
+def doCopyDirect(dstFileName, srcFileName, options, doStrip=False, doPatchShebang=False):
+	cmds = getCopyCmds(dstFileName, srcFileName, options, doStrip, doPatchShebang)
+	for cmd in cmds:
+		logging.debug("  %s" % cmd)
+		os.system(cmd)
 
 #===============================================================================
 # Copy a file/link.
 #===============================================================================
-def doCopy(dstFileName, srcFileName, options):
+def doCopy(dstFileName, srcFileName, options, doPatchShebang=False):
 	relPath = os.path.relpath(dstFileName, options.finalDir)
 
 	# do we need to strip ?
@@ -236,9 +250,9 @@ def doCopy(dstFileName, srcFileName, options):
 
 	# do the copy by wanted method
 	if options.makefile != None and not os.path.islink(srcFileName):
-		doCopyByMakefile(dstFileName, srcFileName, doStrip, options)
+		doCopyByMakefile(dstFileName, srcFileName, options, doStrip, doPatchShebang)
 	else:
-		doCopyDirect(dstFileName, srcFileName, doStrip, options)
+		doCopyDirect(dstFileName, srcFileName, options, doStrip, doPatchShebang)
 
 #===============================================================================
 # Makefile banner
@@ -334,13 +348,14 @@ def processToolchainLibc(libcDir, options):
 			doCopy(dstFileName, srcFileName, options)
 
 	# copy 'ldd' from 'usr/bin" directory
+	# Patch shebang from #!bin/bash to !/bin/sh
 	usrBinDir = os.path.join(libcDir, "usr/bin")
 	for fileName in os.listdir(usrBinDir):
 		if re.match(r"ldd", fileName):
 			srcFileName = os.path.join(usrBinDir, fileName)
 			relPath = os.path.relpath(srcFileName, libcDir)
 			dstFileName = getRealPath(options.finalDir, relPath)
-			doCopy(dstFileName, srcFileName, options)
+			doCopy(dstFileName, srcFileName, options, doPatchShebang=True)
 
 #===============================================================================
 # Process linux basic skel.
