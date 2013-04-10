@@ -203,9 +203,9 @@ module-add = \
 		$(foreach __local,$(macros-LOCAL), \
 			$(call macro-copy,__modules.$(__mod).$(__local),LOCAL_$(__local)) \
 		) \
-	) \
-	$(check-cppflags-compat) \
-	$(call install-headers-setup,$(LOCAL_MODULE))
+		$(check-cppflags-compat) \
+		$(call install-headers-setup,$(LOCAL_MODULE)) \
+	)
 
 ###############################################################################
 ## Check if a list of targets is given in make goals.
