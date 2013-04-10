@@ -1,7 +1,7 @@
 
 # eclipse files
 .cproject
-.pyproject
+.pydevproject
 .project
 
 # backup files
