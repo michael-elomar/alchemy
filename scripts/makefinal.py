@@ -160,7 +160,7 @@ def getCopyCmds(dstFileName, srcFileName, options, doStrip=False, doPatchShebang
 		# Restore mode and timestamp
 		cmds.append("chmod $(stat --printf '%%a' \"%s\") \"%s\"" % \
 			(srcFileName, dstFileName))
-		cmds.append("touch -d@$(stat --printf '%%Y' \"%s\") \"%s\"" % \
+		cmds.append("touch -r \"%s\" \"%s\"" % \
 			(srcFileName, dstFileName))
 	return cmds
 
