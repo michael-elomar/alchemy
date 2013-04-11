@@ -644,6 +644,55 @@ module-get-debug-flags = $(strip \
 	))
 
 ###############################################################################
+## Module revision management. Assume git is used and return SHA1 of HEAD.
+###############################################################################
+
+ifneq ("$(USE_GIT_REV)","0")
+
+# Get revision of one module
+# $1 : module name.
+module-get-revision = $(__modules.$1.revision)
+
+# Get last revision of one module. It is found in a generated file that may
+# not exist so the result can be empty.
+# $1 : module name.
+module-get-last-revision = $(strip \
+	$(if $(call is-var-defined,build.$1.revision.last), \
+		$(build.$1.revision.last) \
+	))
+
+# Compute revision of all modules
+module-compute-revisions = \
+	$(foreach __mod,$(__modules), \
+		$(eval __path := $(__modules.$(__mod).PATH)) \
+		$(eval __rev := $(shell cd $(__path) && git rev-parse HEAD 2>/dev/null)) \
+		$(eval __modules.$(__mod).revision := $(__rev)) \
+	)
+
+# Check if revision of module has changed since last build.
+# If either current/last revision is unknown, it will return false.
+# $1 : module name.
+module-check-revision-changed = $(strip \
+	$(eval __current := $(call module-get-revision,$1)) \
+	$(eval __last := $(call module-get-last-revision,$1)) \
+	$(and $(__current),$(__last),$(call strneq,$(__current),$(__last))))
+
+# Generate the file with last revision. Some duplication with
+# 'module-check-revision-changed' to update the file onlmy when needed.
+# $1 : module name.
+# $2 : output file.
+# Note: shall be call as a command in side a rule.
+generate-last-revision-file = \
+	$(eval __current := $(call module-get-revision,$1)) \
+	$(eval __last := $(call module-get-last-revision,$1)) \
+	$(if $(and $(__current),$(__last),$(call strneq,$(__current),$(__last))), \
+		mkdir -p $(dir $2); \
+		echo "build.$1.revision.last=$(__current)" > $2; \
+	) \
+
+endif
+
+###############################################################################
 ## Generate autoconf.h file from config file.
 ## $1 : input config file.
 ## $2 : output autoconf.h file.

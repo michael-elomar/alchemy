@@ -32,6 +32,7 @@ USE_CCACHE ?= 0
 USE_SCAN_CACHE ?= 0
 USE_COLORS ?= 0
 USE_BUILD_DEPS_CHECK_IN_CONFIG ?= 1
+USE_GIT_REV ?= 0
 
 # Quiet command if V is 0
 ifeq ("$(V)","0")
@@ -377,6 +378,11 @@ $(call modules-compute-depends)
 ifeq ("$(SKIP_DEPS_AND_CHECKS)","0")
   $(call modules-check-depends)
   $(call modules-check-variables)
+endif
+
+# Compute revision of all modules
+ifneq ("$(USE_GIT_REV)","0")
+  $(call module-compute-revisions)
 endif
 
 ###############################################################################

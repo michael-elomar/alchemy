@@ -38,6 +38,19 @@ LOCAL_TARGETS := \
 all_depends := $(call module-get-all-depends,$(LOCAL_MODULE))
 
 ###############################################################################
+## Last revision used management
+###############################################################################
+
+ifneq ("$(USE_GIT_REV)","0")
+
+# Include file with revision use for last build. It will define a variable
+# if available.
+revision_file := $(build_dir)/$(LOCAL_MODULE).revision
+-include $(revision_file)
+
+endif
+
+###############################################################################
 ## Construct prerequisites.
 ###############################################################################
 
@@ -87,12 +100,23 @@ ifneq ("$(call is-module-in-make-goals,$(LOCAL_MODULE))","")
   skip_ext_checks := 0
 endif
 
+# If revision of last build is not the same, do not skip external checks
+# FIXME: modules dependending on this one will not be forced to be checked.
+ifneq ("$(USE_GIT_REV)","0")
+ifneq ("$(call module-check-revision-changed,$(LOCAL_MODULE))","")
+  ifneq ("$(V)","0")
+    $(info $(LOCAL_MODULE): revision has changed since last build)
+  endif
+  skip_ext_checks := 0
+endif
+endif
+
 ###############################################################################
 ## External checks : module built externaly may have other dependencies.
 ###############################################################################
 
 # Update list of 'done' files with module file name
-# Using sort ensure there is no duplicates in the list
+# Using sort ensures there is no duplicates in the list
 ifeq ("$(patsubst %.done,1,$(LOCAL_MODULE_FILENAME))","1")
   LOCAL_DONE_FILES := $(sort $(LOCAL_DONE_FILES) $(LOCAL_MODULE_FILENAME))
 endif
@@ -108,7 +132,6 @@ delete-one-done-file = \
 	)
 
 # Macro to delete all 'done' files registered in module
-# Also check if the module file name is a 'done' file
 delete-all-done-files = \
 	$(foreach __f,$(LOCAL_DONE_FILES),\
 		$(call delete-one-done-file, \
@@ -171,6 +194,22 @@ $(LOCAL_MODULE)-path:
 # Prebuilt modules migth not be defined in an user makefile so skip this for them
 ifneq ("$(LOCAL_MODULE_CLASS)","PREBUILT")
 $(LOCAL_BUILD_MODULE): $(LOCAL_PATH)/$(USER_MAKEFILE_NAME)
+endif
+
+ifneq ("$(USE_GIT_REV)","0")
+
+# Generate the file containing the revision used in last build.
+# Do not do that on a target with the name of the file to avoid reparsing
+# everything when a change is made. Moreover, we want the file to be created
+# AFTER module is built, not BEFORE (at time of inclusion of generated file).
+$(LOCAL_MODULE): | $(LOCAL_MODULE)-gen-last-rev
+
+.PHONY: $(LOCAL_MODULE)-gen-last-rev
+$(LOCAL_MODULE)-gen-last-rev: PRIVATE_MODULE := $(LOCAL_MODULE)
+$(LOCAL_MODULE)-gen-last-rev: PRIVATE_REV_FILE := $(revision_file)
+$(LOCAL_MODULE)-gen-last-rev: $(LOCAL_BUILD_MODULE)
+	@$(call generate-last-revision-file,$(PRIVATE_MODULE),$(PRIVATE_REV_FILE))
+
 endif
 
 ###############################################################################
