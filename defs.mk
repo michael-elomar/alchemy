@@ -48,23 +48,31 @@ rest = $(wordlist 2,$(words $1),$1)
 # $1 : full path to convert.
 path-from-top = $(patsubst $(TOP_DIR)/%,%,$1)
 
+# Uppers and lowers characters
+_uppers := ABCDEFGHIJKLMNOPQRSTUVWXYZ
+_lowers := abcdefghijklmnopqrstuvwxyz
+
 # Translate characters.
 # $1 : text to convert.
 # $2 : characters to convert from.
 # $3 : characters to convert to.
-tr = $(shell echo $1 | tr $2 $3)
+#tr = $(shell echo $1 | tr $2 $3)
+tr = $(error deprecated)
 
 # Convert to upper case.
 # $1 : text to convert.
-upcase = $(shell echo $1 | tr [:lower:] [:upper:])
+#upcase = $(shell echo $1 | tr [:lower:] [:upper:])
+upcase = $(error deprecated)
 
 # Convert to lower case.
 # $1 : text to convert.
-locase = $(shell echo $1 | tr [:upper:] [:lower:])
+#locase = $(shell echo $1 | tr [:upper:] [:lower:])
+locase = $(error deprecated)
 
 # Replace '-' by '_' and convert to upper case.
 # $1 : text to convert.
-get-define = $(strip $(call upcase,$(call tr,$1,-,_)))
+#get-define = $(strip $(call upcase,$(call tr,$1,-,_)))
+get-define = $(strip $(shell echo $1 | sed -e 'y/$(_lowers)-/$(_uppers)_/'))
 
 # Remove quotes from string
 remove-quotes = $(strip $(subst ",,$1))
