@@ -361,9 +361,10 @@ __modules := $(sort $(__modules))
 ALL_MODULES := $(__modules)
 
 # All modules to actually build
-ALL_BUILD_MODULES := \
+ALL_BUILD_MODULES := $(strip \
 	$(foreach __mod,$(ALL_MODULES), \
-		$(if $(call is-module-in-build-config,$(__mod)),$(__mod)))
+		$(if $(call is-module-in-build-config,$(__mod)),$(__mod)) \
+	))
 
 $(shell mkdir -p $(TARGET_OUT_BUILD))
 $(shell echo "$(ALL_MODULES)" > $(TARGET_OUT_BUILD)/modules)
