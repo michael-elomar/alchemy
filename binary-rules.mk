@@ -206,7 +206,7 @@ all_prerequisites += $(imported_PREREQUISITES)
 
 # Notify that we build with dependencies
 LOCAL_CFLAGS += $(foreach __mod,$(all_depends), \
-	-DBUILD_$(call get-define,$(__mod)))
+	-DBUILD_$(call module-get-define,$(__mod)))
 
 # User makefile is an internal dependencies
 all_internal_depends := $(LOCAL_PATH)/$(USER_MAKEFILE_NAME)

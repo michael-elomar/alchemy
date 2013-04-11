@@ -112,6 +112,10 @@ uniq2 = \
 # $1 : name of the variable (not its content)
 is-var-defined = $(call strneq,$(origin $1),undefined)
 
+# Determine if a variable is not defined
+# $1 : name of the variable (not its content)
+is-var-undefined = $(call streq,$(origin $1),undefined)
+
 ###############################################################################
 ## Use some colors if requested.
 ###############################################################################
@@ -208,6 +212,16 @@ module-add = \
 	)
 
 ###############################################################################
+## Get the module name as a 'define' value to be used in kconfig and CFLAGS.
+## $1 : module name.
+###############################################################################
+module-get-define = $(strip \
+	$(if $(call is-var-undefined,__modules.$1.define), \
+		$(eval __modules.$1.define := $(call get-define,$1)) \
+	) \
+	$(__modules.$1.define))
+
+###############################################################################
 ## Check if a list of targets is given in make goals.
 ## $1 : list of targets to check
 ###############################################################################
@@ -256,7 +270,7 @@ is-module-external = $(strip \
 is-module-in-build-config = $(strip \
 	$(if $(call is-module-registered,$1), \
 		$(if $(call streq,$(__modules.$1.MODULE_CLASS),PREBUILT),$(true), \
-			$(eval __var := CONFIG_ALCHEMY_BUILD_$(call get-define,$1)) \
+			$(eval __var := CONFIG_ALCHEMY_BUILD_$(call module-get-define,$1)) \
 			$(if $(call streq,$(CONFIG_DIR_AVAILABLE),0),$(true), \
 				$(if $(call is-var-defined,$(__var)), \
 					$(if $($(__var)),$(true),$(false)), \
