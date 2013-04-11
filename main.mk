@@ -287,7 +287,7 @@ display-user-makefiles-summary = \
 # Create a file that will contain all user makefiles available
 create-user-makefiles-cache = \
 	rm -f $(USER_MAKEFILES_CACHE); \
-	mkdir -p $$(dirname $(USER_MAKEFILES_CACHE)); \
+	mkdir -p $(dir $(USER_MAKEFILES_CACHE)); \
 	touch $(USER_MAKEFILES_CACHE); \
 	$(info Scanning $(TOP_DIR) for makefiles...) \
 	( \
