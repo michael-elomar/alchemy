@@ -56,13 +56,15 @@ MAKECMDGOALS ?= all
 ## only after.
 ###############################################################################
 
-# Get full path.
+# Get full path. Deprecated, use built-in abspath instead (and not realpath
+# that fails if path does not exists).
 # $1 : path to extend.
-fullpath = $(strip $(shell readlink -m -n $1))
+#fullpath = $(strip $(shell readlink -m -n $1))
+fullpath = $(error deprecated)
 
 # Figure out where we are
 # It returns the full path without trailing '/'
-my-dir = $(call fullpath,$(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST)))))
+my-dir = $(call abspath,$(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST)))))
 
 ###############################################################################
 ## Env system setup.
