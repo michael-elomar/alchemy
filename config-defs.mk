@@ -105,7 +105,7 @@ __generate-config-module-args = $(strip \
 	$(eval __arg := $(__mod):$(__desc):$(__depends):$(__modPath)) \
 	$(eval __arg := $(__arg):$(__categoryPath):$(__configPath)) \
 	$(foreach __f,$(__configInFiles), \
-		$(eval __arg := $(__arg):$(call abspath,$(__f))) \
+		$(eval __arg := $(__arg):$(abspath $(__f))) \
 	) \
 	"$(__arg)")
 

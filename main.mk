@@ -65,7 +65,7 @@ fullpath = $(error deprecated)
 
 # Figure out where we are
 # It returns the full path without trailing '/'
-my-dir = $(call abspath,$(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST)))))
+my-dir = $(abspath $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST)))))
 
 ###############################################################################
 ## Env system setup.
