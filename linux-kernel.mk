@@ -207,6 +207,14 @@ $(PERF_BUILD_DIR)/$(LOCAL_MODULE_FILENAME):
 	$(Q) install -p $(PERF_BUILD_DIR)/perf $(TARGET_OUT_STAGING)/usr/bin
 	@touch $@
 
+# Clean rule
+.PHONY: perf-clean
+perf-clean:
+	$(Q)if [ -d $(LINUX_BUILD_DIR) ]; then \
+		$(MAKE) O=$(PERF_BUILD_DIR) -C $(PRIVATE_PATH)/tools/perf --ignore-errors \
+			clean || echo "Ignoring clean errors"; \
+	fi
+
 LOCAL_LIBRARIES := libelf
 
 # Register as a custom build in the system
