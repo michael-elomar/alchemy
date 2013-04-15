@@ -678,14 +678,14 @@ module-check-revision-changed = $(strip \
 	$(and $(__current),$(__last),$(call strneq,$(__current),$(__last))))
 
 # Generate the file with last revision. Some duplication with
-# 'module-check-revision-changed' to update the file onlmy when needed.
+# 'module-check-revision-changed' to update the file only when needed.
 # $1 : module name.
 # $2 : output file.
 # Note: shall be call as a command in side a rule.
 generate-last-revision-file = \
 	$(eval __current := $(call module-get-revision,$1)) \
 	$(eval __last := $(call module-get-last-revision,$1)) \
-	$(if $(and $(__current),$(__last),$(call strneq,$(__current),$(__last))), \
+	$(if $(and $(__current),$(call strneq,$(__current),$(__last))), \
 		mkdir -p $(dir $2); \
 		echo "build.$1.revision.last=$(__current)" > $2; \
 	) \
