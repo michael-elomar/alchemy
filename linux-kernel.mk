@@ -32,6 +32,11 @@ ifeq ("$(wildcard $(LINUX_CONFIG_FILE))","")
   endif
 endif
 
+# Linux Toolchain
+ifndef LINUX_CROSS
+  LINUX_CROSS := $(TARGET_CROSS)
+endif
+
 # Make sure this variable is defined (so make --warn-undefined-variables is quiet)
 # It can be defined by the user makefile to specify a list of headers to be
 # copied from linux source tree (list of absolute path)
@@ -43,8 +48,8 @@ endif
 # How to build
 LINUX_MAKE_ARGS := \
 	ARCH="$(LINUX_ARCH)" \
-	CC="$(CCACHE) $(TARGET_CC)" \
-	CROSS_COMPILE="$(TARGET_CROSS)" \
+	CC="$(CCACHE) $(LINUX_CROSS)gcc" \
+	CROSS_COMPILE="$(LINUX_CROSS)" \
 	-C $(LOCAL_PATH) \
 	INSTALL_MOD_PATH="$(TARGET_OUT_STAGING)" \
 	INSTALL_MOD_STRIP=1 \
