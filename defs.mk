@@ -276,17 +276,14 @@ is-module-external = $(strip \
 ## If no configuration directory present, always return true.
 ###############################################################################
 is-module-in-build-config = $(strip \
-	$(if $(call is-module-registered,$1), \
-		$(if $(call streq,$(__modules.$1.MODULE_CLASS),PREBUILT),$(true), \
-			$(eval __var := CONFIG_ALCHEMY_BUILD_$(call module-get-define,$1)) \
-			$(if $(call streq,$(CONFIG_DIR_AVAILABLE),0),$(true), \
-				$(if $(call is-var-defined,$(__var)), \
-					$(if $($(__var)),$(true),$(false)), \
-					$(false) \
-				) \
+	$(if $(call streq,$(__modules.$1.MODULE_CLASS),PREBUILT),$(true), \
+		$(eval __var := CONFIG_ALCHEMY_BUILD_$(call module-get-define,$1)) \
+		$(if $(call streq,$(CONFIG_DIR_AVAILABLE),0),$(true), \
+			$(if $(call is-var-defined,$(__var)), \
+				$(if $($(__var)),$(true),$(false)), \
+				$(false) \
 			) \
-		), \
-		$(false) \
+		) \
 	))
 
 ###############################################################################
