@@ -93,7 +93,7 @@ $(LINUX_BUILD_DIR)/.config: $(LINUX_CONFIG_FILE)
 $(LINUX_BUILD_DIR)/$(LOCAL_MODULE_FILENAME): $(LINUX_BUILD_DIR)/.config $(LINUX_HEADERS_DONE_FILE)
 	@mkdir -p $(LINUX_BUILD_DIR)/drivers/parrot/nand
 	@echo "Checking linux kernel config: $(LINUX_CONFIG_FILE)"
-	$(Q)yes "" | $(MAKE) $(LINUX_MAKE_ARGS) oldconfig
+	$(Q)yes "" 2>/dev/null | $(MAKE) $(LINUX_MAKE_ARGS) oldconfig
 	@echo "Building linux kernel"
 	$(Q)$(MAKE) $(LINUX_MAKE_ARGS)
 	@echo "Installing linux kernel modules"
