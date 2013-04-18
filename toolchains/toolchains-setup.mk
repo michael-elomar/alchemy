@@ -69,6 +69,8 @@ ifeq ("$(TARGET_LIBC)","")
     TARGET_LIBC := bionic
   else ifeq ("$(TARGET_OS_FLAVOUR)","native")
     TARGET_LIBC := native
+  else ifeq ("$(TARGET_OS_FLAVOUR)","native-chroot")
+    TARGET_LIBC := native
   else
     TARGET_LIBC := eglibc
   endif
