@@ -30,8 +30,8 @@ cflags_armv5te :=
 	-D__ARM_ARCH_5T__ \
 	-D__ARM_ARCH_5TE__
 
-# arm v7neon flags (to be used in cpu flags below)
-cflags_armv7neon := \
+# armv7-a neon flags (to be used in cpu flags below)
+cflags_armv7a_neon := \
 	-march=armv7-a \
 	-mfloat-abi=softfp \
 	-mfpu=neon
@@ -53,19 +53,25 @@ endif
 # If compiler does not support this -mcpu option a warning will be generated
 # and removed from flags later
 ifeq ("$(TARGET_CPU)","p7")
-  TARGET_GLOBAL_CFLAGS += $(cflags_armv7neon)
+  TARGET_GLOBAL_CFLAGS += $(cflags_armv7a_neon)
   TARGET_GLOBAL_CFLAGS += -mtune=cortex-a9 -mcpu=cortex-a9
 endif
 
 # TODO: see if interresting to put -mtune=cortex-a8 -mcpu=cortex-a8
 ifeq ("$(TARGET_CPU)","omap3")
-  TARGET_GLOBAL_CFLAGS += $(cflags_armv7neon)
+  TARGET_GLOBAL_CFLAGS += $(cflags_armv7a_neon)
   TARGET_GLOBAL_LDFLAGS += -Wl,--fix-cortex-a8
 endif
 
 ifeq ("$(TARGET_CPU)","omap4")
-  TARGET_GLOBAL_CFLAGS += $(cflags_armv7neon)
+  TARGET_GLOBAL_CFLAGS += $(cflags_armv7a_neon)
   TARGET_GLOBAL_CFLAGS += -mtune=cortex-a9 -mcpu=cortex-a9
+endif
+
+# generic armv7a_neon
+ifeq ("$(TARGET_CPU)","armv7a_neon")
+  TARGET_GLOBAL_CFLAGS += $(cflags_armv7a_neon)
+  TARGET_GLOBAL_LDFLAGS += -Wl,--fix-cortex-a8
 endif
 
 ###############################################################################
