@@ -36,11 +36,21 @@ information.
   Default is `native`.
 * `TARGET_LIBC` : Libc to be used. Normally automatically guessed based on other
   settings. Mainly to be used in `atom.mk` files to select different behaviours.
-  Default is empty.
+  * `bionic` for android libc.
+  * `eglibc` for embedded linux.
+  * `ecos` for ecos OS.
+  * `native` for native libc on pc.
+  Default is :
+  * `bionic` if `TARGET_OS` is `linux` and `TARGET_OS_FLAVOUR` is `android`.
+  * `native` if `TARGET_OS` is `linux` and `TARGET_OS_FLAVOUR` is `native` or
+    `native-chroot`.
+  * `eglibc` if `TARGET_OS` is `linux`.
+  * `ecos` if `TARGET_OS` is `ecos`.
 * `TARGET_ARCH` : Architecture of the target. Useful to select prebuilt binaries
   based on architecture. Possible values are :
   * `arm`.
   * `x86`.
+  * `x64`.
   Default is `x86`.
 * `TARGET_CPU` : Cpu of the target. This value is typically used to select
   optimization and select some module (for ex: linux). Possible values are :
@@ -49,6 +59,7 @@ information.
   * `p7`.
   * `omap3`.
   * `omap4`.
+  * `armv7a-neon`.
   Default is empty.
 * `TARGET_PRODUCT`: Name of the product. Mainly used for determining some other
   default values.
@@ -78,7 +89,6 @@ information.
 * `TARGET_SKEL_DIRS` : List of full path to skeleton directories to merge when
   generating final tree. The path are separated by space.
 
-
 ### Tools.
 
 * `TARGET_CROSS` : full path to toolchain prefix.
@@ -96,6 +106,12 @@ information.
   Default is `$(TARGET_CROSS)nm`.
 * `TARGET_STRIP` : full path to symbol stripper.
   Default is `$(TARGET_CROSS)strip`.
+
+### Linux specific
+* `TARGET_LINUX_CROSS` : similar to `TARGET_CROSS` but to use a separate
+  toolchain for the compilation of the linux kernel (and drivers).
+* `TARGET_LINUX_DIR` : path to linux kernel source tree. Used by some tools for
+  dome drivers that need access to internal linux headers.
 
 ### Global flags for tools.
 Normally not needed, default values are determined based on target setting.
@@ -136,22 +152,21 @@ Mainly used by the android wrapper.
   executable to separate shared libraries.
 * `TARGET_SCAN_PRUNE_DIRS` : A list of directories to exclude from the scan when
   searching for `atom.mk`. It can be absolute path or single name like `raptor`.
-  `Alchemy` automatically excludes its own output directory, but feel free to add
-  any known directories that will not contain `atom.mk`.
+  `Alchemy` automatically excludes its own output directory, but feel free to
+  add any known directories that will not contain `atom.mk`.
 * `TARGET_SCAN_ADD_DIRS` : A list of directories to add during the scan when
   searching for `atom.mk`.
 * `TARGET_FORCE_EXTERNAL_CHECKS` : Set to 1 to force check of external modules
   even if they are already built. Default is 0. See chapter relating to
   recompilation checks for more information.
 
-
 # Configuration
 
-`Alchemy` allows the selection of available modules that will actually be built as
-well as configuring settings of modules. A global configuration file stores the
-list of selected modules and each configurable module stores its own settings.
-Those file are saved in the `TARGET_CONFIG_DIR` directory. However, it is
-possible to customize for each module the actual configuration file to use.
+`Alchemy` allows the selection of available modules that will actually be built
+as well as configuring settings of modules. A global configuration file stores
+the list of selected modules and each configurable module stores its own
+settings. Those file are saved in the `TARGET_CONFIG_DIR` directory. However, it
+is possible to customize for each module the actual configuration file to use.
 
 ## Global configuration file
 
