@@ -11,6 +11,10 @@
 # diff files from config
 test/config/*/*.diff
 
+# python files
+*.pyc
+*.pyo
+
 # Debian stuff
 debian/files
 debian/*.debhelper.log
