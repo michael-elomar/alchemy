@@ -27,7 +27,7 @@ TARGET_PRODUCT ?= $(TARGET_OS)-$(TARGET_OS_FLAVOUR)
 TARGET_PRODUCT_VARIANT ?= $(TARGET_ARCH)
 
 ifeq ("$(TARGET_PRODUCT_VARIANT)","")
-  TARGET_PRODUCT_NAME := $(TARGET_PRODUCT)
+  TARGET_PRODUCT_FULL_NAME := $(TARGET_PRODUCT)
 else
   TARGET_PRODUCT_FULL_NAME := $(TARGET_PRODUCT)-$(TARGET_PRODUCT_VARIANT)
 endif
@@ -102,7 +102,7 @@ endif
 
 # To be able to use ccache with pre-compiled headers, some environment
 # variables are required
-CCACHE := 
+CCACHE :=
 ifeq ("$(USE_CCACHE)","1")
   ifneq ("$(shell which ccache)","")
     export CCACHE_SLOPPINESS := time_macros

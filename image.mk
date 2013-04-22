@@ -20,18 +20,22 @@ ifneq ("$(wildcard $(TARGET_OUT_STAGING)/zImage)","")
   KERNEL_ZIMAGE := $(TARGET_OUT_STAGING)/zImage
 else ifneq ("$(wildcard $(TARGET_OUT_STAGING)/boot/zImage)","")
   KERNEL_ZIMAGE := $(TARGET_OUT_STAGING)/boot/zImage
+else
+  KERNEL_ZIMAGE :=
 endif
 
 .PHONY: image-plf
 image-plf:
 	@echo "Image plf: start"
 	$(Q) rm -f $(IMAGE_FILE_PLF)
+ifneq ("$(KERNEL_ZIMAGE)","")
 	$(Q) $(MK_KERNEL_PLF) \
 		"ignore-boot.cfg" \
 		$(KERNEL_ZIMAGE) \
 		$(TARGET_OUT_BUILD)/linux/.config \
 		$(TARGET_OUT)/kernel.plf
 	$(Q) $(PLFTOOL) -a u_data=$(TARGET_OUT)/kernel.plf $(IMAGE_FILE_PLF)
+endif
 	$(Q) cd $(TARGET_OUT_FINAL); \
 		find . ! -name '.' -printf '%P;uid=0;gid=0\n' | \
 			plfbatch '-a u_unixfile="&"' $(IMAGE_FILE_PLF)

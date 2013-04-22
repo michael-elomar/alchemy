@@ -40,7 +40,7 @@ endif
 # Make sure this variable is defined (so make --warn-undefined-variables is quiet)
 # It can be defined by the user makefile to specify a list of headers to be
 # copied from linux source tree (list of absolute path)
-# The y will be copied in $(TARGET_OUT_STAGING)/usr/include/linux
+# They will be copied in $(TARGET_OUT_STAGING)/usr/include/linux
 ifndef LINUX_EXPORTED_HEADERS
   LINUX_EXPORTED_HEADERS :=
 endif

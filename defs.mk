@@ -16,11 +16,11 @@ space := $(empty) $(empty)
 space4 := $(space)$(space)$(space)$(space)
 
 # Other special characters definition (useful to avoid parsing error in functions)
-dollar = $$
-comma = ,
-colon = :
-left-paren = (
-right-paren = )
+dollar := $$
+comma := ,
+colon := :
+left-paren := (
+right-paren := )
 
 # True/False values. Any non-empty test is considered as True
 true := T

@@ -476,7 +476,7 @@ ifneq ("$(value LOCAL_CMD_PRE_INSTALL)","")
 $(LOCAL_MODULE)-pre-install:
 	+$(call macro-exec-cmd,CMD_PRE_INSTALL,empty)
 
-# If a copy in staging is done do it before otherwise we can only hook before
+# If a copy in staging is done do it before. Otherwise we can only hook before
 # build module is done...
 # Order only prerequiqites to avoid recompilation...
 ifeq ("$(copy_to_staging)","1")
