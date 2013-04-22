@@ -206,7 +206,7 @@ def doCopyByMakefile(dstFileName, srcFileName, options, doStrip=False, doPatchSh
 def doCopyDirect(dstFileName, srcFileName, options, doStrip=False, doPatchShebang=False):
 	cmds = getCopyCmds(dstFileName, srcFileName, options, doStrip, doPatchShebang)
 	for cmd in cmds:
-		logging.debug("  %s" % cmd)
+		logging.debug("  %s", cmd)
 		os.system(cmd)
 
 #===============================================================================
@@ -380,7 +380,7 @@ def main():
 	setupLog(options)
 
 	# get parameters
-	options.stagingDir =args[0]
+	options.stagingDir = args[0]
 	options.finalDir = os.path.realpath(args[1])
 	logging.info("staging-dir : %s", options.stagingDir)
 	logging.info("final-dir : %s", options.finalDir)

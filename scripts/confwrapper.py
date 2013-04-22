@@ -171,7 +171,7 @@ def getKconfigPath(name):
 		return path
 
 	# Use the one installed on the host
-	return name + KCONFIG_INSTALLED_SUFFIX;
+	return name + KCONFIG_INSTALLED_SUFFIX
 
 #===============================================================================
 # Simplify tree of menus by moving up modules to first non-empty parent.
@@ -634,7 +634,7 @@ def processFullConfig(inFile, modules, mainConfigPath):
 	writeConfigHeader(mainConfigFile)
 	# Write modules in a sorted order to ease merge.
 	for key in sorted(moduleStatus.keys()):
-		if moduleStatus[key]== True:
+		if moduleStatus[key] == True:
 			mainConfigFile.write("CONFIG_ALCHEMY_BUILD_%s=y\n" % \
 					getDefine(key))
 		else:
@@ -779,7 +779,7 @@ def checkMainConfig(mainConfigPath, doWriteDiff):
 		writeDiffConfig(mainConfigPath, diff)
 	elif diff != None:
 		message("%s config is not up to date (%s)", "main", mainConfigPath)
-	logging.debug("Delete %s", mainConfigPath, getEditConfigPath(mainConfigPath))
+	logging.debug("Delete %s", getEditConfigPath(mainConfigPath))
 	safeUnlink(getEditConfigPath(mainConfigPath))
 	return (diff == None)
 
