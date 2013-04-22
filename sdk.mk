@@ -8,8 +8,7 @@
 
 SDK_DIR := $(TARGET_OUT)/sdk
 SDK_TGZ := $(TARGET_OUT)/sdk-$(TARGET_PRODUCT_FULL_NAME).tar.gz
-#MAKESDK_SCRIPT := $(BUILD_SYSTEM)/scripts/makesdk.py
-MAKESDK_SCRIPT := /media/sf_E_DRIVE/Dev/eclipse-3.7/Alchemy/makesdk.py
+MAKESDK_SCRIPT := $(BUILD_SYSTEM)/scripts/makesdk.py
 
 .PHONY: sdk
 sdk: dump-xml
