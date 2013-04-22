@@ -72,6 +72,7 @@ def processModule(ctx, module):
 
 	# Write verbatim some fields
 	fields = ["MODULE", "DESCRIPTION", "CATEGORY_PATH",
+			"REVISION", "FORCE_WHOLE_STATIC_LIBRARY",
 			"EXPORT_CFLAGS", "EXPORT_CXXFLAGS", "EXPORT_LDLIBS"]
 	for field in fields:
 		if field in module.fields and module.fields[field] :
@@ -90,8 +91,11 @@ def processModule(ctx, module):
 					dstDir = "usr/include/" + module.name + "/" + relPath
 				else:
 					dstDir = "usr/include/" + module.name
-				newIncludeDirs.append("$(LOCAL_PATH)/" + dstDir)
+				# Copy headers and add new directory only if files have actually
+				# been copied (ie directory was created)
 				copyHeaders(includeDir, os.path.join(ctx.outDir, dstDir))
+				if os.path.exists(os.path.join(ctx.outDir, dstDir)):
+					newIncludeDirs.append("$(LOCAL_PATH)/" + dstDir)
 			elif includeDir.startswith(os.path.join(ctx.buildDir, module.name)):
 				# TODO: simplify destination by remove extra 'include' and 'module name'
 				relPath = os.path.relpath(includeDir, os.path.join(ctx.buildDir, module.name))
@@ -99,12 +103,17 @@ def processModule(ctx, module):
 					dstDir = "usr/include/" + module.name + "/" + relPath
 				else:
 					dstDir = "usr/include/" + module.name
-				newIncludeDirs.append("$(LOCAL_PATH)/" + dstDir)
+				# Copy headers and add new directory only if files have actually
+				# been copied (ie directory was created)
 				copyHeaders(includeDir, os.path.join(ctx.outDir, dstDir))
+				if os.path.exists(os.path.join(ctx.outDir, dstDir)):
+					newIncludeDirs.append("$(LOCAL_PATH)/" + dstDir)
+
 			elif includeDir.startswith(ctx.stagingDir):
 				relPath = os.path.relpath(includeDir, ctx.stagingDir)
-				if relPath != "usr/include":
-					newIncludeDirs.append("$(LOCAL_PATH)" + relPath)
+				# Only add existing directory that is not in a standard place
+				if relPath != "usr/include" and os.path.exists(includeDir):
+					newIncludeDirs.append("$(LOCAL_PATH)/" + relPath)
 			else:
 				logging.warning("Ignoring include dir: %s", includeDir)
 		# Write path in a readable way
@@ -113,16 +122,33 @@ def processModule(ctx, module):
 			ctx.atom.write(" \\\n\t%s" % includeDir)
 		ctx.atom.write("\n")
 
-	# Libraries for links
+	# Autoconf file
+	if "CONFIG_FILES" in module.fields:
+		autoconfFileName = "autoconf-%s.h" % module.name
+		ctx.atom.write("LOCAL_EXPORT_CFLAGS += \\\n")
+		ctx.atom.write("\t--include=$(LOCAL_PATH)/usr/include/%s/%s\n" % \
+				(module.name, autoconfFileName))
+		if not os.path.exists(os.path.join(ctx.outDir, "usr/include", module.name)):
+			os.makedirs(os.path.join(ctx.outDir, "usr/include", module.name), mode=0755)
+		shutil.copy2(
+				os.path.join(ctx.buildDir, module.name, autoconfFileName),
+				os.path.join(ctx.outDir, "usr/include", module.name, autoconfFileName))
+
+	# Set LOCAL_LIBRARIES with the content of 'depends'
+	if "depends" in module.fields:
+		ctx.atom.write("LOCAL_LIBRARIES := %s\n" % module.fields["depends"])
+
+	# Register shared/static libraries as normal so we can manage dependencies
+	# Other are simply put as prebuilt
 	if moduleClass == "SHARED_LIBRARY" or moduleClass == "STATIC_LIBRARY":
-		ctx.atom.write("LOCAL_EXPORT_LDLIBS += $(LOCAL_PATH)/%s/%s\n" % \
-				(module.fields["DESTDIR"], module.fields["MODULE_FILENAME"]))
-	elif if moduleClass == "WHOLE_STATIC_LIBRARY":
-		ctx.atom.write("LOCAL_EXPORT_LDLIBS += $(LOCAL_PATH)/%s/%s\n" % \
-				(module.fields["DESTDIR"], module.fields["MODULE_FILENAME"]))
+		ctx.atom.write("LOCAL_SDK := $(LOCAL_PATH)\n")
+		ctx.atom.write("LOCAL_DESTDIR := %s\n" % module.fields["DESTDIR"])
+		ctx.atom.write("LOCAL_MODULE_FILENAME := %s\n" % module.fields["MODULE_FILENAME"])
+		ctx.atom.write("include $(BUILD_%s)\n" % moduleClass)
+	else:
+		ctx.atom.write("include $(BUILD_PREBUILT)\n")
 
 	# End of module
-	ctx.atom.write("include $(BUILD_PREBUILT)\n")
 	ctx.atom.write("\n")
 
 #===============================================================================
