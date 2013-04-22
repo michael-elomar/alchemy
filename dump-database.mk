@@ -105,14 +105,17 @@ __xml-escape = $(subst ",&quot;,$(subst ',&apos;,$(subst >,&gt;,$(subst <,&lt;,$
 # Escape characters so it goes though the 'echo' correctly
 # $1 : string to escape
 # Note: do NOT split the line to avoid inserting spaces in the resulting string
-__echo-escape = $(subst ",\",$(subst $(dollar),\$(dollar),$(subst $(endl),\n,$1)))
+# Note: for some strange reasons, a '\' shall be written as '\\\\' to be correctly
+# interpreted. Mainly seen if a '\1' has to be written.
+__echo-escape = $(subst ",\",$(subst $(dollar),\$(dollar),$(subst $(endl),\n,$(subst \,\\\\,$1))))
 
 # We use the 'endl' to force a new line when macro is expanded. This avoids the
 # need to put a ';' and a continuation line when the shell command is expanded.
 # Otherwise the length of the single line of command generated will be to big
 # to pass down the shell (several hundreds of KB)
+# Note: use /bin/echo to make sure we use the binary, not a shell function.
 __write-xml = \
-	@echo "$(call __echo-escape,$1)" >> $(DUMP_DATABASE_XML_FILE) $(endl)
+	@/bin/echo -e "$(call __echo-escape,$1)" >> $(DUMP_DATABASE_XML_FILE) $(endl)
 
 ###############################################################################
 ## Rules.
@@ -128,11 +131,12 @@ dump-depends:
 
 .PHONY: dump-xml
 dump-xml:
+	@echo "Database dump: start"
 	@mkdir -p $(dir $(DUMP_DATABASE_XML_FILE))
 	@rm -f $(DUMP_DATABASE_XML_FILE)
 	@touch $(DUMP_DATABASE_XML_FILE)
 	$(call __dump-database-xml)
-	@echo "Database dump done: $(DUMP_DATABASE_XML_FILE)"
+	@echo "Database dump: done -> $(DUMP_DATABASE_XML_FILE)"
 
 .PHONY: dump-xml-clean
 dump-xml-clean:
