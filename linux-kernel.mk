@@ -186,8 +186,9 @@ linux-clean:
 .PHONY: linux-%
 linux-%:
 	@$(linux-copy-config)
-	@echo "Building linux kernel $* target"
+	@echo "Building linux kernel $* target with $(LINUX_CONFIG_FILE)"
 	$(Q)$(MAKE) $(LINUX_MAKE_ARGS) $*
+	@cp -af $(LINUX_BUILD_DIR)/.config $(LINUX_CONFIG_FILE)
 
 # Register as a custom build in the system
 include $(BUILD_CUSTOM)
