@@ -15,7 +15,7 @@ AUTOTOOLS_INSTALL_BIN := $(shell which install)
 # Make sure pkg-config does not look on host
 PKG_CONFIG_ENV := \
 	PKG_CONFIG_PATH="$(TARGET_OUT_STAGING)/usr/lib/pkgconfig:$(TARGET_OUT_STAGING)/lib/pkgconfig" \
-	PKG_CONFIG_LIBDIR="$(TARGET_OUT_STAGING)/usr/lib/pkgconfig:$(TARGET_OUT_STAGING)/lib/pkgconfig"
+	PKG_CONFIG_LIBDIR=""
 ifeq ("$(TARGET_OS_FLAVOUR)","native")
   PKG_CONFIG_ENV += PKG_CONFIG_SYSROOT_DIR=""
 else
