@@ -165,3 +165,12 @@ endif
 ## As it is not the way we use it, prevent export of this variable
 ###############################################################################
 unexport TARGET_ARCH
+
+###############################################################################
+## Override all TARGET_xxx variables so that they are 'simple' and not
+## 'recursive'. Mainly to avoid expnasion over and over when we known they
+## won't change during rule execution.
+###############################################################################
+$(foreach __var,$(vars-TARGET), \
+	$(eval override TARGET_$(__var) := $(TARGET_$(__var))) \
+)
