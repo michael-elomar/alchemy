@@ -11,7 +11,7 @@
 ###############################################################################
 
 # Make sure SHELL is correctly set
-SHELL := /bin/sh
+SHELL := /bin/bash
 
 # Turns off suffix rules built into make
 .SUFFIXES:
