@@ -126,7 +126,7 @@ __has-autotools-deps = $(strip \
 # Check if a single module shall be displayed in the config
 # $1 : module name
 __show-in-config = $(strip \
-	$(if $(call streq,$(__modules.$1.MODULE_CLASS),PREBUILT), \
+	$(if $(call is-module-prebuilt,$1), \
 		$(false), \
 		$(if $(call strneq,$(TARGET_OS),ecos), \
 			$(true), \

@@ -190,6 +190,8 @@ vars-LOCAL += BUILD_MODULE
 vars-LOCAL += STAGING_MODULE
 vars-LOCAL += DESTDIR
 vars-LOCAL += TARGETS
+vars-LOCAL += REVISION
+vars-LOCAL += SDK
 
 ###############################################################################
 ## List of TARGET_XXX variables that can be used by makefiles.
@@ -217,6 +219,7 @@ vars-TARGET += SKEL
 vars-TARGET += SKEL_DIRS
 vars-TARGET += SCAN_PRUNE_DIRS
 vars-TARGET += SCAN_ADD_DIRS
+vars-TARGET += SDK_DIRS
 
 # Other specialized settings
 vars-TARGET += PBUILD_FORCE_STATIC

@@ -23,6 +23,9 @@ ifneq ("$(TARGET_SKEL_DIRS)","")
   $(foreach d,$(TARGET_SKEL_DIRS),$(eval MAKEFINAL_ARGS += --skel="$(d)"))
 endif
 
+# If a sdk is used, we assume that basic components shall not be put in final dir
+ifeq ("$(TARGET_SDK_DIRS),"")
+
 ifneq ("$(TOOLCHAIN_LIBC)","")
   MAKEFINAL_ARGS += --toolchain-libc="$(TOOLCHAIN_LIBC)"
 endif
@@ -36,6 +39,8 @@ ifeq ("$(TARGET_OS)","linux")
 ifneq ("$(TARGET_OS_FLAVOUR)","native")
   MAKEFINAL_ARGS += --linux-basic-skel
 endif
+endif
+
 endif
 
 ###############################################################################

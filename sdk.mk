@@ -1,0 +1,31 @@
+###############################################################################
+## @file sdk.mk
+## @author Y.M. Morgan
+## @date 2013/04/20
+##
+## Generate a sdk to be used as a base.
+###############################################################################
+
+SDK_DIR := $(TARGET_OUT)/sdk
+SDK_TGZ := $(TARGET_OUT)/sdk-$(TARGET_PRODUCT_FULL_NAME).tar.gz
+#MAKESDK_SCRIPT := $(BUILD_SYSTEM)/scripts/makesdk.py
+MAKESDK_SCRIPT := /media/sf_E_DRIVE/Dev/eclipse-3.7/Alchemy/makesdk.py
+
+.PHONY: sdk
+sdk: dump-xml
+	@echo "Sdk: start"
+	$(Q) $(MAKESDK_SCRIPT) $(DUMP_DATABASE_XML_FILE) \
+		$(TARGET_OUT_BUILD) $(TARGET_OUT_STAGING) $(SDK_DIR)
+	@rm -f $(SDK_TGZ)
+	$(Q) tar -C $(dir $(SDK_DIR)) -czf $(SDK_TGZ) $(notdir $(SDK_DIR))
+	@echo "Sdk: done -> $(SDK_DIR) ($(SDK_TGZ))"
+
+.PHONY: sdk-clean
+sdk-clean:
+	$(Q) rm -rf $(SDK_DIR)
+	$(Q) rm -f $(SDK_TGZ)
+
+clean: sdk-clean
+dirclean: sdk-clean
+clobber: sdk-clean
+

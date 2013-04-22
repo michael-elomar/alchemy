@@ -100,11 +100,20 @@ ifdef ALCHEMY_TARGET_SKEL_DIRS
   TARGET_SKEL_DIRS := $(ALCHEMY_TARGET_SKEL_DIRS)
 endif
 
+# Import scan add dirs from env
+ifdef ALCHEMY_TARGET_SCAN_ADD_DIRS
+  TARGET_SCAN_ADD_DIRS := $(ALCHEMY_TARGET_SCAN_ADD_DIRS)
+endif
+
 # Import scan prune dirs from env
 ifdef ALCHEMY_TARGET_SCAN_PRUNE_DIRS
   TARGET_SCAN_PRUNE_DIRS := $(ALCHEMY_TARGET_SCAN_PRUNE_DIRS)
 endif
 
+# Import sdk dirs from env
+ifdef ALCHEMY_TARGET_SDK_DIRS
+  TARGET_SDK_DIRS := $(ALCHEMY_TARGET_SDK_DIRS)
+endif
 
 # Import use colors from env
 ifdef ALCHEMY_USE_COLORS
@@ -152,7 +161,7 @@ endif
 __clean-targets := clean dirclean clobber
 __query-targets := scan help help-modules dump dump-depends dump-xml build-graph
 __config-targets := config config-check config-update xconfig menuconfig nconfig
-__fs-targets := final plf image-plf image-cpio
+__fs-targets := final plf image-plf image-cpio sdk
 __skip_targets := \
 	$(__clean-targets) \
 	$(__query-targets) \
@@ -275,6 +284,7 @@ find-cmd := $(BUILD_SYSTEM)/scripts/findfiles.py \
 	--prune=$(BUILD_SYSTEM) \
 	$(foreach __d,$(TARGET_SCAN_PRUNE_DIRS),--prune=$(__d)) \
 	$(foreach __d,$(TARGET_SCAN_ADD_DIRS),--add=$(__d)) \
+	$(foreach __d,$(TARGET_SDK_DIRS),--add=$(__d)) \
 	$(TOP_DIR) \
 	$(USER_MAKEFILE_NAME)
 
@@ -523,6 +533,9 @@ include $(BUILD_SYSTEM)/image.mk
 
 # Gdb helpers
 include $(BUILD_SYSTEM)/gdb.mk
+
+# Gdb helpers
+include $(BUILD_SYSTEM)/sdk.mk
 
 # Help
 include $(BUILD_SYSTEM)/help.mk

@@ -42,6 +42,7 @@ help:
 	@echo "  dump-depends: dump dependencies of module database."
 	@echo "  dump-xml    : dump the full module database in xml format."
 	@echo "  build-graph : create a graph of build dependencies."
+	@echo "  sdk         : create a sdk from current confing."
 	@echo ""
 	@echo "Usefull variables:"
 	@echo "  V: set to 1 to activate verbose mode."

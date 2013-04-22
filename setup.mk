@@ -54,6 +54,9 @@ TARGET_PBUILD_FORCE_STATIC ?= 0
 TARGET_SCAN_PRUNE_DIRS ?=
 TARGET_SCAN_ADD_DIRS ?=
 
+# Directories to use as sdk
+TARGET_SDK_DIRS ?=
+
 # Default : do NOT force external checks of module that have sub-makefiles
 # (autotools, linux kernel...)
 # make F=1 enable force checking
@@ -123,9 +126,11 @@ endif
 ###############################################################################
 
 # Make sure that staging dir are found first in case we want to override something
-TARGET_GLOBAL_C_INCLUDES := \
-	$(TARGET_OUT_STAGING)/usr/include \
-	$(TARGET_GLOBAL_C_INCLUDES)
+__extra-c-includes := $(strip \
+	$(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
+		$(__dir)/usr/include \
+	))
+TARGET_GLOBAL_C_INCLUDES := $(__extra-c-includes) $(TARGET_GLOBAL_C_INCLUDES)
 
 # TODO : is it really the place and where to do it ?
 TARGET_GLOBAL_CFLAGS += -DALCHEMY_BUILD
@@ -133,18 +138,18 @@ ifeq ("$(findstring -D__STDC_LIMIT_MACROS,$(TARGET_GLOBAL_CXXFLAGS))","")
   TARGET_GLOBAL_CXXFLAGS += -D__STDC_LIMIT_MACROS
 endif
 
-# Add staging dirs to linker as well
-TARGET_GLOBAL_LDFLAGS += -L$(TARGET_OUT_STAGING)/lib
-TARGET_GLOBAL_LDFLAGS += -L$(TARGET_OUT_STAGING)/usr/lib
-TARGET_GLOBAL_LDFLAGS_SHARED += -L$(TARGET_OUT_STAGING)/lib
-TARGET_GLOBAL_LDFLAGS_SHARED += -L$(TARGET_OUT_STAGING)/usr/lib
+# Add staging/sdk dirs to linker
+# To make sure linker does not hardcode path to libs, set rpath-link
+__extra-ldflags := $(strip \
+	$(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
+		-L$(__dir)/lib \
+		-L$(__dir)/usr/lib \
+		-Wl,-rpath-link=$(__dir)/lib \
+		-Wl,-rpath-link=$(__dir)/usr/lib \
+	))
 
-# Make sure the linker will not hardcode the path to the lib in the binary
-# because they are not in the standard places
-TARGET_GLOBAL_LDFLAGS += -Wl,-rpath-link=$(TARGET_OUT_STAGING)/lib
-TARGET_GLOBAL_LDFLAGS += -Wl,-rpath-link=$(TARGET_OUT_STAGING)/usr/lib
-TARGET_GLOBAL_LDFLAGS_SHARED += -Wl,-rpath-link=$(TARGET_OUT_STAGING)/lib
-TARGET_GLOBAL_LDFLAGS_SHARED += -Wl,-rpath-link=$(TARGET_OUT_STAGING)/usr/lib
+TARGET_GLOBAL_LDFLAGS += $(__extra-ldflags)
+TARGET_GLOBAL_LDFLAGS_SHARED += $(__extra-ldflags)
 
 # Make sure the architecture specific flags is defined
 # For arm/thumb it is done above

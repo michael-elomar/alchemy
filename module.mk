@@ -212,6 +212,10 @@ $(LOCAL_MODULE)-gen-last-rev: $(LOCAL_BUILD_MODULE)
 
 endif
 
+# This explicit rule avoids dependency error when e module has nothing to buid
+# (prebuilt, sdk, custom...)
+$(LOCAL_BUILD_MODULE):
+
 ###############################################################################
 ## Configuration file management.
 ###############################################################################
@@ -276,6 +280,7 @@ endif
 ###############################################################################
 
 ifeq ("$(LOCAL_MODULE_CLASS)","STATIC_LIBRARY")
+ifeq ("$(LOCAL_SDK)","")
 
 include $(BUILD_SYSTEM)/binary-rules.mk
 
@@ -285,12 +290,14 @@ $(LOCAL_BUILD_MODULE): $(all_objects)
 copy_to_staging := 1
 
 endif
+endif
 
 ###############################################################################
 ## Shared library.
 ###############################################################################
 
 ifeq ("$(LOCAL_MODULE_CLASS)","SHARED_LIBRARY")
+ifeq ("$(LOCAL_SDK)","")
 
 include $(BUILD_SYSTEM)/binary-rules.mk
 
@@ -300,6 +307,7 @@ $(LOCAL_BUILD_MODULE): $(all_objects) $(all_libraries)
 copy_to_staging := 1
 copy_to_final := 1
 
+endif
 endif
 
 ###############################################################################
@@ -334,9 +342,7 @@ endif
 
 ifeq ("$(LOCAL_MODULE_CLASS)","PREBUILT")
 
-$(LOCAL_BUILD_MODULE):
-	@mkdir -p $(dir $@)
-	@touch $@
+# Nothing to do
 
 endif
 
@@ -346,9 +352,7 @@ endif
 
 ifeq ("$(LOCAL_MODULE_CLASS)","CUSTOM")
 
-# This makes sure that if the user makefile did not made an explicit rule
-# there will be no error
-$(LOCAL_BUILD_MODULE):
+# Nothing to do
 
 endif
 

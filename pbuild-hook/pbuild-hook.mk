@@ -17,6 +17,9 @@ LOCAL_PATH := $(call my-dir)
 # This requires at least the ckcm module to exist
 ifneq ("$(call is-module-registered,ckcm)","")
 
+# Make sure the module is not already registered as part of a sdk
+ifeq ("$(call is-module-registered,msgbuilder)","")
+
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := msgbuilder
@@ -153,5 +156,7 @@ LOCAL_CLEAN_FILES := \
 $(LOCAL_PATH)/atom.mk:
 
 include $(BUILD_CUSTOM)
+
+endif
 
 endif

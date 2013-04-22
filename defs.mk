@@ -269,6 +269,18 @@ is-module-external = $(strip \
 	))
 
 ###############################################################################
+## Check if a module is prebuilt.
+## $1 : module to check.
+## Note : a module is prebuilt if its class is PREBUILT or is part of a sdk
+## in which case LOCAL_SDK is not empty
+###############################################################################
+is-module-prebuilt = $(strip \
+	$(or \
+		$(call streq,$(__modules.$1.MODULE_CLASS),PREBUILT), \
+		$(__modules.$1.SDK) \
+	))
+
+###############################################################################
 ## Check if a module will be built.
 ## $1 : module to check.
 ## Prebuild modules are considered as in the config (even if they are not
@@ -276,7 +288,7 @@ is-module-external = $(strip \
 ## If no configuration directory present, always return true.
 ###############################################################################
 is-module-in-build-config = $(strip \
-	$(if $(call streq,$(__modules.$1.MODULE_CLASS),PREBUILT),$(true), \
+	$(if $(call is-module-prebuilt,$1),$(true), \
 		$(eval __var := CONFIG_ALCHEMY_BUILD_$(call module-get-define,$1)) \
 		$(if $(call streq,$(CONFIG_DIR_AVAILABLE),0),$(true), \
 			$(if $(call is-var-defined,$(__var)), \
@@ -627,8 +639,12 @@ module-get-build-dir = \
 module-get-build-filename = \
 	$(TARGET_OUT_BUILD)/$1/$(__modules.$1.MODULE_FILENAME)
 
-module-get-staging-filename = \
-	$(TARGET_OUT_STAGING)/$(__modules.$1.DESTDIR)/$(__modules.$1.MODULE_FILENAME)
+# Check if module is part of a sdk
+module-get-staging-filename = $(strip \
+	$(if $(__modules.$1.SDK), \
+		$(__modules.$1.SDK)/$(__modules.$1.DESTDIR)/$(__modules.$1.MODULE_FILENAME), \
+		$(TARGET_OUT_STAGING)/$(__modules.$1.DESTDIR)/$(__modules.$1.MODULE_FILENAME) \
+	))
 
 ###############################################################################
 ## Debug cutomization access.
@@ -648,7 +664,7 @@ ifneq ("$(USE_GIT_REV)","0")
 
 # Get revision of one module
 # $1 : module name.
-module-get-revision = $(__modules.$1.revision)
+module-get-revision = $(__modules.$1.REVISION)
 
 # Get last revision of one module. It is found in a generated file that may
 # not exist so the result can be empty.
@@ -661,9 +677,11 @@ module-get-last-revision = $(strip \
 # Compute revision of all modules
 module-compute-revisions = \
 	$(foreach __mod,$(__modules), \
-		$(eval __path := $(__modules.$(__mod).PATH)) \
-		$(eval __rev := $(shell cd $(__path) && git rev-parse HEAD 2>/dev/null)) \
-		$(eval __modules.$(__mod).revision := $(__rev)) \
+		$(if $(__modules.$(__mod).REVISION),$(empty), \
+			$(eval __path := $(__modules.$(__mod).PATH)) \
+			$(eval __rev := $(shell cd $(__path) && git rev-parse HEAD 2>/dev/null)) \
+			$(eval __modules.$(__mod).REVISION := $(__rev)) \
+		) \
 	)
 
 # Check if revision of module has changed since last build.
