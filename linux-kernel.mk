@@ -32,9 +32,20 @@ ifeq ("$(wildcard $(LINUX_CONFIG_FILE))","")
   endif
 endif
 
+# Old name compat
+ifdef LINUX_CROSS
+  $(warning Please use TARGET_LINUX_CROSS instead of LINUX_CROSS)
+  TARGET_LINUX_CROSS := $(LINUX_CROSS)
+endif
+
 # Linux Toolchain
+ifndef TARGET_LINUX_CROSS
+  TARGET_LINUX_CROSS := $(TARGET_CROSS)
+endif
+
+# Old name compat
 ifndef LINUX_CROSS
-  LINUX_CROSS := $(TARGET_CROSS)
+  LINUX_CROSS := $(TARGET_LINUX_CROSS)
 endif
 
 # Make sure this variable is defined (so make --warn-undefined-variables is quiet)
@@ -48,8 +59,8 @@ endif
 # How to build
 LINUX_MAKE_ARGS := \
 	ARCH="$(LINUX_ARCH)" \
-	CC="$(CCACHE) $(LINUX_CROSS)gcc" \
-	CROSS_COMPILE="$(LINUX_CROSS)" \
+	CC="$(CCACHE) $(TARGET_LINUX_CROSS)gcc" \
+	CROSS_COMPILE="$(TARGET_LINUX_CROSS)" \
 	-C $(LOCAL_PATH) \
 	INSTALL_MOD_PATH="$(TARGET_OUT_STAGING)" \
 	INSTALL_MOD_STRIP=1 \
