@@ -60,7 +60,7 @@ information.
   * `omap3`.
   * `omap4`.
   * `armv7a-neon`.
-  Default is empty.
+  Default is empty (no specifi optimization activated).
 * `TARGET_PRODUCT`: Name of the product. Mainly used for determining some other
   default values.
 * `TARGET_PRODUCT_VARIANT` : Variant of the product. Mainly used for determining
@@ -150,15 +150,46 @@ Mainly used by the android wrapper.
   static libraries even if module requested to build a dynamic one. Mainly here
   to compile ecos target and prepare the transition from monolithic SoftAT
   executable to separate shared libraries.
+  Default is `0`.
 * `TARGET_SCAN_PRUNE_DIRS` : A list of directories to exclude from the scan when
   searching for `atom.mk`. It can be absolute path or single name like `raptor`.
   `Alchemy` automatically excludes its own output directory, but feel free to
   add any known directories that will not contain `atom.mk`.
+  Default is empty.
 * `TARGET_SCAN_ADD_DIRS` : A list of directories to add during the scan when
   searching for `atom.mk`.
+  Default is empty.
 * `TARGET_FORCE_EXTERNAL_CHECKS` : Set to 1 to force check of external modules
   even if they are already built. Default is 0. See chapter relating to
   recompilation checks for more information.
+  Default is `0`.
+* `TARGET_NOSTRIP_FINAL` : Can be set at 1 to prevent stripping binaries when
+  generating final directory.
+  Default is `0`.
+* `TARGET_ADD_DEPENDS_SECTION` : Activate the generation of an extra section in
+  executables and shared libraries built by `alchemy`. This sections contains
+  the list of modulues used for the link and their revision. The first line
+  contains the revision of the linked module itself.
+  Default is `0`.
+  **Note** : this feature requires `USE_GIT_REV` at `1` (disabled by default).
+* `TARGET_DEPENDS_SECTION_NAME` : Name of the section with dependencies
+  Default is `.alchemy.depends`.
+
+* `USE_CLANG` : Use clang instead of gcc for compilation.
+  Default is `0`.
+* `USE_CCACHE` : Use ccache to speed up compilation.
+  Default is `0`.
+* `USE_SCAN_CACHE` : Use cache of `atom.mk` found during last scan. Useful if
+  Default is `0`.
+  the scan is slow on your machine.
+* `USE_COLORS` : Use colors in output.
+  Default is `0`.
+* `USE_BUILD_DEPS_CHECK_IN_CONFIG` : Enable automatic activation of build
+  dependencies in kconfig.
+  Default is `1`.
+* `USE_GIT_REV` : Retrieve git revision of modules to force compilation of
+  external modules when the related project is updated.
+  Default is `0`.
 
 # Configuration
 
