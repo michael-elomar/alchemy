@@ -68,8 +68,8 @@ ifeq ("$(TARGET_CPU)","omap4")
   TARGET_GLOBAL_CFLAGS += -mtune=cortex-a9 -mcpu=cortex-a9
 endif
 
-# generic armv7a_neon
-ifeq ("$(TARGET_CPU)","armv7a_neon")
+# generic armv7a-neon
+ifeq ("$(TARGET_CPU)","armv7a-neon")
   TARGET_GLOBAL_CFLAGS += $(cflags_armv7a_neon)
   TARGET_GLOBAL_LDFLAGS += -Wl,--fix-cortex-a8
 endif
