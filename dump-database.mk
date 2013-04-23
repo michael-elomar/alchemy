@@ -113,8 +113,9 @@ __echo-escape = $(subst ",\",$(subst $(dollar),\$(dollar),$(subst $(endl),\n,$(s
 # need to put a ';' and a continuation line when the shell command is expanded.
 # Otherwise the length of the single line of command generated will be to big
 # to pass down the shell (several hundreds of KB)
+# Note: use /bin/echo to make sure we use the binary, not a shell function.
 __write-xml = \
-	@echo "$(call __echo-escape,$1)" >> $(DUMP_DATABASE_XML_FILE) $(endl)
+	@/bin/echo -e "$(call __echo-escape,$1)" >> $(DUMP_DATABASE_XML_FILE) $(endl)
 
 ###############################################################################
 ## Rules.
