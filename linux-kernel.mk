@@ -108,6 +108,7 @@ $(LINUX_BUILD_DIR)/$(LOCAL_MODULE_FILENAME): $(LINUX_BUILD_DIR)/.config $(LINUX_
 	@echo "Building linux kernel"
 	$(Q)$(MAKE) $(LINUX_MAKE_ARGS)
 	@echo "Installing linux kernel modules"
+	$(Q)rm -rf $(TARGET_OUT_STAGING)/lib/modules
 	$(Q)$(MAKE) $(LINUX_MAKE_ARGS) modules_install
 	@echo "Installing linux kernel images"
 ifeq ("$(LINUX_ARCH)","arm")
