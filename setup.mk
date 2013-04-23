@@ -68,6 +68,16 @@ endif
 # Global prerequisites (shall be used only by os makefile)
 TARGET_GLOBAL_PREREQUISITES :=
 
+# Add a section in executable/shared library with dependencies used
+TARGET_ADD_DEPENDS_SECTION ?= 0
+TARGET_DEPENDS_SECTION_NAME ?= .alchemy.depends
+ifneq ("$(TARGET_ADD_DEPENDS_SECTION)","0")
+ifeq ("$(USE_GIT_REV)","0")
+  $(warning TARGET_ADD_DEPENDS_SECTION requires USE_GIT_REV, disabling ...)
+  TARGET_ADD_DEPENDS_SECTION := 0
+endif
+endif
+
 ###############################################################################
 ## Toolchain setup.
 ###############################################################################

@@ -168,6 +168,7 @@ modules-fields-depends := \
 	depends.STATIC_LIBRARIES \
 	depends.WHOLE_STATIC_LIBRARIES \
 	depends.SHARED_LIBRARIES \
+	depends.link \
 	depends.other \
 	depends.headers \
 	depends.all
@@ -468,6 +469,8 @@ modules-compute-depends = \
 		$(eval __depends-loop := $(empty)) \
 		$(eval __dummy := $(call __module-compute-depends-static,$(__mod),SHARED_LIBRARIES)) \
 		$(eval __depends-loop := $(empty)) \
+		$(eval __dummy := $(call __module-compute-depends-link,$(__mod))) \
+		$(eval __depends-loop := $(empty)) \
 		$(eval __dummy := $(call __module-compute-depends-all,$(__mod))) \
 	)
 
@@ -543,6 +546,17 @@ __module-compute-depends-static-internal = \
 		$(call __module-compute-depends-static,$(__mod),$2) \
 	)
 
+# Compute dependencies for link. It simply aggregate (and sort) static
+# dependencies
+# $1 : module name.
+__module-compute-depends-link = \
+	$(eval __modules.$1.depends.link := $(strip $(sort \
+		$(__modules.$1.depends.EXTERNAL_LIBRARIES) \
+		$(__modules.$1.depends.STATIC_LIBRARIES) \
+		$(__modules.$1.depends.WHOLE_STATIC_LIBRARIES) \
+		$(__modules.$1.depends.SHARED_LIBRARIES) \
+	)))
+
 # Compute all dependencies of a module.
 # $1 : module name.
 # Note : it recursively descends into libraries to get their dependencies.
@@ -608,6 +622,11 @@ module-get-listed-autoconf = $(strip \
 # Get dependencies due to static libraries
 module-get-static-depends = \
 	$(__modules.$1.depends.$2)
+
+# Get link dependencies for the build (aggregation of all static depends)
+# list is sorted and is mainly used for generation of elf section with dependencies.
+module-get-link-depends = \
+	$(__modules.$1.depends.link)
 
 # Get all dependencies for the build
 module-get-all-depends = \
@@ -927,6 +946,25 @@ link-hook = $(strip \
 			$1 $2 "$(__depsdata)" $3 \
 		) \
 	))
+
+###############################################################################
+## Add a section in a binary with list of dependencies and their revision.
+## The revision of this module is also added a the start of the list.
+## The section will simply be a list of lines in the form lib:revision.
+###############################################################################
+
+define add-depends-section
+$(eval __depsdata := $(empty))
+$(foreach __lib,$(PRIVATE_MODULE) $(__modules.$(PRIVATE_MODULE).depends.link), \
+	$(eval __depsdata += $(__lib):$(__modules.$(__lib).REVISION)) \
+)
+$(eval __depsdata := $(subst $(space),\n,$(strip $(__depsdata))))
+$(eval __tmpfile := $(shell mktemp))
+@/bin/echo -e "$(__depsdata)" > $(__tmpfile)
+$(Q)$(TARGET_CROSS)objcopy -p --add-section \
+	$(TARGET_DEPENDS_SECTION_NAME)=$(__tmpfile) $@
+@rm -f $(__tmpfile)
+endef
 
 ###############################################################################
 ## Commands to generate a precompiled file.

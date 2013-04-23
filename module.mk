@@ -303,6 +303,9 @@ include $(BUILD_SYSTEM)/binary-rules.mk
 
 $(LOCAL_BUILD_MODULE): $(all_objects) $(all_libraries)
 	$(transform-o-to-shared-lib)
+ifneq ("$(TARGET_ADD_DEPENDS_SECTION)","0")
+	$(add-depends-section)
+endif
 
 copy_to_staging := 1
 copy_to_final := 1
@@ -320,6 +323,9 @@ include $(BUILD_SYSTEM)/binary-rules.mk
 
 $(LOCAL_BUILD_MODULE): $(all_objects) $(all_libraries)
 	$(transform-o-to-executable)
+ifneq ("$(TARGET_ADD_DEPENDS_SECTION)","0")
+	$(add-depends-section)
+endif
 
 copy_to_staging := 1
 copy_to_final := 1
