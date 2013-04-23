@@ -288,6 +288,13 @@ def writeMakefileFooter(options):
 #===============================================================================
 def processDir(rootDir, options, withEmptyDir, copyType):
 	for (dirPath, dirNames, fileNames) in os.walk(rootDir):
+		# a symlink to an existing directory is put in dirNames, not fileNames
+		# fix this (use a copy in for loop because we will modify dirNames)
+		for dirName in dirNames[:]:
+			if os.path.islink(os.path.join(dirPath, dirName)):
+				dirNames.remove(dirName)
+				fileNames.append(dirName)
+
 		# exclude some directories
 		for dirName in EXCLUDE_DIRS:
 			if dirName in dirNames:
