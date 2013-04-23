@@ -24,7 +24,7 @@ ifneq ("$(TARGET_SKEL_DIRS)","")
 endif
 
 # If a sdk is used, we assume that basic components shall not be put in final dir
-ifeq ("$(TARGET_SDK_DIRS),"")
+ifeq ("$(TARGET_SDK_DIRS)","")
 
 ifneq ("$(TOOLCHAIN_LIBC)","")
   MAKEFINAL_ARGS += --toolchain-libc="$(TOOLCHAIN_LIBC)"
