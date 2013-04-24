@@ -1,4 +1,4 @@
-# Introduction
+<link href="markdown.css" rel="stylesheet"></link>
 
 `Alchemy` is a new build system based on the one used in Android. A central
 makefile instance scans a workspace to find user makefiles, includes them and
@@ -17,6 +17,10 @@ This build system differs mainly in the set of `LOCAL_XXX` variables supported.
 [Android build system](http://jyraphe.b219.org/file.php?h=R2bada79bf459f64eee2c92147dc8dd3d)
 
 [Android ndk build system](http://jyraphe.b219.org/file.php?h=R630e0caa0faeed93d96adddc8fd404ef)
+
+* * *
+
+[TOC]
 
 # Environment
 
