@@ -70,3 +70,19 @@ LOCAL_MODULE := libdl
 LOCAL_EXPORT_LDLIBS := -ldl
 include $(BUILD_PREBUILT)
 
+include $(CLEAR_VARS)
+LOCAL_MODULE := libandroid_runtime
+LOCAL_EXPORT_LDLIBS := -landroid_runtime
+include $(BUILD_PREBUILT)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := libui
+LOCAL_EXPORT_LDLIBS := -lui
+include $(BUILD_PREBUILT)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := libhardware
+LOCAL_EXPORT_LDLIBS := -lhardware
+LOCAL_EXPORT_C_INCLUDES := $(RAPTOR_DIR)/hardware/libhardware/include
+include $(BUILD_PREBUILT)
+
