@@ -44,6 +44,29 @@ endif
 endif
 
 ###############################################################################
+## Add a build-id section to all binaries in staging dir before copying them
+## in final tree. This section is similar to what ld -Wl,--build-id would do
+## but fixes a bug present on some version of toolchain we use (arm-20009q1 for
+## example).
+###############################################################################
+
+ifneq ("$(TARGET_ADD_BUILDID_SECTION)","0")
+
+ADDBUILDID_SCRIPT := $(BUILD_SYSTEM)/scripts/addbuildid.py
+ADDBUILDID_ARGS := \
+	--objcopy=$(TARGET_CROSS)objcopy \
+	--section-name=$(TARGET_BUILDID_SECTION_NAME) \
+	$(TARGET_OUT_STAGING)
+
+__final-add-build-id = $(ADDBUILDID_SCRIPT) $(ADDBUILDID_ARGS)
+
+else
+
+__final-add-build-id =
+
+endif
+
+###############################################################################
 ## Hooks.
 ###############################################################################
 
@@ -71,6 +94,7 @@ endif
 .PHONY: final
 final:
 	@echo "Generating final tree..."
+	$(Q)$(__final-add-build-id)
 	$(Q)$(__final-prepare)
 	$(Q)$(MAKEFINAL_SCRIPT) $(MAKEFINAL_ARGS) \
 		$(TARGET_OUT_STAGING) $(TARGET_OUT_FINAL)

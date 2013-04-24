@@ -78,6 +78,11 @@ ifeq ("$(USE_GIT_REV)","0")
 endif
 endif
 
+# Add a section in executable/shared library with a sha1 of loadable sections
+# of binary
+TARGET_ADD_BUILDID_SECTION ?= 0
+TARGET_BUILDID_SECTION_NAME ?= .alchemy.build-id
+
 ###############################################################################
 ## Toolchain setup.
 ###############################################################################
