@@ -225,6 +225,13 @@ def doCopy(dstFileName, srcFileName, options, doPatchShebang=False):
 		and canStrip(srcFileName):
 		doStrip = True
 
+	# check strip filter
+	if doStrip and options.reStripFilters:
+		for reStripFilter in options.reStripFilters:
+			if reStripFilter.match(os.path.basename(srcFileName)):
+				logging.debug("Not stripping: %s", relPath)
+				doStrip = False
+
 	# check if we need to do something, do not follow symlinks
 	doAction = False
 	if not os.path.lexists(dstFileName):
@@ -398,6 +405,13 @@ def main():
 		logging.info("makefile : %s", args[2])
 		options.makefile = open(args[2], "w")
 
+	# regex for strip filters
+	options.reStripFilters = []
+	for stripFilter in options.stripFilters:
+		stripFilter = stripFilter.replace(r".", r"\.")
+		stripFilter = stripFilter.replace(r"*", r".*")
+		options.reStripFilters.append(re.compile(stripFilter))
+
 	# check that staging directory exists
 	if not os.path.isdir(options.stagingDir):
 		logging.error("%s is not a directory", options.stagingDir)
@@ -460,6 +474,12 @@ def parseArgs():
 		action="store_true",
 		default=False,
 		help="Create a basic linux skel (proc, dev, tmp...)")
+	parser.add_option("--strip-filter",
+		dest="stripFilters",
+		default=[],
+		action="append",
+		help="Filter of file names that will no be stripped (ex: ld-*.so)")
+
 	parser.add_option("-q",
 		dest="quiet",
 		action="store_true",
