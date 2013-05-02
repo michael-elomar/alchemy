@@ -1,3 +1,26 @@
+parrot-tools-alchemy (1.0.5) unstable; urgency=low
+
+  * Add documentation in project.
+  * Fix dependency between configure step and atom.mk.
+  * Do not save the module config if it is not yet saved in full config.
+  * Add linux-kernel.mk to build linux.
+  * Fix check-dyn-deps.sh
+  * [BUGFIX 0110202] Updating version failed with .unpack is not clear.
+  * Restore original timestamp after strip.
+  * Change shebang off ldd during copy.
+  * Get git revision of all modules (see USE_GIT_REV option).
+  * Allow to force toolchain for linux (TARGET_LINUX_CROSS).
+  * Choose correct LIBC for native-chroot.
+  * Add sdk generation feature.
+  * Add TARGET_ADD_DEPENDS_SECTION feature.
+  * Add TARGET_ADD_BUILDID_SECTION option.
+  * [BUGFIX 0111429] Final does not preserve symlink
+  * Do not use job control in alchemake when stdout is not a tty.
+  * Add option to prevent stripping some files.
+  * If valgrind is enabled, do not strip linux loader.
+
+ -- Yves-Marie Morgan (Parrot) <yves-marie.morgan@parrot.com>  Thu, 02 May 2013 11:30:16 +0200
+
 parrot-tools-alchemy (1.0.4) unstable; urgency=low
 
   * Resolve symlinks relative to final directory.
