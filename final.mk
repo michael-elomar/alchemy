@@ -43,6 +43,11 @@ endif
 
 endif
 
+# When valgrind is used, linux loader shall not be stripped
+ifneq ("$(call is-module-in-build-config,valgrind)","")
+  MAKEFINAL_ARGS += --strip-filter="ld-*.so"
+endif
+
 ###############################################################################
 ## Add a build-id section to all binaries in staging dir before copying them
 ## in final tree. This section is similar to what ld -Wl,--build-id would do
