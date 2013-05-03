@@ -21,6 +21,7 @@ LINUX_ARCH := $(TARGET_ARCH)
 LINUX_DIR := $(LOCAL_PATH)
 LINUX_BUILD_DIR := $(call local-get-build-dir)
 LINUX_HEADERS_DONE_FILE := $(LINUX_BUILD_DIR)/linux-headers.done
+LOCAL_DONE_FILES += linux-headers.done
 
 # Linux configuration file
 LINUX_CONFIG_FILE := $(call module-get-config,$(LOCAL_MODULE))
