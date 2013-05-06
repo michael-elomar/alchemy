@@ -43,10 +43,17 @@ endif
 
 endif
 
-# When valgrind is used, linux loader shall not be stripped
+# When valgrind is used, some libs shall not be stripped
 ifneq ("$(call is-module-in-build-config,valgrind)","")
-  MAKEFINAL_ARGS += --strip-filter="ld-*.so"
+MAKEFINAL_ARGS += \
+	--strip-filter="ld-*.so" \
+	--strip-filter="libc-*.so" \
+	--strip-filter="vgpreload*.so"
 endif
+
+# Additional files to filter
+MAKEFINAL_ARGS += \
+	$(foreach __lib,$(TARGET_STRIP_FILTER),--strip-filter="$(__lib)")
 
 ###############################################################################
 ## Add a build-id section to all binaries in staging dir before copying them

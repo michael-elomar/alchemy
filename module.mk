@@ -463,6 +463,8 @@ $(LOCAL_MODULE): $(LOCAL_FINAL_MODULE)
 # Strip if needed, otherwise simply copy
 ifeq ("$(TARGET_NOSTRIP_FINAL)","1")
 $(eval $(call copy-one-file,$(LOCAL_STAGING_MODULE),$(LOCAL_FINAL_MODULE)))
+else ifneq ("$(filter $(TARGET_STRIP_FILTER),$(LOCAL_MODULE_FILENAME))","")
+$(eval $(call copy-one-file,$(LOCAL_STAGING_MODULE),$(LOCAL_FINAL_MODULE)))
 else
 $(LOCAL_FINAL_MODULE): $(LOCAL_STAGING_MODULE)
 	@echo "Strip: $(call path-from-top,$<) => $(call path-from-top,$@)"

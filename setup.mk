@@ -83,6 +83,10 @@ endif
 TARGET_ADD_BUILDID_SECTION ?= 0
 TARGET_BUILDID_SECTION_NAME ?= .alchemy.build-id
 
+# List of filenames to filter during strip (no wildcard allowed here because
+# module.mk will also look in this list to filter, not only final.mk)
+TARGET_STRIP_FILTER :=
+
 ###############################################################################
 ## Toolchain setup.
 ###############################################################################

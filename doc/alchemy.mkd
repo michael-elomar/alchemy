@@ -170,6 +170,14 @@ Mainly used by the android wrapper.
 * `TARGET_NOSTRIP_FINAL` : Can be set at 1 to prevent stripping binaries when
   generating final directory.
   Default is `0`.
+* `TARGET_STRIP_FILTER` : List of filenames to filter during strip. Mainly used
+  when valgrind or other tracing tool is used and requires debugging symbols
+  on the target. This is an alternative to `TARGET_NOSTRIP_FINAL` that keeps
+  **ALL** debugging symbols. This variable allows fine tunning. The list
+  specifies only names, not path.
+  Default is empty.
+  **Note** : when valgrind is activated, `alchemy` automatically filters the
+  linux loader as well as the libc and some valgrind libraries.
 * `TARGET_ADD_DEPENDS_SECTION` : Activate the generation of an extra section in
   executables and shared libraries built by `alchemy`. This sections contains
   the list of modules used for the link and their revision. The first line
@@ -184,7 +192,7 @@ Mainly used by the android wrapper.
   on the original and stripped binary and still produce the same sha1. This can
   be used to identify the non-stripped binary based on the stripped one. This is
   a feature similar to the `--build-id` option of `ld` but fixes a bug present
-  on some toolchain (armm-2009q1 for example) in which only the header of
+  on some toolchain (arm-2009q1 for example) in which only the header of
   sections is used, not the data of the sections.
   Default is `0`.
 * `TARGET_BUILDID_SECTION_NAME` : Name of the section with `build-id`
