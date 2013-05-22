@@ -959,11 +959,13 @@ $(foreach __lib,$(PRIVATE_MODULE) $(__modules.$(PRIVATE_MODULE).depends.link), \
 	$(eval __depsdata += $(__lib):$(__modules.$(__lib).REVISION)) \
 )
 $(eval __depsdata := $(subst $(space),\n,$(strip $(__depsdata))))
-$(eval __tmpfile := $(shell mktemp))
-@/bin/echo -e "$(__depsdata)" > $(__tmpfile)
-$(Q)$(TARGET_CROSS)objcopy -p --add-section \
-	$(TARGET_DEPENDS_SECTION_NAME)=$(__tmpfile) $@
-@rm -f $(__tmpfile)
+@( \
+	__tmpfile=$$(mktemp); \
+	/bin/echo -e "$(__depsdata)" > $${__tmpfile}; \
+	$(TARGET_CROSS)objcopy -p --add-section \
+		$(TARGET_DEPENDS_SECTION_NAME)=$${__tmpfile} $@; \
+	rm -f $${__tmpfile}; \
+)
 endef
 
 ###############################################################################
