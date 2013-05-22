@@ -16,6 +16,16 @@ if [ "${ARCH}" = "x64" ]; then
 else
 	readonly ARCHDIR="i386-linux-gnu"
 fi
+BASE_LIB_PATH="/lib/${ARCHDIR}"
+BASE_USRLIB_PATH="/usr/lib/${ARCHDIR}"
+
+# Fallback in legacy hierarchy
+if [ ! -d "${BASE_LIB_PATH}" ] ; then
+	BASE_LIB_PATH="/lib"
+fi
+if [ ! -d "${BASE_USRLIB_PATH}" ] ; then
+	BASE_USRLIB_PATH="/usr/lib"
+fi
 
 # Copy a file if needed
 # $1: source file
@@ -45,17 +55,17 @@ mkdir -p ${SYSROOT}/usr/lib
 # /lib system libraries
 lib_names=" \
   libc libpthread libm librt libdl libutil \
-  libresolv libnss_files \
+  libresolv libnss_files libthread_db \
 "
 for n in ${lib_names}; do
-	copy_file_pattern "/lib/${ARCHDIR}/${n}.so*" "${SYSROOT}/lib"
-	copy_file_pattern "/lib/${ARCHDIR}/${n}-*.so" "${SYSROOT}/lib"
+	copy_file_pattern "${BASE_LIB_PATH}/${n}.so*" "${SYSROOT}/lib"
+	copy_file_pattern "${BASE_LIB_PATH}/${n}-*.so" "${SYSROOT}/lib"
 done
 
 # Linker and libgcc
-copy_file_pattern "/lib/${ARCHDIR}/ld-*.so" "${SYSROOT}/lib"
-copy_file_pattern "/lib/${ARCHDIR}/ld-linux*.so*" "${SYSROOT}/lib"
-copy_file_pattern "/lib/${ARCHDIR}/libgcc_s.so*" "${SYSROOT}/lib"
+copy_file_pattern "${BASE_LIB_PATH}/ld-*.so" "${SYSROOT}/lib"
+copy_file_pattern "${BASE_LIB_PATH}/ld-linux*.so*" "${SYSROOT}/lib"
+copy_file_pattern "${BASE_LIB_PATH}/libgcc_s.so*" "${SYSROOT}/lib"
 
 # Link /lib64 -> /lib
 if [ "${ARCH}" = "x64" ]; then
@@ -65,7 +75,7 @@ fi
 # /usr/lib libraries
 usr_lib_names="libstdc++ libICE libSM"
 for n in ${usr_lib_names}; do
-	copy_file_pattern "/usr/lib/${ARCHDIR}/${n}.so*" "${SYSROOT}/usr/lib"
+	copy_file_pattern "${BASE_USRLIB_PATH}/${n}.so*" "${SYSROOT}/usr/lib"
 done
 
 # gdbserver
