@@ -412,7 +412,10 @@ ifeq ("$(call is-targets-in-make-goals,$(__query-targets) clobber)","")
 $(foreach __mod,$(ALL_MODULES), \
 	$(if $(call is-module-in-make-goals,$(__mod)), \
 		$(if $(call is-module-in-build-config,$(__mod)),, \
-			$(error $(__mod) is not enabled in the config) \
+			$(warning $(__mod) is not enabled in the config) \
+			$(eval ALL_BUILD_MODULES += $(__mod) \
+				$(call module-get-all-depends,$(__mod)) \
+			) \
 		) \
 	) \
 )
