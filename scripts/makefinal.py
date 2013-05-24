@@ -197,7 +197,7 @@ def doCopyByMakefile(dstFileName, srcFileName, options, doStrip=False, doPatchSh
 	options.makefile.write("\t@mkdir -p \"%s\"\n" % os.path.dirname(dstFileName))
 	options.makefile.write("\t@echo Alchemy install: %s\n" % os.path.relpath(dstFileName))
 	for cmd in cmds:
-		options.makefile.write("\t$(Q)%s\n" % cmd)
+		options.makefile.write("\t$(Q)%s\n" % cmd.replace("$", "$$"))
 	options.makefile.write("\n")
 
 #===============================================================================
