@@ -126,7 +126,7 @@ def processModule(ctx, module):
 	if "CONFIG_FILES" in module.fields:
 		autoconfFileName = "autoconf-%s.h" % module.name
 		ctx.atom.write("LOCAL_EXPORT_CFLAGS += \\\n")
-		ctx.atom.write("\t--include=$(LOCAL_PATH)/usr/include/%s/%s\n" % \
+		ctx.atom.write("\t-include $(LOCAL_PATH)/usr/include/%s/%s\n" % \
 				(module.name, autoconfFileName))
 		if not os.path.exists(os.path.join(ctx.outDir, "usr/include", module.name)):
 			os.makedirs(os.path.join(ctx.outDir, "usr/include", module.name), mode=0755)
