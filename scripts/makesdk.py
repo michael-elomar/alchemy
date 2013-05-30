@@ -18,6 +18,7 @@ class Context(object):
 		self.stagingDir = os.path.abspath(args[2])
 		self.outDir = os.path.abspath(args[3])
 		self.atom = StringIO()
+		self.sdkDirs = []
 
 #===============================================================================
 #===============================================================================
@@ -59,11 +60,39 @@ def copyHeaders(srcDir, dstDir):
 
 #===============================================================================
 #===============================================================================
+def processModuleSdk(ctx, module):
+	# Only once per sdk
+	sdkDir = module.fields["SDK"]
+	if sdkDir in ctx.sdkDirs:
+		return
+	ctx.sdkDirs.append(sdkDir)
+
+	# Copy content of atom.mk of sdk in current context
+	sdkAtomFile = open(os.path.join(sdkDir, "atom.mk"))
+	for line in sdkAtomFile:
+		# Skip header
+		if line.startswith("# GENERATED FILE, DO NOT EDIT"):
+			continue
+		if line.startswith("LOCAL_PATH :="):
+			continue
+		ctx.atom.write(line)
+	sdkAtomFile.close()
+
+	# Copy content of sdk (like if it was a staging dir)
+	copyStaging(sdkDir, ctx.outDir)
+
+#===============================================================================
+#===============================================================================
 def processModule(ctx, module):
 	# Skip module not built
 	if not module.build:
 		return
 	logging.info("Processing module %s", module.name)
+
+	# Handle module from a previous sdk separately
+	if "SDK" in module.fields:
+		processModuleSdk(ctx, module)
+		return
 
 	# Start a new module
 	ctx.atom.write("include $(CLEAR_VARS)\n")
@@ -140,8 +169,8 @@ def processModule(ctx, module):
 
 	# Register shared/static libraries as normal so we can manage dependencies
 	# Other are simply put as prebuilt
+	ctx.atom.write("LOCAL_SDK := $(LOCAL_PATH)\n")
 	if moduleClass == "SHARED_LIBRARY" or moduleClass == "STATIC_LIBRARY":
-		ctx.atom.write("LOCAL_SDK := $(LOCAL_PATH)\n")
 		ctx.atom.write("LOCAL_DESTDIR := %s\n" % module.fields["DESTDIR"])
 		ctx.atom.write("LOCAL_MODULE_FILENAME := %s\n" % module.fields["MODULE_FILENAME"])
 		ctx.atom.write("include $(BUILD_%s)\n" % moduleClass)
@@ -200,12 +229,6 @@ def parseArgs():
 	parser = optparse.OptionParser(usage=usage)
 
 	# Main options
-	parser.add_option("--dump-xml",
-		dest="dumpXmlFilePath",
-		action="store",
-		default=None,
-		metavar="FILE",
-		help="Alchemy database xml dump file")
 
 	# Other options
 	parser.add_option("-q",
