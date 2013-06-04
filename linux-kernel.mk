@@ -23,13 +23,19 @@ LINUX_BUILD_DIR := $(call local-get-build-dir)
 LINUX_HEADERS_DONE_FILE := $(LINUX_BUILD_DIR)/linux-headers.done
 LOCAL_DONE_FILES += linux-headers.done
 
-# Linux configuration file
+# Linux configuration file or target
 LINUX_CONFIG_FILE := $(call module-get-config,$(LOCAL_MODULE))
+LINUX_CONFIG_FILE_IS_TARGET := $(false)
 ifeq ("$(wildcard $(LINUX_CONFIG_FILE))","")
-  ifeq ("$(wildcard $(LINUX_DEFAULT_CONFIG_FILE))","")
-    $(error No linux config file found)
+  ifdef LINUX_DEFAULT_CONFIG_TARGET
+    LINUX_CONFIG_FILE := $(LINUX_DEFAULT_CONFIG_TARGET)
+    LINUX_CONFIG_FILE_IS_TARGET := $(true)
   else
-    LINUX_CONFIG_FILE := $(LINUX_DEFAULT_CONFIG_FILE)
+    ifeq ("$(wildcard $(LINUX_DEFAULT_CONFIG_FILE))","")
+      $(error No linux config file found)
+    else
+      LINUX_CONFIG_FILE := $(LINUX_DEFAULT_CONFIG_FILE)
+    endif
   endif
 endif
 
@@ -93,13 +99,36 @@ linux-copy-image = \
 		cp -af $(LINUX_BUILD_DIR)/arch/$(LINUX_ARCH)/boot/$1 $(TARGET_OUT_STAGING)/boot; \
 	fi;
 
-# Copy config in build dir
-linux-copy-config = \
+# Setup config in build dir
+ifneq ("$(LINUX_CONFIG_FILE_IS_TARGET)","")
+
+# Use linux target
+linux-setup-config = \
+	mkdir -p $(LINUX_BUILD_DIR); \
+	$(MAKE) $(LINUX_MAKE_ARGS) $(LINUX_CONFIG_FILE)
+
+# Nothing to do
+linux-save-config =
+
+# Rule to create .config
+$(LINUX_BUILD_DIR)/.config:
+	+$(Q)$(linux-setup-config)
+
+else
+
+# Use a file
+linux-setup-config = \
 	mkdir -p $(LINUX_BUILD_DIR); \
 	cp -af $(LINUX_CONFIG_FILE) $(LINUX_BUILD_DIR)/.config
 
+linux-save-config = \
+	cp -af $(LINUX_BUILD_DIR)/.config $(LINUX_CONFIG_FILE)
+
+# Rule to create .config
 $(LINUX_BUILD_DIR)/.config: $(LINUX_CONFIG_FILE)
-	@$(linux-copy-config)
+	+$(Q)$(linux-setup-config)
+
+endif
 
 # Avoid compiling kernel at same time than header installation by adding a prerequisite
 $(LINUX_BUILD_DIR)/$(LOCAL_MODULE_FILENAME): $(LINUX_BUILD_DIR)/.config $(LINUX_HEADERS_DONE_FILE)
@@ -154,13 +183,13 @@ endif
 linux-menuconfig: $(LINUX_BUILD_DIR)/.config
 	@echo "Configuring linux kernel: $(LINUX_CONFIG_FILE)"
 	$(Q)$(MAKE) $(LINUX_MAKE_ARGS) menuconfig
-	@cp -af $(LINUX_BUILD_DIR)/.config $(LINUX_CONFIG_FILE)
+	$(Q)$(linux-save-config)
 
 .PHONY: linux-xconfig
 linux-xconfig: $(LINUX_BUILD_DIR)/.config
 	@echo "Configuring linux kernel: $(LINUX_CONFIG_FILE)"
 	$(Q)$(MAKE) $(LINUX_MAKE_ARGS) xconfig
-	@cp -af $(LINUX_BUILD_DIR)/.config $(LINUX_CONFIG_FILE)
+	$(Q)$(linux-save-config)
 
 .PHONY: linux-config
 linux-config: linux-xconfig
@@ -184,13 +213,13 @@ linux-clean:
 # Do NOT put a dependency for this pattern rule to avoid subtle troubles.
 # For example, depending on linux config file will trigger this rule for this
 # makefile (named linux-kernel.mk) that matches the pattern.
-# The macro linux-copy-config is called to make sure it is really there...
+# The macro linux-setup-config is called to make sure it is really there...
 .PHONY: linux-%
 linux-%:
-	@$(linux-copy-config)
+	@$(linux-setup-config)
 	@echo "Building linux kernel $* target with $(LINUX_CONFIG_FILE)"
 	$(Q)$(MAKE) $(LINUX_MAKE_ARGS) $*
-	@cp -af $(LINUX_BUILD_DIR)/.config $(LINUX_CONFIG_FILE)
+	$(Q)$(linux-save-config)
 
 # Register as a custom build in the system
 include $(BUILD_CUSTOM)
