@@ -34,7 +34,7 @@ gdb-wrapper: $(GDB_WRAPPER_SCRIPT)
 gdb-wrapper-clean:
 	$(Q) rm -f $(GDB_WRAPPER_SCRIPT)
 
-all: gdb-wrapper
+$(ALL_BUILD_MODULES): gdb-wrapper
 clean: gdb-wrapper-clean
 dirclean: gdb-wrapper-clean
 clobber: gdb-wrapper-clean
