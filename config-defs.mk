@@ -85,9 +85,9 @@ __get-module-config-in-files = $(strip \
 ###############################################################################
 
 # Escape description so it can be inserted as a parameter in the command line
-# It removes completely ':' and escape quotes.
+# It removes completely '|' and escape quotes.
 # $1 : description
-__config-desc-escape = $(subst ",\",$(subst $(colon),$(empty),$1))
+__config-desc-escape = $(subst ",\",$(subst |,$(empty),$1))
 
 # Generate arguments suitable for an action on a module config.
 # $1 : module name
@@ -95,6 +95,7 @@ __generate-config-module-args = $(strip \
 	$(eval __mod := $1) \
 	$(eval __desc := $(call __config-desc-escape,$(__modules.$(__mod).DESCRIPTION))) \
 	$(eval __depends := $(call module-get-config-depends,$(__mod))) \
+	$(eval __dependsCond := $(__modules.$(__mod).CONDITIONAL_LIBRARIES)) \
 	$(eval __modPath := $(call path-from-top,$(__modules.$(__mod).PATH))) \
 	$(eval __categoryPath := $(__modules.$(__mod).CATEGORY_PATH)) \
 	$(eval __configInFiles := $(call __get-module-config-in-files,$(__mod))) \
@@ -102,10 +103,10 @@ __generate-config-module-args = $(strip \
 		$(eval __configPath := $(call __get-module-config,$(__mod))), \
 		$(eval __configPath := $(empty)) \
 	) \
-	$(eval __arg := $(__mod):$(__desc):$(__depends):$(__modPath)) \
-	$(eval __arg := $(__arg):$(__categoryPath):$(__configPath)) \
+	$(eval __arg := $(__mod)|$(__desc)|$(__depends)|$(__dependsCond)|$(__modPath)) \
+	$(eval __arg := $(__arg)|$(__categoryPath)|$(__configPath)) \
 	$(foreach __f,$(__configInFiles), \
-		$(eval __arg := $(__arg):$(abspath $(__f))) \
+		$(eval __arg := $(__arg)|$(abspath $(__f))) \
 	) \
 	"$(__arg)")
 

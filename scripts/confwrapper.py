@@ -26,7 +26,7 @@ ACTIONS = [ACTION_CHECK, ACTION_UPDATE, ACTION_CONFIG]
 UIS = ["qconf", "mconf", "nconf"]
 
 # Field separator in argument
-ARG_FIELD_SEP = ":"
+ARG_FIELD_SEP = "|"
 
 # Suffix for temp files
 TEMP_SUFFIX = ".alchemy"
@@ -143,10 +143,18 @@ class Module:
 		self.name = fields[0]
 		self.desc = fields[1]
 		self.depends = fields[2].split()
-		self.path = fields[3].rstrip("/")
-		self.categoryPath = fields[4].rstrip("/")
-		self.configPath = fields[5]
-		self.configInPathList = fields[6:]
+		self.dependsCond = [pair.split(":") for pair in fields[3].split()]
+		self.path = fields[4].rstrip("/")
+		self.categoryPath = fields[5].rstrip("/")
+		self.configPath = fields[6]
+		self.configInPathList = fields[7:]
+		# Remove from self.depends, conditionals from self.dependsCond
+		# Remove CONFIG_PREFIX from conditional
+		for depCond in self.dependsCond:
+			if depCond[1] in self.depends:
+				self.depends.remove(depCond[1])
+			if depCond[0].startswith("CONFIG_"):
+				depCond[0] = depCond[0][7:]
 
 	def __lt__(self, other):
 		return self.name < other.name
@@ -155,9 +163,9 @@ class Module:
 		return self.categoryPath == ""
 
 	def __repr__(self):
-		return ("{name=%s,desc=%s,depends=%s,path=%s," + \
+		return ("{name=%s,desc=%s,depends=%s,dependsCond=%s,path=%s," + \
 				"categoryPath=%s,configPath=%s,configInPathList=%s}") % \
-				(self.name, self.desc, self.depends, self.path,
+				(self.name, self.desc, self.depends, self.dependsCond, self.path,
 				self.categoryPath, self.configPath, str(self.configInPathList))
 
 #===============================================================================
@@ -370,6 +378,9 @@ def writeFullConfigIn(outFile, menu):
 			outFile.write("  bool '%s'\n" % module.name)
 			for dep in module.depends:
 				outFile.write("  select ALCHEMY_BUILD_%s\n" % getDefine(dep))
+			for depCond in module.dependsCond:
+				outFile.write("  select ALCHEMY_BUILD_%s if %s\n" % \
+						(getDefine(depCond[1]), depCond[0]))
 			outFile.write("  default n\n")
 			outFile.write("  help\n")
 			outFile.write("    Build %s\n" % module.name)

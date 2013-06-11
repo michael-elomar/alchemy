@@ -455,6 +455,22 @@ specified in prerequisites export, it will not work in a parallel build.
 **Note** : specifying an `internal` module as a dependency of an `external`
 module is not really supported. It may works but it is not guaranteed.
 
+### `LOCAL_CONDITIONAL_LIBRARIES`
+
+This is a list of pair `variable:module` to indicate that a module is needed
+only if a variable (found in a `config.in` file) is defined. Although it is
+possible to explicitly put a conditional in the `atom.mk`, it is recommended to
+use this technique to make sure that `kconfig` will also see this conditional
+dependency. Without it it would not be possible to disable a module once the
+configuration variable is enabled: the configuration editor would need to be
+launched 2 times, one to disable the variable, another to disable the module.
+
+If a configuration variable needs to select several modules, specify it in
+several pairs `variable:module`.
+
+Internally modules will be added to `LOCAL_LIBRARIES` if the variable is defined
+in the configuration.
+
 ### `LOCAL_DEPENDS_HEADERS`
 
 This is a list of modules whose headers are required to compile but not for

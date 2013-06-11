@@ -218,6 +218,7 @@ module-add = \
 		) \
 		$(check-cppflags-compat) \
 		$(call install-headers-setup,$(LOCAL_MODULE)) \
+		$(call conditional-libraries-setup,$(LOCAL_MODULE)) \
 	)
 
 ###############################################################################
@@ -834,6 +835,22 @@ install-headers-setup = \
 		) \
 		$(eval __modules.$1.COPY_FILES += $(__w1):$(__w2)) \
 		$(eval __modules.$1.EXPORT_PREREQUISITES += $(__dst)) \
+	)
+
+###############################################################################
+## Setup conditional libraries. It looks for pairs <var>:<lib> in
+## LOCAL_CONDITIONAL_LIBRARIES and add <lib> in LOCAL_LIBRARIES if <var> is
+## defined.
+## $1 : module name.
+###############################################################################
+conditional-libraries-setup = \
+	$(foreach __pair,$(__modules.$1.CONDITIONAL_LIBRARIES), \
+		$(eval __pair2 := $(subst :,$(space),$(__pair))) \
+		$(eval __w1 := $(word 1,$(__pair2))) \
+		$(eval __w2 := $(word 2,$(__pair2))) \
+		$(if $(call is-var-defined,$(__w1)), \
+			$(eval __modules.$1.LIBRARIES += $(__w2)) \
+		) \
 	)
 
 ###############################################################################

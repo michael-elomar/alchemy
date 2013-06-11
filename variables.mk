@@ -60,6 +60,12 @@ vars-LOCAL += EXTERNAL_LIBRARIES
 # General libraries to add in dependency based on their actual class (STATIC/SHARED/EXTERNAL).
 vars-LOCAL += LIBRARIES
 
+# Libraries whose dependency is conditional
+# Format : list of pair <var>:<lib>
+# <var> : variable to test
+# <lib> : library to add in LOCAL_LIBRARIES if <var> is defined
+vars-LOCAL += CONDITIONAL_LIBRARIES
+
 # Modules whose headers are required to build
 vars-LOCAL += DEPENDS_HEADERS
 
