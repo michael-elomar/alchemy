@@ -12,6 +12,9 @@ LOCAL_PATH := $(call my-dir)
 ## and the internals of modules.
 ##
 ## However, a limited number of modules are handled.
+##
+## Note: dependency on the library is required so that PRIVATE_XXX variables
+## are correctly propagated.
 ###############################################################################
 
 # This requires at least the ckcm module to exist
@@ -58,6 +61,11 @@ endif
 # Blues
 ifneq ("$(call is-module-registered,blues)","")
 ifneq ("$(call is-module-in-build-config,blues)","")
+
+# FIXME: remove first part of block when blues has integrated the modifications
+# and when everyone will use this blues version
+ifeq ("$(findstring Blues_Msgs_generated.ckcm.c,$(__modules.blues.PREREQUISITES))","")
+
 MSGBUILDER_CKCM_MSG_FILES += \
 	$(__modules.blues.PATH)/Sources/Common/System/Blues_Msgs_generated.ckcm.c
 MSGBUILDER_CKCM_CFLAGS += \
@@ -67,6 +75,21 @@ MSGBUILDER_CKCM_CFLAGS += \
 LOCAL_LIBRARIES += blues
 LOCAL_PREREQUISITES += $(__modules.blues.PREREQUISITES)
 LOCAL_PREREQUISITES += $(__modules.blues.EXPORT_PREREQUISITES)
+
+else
+
+# No need to import blues prerequisites, internally generated file already have them.
+# Adding it here would cause cyclic dependency within 'make'.
+MSGBUILDER_CKCM_MSG_FILES += \
+	$(TARGET_OUT_BUILD)/blues/Blues_Msgs_generated.ckcm.c
+MSGBUILDER_CKCM_CFLAGS += \
+	-D_BLUES_ \
+	-I$(__modules.blues.PATH)/Sources/Common/System \
+	-I$(TARGET_OUT_BUILD)/blues/include
+LOCAL_LIBRARIES += blues
+
+endif
+
 endif
 endif
 
