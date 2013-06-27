@@ -192,6 +192,9 @@ check-cppflags-compat = \
 ###############################################################################
 ## Add a module in the build system and save its LOCAL_xxx variables.
 ## All LOCAL_xxx variables will be saved in module database.
+## An internal prebuilt module (for example a bionic one) will take precedence
+## over another module with the same name.
+## A module comming from a sdk will be overidden by a standard module.
 ###############################################################################
 module-add = \
 	$(eval LOCAL_MODULE := $(strip $(LOCAL_MODULE))) \
@@ -200,12 +203,20 @@ module-add = \
 	$(eval __mod := $(LOCAL_MODULE)) \
 	$(eval __add := 1) \
 	$(if $(call is-module-registered,$(__mod)), \
-		$(eval __add := 0) \
-		$(eval __path := $(__modules.$(__mod).PATH)) \
-		$(eval __class := $(__modules.$(__mod).MODULE_CLASS)) \
-		$(if $(call streq,$(__class),PREBUILT), \
-			$(warning $(LOCAL_PATH): module '$(__mod)' is already prebuilt), \
-			$(error $(LOCAL_PATH): module '$(__mod)' already registered at $(__path)) \
+		$(if $(__modules.$(__mod).SDK), \
+			$(info $(LOCAL_PATH): module '$(__mod)' overwrites sdk) \
+			$(foreach __local,$(vars-LOCAL), \
+				$(eval __modules.$(__mod).$(__local) := $(empty))) \
+			$(foreach __local,$(macros-LOCAL), \
+				$(eval __modules.$(__mod).$(__local) := $(empty))) \
+			, \
+			$(eval __add := 0) \
+			$(eval __path := $(__modules.$(__mod).PATH)) \
+			$(eval __class := $(__modules.$(__mod).MODULE_CLASS)) \
+			$(if $(call streq,$(__class),PREBUILT), \
+				$(warning $(LOCAL_PATH): module '$(__mod)' is already prebuilt), \
+				$(error $(LOCAL_PATH): module '$(__mod)' already registered at $(__path)) \
+			) \
 		) \
 	) \
 	$(if $(call streq,$(__add),1), \
