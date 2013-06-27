@@ -72,6 +72,10 @@ all_prerequisites += \
 	$(LOCAL_PREREQUISITES) \
 	$(LOCAL_EXPORT_PREREQUISITES)
 
+# Make sure autoconf.h file is generated
+all_prerequisites += \
+	$(call module-get-autoconf,$(LOCAL_MODULE))
+
 # Make sure PRIVATE_XXX variables of prerequisites are correct
 # Without this, the first module that needs the prerequisite will force its
 # PRIVATE_XXX variables leading to 'interresting' results
