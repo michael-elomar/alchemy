@@ -284,7 +284,6 @@ find-cmd := $(BUILD_SYSTEM)/scripts/findfiles.py \
 	--prune=$(BUILD_SYSTEM) \
 	$(foreach __d,$(TARGET_SCAN_PRUNE_DIRS),--prune=$(__d)) \
 	$(foreach __d,$(TARGET_SCAN_ADD_DIRS),--add=$(__d)) \
-	$(foreach __d,$(TARGET_SDK_DIRS),--add=$(__d)) \
 	$(TOP_DIR) \
 	$(USER_MAKEFILE_NAME)
 
@@ -296,13 +295,15 @@ display-user-makefiles-summary = \
 	$(info Found $(words $(USER_MAKEFILES)) makefiles)
 
 # Create a file that will contain all user makefiles available
+# Make sure that atom.mk from sdk are included first so they can be overriden
 create-user-makefiles-cache = \
 	rm -f $(USER_MAKEFILES_CACHE); \
 	mkdir -p $(dir $(USER_MAKEFILES_CACHE)); \
 	touch $(USER_MAKEFILES_CACHE); \
 	$(info Scanning $(TOP_DIR) for makefiles...) \
 	( \
-		for f in `$(find-cmd)`; do \
+		files=$(addsuffix /atom.mk,$(TARGET_SDK_DIRS)); \
+		for f in $$files `$(find-cmd)`; do \
 			echo "USER_MAKEFILES += $$f"; \
 			echo "\$$(call user-makefile-before-include,$$f)"; \
 			echo "include $$f"; \
