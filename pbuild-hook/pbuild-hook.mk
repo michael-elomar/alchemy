@@ -20,6 +20,9 @@ LOCAL_PATH := $(call my-dir)
 # This requires at least the ckcm module to exist
 ifneq ("$(call is-module-registered,ckcm)","")
 
+# Skip if ckcm is from a sdk
+ifeq ("$(__modules.ckcm.SDK)","")
+
 # Make sure the module is not already registered as part of a sdk
 ifeq ("$(call is-module-registered,msgbuilder)","")
 
@@ -47,6 +50,7 @@ MSGBUILDER_CKCM_CFLAGS := -DNATIVE_COMPILER -I$(LOCAL_PATH)
 # ParrotOS in ckcm
 ifneq ("$(call is-module-registered,ckcm)","")
 ifneq ("$(call is-module-in-build-config,ckcm)","")
+ifeq ("$(__modules.ckcm.SDK)","")
 MSGBUILDER_CKCM_MSG_FILES += \
 	$(__modules.ckcm.PATH)/ckcm/src/Parrotos_Msgs.ckcm.c
 MSGBUILDER_CKCM_CFLAGS += \
@@ -57,10 +61,12 @@ LOCAL_PREREQUISITES += $(__modules.ckcm.PREREQUISITES)
 LOCAL_PREREQUISITES += $(__modules.ckcm.EXPORT_PREREQUISITES)
 endif
 endif
+endif
 
 # Blues
 ifneq ("$(call is-module-registered,blues)","")
 ifneq ("$(call is-module-in-build-config,blues)","")
+ifeq ("$(__modules.blues.SDK)","")
 
 # FIXME: remove first part of block when blues has integrated the modifications
 # and when everyone will use this blues version
@@ -92,10 +98,12 @@ endif
 
 endif
 endif
+endif
 
 # Concertos
 ifneq ("$(call is-module-registered,concertos)","")
 ifneq ("$(call is-module-in-build-config,concertos)","")
+ifeq ("$(__modules.concertos.SDK)","")
 MSGBUILDER_CKCM_MSG_FILES += \
 	$(__modules.concertos.PATH)/Build/Concertos_Msgs.ckcm.c
 MSGBUILDER_CKCM_CFLAGS += \
@@ -108,10 +116,12 @@ LOCAL_PREREQUISITES += $(__modules.concertos.PREREQUISITES)
 LOCAL_PREREQUISITES += $(__modules.concertos.EXPORT_PREREQUISITES)
 endif
 endif
+endif
 
 # SoftAT
 ifneq ("$(call is-module-registered,softat)","")
 ifneq ("$(call is-module-in-build-config,softat)","")
+ifeq ("$(__modules.softat.SDK)","")
 MSGBUILDER_CKCM_MSG_FILES += \
 	$(__modules.softat.PATH)/Sources/System/SYST_CK505X_Msgs.ckcm.c
 MSGBUILDER_CKCM_CFLAGS += \
@@ -121,6 +131,7 @@ MSGBUILDER_CKCM_CFLAGS += \
 LOCAL_LIBRARIES += softat
 LOCAL_PREREQUISITES += $(__modules.softat.PREREQUISITES)
 LOCAL_PREREQUISITES += $(__modules.softat.EXPORT_PREREQUISITES)
+endif
 endif
 endif
 
@@ -180,6 +191,8 @@ $(LOCAL_PATH)/atom.mk:
 
 include $(BUILD_CUSTOM)
 
-endif
+endif # ifeq ("$(call is-module-registered,msgbuilder)","")
 
-endif
+endif # ifeq ("$(__modules.ckcm.SDK)","")
+
+endif # ifneq ("$(call is-module-registered,ckcm)","")
