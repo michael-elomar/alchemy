@@ -145,6 +145,14 @@ endif
 include $(BUILD_SYSTEM)/variables.mk
 include $(BUILD_SYSTEM)/defs.mk
 
+# Make sure all TARGET_xxx variables that we received does not have trailing
+# spaces or end of line
+$(foreach __var,$(vars-TARGET), \
+	$(if $(call is-var-defined,TARGET_$(__var)), \
+		$(eval TARGET_$(__var) := $(strip $(TARGET_$(__var)))) \
+	) \
+)
+
 # Setup configuration
 include $(BUILD_SYSTEM)/setup.mk
 
