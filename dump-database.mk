@@ -144,7 +144,7 @@ dump-depends:
 .PHONY: dump-xml
 dump-xml:
 ifdef __dumping-xml
-	# Called inside a sub-make to dump using 'info' in a file
+	@# Called inside a sub-make to dump using 'info' in a file
 	$(info @@@@@XML-BEGIN@@@@@)
 	$(call __dump-database-xml)
 	$(info @@@@@XML-END@@@@@)
@@ -154,8 +154,8 @@ else
 	@rm -f $(DUMP_DATABASE_XML_FILE)
 	@touch $(DUMP_DATABASE_XML_FILE)
 ifdef __dump-xml-with-info
-	# Force passing TARGET_ARCH because it was unexported in setup.mk
-	# FIXME: backslashes seems lost in the process...
+	@# Force passing TARGET_ARCH because it was unexported in setup.mk
+	@# FIXME: backslashes seems lost in the process...
 	+@( \
 		tmpfile=$$(mktemp); \
 		$(ALCHEMAKE_CMDLINE) TARGET_ARCH=$(TARGET_ARCH) __dumping-xml=1 &> $${tmpfile}; \
