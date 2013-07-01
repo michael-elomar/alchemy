@@ -176,6 +176,9 @@ def main():
 	# Setup logging
 	setupLog()
 
+	# Put in an environment variable the command line so we can find it
+	os.environ["ALCHEMAKE_CMDLINE"] = " ".join(["make"] + sys.argv[1:])
+
 	# If not on a terminal, do NOT use job control, simply execute make...
 	if not os.isatty(0) or not os.isatty(1):
 		logging.warning("Not using job control")

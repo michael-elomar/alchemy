@@ -13,6 +13,13 @@
 # Where to store the xml
 DUMP_DATABASE_XML_FILE := $(TARGET_OUT)/alchemy-database.xml
 
+# Mode used to dump the xml
+# Dumping with 'info' is faster than with 'echo' but requires to wrap internally
+# a call to make with the same command line
+ifdef ALCHEMAKE_CMDLINE
+  __dump-xml-with-info := 1
+endif
+
 ###############################################################################
 ## Macros.
 ###############################################################################
@@ -114,8 +121,13 @@ __echo-escape = $(subst ",\",$(subst $(dollar),\$(dollar),$(subst $(endl),\n,$(s
 # Otherwise the length of the single line of command generated will be to big
 # to pass down the shell (several hundreds of KB)
 # Note: use /bin/echo to make sure we use the binary, not a shell function.
+ifdef __dump-xml-with-info
+__write-xml = \
+	$(info $1)
+else
 __write-xml = \
 	@/bin/echo -e "$(call __echo-escape,$1)" >> $(DUMP_DATABASE_XML_FILE) $(endl)
+endif
 
 ###############################################################################
 ## Rules.
@@ -131,12 +143,39 @@ dump-depends:
 
 .PHONY: dump-xml
 dump-xml:
+ifdef __dumping-xml
+	# Called inside a sub-make to dump using 'info' in a file
+	$(info @@@@@XML-BEGIN@@@@@)
+	$(call __dump-database-xml)
+	$(info @@@@@XML-END@@@@@)
+else
 	@echo "Database dump: start"
 	@mkdir -p $(dir $(DUMP_DATABASE_XML_FILE))
 	@rm -f $(DUMP_DATABASE_XML_FILE)
 	@touch $(DUMP_DATABASE_XML_FILE)
+ifdef __dump-xml-with-info
+	+@( \
+		tmpfile=$$(mktemp); \
+		$(ALCHEMAKE_CMDLINE) __dumping-xml=1 &> $${tmpfile}; \
+		inxml=0; \
+		# FIXME: backslashes seems lost in the process... \
+		while read; do \
+			line=$${REPLY}; \
+			if [ "$${line}" = "@@@@@XML-BEGIN@@@@@" ]; then \
+				inxml=1; \
+			elif [ "$${line}" = "@@@@@XML-END@@@@@" ]; then \
+				inxml=0; \
+			elif [ "$${inxml}" = "1" ]; then \
+				echo "$${line}" >> $(DUMP_DATABASE_XML_FILE); \
+			fi; \
+		done < $${tmpfile}; \
+		rm -f $${tmpfile}; \
+	)
+else
 	$(call __dump-database-xml)
+endif
 	@echo "Database dump: done -> $(DUMP_DATABASE_XML_FILE)"
+endif
 
 .PHONY: dump-xml-clean
 dump-xml-clean:
