@@ -26,30 +26,15 @@ class Module(object):
 
 #===============================================================================
 #===============================================================================
-class ModuleDb(object):
-	def __init__(self):
-		self._modules = {}
-
-	def append(self, module):
-		self._modules[module.name] = module
-
-	def __getitem__(self, key):
-		return self._modules[key]
-
-	def __iter__(self):
-		return self._modules.itervalues()
-
-#===============================================================================
-#===============================================================================
 def loadXml(xmlPath):
 	# Parse xml file
 	xmlDom = xml.dom.minidom.parse(xmlPath)
 
 	# Load modules
-	modules = ModuleDb()
+	modules = []
 	moduleNodes = xmlDom.documentElement.getElementsByTagName("module")
 	for moduleNode in moduleNodes:
-		modules.append(Module(moduleNode))
+		modules.append( Module(moduleNode))
 
 	# Return list of loaded modules
 	return modules
