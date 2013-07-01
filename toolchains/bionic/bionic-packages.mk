@@ -86,3 +86,7 @@ LOCAL_EXPORT_LDLIBS := -lhardware
 LOCAL_EXPORT_C_INCLUDES := $(RAPTOR_DIR)/hardware/libhardware/include
 include $(BUILD_PREBUILT)
 
+include $(CLEAR_VARS)
+LOCAL_MODULE := libGLESv1_CM
+LOCAL_EXPORT_LDLIBS := -lGLESv1_CM
+include $(BUILD_PREBUILT)
