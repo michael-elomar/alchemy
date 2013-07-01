@@ -154,11 +154,12 @@ else
 	@rm -f $(DUMP_DATABASE_XML_FILE)
 	@touch $(DUMP_DATABASE_XML_FILE)
 ifdef __dump-xml-with-info
+	# Force passing TARGET_ARCH because it was unexported in setup.mk
+	# FIXME: backslashes seems lost in the process...
 	+@( \
 		tmpfile=$$(mktemp); \
-		$(ALCHEMAKE_CMDLINE) __dumping-xml=1 &> $${tmpfile}; \
+		$(ALCHEMAKE_CMDLINE) TARGET_ARCH=$(TARGET_ARCH) __dumping-xml=1 &> $${tmpfile}; \
 		inxml=0; \
-		# FIXME: backslashes seems lost in the process... \
 		while read; do \
 			line=$${REPLY}; \
 			if [ "$${line}" = "@@@@@XML-BEGIN@@@@@" ]; then \
