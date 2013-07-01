@@ -1,54 +1,52 @@
-#! /bin/sh
-# A little script I whipped up to make it easy to
-# patch source trees and have sane error handling
-# -Erik
-#
-# (c) 2002 Erik Andersen <andersen@codepoet.org>
+#!/bin/bash
 
-# Set directories from arguments, or use defaults.
-targetdir=${1-.}
-patchdir=${2-../kernel-patches}
+function usage()
+{
+	echo ""
+	echo "Apply a set of patch files on a source tree."
+	echo ""
+	echo "Usage: $0 <targerdir> <patchdir> <patchfiles>..."
+	echo "  <targerdir> : Target directory where to apply patches."
+	echo "  <patchdir>  : Directory where to find path files."
+	echo "  <patchfiles>: List of patch files to apply."
+}
+
+# Check arguments
+if [ "$#" -lt "2" ]; then
+	usage; exit 1
+fi
+
+# Get arguments
+readonly targetdir=$1
+readonly patchdir=$2
 shift 2
-patchpattern=${@-*}
+readonly patchfiles="$@"
 
+# Check validity of given directories
 if [ ! -d "${targetdir}" ] ; then
-    echo "Aborting.  '${targetdir}' is not a directory."
-    exit 1
+	echo "Aborting.  '${targetdir}' is not a directory."
+	exit 1
 fi
 if [ ! -d "${patchdir}" ] ; then
-    echo "Aborting.  '${patchdir}' is not a directory."
-    exit 1
-fi
-    
-for i in `cd ${patchdir}; ls -d ${patchpattern} 2> /dev/null` ; do 
-    case "$i" in
-	*.gz)
-	type="gzip"; uncomp="gunzip -dc"; ;; 
-	*.bz)
-	type="bzip"; uncomp="bunzip -dc"; ;; 
-	*.bz2)
-	type="bzip2"; uncomp="bunzip2 -dc"; ;; 
-	*.zip)
-	type="zip"; uncomp="unzip -d"; ;; 
-	*.Z)
-	type="compress"; uncomp="uncompress -c"; ;; 
-	*)
-	type="plaintext"; uncomp="cat"; ;; 
-    esac
-    echo ""
-    echo "Applying ${i} using ${type}: " 
-    ${uncomp} ${patchdir}/${i} | patch -p1 -E -d ${targetdir} 
-    if [ $? != 0 ] ; then
-        echo "Patch failed!  Please fix $i!"
+	echo "Aborting.  '${patchdir}' is not a directory."
 	exit 1
-    fi
+fi
+
+# Process files
+for f in ${patchfiles} ; do
+	echo "Applying ${f}: "
+	cat ${patchdir}/${f} | patch -p1 -E -d ${targetdir}
+	if [ "$?" != "0" ] ; then
+		echo "Patch failed!  Please fix ${f}!"
+		exit 1
+	fi
 done
 
 # Check for rejects...
-if [ "`find $targetdir/ '(' -name '*.rej' -o -name '.*.rej' ')' -print`" ] ; then
-    echo "Aborting.  Reject files found."
-    exit 1
+if [ "$(find ${targetdir}/ '(' -name '*.rej' -o -name '.*.rej' ')' -print)" ] ; then
+	echo "Aborting.  Reject files found."
+	exit 1
 fi
 
 # Remove backup files
-find $targetdir/ '(' -name '*.orig' -o -name '.*.orig' ')' -exec rm -f {} \;
+find ${targetdir}/ '(' -name '*.orig' -o -name '.*.orig' ')' -exec rm -f {} \;
