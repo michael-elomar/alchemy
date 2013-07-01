@@ -224,7 +224,7 @@ $(LOCAL_BUILD_MODULE):
 ## Configuration file management.
 ###############################################################################
 
-config_file := $(call __get-module-config,$(LOCAL_MODULE))
+config_file := $(call module-get-config,$(LOCAL_MODULE))
 autoconf_file := $(call module-get-autoconf,$(LOCAL_MODULE))
 ifneq ("$(autoconf_file)","")
 

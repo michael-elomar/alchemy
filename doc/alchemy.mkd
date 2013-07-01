@@ -323,6 +323,20 @@ By default, module configuration files are searched in the folder pointer to by
 the location. You can also set this variable in `product.mk` or
 `Alchemy-debug-setup.mk`.
 
+## Special customization of configuration files.
+
+It is possible to fine tune existing configuration files and apply `sed` files
+to them to change a flag. `sed` files to be applied to a module configuration
+file is indicated in a variable `custom.<module>.config.sedfiles`. Several
+`sed` files can be specified.
+
+When `sed` files are specified, a copy of the original configuration file is
+made in the build directory and `sed` files are applied there. However when the
+configuration tool is used, the original file is edited.
+
+The `custom.<module>.config.sedfiles` variable can be given as argument of make
+or alchemake as well as in `product.mk` or `Alchemy-debug-setup.mk`.
+
 # Anatomy of an `atom.mk`
 
 The first thing that shall be done in an `atom.mk` is to get its path in the

@@ -19,11 +19,8 @@ CONFWRAPPER_ENV := \
 # Tools
 CONFWRAPPER := $(CONFWRAPPER_ENV) $(BUILD_SYSTEM)/scripts/confwrapper.py
 
-# Directory where original configurations are stored
-CONFIG_ORIG_DIR := $(TARGET_CONFIG_DIR)
-
 # File where global configuration is stored
-CONFIG_GLOBAL_FILE := $(CONFIG_ORIG_DIR)/global.config
+CONFIG_GLOBAL_FILE := $(TARGET_CONFIG_DIR)/global.config
 
 # Remember if the config directory is present or not
 ifeq ("$(wildcard $(TARGET_CONFIG_DIR))","")
@@ -45,30 +42,28 @@ else
 endif
 
 ###############################################################################
-## Check that a module is configurable.
-## $1 : module name.
-###############################################################################
-__check-module-configurable = $(strip \
-	$(if $(call is-module-registered,$1), \
-		$(if $(call __get-module-config-in-files,$1), \
-			$(true), \
-			$(info Nothing configurable for $1) \
-		), \
-		$(error $1 is not a registered module) \
-	))
-
-###############################################################################
 ## Get the name of the configuration file of a module.
 ## If a variable named custom.<module>.config exists, it is used, otherwise
 ## it gets the file from the original config directory.
 ## $1 : module name.
 ###############################################################################
-__get-module-config = $(strip \
+
+# Path to original file given as input
+__get-orig-module-config = $(strip \
 	$(if $(call is-var-defined,custom.$1.config), \
-		$(custom.$1.config),$(CONFIG_ORIG_DIR)/$1.config \
+		$(custom.$1.config),$(TARGET_CONFIG_DIR)/$1.config \
 	))
 
-module-get-config = $(call __get-module-config,$1)
+# Path to final file after optional patching with sed files
+__get-final-module-config = $(strip \
+	$(if $(call is-var-defined,custom.$1.config.sedfiles), \
+		$(call module-get-build-dir,$1)/$1.config \
+		, \
+		$(call __get-orig-module-config,$1) \
+	))
+
+# Public version
+module-get-config = $(call __get-final-module-config,$1)
 
 ###############################################################################
 ## Get the list of path to Config.in files of a module.
@@ -100,7 +95,7 @@ __generate-config-module-args = $(strip \
 	$(eval __categoryPath := $(__modules.$(__mod).CATEGORY_PATH)) \
 	$(eval __configInFiles := $(call __get-module-config-in-files,$(__mod))) \
 	$(if $(__configInFiles), \
-		$(eval __configPath := $(call __get-module-config,$(__mod))), \
+		$(eval __configPath := $(call __get-orig-module-config,$(__mod))), \
 		$(eval __configPath := $(empty)) \
 	) \
 	$(eval __arg := $(__mod)|$(__desc)|$(__depends)|$(__dependsCond)|$(__modPath)) \
@@ -147,12 +142,28 @@ __generate-config-args = $(strip \
 	))
 
 ###############################################################################
-## Load configuration of a module.
+## Load configuration of a module. If sed files are specified, a copy is made
+## in build directory and sed files applied there.
 ## $1: module name.
 ###############################################################################
+
+# Path to script used to aply sed files on config file
+__apply-sed-script := $(BUILD_SYSTEM)/scripts/config-apply-sedfiles.sh
+
 define __load-config-internal
-  $(eval __config := $(call __get-module-config,$1))
-  -include $(__config)
+$(if $(call is-var-defined,custom.$1.config.sedfiles), \
+	$(if $(wildcard $(call __get-orig-module-config,$1)), \
+		$(foreach __f,$(custom.$1.config.sedfiles), \
+			$(info Apply $(__f) on '$1' config) \
+		) \
+		$(eval __out := $(shell $(__apply-sed-script) \
+			$(call __get-orig-module-config,$1) \
+			$(call __get-final-module-config,$1) \
+			$(custom.$1.config.sedfiles) \
+		)) \
+	) \
+)
+-include $(call module-get-config,$1)
 endef
 
 ###############################################################################
