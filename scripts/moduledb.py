@@ -37,7 +37,7 @@ class ModuleDb(object):
 		return self._modules[key]
 
 	def __iter__(self):
-		return self._modules.itervalues()
+		return iter(self._modules.values())
 
 #===============================================================================
 #===============================================================================
