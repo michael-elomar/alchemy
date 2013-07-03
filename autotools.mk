@@ -14,7 +14,7 @@ LOCAL_DONE_FILES := $(LOCAL_MODULE).done
 # Check if a module is using old LOCAL_AUTOTOOLS_DIR variable
 ifdef LOCAL_AUTOTOOLS_DIR
 ifneq ("$(LOCAL_AUTOTOOLS_DIR)","")
-  $(info $(LOCAL_PATH): module '$(LOCAL_MODULE)' is using deprecated variable 'LOCAL_AUTOTOOLS_DIR')
+  $(error $(LOCAL_PATH): module '$(LOCAL_MODULE)' is using deprecated variable 'LOCAL_AUTOTOOLS_DIR')
   LOCAL_AUTOTOOLS_SUBDIR := $(LOCAL_AUTOTOOLS_DIR)
   LOCAL_AUTOTOOLS_DIR := $(empty)
 endif
@@ -31,7 +31,7 @@ $(foreach __var,$(__autotools-cmd-vars), \
 	$(eval __var2 := LOCAL_AUTOTOOLS_CMD_$(__var)) \
 	$(if $(call streq,$(words $(value $(__var2))),1), \
 		$(if $(call strneq,$(strip $(value $(__var2))),$$(empty)), \
-			$(info $(LOCAL_PATH): module '$(LOCAL_MODULE)' uses variable '$(__var2)' in a deprecated way) \
+			$(error $(LOCAL_PATH): module '$(LOCAL_MODULE)' uses variable '$(__var2)' in a deprecated way) \
 		) \
 	) \
 )
