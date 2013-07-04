@@ -14,6 +14,11 @@ FIXSTAT := $(BUILD_SYSTEM)/scripts/fixstat.py -v \
 		--permissions-file=$(__f) \
 	)
 
+# Apply default permissions (quite restrictives)
+ifdef TARGET_PERMISSIONS_USE_DEFAULT
+  FIXSTAT += --use-default
+endif
+
 ###############################################################################
 ## Image in plf format.
 ###############################################################################
