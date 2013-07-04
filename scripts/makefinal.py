@@ -483,6 +483,7 @@ def parseArgs():
 		help="Filter of file names that will no be stripped (ex: ld-*.so)")
 	parser.add_option("--remove-wgo",
 		dest="removeWGO",
+		action="store_true",
 		default=False,
 		help="Remove write access for group and other on all copied files")
 
