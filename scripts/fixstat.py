@@ -14,6 +14,7 @@ DEFAULT_PERMISSIONS = [
 	r"/usr/sbin/.*    0755    root    root",
 	r"/usr/bin/.*     0755    root    root",
 	r".*              0644    root    root", # Default for all files
+	r".*/             0755    root    root", # Default for all directories
 ]
 
 #===============================================================================
@@ -28,7 +29,8 @@ class MyStat(object):
 #===============================================================================
 class Permission(object):
 	def __init__(self):
-		self.pattern = None
+		self.pattern = ""
+		self.rePattern = None
 		self.mode = 0
 		self.uid = 0
 		self.gid = 0
@@ -87,12 +89,14 @@ def parsePermissionLine(ctx, filePath, lineNum, line, isDefault=False):
 			logging.info("permission %s %s %s %s",
 					fields[0], fields[1], fields[2], fields[3])
 			# Compile pattern in a regex (remove leading '/' so that
-			# pattern matching is OK when listing a local dir)
-			filePattern = fields[0].lstrip("/")
-			pattern = re.compile(filePattern)
+			# pattern matching is OK when listing a local dir, trailing '/'
+			# is only used to try match on directory only)
+			pattern = fields[0]
+			rePattern = re.compile(pattern.strip("/"))
 			perm = Permission()
 			perm.isDefault = isDefault
 			perm.pattern = pattern
+			perm.rePattern = rePattern
 			# Decode mode
 			perm.mode = int(fields[1], base=8)
 			# Decode user
@@ -132,18 +136,21 @@ def parsePermissionsFile(ctx, filePath):
 #===============================================================================
 #===============================================================================
 def fixstat(ctx, filePath, st):
-	# At least root by deafult...
+	# At least root by default...
 	st.uid = 0
 	st.gid = 0
 	# Search for the first matching
 	for perm in ctx.permissions:
-		if perm.pattern.match(filePath) is not None:
-			# Update data
-			newMode = stat.S_IFMT(st.mode) | perm.mode
-			if st.mode != newMode and not perm.isDefault:
-				logging.info("Fixing %s: mode=0%o uid=%d gid=%d",
-						filePath, perm.mode, perm.uid, perm.gid)
-			st.mode = newMode
+		# Make sure pattern for directories are done on directories
+		if perm.pattern.endswith("/") and not stat.S_ISDIR(st.mode):
+			continue
+		if not perm.pattern.endswith("/") and stat.S_ISDIR(st.mode):
+			continue
+		if perm.rePattern.match(filePath) is not None:
+			# Update mode (except for link because it is useless)
+			if not stat.S_ISLNK(st.mode):
+				st.mode = stat.S_IFMT(st.mode) | stat.S_IMODE(perm.mode)
+			# User/group
 			st.uid = perm.uid
 			st.gid = perm.gid
 			return st
