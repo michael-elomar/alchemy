@@ -132,6 +132,9 @@ def parsePermissionsFile(ctx, filePath):
 #===============================================================================
 #===============================================================================
 def fixstat(ctx, filePath, st):
+	# At least root by deafult...
+	st.uid = 0
+	st.gid = 0
 	# Search for the first matching
 	for perm in ctx.permissions:
 		if perm.pattern.match(filePath) is not None:

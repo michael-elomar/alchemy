@@ -7,7 +7,7 @@
 ###############################################################################
 
 # Script that will modify mode/uid/gid of files while generating the image
-FIXSTAT := $(BUILD_SYSTEM)/scripts/fixstat.py -v \
+FIXSTAT := $(BUILD_SYSTEM)/scripts/fixstat.py \
 	--user-file=$(TARGET_OUT_FINAL)/etc/passwd \
 	--group-file=$(TARGET_OUT_FINAL)/etc/group \
 	$(foreach __f,$(TARGET_PERMISSIONS_FILES), \
@@ -15,7 +15,8 @@ FIXSTAT := $(BUILD_SYSTEM)/scripts/fixstat.py -v \
 	)
 
 # Apply default permissions (quite restrictives)
-ifdef TARGET_PERMISSIONS_USE_DEFAULT
+TARGET_PERMISSIONS_USE_DEFAULT ?= 0
+ifneq ("$(TARGET_PERMISSIONS_USE_DEFAULT)","0")
   FIXSTAT += --use-default
 endif
 
