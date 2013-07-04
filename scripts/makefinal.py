@@ -162,6 +162,8 @@ def getCopyCmds(dstFileName, srcFileName, options, doStrip=False, doPatchShebang
 			(srcFileName, dstFileName))
 		cmds.append("touch -r \"%s\" \"%s\"" % \
 			(srcFileName, dstFileName))
+	if options.removeWGO and not os.path.islink(srcFileName):
+		cmds.append("chmod g-w,o-w \"%s\"" % dstFileName)
 	return cmds
 
 #===============================================================================
@@ -479,6 +481,10 @@ def parseArgs():
 		default=[],
 		action="append",
 		help="Filter of file names that will no be stripped (ex: ld-*.so)")
+	parser.add_option("--remove-wgo",
+		dest="removeWGO",
+		default=False,
+		help="Remove write access for group and other on all copied files")
 
 	parser.add_option("-q",
 		dest="quiet",

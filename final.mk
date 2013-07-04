@@ -51,6 +51,14 @@ MAKEFINAL_ARGS += \
 	--strip-filter="vgpreload*.so"
 endif
 
+# Remove write access to 'group' and 'other'. For native only, a fixstat tools
+# is used on other variant when geberating the image
+ifeq ("$(TARGET_OS)","linux")
+ifeq ("$(TARGET_OS_FLAVOUR)","native-chroot")
+  MAKEFINAL_ARGS += --remove-wgo
+endif
+endif
+
 # Additional files to filter
 MAKEFINAL_ARGS += \
 	$(foreach __lib,$(TARGET_STRIP_FILTER),--strip-filter="$(__lib)")
