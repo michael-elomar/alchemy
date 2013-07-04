@@ -49,7 +49,10 @@ copy_file()
 copy_file_pattern()
 {
 	for f in $1; do
-		copy_file $f $2
+		# In case no matches, the pattern is returned varbatim...
+		if [ -f $f ]; then
+			copy_file $f $2
+		fi
 	done
 }
 
