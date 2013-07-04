@@ -6,6 +6,14 @@
 ## Image generation.
 ###############################################################################
 
+# Script that will modify mode/uid/gid of files while generating the image
+FIXSTAT := $(BUILD_SYSTEM)/scripts/fixstat.py -v \
+	--user-file=$(TARGET_OUT_FINAL)/etc/passwd \
+	--group-file=$(TARGET_OUT_FINAL)/etc/group \
+	$(foreach __f,$(TARGET_PERMISSIONS_FILES), \
+		--permissions-file=$(__f) \
+	)
+
 ###############################################################################
 ## Image in plf format.
 ###############################################################################
@@ -37,7 +45,7 @@ ifneq ("$(KERNEL_ZIMAGE)","")
 	$(Q) $(PLFTOOL) -a u_data=$(TARGET_OUT)/kernel.plf $(IMAGE_FILE_PLF)
 endif
 	$(Q) cd $(TARGET_OUT_FINAL); \
-		find . ! -name '.' -printf '%P;uid=0;gid=0\n' | \
+		find . ! -name '.' -printf '%P\n' | $(FIXSTAT) | \
 			plfbatch '-a u_unixfile="&"' $(IMAGE_FILE_PLF)
 	@echo "Image plf: done -> $(IMAGE_FILE_PLF)"
 
