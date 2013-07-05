@@ -6,6 +6,9 @@
 ## Image generation.
 ###############################################################################
 
+# List of files with permissions to be applied
+TARGET_PERMISSIONS_FILES ?=
+
 # Script that will modify mode/uid/gid of files while generating the image
 FIXSTAT := $(BUILD_SYSTEM)/scripts/fixstat.py \
 	--user-file=$(TARGET_OUT_FINAL)/etc/passwd \
@@ -14,9 +17,8 @@ FIXSTAT := $(BUILD_SYSTEM)/scripts/fixstat.py \
 		--permissions-file=$(__f) \
 	)
 
-# Apply default permissions (quite restrictives)
-TARGET_PERMISSIONS_USE_DEFAULT ?= 0
-ifneq ("$(TARGET_PERMISSIONS_USE_DEFAULT)","0")
+# Apply default permissions (quite restrictives) only if other rules are present
+ifneq ("$(TARGET_PERMISSIONS_FILES)","")
   FIXSTAT += --use-default
 endif
 
