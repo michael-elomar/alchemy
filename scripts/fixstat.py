@@ -92,7 +92,7 @@ def parsePermissionLine(ctx, filePath, lineNum, line, isDefault=False):
 			# pattern matching is OK when listing a local dir, trailing '/'
 			# is only used to try match on directory only)
 			pattern = fields[0]
-			rePattern = re.compile(pattern.strip("/"))
+			rePattern = re.compile(pattern.strip("/") + "$")
 			perm = Permission()
 			perm.isDefault = isDefault
 			perm.pattern = pattern
