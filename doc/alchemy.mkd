@@ -199,6 +199,15 @@ Mainly used by the android wrapper.
   Default is `.alchemy.build-id`.
 * `TARGET_SDK_DIRS` : List of directories where to find `SDK` previously
   generated. Default is empty.
+* `TARGET_PERMISSIONS_FILES` : List of files containing permissions to apply to
+  files and directories when generating the image (plf) from the final directory.
+  The format of those permissions files is : `pattern mode user group`.
+ * `pattern` : file or directory pattern (regex) to test. Patterns for
+   directories ends with a `/`.
+ * `mode` : unix mode to apply, in octal notation.
+ * `user`, `group` : name of user and group to apply. The uid and gid is
+   extracted automatically from `/etc/passwd` and `/etc/group` files found in
+   final directory.
 
 * `USE_CLANG` : Use clang instead of gcc for compilation.
   Default is `0`.
