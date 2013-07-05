@@ -7,6 +7,12 @@
 SCRIPT_PATH=$(cd $(dirname $0) && pwd)
 SYSROOT=${SCRIPT_PATH}
 
+# sanity check
+if [ "${SYSROOT}" = "" -o ${SYSROOT} = "/" ]; then
+	echo "Bad SYSROOT"
+	exit 1
+fi
+
 # List of directory to mount as a binding with host
 readonly MOUNT_POINTS="proc dev dev/pts"
 readonly UMOUNT_POINTS="dev/pts dev proc"
