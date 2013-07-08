@@ -98,5 +98,5 @@ TARGET_GLOBAL_CFLAGS_thumb ?= \
 	-finline-limit=64
 else
 # Make sure that if in arm mode, the thumb flags will not be used
-override TARGET_GLOBAL_CFLAGS_thumb = $(error -mthumb-interwork not enabled)
+override TARGET_GLOBAL_CFLAGS_thumb :=
 endif
