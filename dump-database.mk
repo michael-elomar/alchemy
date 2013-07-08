@@ -80,6 +80,7 @@ __dump-database-macro = \
 # Dump the full database in xml format
 __dump-database-xml = \
 	$(call __write-xml,<?xml version='1.0' encoding='UTF-8'?>) \
+	$(call __write-xml,<alchemy>) \
 	$(call __write-xml,<target>) \
 	$(foreach __var,$(vars-TARGET), \
 		$(call __dump-database-var-xml,$(__var),$(strip $(TARGET_$(__var)))) \
@@ -97,7 +98,8 @@ __dump-database-xml = \
 		) \
 		$(call __write-xml,$(space4)</module>) \
 	) \
-	$(call __write-xml,</modules>)
+	$(call __write-xml,</modules>) \
+	$(call __write-xml,</alchemy>)
 
 # Dump a field in xml format if not empty
 # $1 : field name
