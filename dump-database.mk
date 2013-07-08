@@ -87,7 +87,7 @@ __dump-database-xml = \
 	) \
 	$(call __write-xml,</target>) \
 	$(call __write-xml,<modules>) \
-	$(foreach __mod,$(__modules), \
+	$(foreach __mod,$(ALL_MODULES), \
 		$(eval __build := $(if $(call is-module-in-build-config,$(__mod)),yes,no)) \
 		$(call __write-xml,$(space4)<module name='$(__mod)' build='$(__build)'>) \
 		$(foreach __field,$(modules-fields-depends) $(vars-LOCAL), \
