@@ -19,6 +19,7 @@ class Context(object):
 		self.outDir = os.path.abspath(args[3])
 		self.atom = StringIO()
 		self.sdkDirs = []
+		self.modules = None
 
 #===============================================================================
 #===============================================================================
@@ -180,6 +181,15 @@ def processModule(ctx, module):
 	ctx.atom.write("\n")
 
 #===============================================================================
+#===============================================================================
+def checkTargetVar(ctx, name):
+	val = ctx.modules.targetVars.get(name, "")
+	if val:
+		ctx.atom.write("ifneq (\"$(TARGET_%s)\",\"%s\")\n" % (name, val))
+		ctx.atom.write("  $(error This sdk is for TARGET_%s=%s)\n" % (name, val))
+		ctx.atom.write("endif\n\n")
+
+#===============================================================================
 # Main function.
 #===============================================================================
 def main():
@@ -192,7 +202,7 @@ def main():
 	# Load modules from xml
 	logging.info("Loading xml '%s'", ctx.dumpXmlPath)
 	try:
-		modules = moduledb.loadXml(ctx.dumpXmlPath)
+		ctx.modules = moduledb.loadXml(ctx.dumpXmlPath)
 	except xml.parsers.expat.ExpatError as ex:
 		sys.stderr.write("Error while loading '%s':\n" % ctx.dumpXmlPath)
 		sys.stderr.write("  %s\n" % ex)
@@ -208,8 +218,16 @@ def main():
 	logging.info("Copying staging directory")
 	copyStaging(ctx.stagingDir, ctx.outDir)
 
+	# Make sure that when the sdk is used it will be on the same target
+	checkTargetVar(ctx, "OS")
+	checkTargetVar(ctx, "OS_FLAVOUR")
+	checkTargetVar(ctx, "ARCH")
+	checkTargetVar(ctx, "CPU")
+	checkTargetVar(ctx, "LIBC")
+	checkTargetVar(ctx, "DEFAULT_ARM_MODE")
+
 	# Process modules
-	for module in modules:
+	for module in ctx.modules:
 		processModule(ctx, module)
 
 	# Write the atom.mk
