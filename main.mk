@@ -292,6 +292,7 @@ find-cmd := $(BUILD_SYSTEM)/scripts/findfiles.py \
 	--prune=$(BUILD_SYSTEM) \
 	$(foreach __d,$(TARGET_SCAN_PRUNE_DIRS),--prune=$(__d)) \
 	$(foreach __d,$(TARGET_SCAN_ADD_DIRS),--add=$(__d)) \
+	$(foreach __d,$(TARGET_SDK_DIRS),--prune=$(__d)) \
 	$(TOP_DIR) \
 	$(USER_MAKEFILE_NAME)
 
