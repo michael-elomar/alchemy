@@ -80,6 +80,11 @@ __dump-database-macro = \
 # Dump the full database in xml format
 __dump-database-xml = \
 	$(call __write-xml,<?xml version='1.0' encoding='UTF-8'?>) \
+	$(call __write-xml,<target>) \
+	$(foreach __var,$(vars-TARGET), \
+		$(call __dump-database-var-xml,$(__var),$(strip $(TARGET_$(__var)))) \
+	) \
+	$(call __write-xml,</target>) \
 	$(call __write-xml,<modules>) \
 	$(foreach __mod,$(__modules), \
 		$(eval __build := $(if $(call is-module-in-build-config,$(__mod)),yes,no)) \
@@ -103,6 +108,14 @@ __dump-database-field-xml = \
 		$(call __write-xml,$(space4)$(space4)$(space4)<value>$(call __xml-escape,$2)</value>) \
 		$(call __write-xml,$(space4)$(space4)</field>) \
 	) \
+
+# Dump a variable in xml format (even if empty)
+# $1 : variable name
+# $2 : variable value
+__dump-database-var-xml = \
+	$(call __write-xml,$(space4)<var name='$1'>) \
+	$(call __write-xml,$(space4)$(space4)<value>$(call __xml-escape,$2)</value>) \
+	$(call __write-xml,$(space4)</var>)
 
 # Escape characters for xml (escape '&' first, so in the innermost call at the end)
 # $1 : string to escape
