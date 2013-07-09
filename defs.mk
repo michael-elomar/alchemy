@@ -204,7 +204,7 @@ module-add = \
 	$(eval __add := 1) \
 	$(if $(call is-module-registered,$(__mod)), \
 		$(if $(__modules.$(__mod).SDK), \
-			$(info $(LOCAL_PATH): module '$(__mod)' overwrites sdk) \
+			$(info $(LOCAL_PATH): module '$(__mod)' overwrites sdk at $(__modules.$(__mod).SDK)) \
 			$(foreach __local,$(vars-LOCAL), \
 				$(eval __modules.$(__mod).$(__local) := $(empty))) \
 			$(foreach __local,$(macros-LOCAL), \
@@ -330,11 +330,14 @@ module-restore-locals = \
 ## recorded.
 ###############################################################################
 
-# Check dependencies of all modules. Only if module will be built
+# Check dependencies of all modules. Only if module will be built and not from
+# a sdk.
 modules-check-depends = \
 	$(foreach __mod,$(__modules), \
 		$(if $(call is-module-in-build-config,$(__mod)), \
-			$(call __module-check-depends,$(__mod)) \
+			$(if $(__modules.$(__mod).SDK),$(empty), \
+				$(call __module-check-depends,$(__mod)) \
+			) \
 		) \
 	)
 
