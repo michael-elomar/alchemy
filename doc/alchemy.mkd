@@ -961,8 +961,8 @@ project environment.
 
 ## Example of environment
 
-You can take a look at `pulsar` environment for an example of use. Clone the
-pulsar project `ssh://gituser@canari/pulsar/pulsar.git` and read the `README` file.
+You can take a look at `pulsar` environment for an example of use. Take a look
+at the README: `http://canari/cgi-bin/cgit.cgi/pulsar/pulsar.git/tree/README`.
 
 ## Command line options
 
