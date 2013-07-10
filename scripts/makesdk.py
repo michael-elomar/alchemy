@@ -30,8 +30,10 @@ def copyStaging(srcDir, dstDir):
 			srcFilePath = os.path.join(dirPath, fileName)
 			relPath = os.path.relpath(srcFilePath, srcDir)
 			dstFilePath = os.path.join(dstDir, relPath)
-			if os.path.splitext(fileName)[1] in extensions \
-					or ".so." in fileName:
+			# When combining several sdk the same file could be found several times
+			if not os.path.exists(dstFilePath) \
+					and (os.path.splitext(fileName)[1] in extensions \
+							or ".so." in fileName):
 				if not os.path.exists(os.path.split(dstFilePath)[0]):
 					os.makedirs(os.path.split(dstFilePath)[0], mode=0755)
 				if os.path.islink(srcFilePath):
