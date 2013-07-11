@@ -311,7 +311,7 @@ create-user-makefiles-cache = \
 	touch $(USER_MAKEFILES_CACHE); \
 	$(info Scanning $(TOP_DIR) for makefiles...) \
 	( \
-		files=$(addsuffix /atom.mk,$(TARGET_SDK_DIRS)); \
+		files="$(addsuffix /atom.mk,$(TARGET_SDK_DIRS))"; \
 		for f in $$files `$(find-cmd)`; do \
 			echo "USER_MAKEFILES += $$f"; \
 			echo "\$$(call user-makefile-before-include,$$f)"; \
