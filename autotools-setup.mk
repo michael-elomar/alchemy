@@ -14,6 +14,7 @@ AUTOTOOLS_INSTALL_BIN := $(shell which install)
 
 # Make sure pkg-config does not look on host
 PKG_CONFIG_ENV := \
+	PKG_CONFIG="$(shell which pkg-config)" \
 	PKG_CONFIG_PATH="$(TARGET_OUT_STAGING)/usr/lib/pkgconfig:$(TARGET_OUT_STAGING)/lib/pkgconfig" \
 	PKG_CONFIG_LIBDIR=""
 ifeq ("$(TARGET_OS_FLAVOUR)","native")
@@ -37,6 +38,7 @@ AUTOTOOLS_CONFIGURE_ENV := \
 	STRIP="$(TARGET_STRIP)" \
 	OBJCOPY="$(TARGET_CROSS)objcopy" \
 	OBJDUMP="$(TARGET_CROSS)objdump" \
+	MANIFEST_TOOL=":" \
 	CC_FOR_BUILD="$(HOST_CC)" \
 	CFLAGS="$(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES)) $(TARGET_GLOBAL_CFLAGS)" \
 	CPPFLAGS="$(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES)) $(TARGET_GLOBAL_CFLAGS)" \
