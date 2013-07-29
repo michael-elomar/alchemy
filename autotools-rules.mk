@@ -55,6 +55,7 @@ define __autotools-libtool_patch
 		) \
 		sed -i -e "s|{wl}-rpath|{wl}-rpath-link|1" $$f; \
 		sed -i -e "s|{wl}--rpath|{wl}-rpath-link|1" $$f; \
+		sed -i -e "s|need_relink=yes|need_relink=no|1" $$f; \
 	done
 endef
 
