@@ -66,9 +66,10 @@ ifndef __cmake-macros
 define __cmake-default-cmd-configure
 	@mkdir -p $(PRIVATE_OBJ_DIR)
 	$(Q) cd $(PRIVATE_OBJ_DIR) && rm -f CMakeCache.txt && \
-		$(CMAKE) $(PRIVATE_SRC_DIR) \
+		$(PKG_CONFIG_ENV) $(CMAKE) \
 			-DCMAKE_TOOLCHAIN_FILE="$(CMAKE_TOOLCHAIN_FILE)" \
-			$(CMAKE_CONFIGURE_ARGS) $(PRIVATE_CONFIGURE_ARGS)
+			$(CMAKE_CONFIGURE_ARGS) $(PRIVATE_CONFIGURE_ARGS) \
+			$(PRIVATE_SRC_DIR)
 endef
 
 define __cmake-default-cmd-build
