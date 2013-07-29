@@ -247,6 +247,9 @@ include $(BUILD_SYSTEM)/check.mk
 # Setup autotools definitions (shall be after inclusion of defs.mk)
 include $(BUILD_SYSTEM)/autotools-setup.mk
 
+# Setup CMake definitions
+include $(BUILD_SYSTEM)/cmake-setup.mk
+
 # Setup warnings flags
 include $(BUILD_SYSTEM)/warnings.mk
 
@@ -268,6 +271,7 @@ BUILD_STATIC_LIBRARY := $(BUILD_SYSTEM)/static.mk
 BUILD_SHARED_LIBRARY := $(BUILD_SYSTEM)/shared.mk
 BUILD_EXECUTABLE := $(BUILD_SYSTEM)/executable.mk
 BUILD_AUTOTOOLS := $(BUILD_SYSTEM)/autotools.mk
+BUILD_CMAKE := $(BUILD_SYSTEM)/cmake.mk
 BUILD_CUSTOM := $(BUILD_SYSTEM)/custom.mk
 BUILD_META_PACKAGE := $(BUILD_SYSTEM)/custom.mk
 BUILD_LINUX := $(BUILD_SYSTEM)/linux-kernel.mk
