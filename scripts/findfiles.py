@@ -34,8 +34,12 @@ def main():
 	(options, args) = parseArgs()
 
 	# Extract arguments
-	topDir = os.path.abspath(args[0])
+	topDir = os.path.realpath(args[0])
 	fileName = args[1]
+
+	# Get real paths (because we will compare them)
+	options.pruneList = [os.path.realpath(pruneDir) \
+			for pruneDir in options.pruneList]
 
 	# Go
 	resultList = []
