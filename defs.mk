@@ -218,7 +218,6 @@ module-add = \
 		) \
 		$(check-cppflags-compat) \
 		$(call install-headers-setup,$(LOCAL_MODULE)) \
-		$(call conditional-libraries-setup,$(LOCAL_MODULE)) \
 	)
 
 ###############################################################################
@@ -457,6 +456,7 @@ __is-in-depends-loop = $(strip \
 # The dummy assignment is to discard output generated internally
 modules-compute-depends = \
 	$(foreach __mod,$(__modules), \
+		$(call conditional-libraries-setup,$(__mod)) \
 		$(foreach __field,$(modules-fields-depends), \
 			$(eval __modules.$(__mod).$(__field) := $(empty)) \
 		) \
