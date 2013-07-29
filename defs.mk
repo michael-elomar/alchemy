@@ -982,7 +982,7 @@ $(eval __depsdata := $(subst $(space),\n,$(strip $(__depsdata))))
 @( \
 	__tmpfile=$$(mktemp); \
 	/bin/echo -e "$(__depsdata)" > $${__tmpfile}; \
-	$(TARGET_CROSS)objcopy -p --add-section \
+	$(TARGET_CROSS)objcopy --add-section \
 		$(TARGET_DEPENDS_SECTION_NAME)=$${__tmpfile} $@; \
 	rm -f $${__tmpfile}; \
 )
