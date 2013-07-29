@@ -82,33 +82,33 @@ __autotools-debug_CXXFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),CXXF
 __autotools-debug_LDFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),LDFLAGS)
 
 # Print debug messages
-ifneq ("$(__autotools-debug_CFLAGS)","")
+ifneq ("$(strip $(__autotools-debug_CFLAGS))","")
   $(info Debug: Adding '$(__autotools-debug_CFLAGS)' to '$(LOCAL_MODULE)' CFLAGS and CXXFLAGS)
   __autotools-add_CFLAGS += $(__autotools-debug_CFLAGS)
   __autotools-add_CXXFLAGS += $(__autotools-debug_CFLAGS)
 endif
 
-ifneq ("$(__autotools-debug_CXXFLAGS)","")
+ifneq ("$(strip $(__autotools-debug_CXXFLAGS))","")
   $(info Debug: Adding '$(__autotools-debug_CXXFLAGS)' to '$(LOCAL_MODULE)' CXXFLAGS)
   __autotools-add_CXXFLAGS += $(__autotools-debug_CXXFLAGS)
 endif
 
-ifneq ("$(__autotools-debug_LDFLAGS)","")
+ifneq ("$(strip $(__autotools-debug_LDFLAGS))","")
   $(info Debug: Adding '$(__autotools-debug_LDFLAGS)' to '$(LOCAL_MODULE)' LDFLAGS)
   __autotools-add_LDFLAGS += $(__autotools-debug_LDFLAGS)
 endif
 
 # Add flags in environment
-ifneq ("$(__autotools-add_CFLAGS)","")
+ifneq ("$(strip $(__autotools-add_CFLAGS))","")
   LOCAL_AUTOTOOLS_CONFIGURE_ENV += CFLAGS="$$CFLAGS $(__autotools-add_CFLAGS)"
   LOCAL_AUTOTOOLS_CONFIGURE_ENV += CPPFLAGS="$$CPPFLAGS $(__autotools-add_CFLAGS)"
 endif
 
-ifneq ("$(__autotools-add_CXXFLAGS)","")
+ifneq ("$(strip $(__autotools-add_CXXFLAGS))","")
   LOCAL_AUTOTOOLS_CONFIGURE_ENV += CXXFLAGS="$$CXXFLAGS $(__autotools-add_CXXFLAGS)"
 endif
 
-ifneq ("$(__autotools-add_LDFLAGS)","")
+ifneq ("$(strip $(__autotools-add_LDFLAGS))","")
   LOCAL_AUTOTOOLS_CONFIGURE_ENV += LDFLAGS="$$LDFLAGS $(__autotools-add_LDFLAGS)"
   LOCAL_AUTOTOOLS_CONFIGURE_ENV += DYN_LDFLAGS="$$DYN_LDFLAGS $(__autotools-add_LDFLAGS)"
 endif
