@@ -10,6 +10,12 @@
 ## General setup.
 ###############################################################################
 
+# Alchemy version
+ALCHEMY_VERSION_MAJOR := 1
+ALCHEMY_VERSION_MINOR := 0
+ALCHEMY_VERSION_REV   := 6
+ALCHEMY_VERSION := $(ALCHEMY_VERSION_MAJOR).$(ALCHEMY_VERSION_MINOR).$(ALCHEMY_VERSION_REV)
+
 # Make sure SHELL is correctly set
 SHELL := /bin/bash
 

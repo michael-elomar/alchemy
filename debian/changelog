@@ -1,3 +1,17 @@
+parrot-tools-alchemy (1.0.6) unstable; urgency=low
+  * Add TARGET_STRIP_FILTER option.
+  * Fix copy of native libraries in the final directory.
+  * [CR 112607] Allow to build/clean a module that is not in the config by explicitely giving its name
+  * Allow linux to specify a target to setup .config file instead of a real config file.
+  * [CR 0115166] Add/Disable dependant modules dynamically when setting configuration.
+  * [BUGFIX 0116553] Patches are not applied in the order they are specified.
+  * [CR 0116356] Customize module flags.
+  * [CR 0117001] Add a fixstat wrapper when generating plf from final dir.
+  * Several fixes on sdk generation/use.
+  * [DEV] Make sure wrappers are copied even when 'all' target was never done.
+
+ -- Yves-Marie Morgan (Parrot) <yves-marie.morgan@parrot.com>  Mon, 29 Jul 2013 11:24:43 +0200
+
 parrot-tools-alchemy (1.0.5) unstable; urgency=low
 
   * Add documentation in project.
