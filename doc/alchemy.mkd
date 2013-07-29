@@ -214,8 +214,8 @@ Mainly used by the android wrapper.
 * `USE_CCACHE` : Use ccache to speed up compilation.
   Default is `0`.
 * `USE_SCAN_CACHE` : Use cache of `atom.mk` found during last scan. Useful if
-  Default is `0`.
   the scan is slow on your machine.
+  Default is `0`.
 * `USE_COLORS` : Use colors in output.
   Default is `0`.
 * `USE_BUILD_DEPS_CHECK_IN_CONFIG` : Enable automatic activation of build
