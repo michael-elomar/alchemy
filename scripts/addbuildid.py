@@ -60,14 +60,19 @@ def addBuildId(options, filePath, buildId):
 	tempFile = os.fdopen(tempFd, "w")
 	tempFile.write(buildId)
 	tempFile.close()
-	# Start objcopy to add the section (-p is to preserve date)
-	args = [options.objcopy, "-p", "--add-section",
+	# Start objcopy to add the section
+	args = [options.objcopy, "--add-section",
 		 "%s=%s" % (options.sectionName, tempPath), filePath]
 	if not options.dryRun:
 		try:
 			fixWritePerm(filePath)
+			st = os.stat(filePath)
 			process = subprocess.Popen(args)
 			process.wait()
+			# Restore dates (more precise that -p option of objcopy)
+			# To make sure we don't put an older date due to truncation, add a
+			# micro-second to the times
+			os.utime(filePath, (st.st_atime+0.000001, st.st_mtime+0.000001))
 			if process.returncode != 0:
 				logging.error("Failed to add '%s' section (err=%d) : %s",
 						options.sectionName, process.returncode, filePath)
