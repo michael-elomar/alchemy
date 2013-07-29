@@ -208,6 +208,13 @@ linux-clean:
 	$(Q)rm -f $(TARGET_OUT_STAGING)/boot/bzImage
 	$(Q)rm -f $(TARGET_OUT_STAGING)/boot/uImage
 	$(Q)rm -f $(LINUX_HEADERS_DONE_FILE)
+	$(Q)rm -rf $(TARGET_OUT_STAGING)/usr/src/linux-headers
+	$(Q)$(foreach header,$(LINUX_EXPORTED_HEADERS),\
+		rm -f $(TARGET_OUT_STAGING)/usr/include/linux/$(notdir $(header)); \
+	)
+	$(Q)$(foreach header,$(LINUX_EXPORTED_HEADERS_OVER),\
+		rm -f $(TARGET_OUT_STAGING)/usr/$(header); \
+	)
 
 # Default rule to invoke kernel specific targets (like cscope, tags, help ...)
 # Do NOT put a dependency for this pattern rule to avoid subtle troubles.
