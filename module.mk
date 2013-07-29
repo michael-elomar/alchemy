@@ -216,7 +216,7 @@ $(LOCAL_MODULE)-gen-last-rev: $(LOCAL_BUILD_MODULE)
 
 endif
 
-# This explicit rule avoids dependency error when e module has nothing to buid
+# This explicit rule avoids dependency error when the module has nothing to build
 # (prebuilt, sdk, custom...)
 $(LOCAL_BUILD_MODULE):
 
@@ -239,14 +239,33 @@ endif
 
 ###############################################################################
 ## Archive extraction + patches.
-## Partially redundant with autotools rules.
+## Do this step if there is no archive but there is a post unpack command.
+## This is to handle cases where a pre-configure step is needed but no
+## real archive to unpack. And because there is no pre-cmd variables at the
+## moment.
 ###############################################################################
-ifneq ("$(LOCAL_ARCHIVE)","")
+ifneq ("$(or $(LOCAL_ARCHIVE),$(value LOCAL_ARCHIVE_CMD_POST_UNPACK))","")
 
-archive_file := $(LOCAL_PATH)/$(LOCAL_ARCHIVE)
-patches := $(strip $(LOCAL_ARCHIVE_PATCHES))
-unpacked_file := $(build_dir)/$(LOCAL_MODULE).unpacked
+# Full path to archive file (can be empty if we only want post unpack command)
+ifneq ("$(strip $(LOCAL_ARCHIVE))","")
+  archive_file := $(LOCAL_PATH)/$(LOCAL_ARCHIVE)
+else
+  archive_file :=
+endif
+
+# Name of files indicating steps done
+# Using version allow to switch without having some dependencies troubles
+ifneq ("$(LOCAL_ARCHIVE_VERSION)","")
+  unpacked_file := $(build_dir)/$(LOCAL_MODULE)-$(LOCAL_ARCHIVE_VERSION).unpacked
+else
+  unpacked_file := $(build_dir)/$(LOCAL_MODULE).unpacked
+endif
+
+# Where to unpack
 unpack_dir := $(build_dir)
+
+# Patches to apply
+patches := $(strip $(LOCAL_ARCHIVE_PATCHES))
 
 # Generated files to be compiled will also depends on 'unpacked_file' in
 # binary-rules.mk
@@ -264,10 +283,12 @@ define __archive-apply-patches
 endef
 
 $(unpacked_file): $(archive_file) $(addprefix $(LOCAL_PATH)/,$(patches))
+ifneq ("$(archive_file)","")
 	$(call print-banner2,Archive,$(PRIVATE_MODULE),Unpacking $(call path-from-top,$<))
 	@mkdir -p $(PRIVATE_ARCHIVE_UNPACK_DIR)
 	+$(call macro-exec-cmd,ARCHIVE_CMD_UNPACK,__archive-default-unpack)
 	+$(if $(PRIVATE_ARCHIVE_PATCHES),$(__archive-apply-patches))
+endif
 	+$(call macro-exec-cmd,ARCHIVE_CMD_POST_UNPACK,empty)
 	@mkdir -p $(dir $@)
 	@touch $@

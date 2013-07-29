@@ -6,87 +6,30 @@
 ## Build a module using autotools.
 ###############################################################################
 
-# Name of files indicating steps done
-# Using version allow to switch without having some dependencies troubles
-ifneq ("$(LOCAL_AUTOTOOLS_VERSION)","")
-  unpacked_file := $(build_dir)/$(LOCAL_MODULE)-$(LOCAL_AUTOTOOLS_VERSION).unpacked
-  configured_file := $(build_dir)/$(LOCAL_MODULE)-$(LOCAL_AUTOTOOLS_VERSION).configured
-  built_file := $(build_dir)/$(LOCAL_MODULE)-$(LOCAL_AUTOTOOLS_VERSION).built
-  installed_file := $(build_dir)/$(LOCAL_MODULE)-$(LOCAL_AUTOTOOLS_VERSION).installed
-else
-  unpacked_file := $(build_dir)/$(LOCAL_MODULE).unpacked
-  configured_file := $(build_dir)/$(LOCAL_MODULE).configured
-  built_file := $(build_dir)/$(LOCAL_MODULE).built
-  installed_file := $(build_dir)/$(LOCAL_MODULE).installed
-endif
-
-# Archive file (optional)
-ifneq ("$(strip $(LOCAL_AUTOTOOLS_ARCHIVE))","")
-  archive_file := $(LOCAL_PATH)/$(LOCAL_AUTOTOOLS_ARCHIVE)
-else
-  archive_file :=
-endif
-
-# Where to unpack
-unpack_dir := $(build_dir)
-
-# Where the source will actually be found once unpacked
-ifneq ("$(archive_file)","")
-  src_dir := $(unpack_dir)/$(LOCAL_AUTOTOOLS_SUBDIR)
-else
-  src_dir := $(LOCAL_PATH)
-endif
-
-# Patches to apply
-patches := $(strip $(LOCAL_AUTOTOOLS_PATCHES))
-
-# Where the package will be configured and built
-ifneq ("$(archive_file)","")
-  obj_dir := $(src_dir)
-else
-  obj_dir := $(build_dir)/obj
-endif
-
-# Delete some additionnal 'done' files if a skip of external checks is not done
-ifeq ("$(skip_ext_checks)","0")
-$(call delete-one-done-file,$(built_file))
-$(call delete-one-done-file,$(installed_file))
-endif
-
-# Dependencies for reconfiguration
-# Note: if configure file is in an archive the wildcard test will fail the
-# first time, but it is not a problem. The important thing is to detect by
-# ourself that the configure file is newer to make sure we apply all patches.
-ifneq ("$(wildcard $(src_dir)/configure)","")
-  configure_file := $(src_dir)/configure
-else
-  configure_file := $(empty)
-endif
-
 ###############################################################################
 ## Configure argument sanitization.
 ###############################################################################
 
 # This file is included several times, define macros only once
 # (mainly to improve perf)
-ifndef autotools-macros
+ifndef __autotools-macros
 
-# List of flag to check for their actual support by configure script
-configure-flags := \
+# List of flags to check for their actual support by configure script
+__autotools-configure-flags := \
 	--disable-maintainer-mode \
 	--enable-silent-rules
 
 # Check if a flag is supported by configure script. This is to avoid warning
 # $1 : full path to configure script to check
 # $2 : flag to check
-configure-check-flag = $(strip \
+__autotools-configure-check-flag = $(strip \
 	$(if $(shell grep -e "$(strip $2)" "$(strip $1)"),$(true),$(false)))
 
 # Get the list of flags to filter out of configure arguments
 # $1 : full path to configure script to check
-configure-getfilter-args = $(strip \
-	$(foreach __flag,$(configure-flags), \
-		$(if $(call configure-check-flag,$1,$(__flag)), \
+__autotools-configure-getfilter-args = $(strip \
+	$(foreach __flag,$(__autotools-configure-flags), \
+		$(if $(call __autotools-configure-check-flag,$1,$(__flag)), \
 			$(empty),$(__flag) \
 		) \
 	))
@@ -94,55 +37,80 @@ configure-getfilter-args = $(strip \
 # Remove flags not supported by configure
 # $1 : full path to configure script to check
 # $2 : configure arguments
-configure-filter-args = $(strip \
-	$(filter-out $(call configure-getfilter-args,$1),$2))
+__autotools-configure-filter-args = $(strip \
+	$(filter-out $(call __autotools-configure-getfilter-args,$1),$2))
 
-endif
+# Patch libtool to make it work properly for cross-compilation.
+# Modify the libdir in .la files installed in staging dir so that they reference
+# the staging dir and not the final dir. Do this only if dest dir is not empty
+# (in native build staging dir is the final dir specified in configure script).
+# Use -rpath-link instead of -rpath to avoid hardcoding host path in binaries.
+# See this link for more information :
+# http://www.metastatic.org/text/libtool.html
+define __autotools-libtool_patch
+	$(Q) for f in `find $(PRIVATE_OBJ_DIR) -name libtool -o -name ltmain.sh`; do \
+		echo "Patching $$f"; \
+		$(if $(AUTOTOOLS_INSTALL_DESTDIR), \
+			sed -i -e "s|^libdir='\$$install_libdir'|libdir='\$${install_libdir:\+$(TARGET_OUT_STAGING)\$$install_libdir}'|1" $$f; \
+		) \
+		sed -i -e "s|{wl}-rpath|{wl}-rpath-link|1" $$f; \
+		sed -i -e "s|{wl}--rpath|{wl}-rpath-link|1" $$f; \
+	done
+endef
+
+# Simulate that some files are up to date to avoid internal reconfiguration
+# that will likely fail because env or libtool patches are not correct
+define __autotools-hook-pre-clean
+	$(Q) if [ -d $(PRIVATE_OBJ_DIR) ]; then find $(PRIVATE_OBJ_DIR) -name config.status -exec touch {} \; ; fi
+	$(Q) if [ -d $(PRIVATE_OBJ_DIR) ]; then find $(PRIVATE_OBJ_DIR) -name Makefile -exec touch {} \; ; fi
+endef
+
+endif # ifndef __autotools-macros
 
 ###############################################################################
 ## Add compilation/debug flags.
 ###############################################################################
 
 # Compilation flags
-add_CFLAGS := $(LOCAL_CFLAGS) $(call normalize-c-includes,$(LOCAL_C_INCLUDES))
-add_CXXFLAGS := $(add_CFLAGS) $(LOCAL_CXXFLAGS)
-add_LDFLAGS := $(LOCAL_LDFLAGS)
+__autotools-add_CFLAGS := $(LOCAL_CFLAGS) $(call normalize-c-includes,$(LOCAL_C_INCLUDES))
+__autotools-add_CXXFLAGS := $(__autotools-add_CFLAGS) $(LOCAL_CXXFLAGS)
+__autotools-add_LDFLAGS := $(LOCAL_LDFLAGS)
 
 # Debug flags
-debug_CFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),CFLAGS)
-debug_CXXFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),CXXFLAGS)
-debug_LDFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),LDFLAGS)
+__autotools-debug_CFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),CFLAGS)
+__autotools-debug_CXXFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),CXXFLAGS)
+__autotools-debug_LDFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),LDFLAGS)
 
 # Print debug messages
-ifneq ("$(debug_CFLAGS)","")
-  $(info Debug: Adding '$(debug_CFLAGS)' to '$(LOCAL_MODULE)' CFLAGS and CXXFLAGS)
-  add_CFLAGS += $(debug_CFLAGS)
-  add_CXXFLAGS += $(debug_CFLAGS)
+ifneq ("$(__autotools-debug_CFLAGS)","")
+  $(info Debug: Adding '$(__autotools-debug_CFLAGS)' to '$(LOCAL_MODULE)' CFLAGS and CXXFLAGS)
+  __autotools-add_CFLAGS += $(__autotools-debug_CFLAGS)
+  __autotools-add_CXXFLAGS += $(__autotools-debug_CFLAGS)
 endif
 
-ifneq ("$(debug_CXXFLAGS)","")
-  $(info Debug: Adding '$(debug_CXXFLAGS)' to '$(LOCAL_MODULE)' CXXFLAGS)
-  add_CXXFLAGS += $(debug_CXXFLAGS)
+ifneq ("$(__autotools-debug_CXXFLAGS)","")
+  $(info Debug: Adding '$(__autotools-debug_CXXFLAGS)' to '$(LOCAL_MODULE)' CXXFLAGS)
+  __autotools-add_CXXFLAGS += $(__autotools-debug_CXXFLAGS)
 endif
 
-ifneq ("$(debug_LDFLAGS)","")
-  $(info Debug: Adding '$(debug_LDFLAGS)' to '$(LOCAL_MODULE)' LDFLAGS)
-  add_LDFLAGS += $(debug_LDFLAGS)
+ifneq ("$(__autotools-debug_LDFLAGS)","")
+  $(info Debug: Adding '$(__autotools-debug_LDFLAGS)' to '$(LOCAL_MODULE)' LDFLAGS)
+  __autotools-add_LDFLAGS += $(__autotools-debug_LDFLAGS)
 endif
 
 # Add flags in environment
-ifneq ("$(add_CFLAGS)","")
-  LOCAL_AUTOTOOLS_CONFIGURE_ENV += CFLAGS="$$CFLAGS $(add_CFLAGS)"
-  LOCAL_AUTOTOOLS_CONFIGURE_ENV += CPPFLAGS="$$CPPFLAGS $(add_CFLAGS)"
+ifneq ("$(__autotools-add_CFLAGS)","")
+  LOCAL_AUTOTOOLS_CONFIGURE_ENV += CFLAGS="$$CFLAGS $(__autotools-add_CFLAGS)"
+  LOCAL_AUTOTOOLS_CONFIGURE_ENV += CPPFLAGS="$$CPPFLAGS $(__autotools-add_CFLAGS)"
 endif
 
-ifneq ("$(add_CXXFLAGS)","")
-  LOCAL_AUTOTOOLS_CONFIGURE_ENV += CXXFLAGS="$$CXXFLAGS $(add_CFLAGS)"
+ifneq ("$(__autotools-add_CXXFLAGS)","")
+  LOCAL_AUTOTOOLS_CONFIGURE_ENV += CXXFLAGS="$$CXXFLAGS $(__autotools-add_CFLAGS)"
 endif
 
-ifneq ("$(add_LDFLAGS)","")
-  LOCAL_AUTOTOOLS_CONFIGURE_ENV += LDFLAGS="$$LDFLAGS $(add_LDFLAGS)"
-  LOCAL_AUTOTOOLS_CONFIGURE_ENV += DYN_LDFLAGS="$$DYN_LDFLAGS $(add_LDFLAGS)"
+ifneq ("$(__autotools-add_LDFLAGS)","")
+  LOCAL_AUTOTOOLS_CONFIGURE_ENV += LDFLAGS="$$LDFLAGS $(__autotools-add_LDFLAGS)"
+  LOCAL_AUTOTOOLS_CONFIGURE_ENV += DYN_LDFLAGS="$$DYN_LDFLAGS $(__autotools-add_LDFLAGS)"
 endif
 
 ###############################################################################
@@ -151,28 +119,24 @@ endif
 
 # This file is included several times, define macros only once
 # (mainly to improve perf)
-ifndef autotools-macros
+ifndef __autotools-macros
 
-define __default-unpack
-	$(Q) tar -C $(PRIVATE_UNPACK_DIR) -xf $(PRIVATE_ARCHIVE)
-endef
-
-define __default-configure
+define __autotools-default-cmd-configure
 	$(Q) cd $(PRIVATE_OBJ_DIR) && \
 		$(AUTOTOOLS_CONFIGURE_ENV) $(PRIVATE_CONFIGURE_ENV) \
 		$(PRIVATE_SRC_DIR)/configure \
-		$(call configure-filter-args, \
+		$(call __autotools-configure-filter-args, \
 			$(PRIVATE_SRC_DIR)/configure,$(AUTOTOOLS_CONFIGURE_ARGS)) \
 		$(PRIVATE_CONFIGURE_ARGS)
 endef
 
-define __default-make-build
+define __autotools-default-cmd-build
 	$(Q) $(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_BUILD_ENV) \
 		$(MAKE) -C $(PRIVATE_OBJ_DIR) \
 		$(AUTOTOOLS_MAKE_ARGS) $(PRIVATE_MAKE_BUILD_ARGS)
 endef
 
-define __default-make-install
+define __autotools-default-cmd-install
 	$(Q) $(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) \
 		$(MAKE) -C $(PRIVATE_OBJ_DIR) \
 		$(AUTOTOOLS_MAKE_ARGS) $(PRIVATE_MAKE_INSTALL_ARGS) install
@@ -180,7 +144,7 @@ endef
 
 # Force success for command in case "uninstall" or "clean" is not supported
 # or Makefile not present
-define __default-clean
+define __autotools-default-cmd-clean
 	$(Q) if [ -f $(PRIVATE_OBJ_DIR)/Makefile ]; then \
 		$(AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) \
 			$(MAKE) --keep-going --ignore-errors -C $(PRIVATE_OBJ_DIR) \
@@ -193,118 +157,34 @@ define __default-clean
 	fi;
 endef
 
-define __apply-patches
-	$(Q) $(BUILD_SYSTEM)/scripts/apply-patches.sh \
-		$(PRIVATE_SRC_DIR) $(PRIVATE_PATH) $(PRIVATE_PATCHES)
-endef
+endif # ifndef __autotools-macros
 
-# Patch libtool to make it work properly for cross-compilation.
-# Modify the libdir in .la files installed in staging dir so that they reference
-# the staging dir and not the final dir. Do this only if dest dir is not empty
-# (in native build staging dir is the final dir specified in configure script).
-# Use -rpath-link instead of -rpath to avoid hardcoding host path in binaries.
-# See this link for more information :
-# http://www.metastatic.org/text/libtool.html
-define __libtool_patch
-	$(Q) for f in `find $(PRIVATE_OBJ_DIR) -name libtool -o -name ltmain.sh`; do \
-		echo "Patching $$f"; \
-		$(if $(AUTOTOOLS_INSTALL_DESTDIR), \
-			sed -i -e "s|^libdir='\$$install_libdir'|libdir='\$${install_libdir:\+$(TARGET_OUT_STAGING)\$$install_libdir}'|1" $$f; \
-		) \
-		sed -i -e "s|{wl}-rpath|{wl}-rpath-link|1" $$f; \
-		sed -i -e "s|{wl}--rpath|{wl}-rpath-link|1" $$f; \
-	done
-endef
+###############################################################################
+###############################################################################
 
-# Display a message
-# $1 : message
-__autotools-msg = \
-	$(call print-banner2,Autotools,$(PRIVATE_MODULE),$1)
+include $(BUILD_SYSTEM)/generic-rules.mk
 
+# Restart configuration step if configure file has changed
+# Note: if configure file is in an archive the wildcard test will fail the
+# first time, but it is not a problem. The important thing is to detect by
+# ourself that the configure file is newer.
+ifneq ("$(wildcard $(src_dir)/configure)","")
+$(configured_file): $(src_dir)/configure
 endif
 
-###############################################################################
-## Rules.
-## Note : use '+' to make sure sub-make is properly managed, this avoid:
-## warning: jobserver unavailable: using -j1.  Add `+' to parent make rule.
-###############################################################################
+# Setup commands
+$(LOCAL_TARGETS): PRIVATE_MSG := Autotools
+$(LOCAL_TARGETS): PRIVATE_CMD_PREFIX := AUTOTOOLS
+$(LOCAL_TARGETS): PRIVATE_DEFAULT_CMD_CONFIGURE := __autotools-default-cmd-configure
+$(LOCAL_TARGETS): PRIVATE_DEFAULT_CMD_BUILD := __autotools-default-cmd-build
+$(LOCAL_TARGETS): PRIVATE_DEFAULT_CMD_INSTALL := __autotools-default-cmd-install
+$(LOCAL_TARGETS): PRIVATE_DEFAULT_CMD_CLEAN := __autotools-default-cmd-clean
 
-# Make sure all prerequisites files are generated first
-# But do NOT force recompilation (order only)
-$(unpacked_file): | $(all_prerequisites)
+# Internal hooks to be applied before/after steps.
+$(LOCAL_TARGETS): PRIVATE_HOOK_POST_CONFIGURE := __autotools-libtool_patch
+$(LOCAL_TARGETS): PRIVATE_HOOK_PRE_CLEAN := __autotools-hook-pre-clean
 
-# Unpack + patch
-$(unpacked_file): $(archive_file) $(addprefix $(LOCAL_PATH)/,$(patches))
-ifneq ("$(archive_file)","")
-	$(call __autotools-msg,Unpacking $(call path-from-top,$<))
-	@mkdir -p $(PRIVATE_UNPACK_DIR)
-	+$(call macro-exec-cmd,AUTOTOOLS_CMD_UNPACK,__default-unpack)
-	+$(if $(PRIVATE_PATCHES),$(__apply-patches))
-endif
-	+$(call macro-exec-cmd,AUTOTOOLS_CMD_POST_UNPACK,empty)
-	@mkdir -p $(dir $@)
-	@touch $@
-
-# Configuration
-# If the user makefile is changed, restart at the configure step
-$(configured_file): $(unpacked_file) $(configure_file) $(LOCAL_PATH)/$(USER_MAKEFILE_NAME)
-	$(call __autotools-msg,Configuring)
-	@mkdir -p $(PRIVATE_OBJ_DIR)
-	+$(call macro-exec-cmd,AUTOTOOLS_CMD_CONFIGURE,__default-configure)
-	+$(call macro-exec-cmd,AUTOTOOLS_CMD_POST_CONFIGURE,empty)
-	+$(__libtool_patch)
-	@mkdir -p $(dir $@)
-	@touch $@
-
-# Build
-$(built_file): $(configured_file)
-	$(call __autotools-msg,Building)
-	@mkdir -p $(PRIVATE_OBJ_DIR)
-	+$(call macro-exec-cmd,AUTOTOOLS_CMD_BUILD,__default-make-build)
-	+$(call macro-exec-cmd,AUTOTOOLS_CMD_POST_BUILD,empty)
-	@mkdir -p $(dir $@)
-	@touch $@
-
-# Installation
-$(installed_file): $(built_file)
-	$(call __autotools-msg,Installing)
-	+$(call macro-exec-cmd,AUTOTOOLS_CMD_INSTALL,__default-make-install)
-	+$(call macro-exec-cmd,AUTOTOOLS_CMD_POST_INSTALL,empty)
-	@mkdir -p $(dir $@)
-	@touch $@
-
-# Done
-$(LOCAL_BUILD_MODULE): $(installed_file)
-	@mkdir -p $(dir $@)
-	@touch $@
-
-# Clean targets additional commands
-# Simulate that some files are up to date to avoid internal reconfiguration
-# that will likely fail because env or libtool patches are not correct
-$(LOCAL_MODULE)-clean:
-	$(Q) if [ -d $(PRIVATE_OBJ_DIR) ]; then find $(PRIVATE_OBJ_DIR) -name config.status -exec touch {} \; ; fi
-	$(Q) if [ -d $(PRIVATE_OBJ_DIR) ]; then find $(PRIVATE_OBJ_DIR) -name Makefile -exec touch {} \; ; fi
-	+$(call macro-exec-cmd,AUTOTOOLS_CMD_CLEAN,__default-clean)
-	+$(call macro-exec-cmd,AUTOTOOLS_CMD_POST_CLEAN,empty)
-
-###############################################################################
-## Rule-specific variable definitions.
-###############################################################################
-
-# clean targets additional variables
-# To NOT put build dir in PRIVATE_CLEAN_DIRS
-# we need to call some makefiles during our custom clean
-$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(installed_file)
-$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(built_file)
-
-# We don't create target-specific variables for macros because it does not
-# work when created with 'define ... endef'. They will be accessed directly
-# from module database
-$(LOCAL_TARGETS): PRIVATE_ARCHIVE := $(archive_file)
-$(LOCAL_TARGETS): PRIVATE_UNPACK_DIR := $(unpack_dir)
-$(LOCAL_TARGETS): PRIVATE_SRC_DIR := $(src_dir)
-$(LOCAL_TARGETS): PRIVATE_OBJ_DIR := $(obj_dir)
-$(LOCAL_TARGETS): PRIVATE_PATCHES := $(patches)
+# Variables needed by default commands
 $(LOCAL_TARGETS): PRIVATE_CONFIGURE_ENV := $(LOCAL_AUTOTOOLS_CONFIGURE_ENV)
 $(LOCAL_TARGETS): PRIVATE_CONFIGURE_ARGS := $(LOCAL_AUTOTOOLS_CONFIGURE_ARGS)
 $(LOCAL_TARGETS): PRIVATE_MAKE_BUILD_ENV := $(LOCAL_AUTOTOOLS_MAKE_BUILD_ENV)
@@ -313,4 +193,4 @@ $(LOCAL_TARGETS): PRIVATE_MAKE_INSTALL_ENV := $(LOCAL_AUTOTOOLS_MAKE_INSTALL_ENV
 $(LOCAL_TARGETS): PRIVATE_MAKE_INSTALL_ARGS := $(LOCAL_AUTOTOOLS_MAKE_INSTALL_ARGS)
 
 # Macros of this file have been defined
-autotools-macros := 1
+__autotools-macros := 1
