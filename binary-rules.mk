@@ -18,52 +18,6 @@ ifneq ("$(strip $(LOCAL_PBUILD_HOOK))","")
 endif
 
 ###############################################################################
-## ARM specific checks.
-###############################################################################
-ifeq ("$(TARGET_ARCH)","arm")
-
-# Make sure LOCAL_ARM_MODE is valid
-# If not set, use default mode
-LOCAL_ARM_MODE := $(strip $(LOCAL_ARM_MODE))
-ifeq ("$(LOCAL_ARM_MODE)","")
-  LOCAL_ARM_MODE := $(TARGET_DEFAULT_ARM_MODE)
-endif
-
-ifneq ("$(LOCAL_ARM_MODE)","arm")
-ifneq ("$(LOCAL_ARM_MODE)","thumb")
-  $(error $(LOCAL_PATH): LOCAL_ARM_MODE is not valid : $(LOCAL_ARM_MODE))
-endif
-endif
-
-# If default mode is not thumb, do not allow thumb, so the only practical use of
-# this variable is to allow arm if default is thumb, not the other way around
-ifneq ("$(TARGET_DEFAULT_ARM_MODE)","thumb")
-  LOCAL_ARM_MODE := $(TARGET_DEFAULT_ARM_MODE)
-endif
-
-# Check that -marm or -mthumb is not forced in compilation flags
-check-flags-arm-mode := -marm -mthumb
-check-flags-arm-mode-message := please use LOCAL_ARM_MODE
-$(call check-flags,LOCAL_CFLAGS,$(check-flags-arm-mode),$(check-flags-arm-mode-message))
-$(call check-flags,LOCAL_CXXFLAGS,$(check-flags-arm-mode),$(check-flags-arm-mode-message))
-$(call check-flags,LOCAL_EXPORT_CFLAGS,$(check-flags-arm-mode),$(check-flags-arm-mode-message))
-$(call check-flags,LOCAL_EXPORT_CXXFLAGS,$(check-flags-arm-mode),$(check-flags-arm-mode-message))
-
-endif
-
-###############################################################################
-## Generic checks.
-###############################################################################
-
-# Do not put -O0 in flags, use debug setup makefile
-check-flags-debug := -O0
-check-flags-debug-message := please use custom $(debug-setup-makefile) in top dir
-$(call check-flags,LOCAL_CFLAGS,$(check-flags-debug),$(check-flags-debug-message))
-$(call check-flags,LOCAL_CXXFLAGS,$(check-flags-debug),$(check-flags-debug-message))
-$(call check-flags,LOCAL_EXPORT_CFLAGS,$(check-flags-debug),$(check-flags-debug-message))
-$(call check-flags,LOCAL_EXPORT_CXXFLAGS,$(check-flags-debug),$(check-flags-debug-message))
-
-###############################################################################
 ## List of sources, objects and libraries.
 ###############################################################################
 
