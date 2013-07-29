@@ -105,7 +105,7 @@ ifneq ("$(__autotools-add_CFLAGS)","")
 endif
 
 ifneq ("$(__autotools-add_CXXFLAGS)","")
-  LOCAL_AUTOTOOLS_CONFIGURE_ENV += CXXFLAGS="$$CXXFLAGS $(__autotools-add_CFLAGS)"
+  LOCAL_AUTOTOOLS_CONFIGURE_ENV += CXXFLAGS="$$CXXFLAGS $(__autotools-add_CXXFLAGS)"
 endif
 
 ifneq ("$(__autotools-add_LDFLAGS)","")
