@@ -498,6 +498,11 @@ several pairs `variable:module`.
 Internally modules will be added to `LOCAL_LIBRARIES` if the variable is defined
 in the configuration.
 
+If `variable` is `OPTIONAL`, the module is put as a dependency only if it is in
+the build configuration. This allow to depends on a module only if it is
+enabled. The `kconfig` tools will not display this dependency, only the build
+system will use it.
+
 ### `LOCAL_DEPENDS_HEADERS`
 
 This is a list of modules whose headers are required to compile but not for

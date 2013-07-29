@@ -379,8 +379,9 @@ def writeFullConfigIn(outFile, menu):
 			for dep in module.depends:
 				outFile.write("  select ALCHEMY_BUILD_%s\n" % getDefine(dep))
 			for depCond in module.dependsCond:
-				outFile.write("  select ALCHEMY_BUILD_%s if %s\n" % \
-						(getDefine(depCond[1]), depCond[0]))
+				if depCond[0] != "OPTIONAL":
+					outFile.write("  select ALCHEMY_BUILD_%s if %s\n" % \
+							(getDefine(depCond[1]), depCond[0]))
 			outFile.write("  default n\n")
 			outFile.write("  help\n")
 			outFile.write("    Build %s\n" % module.name)
