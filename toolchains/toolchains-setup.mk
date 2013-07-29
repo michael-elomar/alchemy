@@ -97,6 +97,9 @@ include $(BUILD_SYSTEM)/toolchains/$(TARGET_LIBC)/$(TARGET_LIBC)-setup.mk
 ###############################################################################
 ## Tools for target.
 ###############################################################################
+
+ifneq ("$(USE_CLANG)","1")
+
 TARGET_CC ?= $(TARGET_CROSS)gcc
 TARGET_CXX ?= $(TARGET_CROSS)g++
 TARGET_AS ?= $(TARGET_CROSS)as
@@ -104,6 +107,19 @@ TARGET_AR ?= $(TARGET_CROSS)ar
 TARGET_LD ?= $(TARGET_CROSS)ld
 TARGET_NM ?= $(TARGET_CROSS)nm
 TARGET_STRIP ?= $(TARGET_CROSS)strip
+
+else
+
+# llvm-ar causes issues, so use ar
+TARGET_CC ?= clang
+TARGET_CXX ?= clang++
+TARGET_AS ?= llvm-as
+TARGET_AR ?= ar
+TARGET_LD ?= llvm-ld
+TARGET_NM ?= llvm-nm
+TARGET_STRIP ?= strip
+
+endif
 
 # No libc or gdbserver by default
 TOOLCHAIN_LIBC ?=
