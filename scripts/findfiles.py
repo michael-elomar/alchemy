@@ -10,7 +10,7 @@ def processDir(resultList, topDir, fileName, options):
 	# Check that the directory is not in the prune list
 	if topDir in options.pruneList:
 		return
-	for dirPath, dirNames, fileNames in os.walk(topDir):
+	for dirPath, dirNames, fileNames in os.walk(topDir, followlinks=options.followLinks):
 		# Remove directories to skip from list
 		i = 0
 		while i < len(dirNames):
@@ -79,6 +79,11 @@ def parseArgs():
 		action="store_true",
 		default=False,
 		help="Do not stop scanning a directory if a match has been found.")
+	parser.add_option("--follow-links",
+		dest="followLinks",
+		action="store_true",
+		default=False,
+		help="Follow symbolic links.")
 
 	# Parse arguments and check validity
 	(options, args) = parser.parse_args()

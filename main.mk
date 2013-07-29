@@ -303,6 +303,7 @@ find-cmd := $(BUILD_SYSTEM)/scripts/findfiles.py \
 	$(foreach __d,$(TARGET_SCAN_PRUNE_DIRS),--prune=$(__d)) \
 	$(foreach __d,$(TARGET_SCAN_ADD_DIRS),--add=$(__d)) \
 	$(foreach __d,$(TARGET_SDK_DIRS),--prune=$(__d)) \
+	$(if $(call streq,$(TARGET_SCAN_FOLLOW_LINKS),1),--follow-links) \
 	$(TOP_DIR) \
 	$(USER_MAKEFILE_NAME)
 

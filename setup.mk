@@ -54,6 +54,9 @@ TARGET_PBUILD_FORCE_STATIC ?= 0
 TARGET_SCAN_PRUNE_DIRS ?=
 TARGET_SCAN_ADD_DIRS ?=
 
+# Set to 1 to follow symbolic links during scan
+TARGET_SCAN_FOLLOW_LINKS ?= 0
+
 # Directories to use as sdk
 TARGET_SDK_DIRS ?=
 

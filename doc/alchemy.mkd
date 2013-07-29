@@ -163,6 +163,10 @@ Mainly used by the android wrapper.
 * `TARGET_SCAN_ADD_DIRS` : A list of directories to add during the scan when
   searching for `atom.mk`.
   Default is empty.
+* `TARGET_SCAN_FOLLOW_LINKS` : Set to `1` to follow symbolic links when scanning
+  for `atom.mk` files. When set to `0`, symbolic links to directories are not
+  searched.
+  Default is `0`.
 * `TARGET_FORCE_EXTERNAL_CHECKS` : Set to 1 to force check of external modules
   even if they are already built. Default is 0. See chapter relating to
   recompilation checks for more information.
