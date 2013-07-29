@@ -575,6 +575,37 @@ class ElfSym(object):
 
 #===============================================================================
 #===============================================================================
+class ElfDyn(object):
+	size32 = 8
+	size64 = 16
+	strTags = [DT_NEEDED, DT_SONAME, DT_RPATH, DT_RUNPATH]
+	def __init__(self, elf, idx, buf):
+		self.idx = idx
+		self.valstr = None
+
+		# Setup format
+		if elf.ehdr.is32Bit():
+			fmt = elf.ehdr.getFmtPrefix() + "II"
+			self.size = ElfDyn.size32
+		else:
+			fmt = elf.ehdr.getFmtPrefix() + "QQ"
+			self.size = ElfDyn.size64
+
+		# Save fields
+		fields = struct.unpack(fmt, buf)
+		self.d_tag = fields[0]
+		self.d_val = fields[1]
+
+	def __str__(self):
+		if self.valstr is not None:
+			return "{d_tag=0x%x, d_val=0x%x, valstr='%s'}" % \
+					(self.d_tag, self.d_val, self.valstr)
+		else:
+			return "{d_tag=0x%x, d_val=0x%x}" % \
+					(self.d_tag, self.d_val)
+
+#===============================================================================
+#===============================================================================
 class Elf(object):
 	def __init__(self):
 		self.ehdr = None
@@ -582,6 +613,7 @@ class Elf(object):
 		self.shdrTable = []
 		self.symTable = []
 		self.dynsymTable = []
+		self.dynamicEntries = []
 		self._data = None
 
 	def loadFromFile(self, filePath):
@@ -611,6 +643,8 @@ class Elf(object):
 				self._readSymTable(shdr, self.symTable)
 			elif shdr.sh_type == SHT_DYNSYM:
 				self._readSymTable(shdr, self.dynsymTable)
+			elif shdr.sh_type == SHT_DYNAMIC:
+				self._readDynamicSection(shdr)
 
 	def _readEhdr(self):
 		# Give all data, we don't known yet which size to give
@@ -637,6 +671,17 @@ class Elf(object):
 			sym = ElfSym(self, i, self._data[offset:offset+size])
 			sym.namestr = self._getString(shdr.sh_link, sym.st_name)
 			table.append(sym)
+
+	def _readDynamicSection(self, shdr):
+		size = ElfDyn.size32 if self.ehdr.is32Bit() else ElfDyn.size64
+		for i in range(0, shdr.sh_size//size):
+			offset = shdr.sh_offset + i*size
+			dyn = ElfDyn(self, i, self._data[offset:offset+size])
+			if dyn.d_tag in ElfDyn.strTags:
+				dyn.valstr = self._getString(shdr.sh_link, dyn.d_val)
+			self.dynamicEntries.append(dyn)
+			if dyn.d_tag == DT_NULL:
+				break
 
 	def _getString(self, idx, offset):
 		if idx >= len(self.shdrTable):
