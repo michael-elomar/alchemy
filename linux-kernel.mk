@@ -257,6 +257,7 @@ perf-clean:
 		$(MAKE) O=$(PERF_BUILD_DIR) -C $(PRIVATE_PATH)/tools/perf --ignore-errors \
 			clean || echo "Ignoring clean errors"; \
 	fi
+	$(Q) rm -f $(TARGET_OUT_STAGING)/usr/bin/perf
 
 LOCAL_LIBRARIES := libelf
 
