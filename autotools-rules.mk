@@ -162,6 +162,10 @@ endif # ifndef __autotools-macros
 ###############################################################################
 ###############################################################################
 
+# Because autootools is widely used for generic build to not try to support
+# out ouf source build
+generic-build-out-of-src := 0
+
 include $(BUILD_SYSTEM)/generic-rules.mk
 
 # Restart configuration step if configure file has changed

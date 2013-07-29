@@ -28,7 +28,11 @@ endif
 # Where the package will be configured and built
 # TODO: try to build outside source even for unpacked archives
 ifneq ("$(LOCAL_ARCHIVE)","")
-  obj_dir := $(src_dir)
+  ifeq ("$(generic-build-out-of-src)","0")
+    obj_dir := $(src_dir)
+  else
+    obj_dir := $(build_dir)/obj
+  endif
 else
   obj_dir := $(build_dir)/obj
 endif
