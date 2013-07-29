@@ -73,3 +73,10 @@ $(CMAKE_TOOLCHAIN_FILE):
 	@mkdir -p $(dir $@)
 	@($(cmake-gen-toolchain-file)) > $@
 
+.PHONY: cmake-toolchain-file-clean
+cmake-toolchain-file-clean:
+	$(Q) rm -f $(CMAKE_TOOLCHAIN_FILE)
+
+clean: cmake-toolchain-file-clean
+dirclean: cmake-toolchain-file-clean
+clobber: cmake-toolchain-file-clean
