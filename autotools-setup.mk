@@ -80,6 +80,24 @@ AUTOTOOLS_CONFIGURE_ARGS += \
 AUTOTOOLS_CONFIGURE_ARGS += \
 	--disable-maintainer-mode
 
+# Disable locale support
+AUTOTOOLS_CONFIGURE_ARGS += \
+	--disable-nls
+
+# Disable documentation
+AUTOTOOLS_CONFIGURE_ARGS += \
+	--disable-gtk-doc \
+	--disable-gtk-doc-html \
+	--disable-doxygen-docs \
+	--disable-doc \
+	--disable-docs \
+	--disable-documentation
+
+# Do'nt display warning for unrecognized options (abvove disabled options may
+# not be ctually supported)
+AUTOTOOLS_CONFIGURE_ARGS += \
+	--disable-option-checking
+
 # Environment to use when executing make
 # Use PKG_CONFIG_ENV in case a package needs automatic reconfiguration
 AUTOTOOLS_MAKE_ENV := $(PKG_CONFIG_ENV)

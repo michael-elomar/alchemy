@@ -7,38 +7,11 @@
 ###############################################################################
 
 ###############################################################################
-## Configure argument sanitization.
 ###############################################################################
 
 # This file is included several times, define macros only once
 # (mainly to improve perf)
 ifndef __autotools-macros
-
-# List of flags to check for their actual support by configure script
-__autotools-configure-flags := \
-	--disable-maintainer-mode \
-	--enable-silent-rules
-
-# Check if a flag is supported by configure script. This is to avoid warning
-# $1 : full path to configure script to check
-# $2 : flag to check
-__autotools-configure-check-flag = $(strip \
-	$(if $(shell grep -e "$(strip $2)" "$(strip $1)"),$(true),$(false)))
-
-# Get the list of flags to filter out of configure arguments
-# $1 : full path to configure script to check
-__autotools-configure-getfilter-args = $(strip \
-	$(foreach __flag,$(__autotools-configure-flags), \
-		$(if $(call __autotools-configure-check-flag,$1,$(__flag)), \
-			$(empty),$(__flag) \
-		) \
-	))
-
-# Remove flags not supported by configure
-# $1 : full path to configure script to check
-# $2 : configure arguments
-__autotools-configure-filter-args = $(strip \
-	$(filter-out $(call __autotools-configure-getfilter-args,$1),$2))
 
 # Patch libtool to make it work properly for cross-compilation.
 # Modify the libdir in .la files installed in staging dir so that they reference
@@ -126,9 +99,7 @@ define __autotools-default-cmd-configure
 	$(Q) cd $(PRIVATE_OBJ_DIR) && \
 		$(AUTOTOOLS_CONFIGURE_ENV) $(PRIVATE_CONFIGURE_ENV) \
 		$(PRIVATE_SRC_DIR)/configure \
-		$(call __autotools-configure-filter-args, \
-			$(PRIVATE_SRC_DIR)/configure,$(AUTOTOOLS_CONFIGURE_ARGS)) \
-		$(PRIVATE_CONFIGURE_ARGS)
+		$(AUTOTOOLS_CONFIGURE_ARGS) $(PRIVATE_CONFIGURE_ARGS)
 endef
 
 define __autotools-default-cmd-build
