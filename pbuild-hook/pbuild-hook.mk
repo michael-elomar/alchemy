@@ -187,7 +187,7 @@ LOCAL_CLEAN_FILES := \
 
 # We don't have any atom.mk but internally the build system will add a dependency
 # ont it, make it happy
-$(LOCAL_PATH)/atom.mk:
+$(LOCAL_PATH)/$(USER_MAKEFILE_NAME):
 
 include $(BUILD_CUSTOM)
 
