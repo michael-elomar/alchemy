@@ -96,7 +96,7 @@ information.
 ### Tools.
 
 * `TARGET_CROSS` : full path to toolchain prefix.
-  For example : "/opt/arm-eglibc/bin/arm-none-linux-gnueabi-".
+  For example : `/opt/arm-eglibc/bin/arm-none-linux-gnueabi-`.
   Default depends on other target settings.
 * `TARGET_CC` : full path to C compiler.
   Default is `$(TARGET_CROSS)gcc`.
@@ -150,7 +150,7 @@ Mainly used by the android wrapper.
 
 ### Other variables
 
-* `TARGET_PBUILD_FORCE_STATIC` : Can be set to 1 to force the compilation of
+* `TARGET_PBUILD_FORCE_STATIC` : Can be set to `1` to force the compilation of
   static libraries even if module requested to build a dynamic one. Mainly here
   to compile ecos target and prepare the transition from monolithic SoftAT
   executable to separate shared libraries.
@@ -167,11 +167,11 @@ Mainly used by the android wrapper.
   for `atom.mk` files. When set to `0`, symbolic links to directories are not
   searched.
   Default is `0`.
-* `TARGET_FORCE_EXTERNAL_CHECKS` : Set to 1 to force check of external modules
-  even if they are already built. Default is 0. See chapter relating to
-  recompilation checks for more information.
+* `TARGET_FORCE_EXTERNAL_CHECKS` : Set to `1` to force check of external modules
+  even if they are already built. See chapter relating to recompilation checks
+  for more information.
   Default is `0`.
-* `TARGET_NOSTRIP_FINAL` : Can be set at 1 to prevent stripping binaries when
+* `TARGET_NOSTRIP_FINAL` : Can be set at `1` to prevent stripping binaries when
   generating final directory.
   Default is `0`.
 * `TARGET_STRIP_FILTER` : List of filenames to filter during strip. Mainly used
@@ -193,7 +193,7 @@ Mainly used by the android wrapper.
 * `TARGET_ADD_BUILDID_SECTION` : Add a `build-id` section in all binaries. This
   is a `sha1` of all sections that are loadable at runtime and with data in the
   binary. This section is kept after stripping and the `sha1` can be recomputed
-  on the original and stripped binary and still produce the same sha1. This can
+  on the original and stripped binary and still produce the same `sha1`. This can
   be used to identify the non-stripped binary based on the stripped one. This is
   a feature similar to the `--build-id` option of `ld` but fixes a bug present
   on some toolchain (arm-2009q1 for example) in which only the header of
@@ -206,12 +206,12 @@ Mainly used by the android wrapper.
 * `TARGET_PERMISSIONS_FILES` : List of files containing permissions to apply to
   files and directories when generating the image (plf) from the final directory.
   The format of those permissions files is : `pattern mode user group`.
- * `pattern` : file or directory pattern (regex) to test. Patterns for
-   directories ends with a `/`.
- * `mode` : unix mode to apply, in octal notation.
- * `user`, `group` : name of user and group to apply. The uid and gid is
-   extracted automatically from `/etc/passwd` and `/etc/group` files found in
-   final directory.
+  * `pattern` : file or directory pattern (regex) to test. Patterns for
+    directories ends with a `/`.
+  * `mode` : unix mode to apply, in octal notation.
+  * `user`, `group` : name of user and group to apply. The uid and gid is
+    extracted automatically from `/etc/passwd` and `/etc/group` files found in
+    final directory.
 
 * `USE_CLANG` : Use clang instead of gcc for compilation.
   Default is `0`.
