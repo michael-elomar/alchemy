@@ -54,14 +54,14 @@ _from := a b c d e f g h i j k l m n o p q r s t u v w x y z . -
 _to   := A B C D E F G H I J K L M N O P Q R S T U V W X Y Z _ _
 _conv := $(join $(addsuffix :,$(_from)),$(_to))
 get-define = $(strip \
-	$(eval __tmp := $1) \
-	$(foreach __pair, $(_conv), \
-		$(eval __pair2 := $(subst :,$(space),$(__pair))) \
-		$(eval __w1 := $(word 1,$(__pair2))) \
-		$(eval __w2 := $(word 2,$(__pair2))) \
-		$(eval __tmp := $(subst $(__w1),$(__w2),$(__tmp))) \
+	$(eval __gdtmp := $1) \
+	$(foreach __gdpair, $(_conv), \
+		$(eval __gdpair2 := $(subst :,$(space),$(__gdpair))) \
+		$(eval __gdw1 := $(word 1,$(__gdpair2))) \
+		$(eval __gdw2 := $(word 2,$(__gdpair2))) \
+		$(eval __gdtmp := $(subst $(__gdw1),$(__gdw2),$(__gdtmp))) \
 	) \
-	$(__tmp))
+	$(__gdtmp))
 
 # Remove quotes from string
 remove-quotes = $(strip $(subst ",,$1))
