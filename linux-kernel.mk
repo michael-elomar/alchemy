@@ -248,10 +248,16 @@ PERF_MAKE_ENV := \
 	LDFLAGS="$(TARGET_GLOBAL_LDFLAGS)" \
 	EXTRA_CFLAGS="$(TARGET_GLOBAL_CFLAGS) $(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES))"
 
+PERF_MAKE_ARGS := \
+	NO_DWARF=1 \
+	NO_NEWT=1 \
+	NO_DEMANGLE=1
+
 # Build rule
 $(PERF_BUILD_DIR)/$(LOCAL_MODULE_FILENAME):
 	@mkdir -p $(dir $@)
-	$(Q) $(PERF_MAKE_ENV) $(MAKE) ARCH=$(LINUX_ARCH) CROSS_COMPILE=$(TARGET_CROSS) \
+	$(Q) $(PERF_MAKE_ENV) $(MAKE) $(PERF_MAKE_ARGS) \
+		ARCH=$(LINUX_ARCH) CROSS_COMPILE=$(TARGET_CROSS) \
 		O=$(PERF_BUILD_DIR) -C $(PRIVATE_PATH)/tools/perf
 	$(Q) mkdir -p $(TARGET_OUT_STAGING)/usr/bin
 	$(Q) install -p $(PERF_BUILD_DIR)/perf $(TARGET_OUT_STAGING)/usr/bin
@@ -261,7 +267,9 @@ $(PERF_BUILD_DIR)/$(LOCAL_MODULE_FILENAME):
 .PHONY: perf-clean
 perf-clean:
 	$(Q)if [ -d $(LINUX_BUILD_DIR) ]; then \
-		$(MAKE) O=$(PERF_BUILD_DIR) -C $(PRIVATE_PATH)/tools/perf --ignore-errors \
+		$(PERF_MAKE_ENV) $(MAKE) $(PERF_MAKE_ARGS) \
+			ARCH=$(LINUX_ARCH) CROSS_COMPILE=$(TARGET_CROSS) \
+			O=$(PERF_BUILD_DIR) -C $(PRIVATE_PATH)/tools/perf --ignore-errors \
 			clean || echo "Ignoring clean errors"; \
 	fi
 	$(Q) rm -f $(TARGET_OUT_STAGING)/usr/bin/perf
