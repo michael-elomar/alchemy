@@ -996,6 +996,21 @@ $(eval __depsdata := $(subst $(space),\n,$(strip $(__depsdata))))
 endef
 
 ###############################################################################
+## Copy license files from $1 to $2.
+## It will copy [.]MODULE_LICENSE* and [.]MODULE_NAME* files.
+## $1 : source directory.
+## $2 : destination directory.
+###############################################################################
+__license-pattern := \
+	MODULE_LICENSE* .MODULE_LICENSE* MODULE_NAME* .MODULE_NAME*
+define copy-license-files
+@( \
+	files="$(wildcard $(addprefix $1/,$(__license-pattern)))"; \
+	if [ "$${files}" != "" ]; then mkdir -p $2; cp -af $${files} $2; fi; \
+)
+endef
+
+###############################################################################
 ## Commands to generate a precompiled file.
 ###############################################################################
 

@@ -91,9 +91,12 @@ $(installed_file): $(built_file)
 	@mkdir -p $(dir $@)
 	@touch $@
 
-# Done
+# Done (copy license files in obj dir if different from src dir)
 $(LOCAL_BUILD_MODULE): $(installed_file)
 	@mkdir -p $(dir $@)
+ifneq ("$(src_dir)","$(obj_dir)")
+	$(call copy-license-files,$(PRIVATE_PATH),$(PRIVATE_OBJ_DIR))
+endif
 	@touch $@
 
 # Clean targets additional commands

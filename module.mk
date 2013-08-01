@@ -288,6 +288,7 @@ ifneq ("$(archive_file)","")
 	@mkdir -p $(PRIVATE_ARCHIVE_UNPACK_DIR)
 	+$(call macro-exec-cmd,ARCHIVE_CMD_UNPACK,__archive-default-unpack)
 	+$(if $(PRIVATE_ARCHIVE_PATCHES),$(__archive-apply-patches))
+	$(call copy-license-files,$(PRIVATE_PATH),$(PRIVATE_ARCHIVE_UNPACK_DIR)/$(PRIVATE_ARCHIVE_SUBDIR))
 endif
 	+$(call macro-exec-cmd,ARCHIVE_CMD_POST_UNPACK,empty)
 	@mkdir -p $(dir $@)
@@ -357,6 +358,7 @@ include $(BUILD_SYSTEM)/binary-rules.mk
 
 $(LOCAL_BUILD_MODULE): $(all_objects)
 	$(transform-o-to-static-lib)
+	$(call copy-license-files,$(PRIVATE_PATH),$(PRIVATE_BUILD_DIR))
 
 copy_to_staging := 1
 
@@ -377,6 +379,7 @@ $(LOCAL_BUILD_MODULE): $(all_objects) $(all_libraries)
 ifneq ("$(TARGET_ADD_DEPENDS_SECTION)","0")
 	$(add-depends-section)
 endif
+	$(call copy-license-files,$(PRIVATE_PATH),$(PRIVATE_BUILD_DIR))
 
 copy_to_staging := 1
 copy_to_final := 1
@@ -397,6 +400,7 @@ $(LOCAL_BUILD_MODULE): $(all_objects) $(all_libraries)
 ifneq ("$(TARGET_ADD_DEPENDS_SECTION)","0")
 	$(add-depends-section)
 endif
+	$(call copy-license-files,$(PRIVATE_PATH),$(PRIVATE_BUILD_DIR))
 
 copy_to_staging := 1
 copy_to_final := 1
