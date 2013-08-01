@@ -399,14 +399,15 @@ Several classes of modules are managed by `alchemy` :
 * `SHARED_LIBRARY`
 * `EXECUTABLE`
 * `AUTOTOOLS`
+* `CMAKE`
 * `CUSTOM`
 
 Module will be referred as either `internal` or `external` :
 
 * Internal modules are `STATIC_LIBRARY`, `SHARED_LIBRARY` and `EXECUTABLE`
   modules because they are completely managed by the build system.
-* External modules are `AUTOTOOLS` and `CUSTOM` modules because the build system
-  has little control on the way those modules are built.
+* External modules are `AUTOTOOLS`, `CMAKE` and `CUSTOM` modules because the
+  build system has little control on the way those modules are built.
 
 **Note** : there is also a `PREBUILT` class but its used is reserved for the
 build system and should not normally be used by user makefiles. It is present to
@@ -557,6 +558,20 @@ file name is deduced from `src`.
 If `src` or `dst` start with a `'/'` it is assumed to be a full path, in this
 case `LOCAL_PATH` is not prepended for `src` and `TARGET_OUT_STAGING` is not
 prepended for `dst`.
+
+**Note** : There is no build order between copied files and modules depending
+on the one copying the file. If you want to make sure that copied files are
+available for other module, either put copied files in `LOCAL_EXPORT_PREREQUISITES`
+or use `LOCAL_INSTALL_HEADERS`.
+
+### `LOCAL_INSTALL_HEADERS`
+
+List of headers to be installed in the staging directory. The format is the same
+than `LOCAL_COPY_FILES`.
+
+**Note** : internally this is a combination of `LOCAL_COPY_FILES` and
+`LOCAL_EXPORT_PREREQUISITES`. It means that headers will be installed before
+anything depending on this module is built.
 
 ### `LOCAL_CLEAN_FILES` `LOCAL_CLEAN_DIRS`
 
@@ -840,6 +855,33 @@ Some variables containing generic content can also be used :
 * `AUTOTOOLS_INSTALL_DESTDIR`
 * `GNU_BUILD_NAME`
 * `GNU_TARGET_NAME`
+
+## CMake modules
+
+This class of modules if for the compilation of packages that use `cmake`.
+`Alchemy` provides internally everything need for the compilation, in particular
+a toolchain file.
+
+# Customization variables
+
+* `LOCAL_CMAKE_CONFIGURE_ARGS` : Extra arguments for the configure step.
+* `LOCAL_CMAKE_MAKE_BUILD_ARGS` : extra arguments for the build step.
+* `LOCAL_CMAKE_MAKE_INSTALL_ARGS` : Extra arguments for the install step.
+
+# Custom commands
+
+It is possible to override each step of the build.
+Please note that it shall be a macro defined using the `define/endef` keywords,
+not a `:=` definition.
+
+* `LOCAL_CMAKE_CMD_CONFIGURE`
+* `LOCAL_CMAKE_CMD_BUILD`
+* `LOCAL_CMAKE_CMD_INSTALL`
+* `LOCAL_CMAKE_CMD_CLEAN`
+* `LOCAL_CMAKE_CMD_POST_CONFIGURE`
+* `LOCAL_CMAKE_CMD_POST_BUILD`
+* `LOCAL_CMAKE_CMD_POST_INSTALL`
+* `LOCAL_CMAKE_CMD_POST_CLEAN`
 
 ## Custom rules
 
