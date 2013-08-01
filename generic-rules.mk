@@ -58,6 +58,9 @@ __generic-msg = \
 # But do NOT force recompilation (order only)
 $(configured_file): | $(all_prerequisites)
 
+# Restart build if any of dependencies have changed
+$(built_file): $(all_depends_build_filename)
+
 # Configuration
 # If the user makefile is changed, restart at the configure step
 $(configured_file): $(LOCAL_PATH)/$(USER_MAKEFILE_NAME)

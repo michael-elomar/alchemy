@@ -36,6 +36,10 @@ LOCAL_TARGETS := \
 
 # Get all modules we depend on
 all_depends := $(call module-get-all-depends,$(LOCAL_MODULE))
+all_depends_build_filename := \
+	$(foreach __lib,$(all_depends), \
+		$(call module-get-build-filename,$(__lib)) \
+	)
 
 ###############################################################################
 ## Last revision used management
@@ -215,6 +219,9 @@ $(LOCAL_MODULE)-gen-last-rev: $(LOCAL_BUILD_MODULE)
 	@$(call generate-last-revision-file,$(PRIVATE_MODULE),$(PRIVATE_REV_FILE))
 
 endif
+
+# This will force to recheck this module if one of its dependencies is changed.
+$(LOCAL_BUILD_MODULE): $(all_depends_build_filename)
 
 # This explicit rule avoids dependency error when the module has nothing to build
 # (prebuilt, sdk, custom...)
