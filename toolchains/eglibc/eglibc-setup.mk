@@ -6,9 +6,16 @@
 ## This file contains additional setup for eglibc.
 ###############################################################################
 
+# Select a default toolchain
 ifndef TARGET_CROSS
   ifeq ("$(TARGET_ARCH)","arm")
-    TARGET_CROSS := /opt/arm-2009q1/bin/arm-none-linux-gnueabi-
+    ifeq ("$(TARGET_CPU)","p6")
+      TARGET_CROSS := /opt/arm-2009q1/bin/arm-none-linux-gnueabi-
+    else ifeq ("$(TARGET_CPU)","p6i")
+      TARGET_CROSS := /opt/arm-2009q1/bin/arm-none-linux-gnueabi-
+    else
+      TARGET_CROSS := /opt/arm-2012.03/bin/arm-none-linux-gnueabi-
+    endif
   endif
 endif
 
