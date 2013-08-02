@@ -51,6 +51,8 @@ ifneq ("$(KERNEL_ZIMAGE)","")
 		$(TARGET_OUT_BUILD)/linux/.config \
 		$(TARGET_OUT)/kernel.plf
 	$(Q) $(PLFTOOL) -a u_data=$(TARGET_OUT)/kernel.plf $(IMAGE_FILE_PLF)
+else
+	@echo "Image plf: no kernel image found"
 endif
 	$(Q) cd $(TARGET_OUT_FINAL); \
 		find . ! -name '.' -printf '%P\n' | $(FIXSTAT) | \
