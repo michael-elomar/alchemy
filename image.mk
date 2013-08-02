@@ -64,6 +64,14 @@ image-plf-clean:
 	$(Q)rm -f $(TARGET_OUT)/kernel.plf
 	$(Q)rm -f $(IMAGE_FILE_PLF)
 
+# Only add dependency if it is also given in goals to avoid unecessary checks
+ifneq ("$(call is-targets-in-make-goals,all)","")
+image-plf: all
+endif
+ifneq ("$(call is-targets-in-make-goals,final)","")
+image-plf: final
+endif
+
 clean: image-plf-clean
 dirclean: image-plf-clean
 clobber: image-plf-clean
@@ -94,6 +102,14 @@ image-cpio:
 image-cpio-clean:
 	$(Q) rm -f $(IMAGE_FILE_CPIO)
 	$(Q) rm -f $(IMAGE_FILE_CPIO_GZ)
+
+# Only add dependency if it is also given in goals to avoid unecessary checks
+ifneq ("$(call is-targets-in-make-goals,all)","")
+image-cpio: all
+endif
+ifneq ("$(call is-targets-in-make-goals,final)","")
+image-cpio: final
+endif
 
 clean: image-cpio-clean
 dirclean: image-cpio-clean
