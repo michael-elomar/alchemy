@@ -488,8 +488,8 @@ $(foreach __src,$(all_copy_files_src), \
 	$(eval $(__src): | $(all_copy_files_prerequisites)) \
 )
 
-# Add files to be copied as a dependency
-$(LOCAL_BUILD_MODULE): $(all_copy_files_dst)
+# Add files to be copied as an order-only dependency (does not force rebuild)
+$(LOCAL_BUILD_MODULE): | $(all_copy_files_dst)
 
 # Add rule to delete copied files during clean
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(all_copy_files_dst)
