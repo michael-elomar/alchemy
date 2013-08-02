@@ -483,8 +483,7 @@ __all_custom_build_filename := $(foreach __mod,$(__modlist), \
 %::
 	@for f in $(__all_custom_build_filename); do \
 		if [ "$$f" = "$@" ]; then \
-			mkdir $(dir $@); touch $@; \
-			echo "touch $@"; \
+			mkdir -p $(dir $@); touch $@; \
 		fi; \
 	done
 
