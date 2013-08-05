@@ -850,15 +850,30 @@ In the definition of custom commands, the following points shall be noted :
 
 Some variables containing generic content can also be used :
 
+* `TARGET_AUTOTOOLS_CPPFLAGS`
+* `TARGET_AUTOTOOLS_CFLAGS`
+* `TARGET_AUTOTOOLS_CXXFLAGS`
+* `TARGET_AUTOTOOLS_LDFLAGS`
+* `TARGET_AUTOTOOLS_DYN_LDFLAGS`
+* `TARGET_AUTOTOOLS_CONFIGURE_ENV`
+* `TARGET_AUTOTOOLS_CONFIGURE_ARGS`
+* `TARGET_AUTOTOOLS_MAKE_ENV`
+* `TARGET_AUTOTOOLS_MAKE_ARGS`
+* `TARGET_AUTOTOOLS_CONFIGURE_PREFIX`
+* `TARGET_AUTOTOOLS_CONFIGURE_SYSCONFDIR`
+* `TARGET_AUTOTOOLS_INSTALL_DESTDIR`
+* `GNU_BUILD_NAME`
+* `GNU_TARGET_NAME`
+
+**Note** : Old variables still available for compatibility :
+
 * `AUTOTOOLS_CONFIGURE_ENV`
 * `AUTOTOOLS_CONFIGURE_ARGS`
-* `AUTOTOOLS_MAKE_ENV`
-* `AUTOTOOLS_MAKE_ARGS`
 * `AUTOTOOLS_CONFIGURE_PREFIX`
 * `AUTOTOOLS_CONFIGURE_SYSCONFDIR`
 * `AUTOTOOLS_INSTALL_DESTDIR`
-* `GNU_BUILD_NAME`
-* `GNU_TARGET_NAME`
+* `AUTOTOOLS_MAKE_ENV`
+* `AUTOTOOLS_MAKE_ARGS`
 
 ## CMake modules
 
@@ -903,6 +918,55 @@ target: prerequisites
 In commands, you can only use `PRIVATE_PATH` and `PRIVATE_MODULE` variables which
 correspond to `LOCAL_PATH` and `LOCAL_MODULE`, all other variables will be empty
 at the point commands are executed.
+
+## Host modules
+
+`Alchemy` offers the possibility to compile modules for the host that can be used
+as tools by other modules. The registration of a host module is the same as for a
+standard module, the only thing that change is that `LOCAL_HOST_MODULE` shall be
+used instead of `LOCAL_MODULE`. Dependency management is the same. Internally
+the name of the module will be prefixed by `host.` so any reference to the
+module name (in another module dependency or in make goals) shall use this prefix.
+
+If a module requires a host tool from a host module to build, it shall add a
+dependency in the `LOCAL_DEPENDS_HOST_MODULES` variable.
+
+Host tools are installed in the directory `HOST_OUT_STAGING` and usually in the
+`usr/bin` sub-directory.
+
+Note that `$(HOST_OUT_STAGING)/bin` and `$(HOST_OUT_STAGING)/usr/bin` are
+automatically added to the `PATH` environment variable for `AUTOTOOLS` and
+`CMAKE` builds.
+
+There is some `HOST_xxx` variables that are defined internally and that can be
+customized before invoking `alchemy`. For the meaning, see the corresponding
+`TARGET_xxx` variable. In this list only the default value is indicated.
+
+* `HOST_OUT_BUILD` : `$(TARGET_OUT)/build-host`
+* `HOST_OUT_STAGING` : `$(TARGET_OUT)/staging-host`
+* `HOST_GLOBAL_C_INCLUDES` :
+* `HOST_GLOBAL_CFLAGS` : `-pipe -O2 -g0`
+* `HOST_GLOBAL_CXXFLAGS` : empty.
+* `HOST_GLOBAL_ARFLAGS` : `rcs`
+* `HOST_GLOBAL_LDFLAGS` : empty.
+* `HOST_GLOBAL_LDFLAGS_SHARED` : empty.
+* `HOST_GLOBAL_LDLIBS` : empty.
+* `HOST_GLOBAL_LDLIBS_SHARED` : empty.
+* `HOST_GLOBAL_PCH_FLAGS` : empty.
+* `HOST_CC` : `gcc`.
+* `HOST_CXX` : `g++`.
+* `HOST_AS` : `as`.
+* `HOST_AR` : `ar`.
+* `HOST_LD` : `ld`.
+* `HOST_NM` : `nm`.
+* `HOST_STRIP` : `strip`.
+* `HOST_CPP` : `cpp`.
+* `HOST_RANLIB` : `ranlib`.
+* `HOST_OBJCOPY` : `objcopy`.
+* `HOST_OBJDUMP` : `objdump`.
+
+**Note** : `include`, `lib` and `usr/lib` folders under `HOST_OUT_STAGING` are
+automatically added to corresponding flags.
 
 # A closer look to dependencies
 
