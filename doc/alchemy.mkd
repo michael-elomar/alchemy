@@ -227,7 +227,7 @@ Mainly used by the android wrapper.
   Default is `1`.
 * `USE_GIT_REV` : Retrieve git revision of modules to force compilation of
   external modules when the related project is updated.
-  Default is `0`.
+  Default is `1`.
 
 # Configuration
 

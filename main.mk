@@ -38,7 +38,7 @@ USE_CCACHE ?= 0
 USE_SCAN_CACHE ?= 0
 USE_COLORS ?= 0
 USE_BUILD_DEPS_CHECK_IN_CONFIG ?= 1
-USE_GIT_REV ?= 0
+USE_GIT_REV ?= 1
 
 # Quiet command if V is 0
 ifeq ("$(V)","0")
