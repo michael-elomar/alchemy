@@ -17,7 +17,6 @@ TARGET_GLOBAL_LDFLAGS ?=
 TARGET_GLOBAL_LDFLAGS_SHARED ?=
 TARGET_GLOBAL_LDLIBS ?=
 TARGET_GLOBAL_LDLIBS_SHARED ?=
-TARGET_GLOBAL_PCH_FLAGS ?=
 
 # Compatibility: use provided variable and make sure no user makefile use it.
 # TODO: remove completely in next version (first step is error).
@@ -25,6 +24,14 @@ ifdef TARGET_GLOBAL_CPPFLAGS
   TARGET_GLOBAL_CXXFLAGS += $(TARGET_GLOBAL_CPPFLAGS)
   $(error Please use TARGET_GLOBAL_CXXFLAGS instead of TARGET_GLOBAL_CPPFLAGS)
 endif
+
+# Pre-compiled header generation flag
+ifneq ("$(USE_CLANG)","1")
+  TARGET_GLOBAL_PCH_FLAGS ?= -c
+else
+  TARGET_GLOBAL_PCH_FLAGS ?= -x c++-header
+endif
+
 
 ###############################################################################
 ## Generic setup.
@@ -77,6 +84,11 @@ ifeq ("$(TARGET_LIBC)","")
   endif
 endif
 
+# Prefix of output
+TARGET_STATIC_LIB_SUFFIX := .a
+TARGET_SHARED_LIB_SUFFIX := .so
+TARGET_EXE_SUFFIX :=
+
 endif
 
 ###############################################################################
@@ -86,6 +98,11 @@ ifeq ("$(TARGET_OS)","ecos")
 
 # Force libc
 TARGET_LIBC := ecos
+
+# Prefix of output
+TARGET_STATIC_LIB_SUFFIX := .a
+TARGET_SHARED_LIB_SUFFIX := .so.a
+TARGET_EXE_SUFFIX := .elf
 
 endif
 
@@ -108,6 +125,10 @@ TARGET_AR ?= $(TARGET_CROSS)ar
 TARGET_LD ?= $(TARGET_CROSS)ld
 TARGET_NM ?= $(TARGET_CROSS)nm
 TARGET_STRIP ?= $(TARGET_CROSS)strip
+TARGET_CPP ?= $(TARGET_CROSS)cpp
+TARGET_RANLIB ?= $(TARGET_CROSS)ranlib
+TARGET_OBJCOPY ?= $(TARGET_CROSS)objcopy
+TARGET_OBJDUMP ?= $(TARGET_CROSS)objdump
 
 else
 
@@ -119,6 +140,10 @@ TARGET_AR ?= ar
 TARGET_LD ?= llvm-ld
 TARGET_NM ?= llvm-nm
 TARGET_STRIP ?= strip
+TARGET_CPP ?= cpp
+TARGET_RANLIB ?= llvm-ranlib
+TARGET_OBJCOPY ?= objcopy
+TARGET_OBJDUMP ?= llvm-objdump
 
 endif
 

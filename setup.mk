@@ -101,52 +101,16 @@ TARGET_STRIP_FILTER :=
 include $(BUILD_SYSTEM)/toolchains/toolchains-setup.mk
 
 ###############################################################################
-## Tools for host.
+## Host setup.
 ###############################################################################
+HOST_OS := linux
+
 HOST_CC ?= gcc
 HOST_CXX ?= g++
 HOST_AR ?= ar
 HOST_LD ?= ld
 HOST_NM ?= nm
 HOST_STRIP ?= strip
-
-###############################################################################
-## Host/Target OS.
-###############################################################################
-
-# Host OS
-HOST_OS := linux
-
-# Binary suffixes
-ifeq ("$(TARGET_OS)","linux")
-  TARGET_STATIC_LIB_SUFFIX := .a
-  TARGET_SHARED_LIB_SUFFIX := .so
-  TARGET_EXE_SUFFIX :=
-else ifeq ("$(TARGET_OS)","ecos")
-  TARGET_STATIC_LIB_SUFFIX := .a
-  TARGET_SHARED_LIB_SUFFIX := .so.a
-  TARGET_EXE_SUFFIX := .elf
-else
-  $(error Unsupported target OS : $(TARGET_OS))
-endif
-
-# To be able to use ccache with pre-compiled headers, some environment
-# variables are required
-CCACHE :=
-ifeq ("$(USE_CCACHE)","1")
-  ifneq ("$(shell which ccache)","")
-    export CCACHE_SLOPPINESS := time_macros
-    CCACHE := ccache
-    TARGET_GLOBAL_CFLAGS += -fpch-preprocess
-  endif
-endif
-
-# Pre-compiled header generation flag
-ifneq ("$(USE_CLANG)","1")
-  TARGET_GLOBAL_PCH_FLAGS := -c
-else
-  TARGET_GLOBAL_PCH_FLAGS := -x c++-header
-endif
 
 ###############################################################################
 ## Update flags.
@@ -159,8 +123,10 @@ __extra-c-includes := $(strip \
 	))
 TARGET_GLOBAL_C_INCLUDES := $(__extra-c-includes) $(TARGET_GLOBAL_C_INCLUDES)
 
-# TODO : is it really the place and where to do it ?
+# So that everyone knowns we are building with alchemy.
 TARGET_GLOBAL_CFLAGS += -DALCHEMY_BUILD
+
+# TODO : is it really the place and where to do it ?
 ifeq ("$(findstring -D__STDC_LIMIT_MACROS,$(TARGET_GLOBAL_CXXFLAGS))","")
   TARGET_GLOBAL_CXXFLAGS += -D__STDC_LIMIT_MACROS
 endif
@@ -185,6 +151,17 @@ TARGET_GLOBAL_CFLAGS_$(TARGET_ARCH) ?=
 # Don't emit warning for unused driver arguments
 ifeq ("$(USE_CLANG)","1")
   TARGET_GLOBAL_CFLAGS += -Qunused-arguments
+endif
+
+# To be able to use ccache with pre-compiled headers, some environment
+# variables are required
+CCACHE :=
+ifeq ("$(USE_CCACHE)","1")
+  ifneq ("$(shell which ccache)","")
+    export CCACHE_SLOPPINESS := time_macros
+    CCACHE := ccache
+    TARGET_GLOBAL_CFLAGS += -fpch-preprocess
+  endif
 endif
 
 ###############################################################################
