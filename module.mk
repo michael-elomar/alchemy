@@ -17,8 +17,19 @@ endif
 copy_to_staging := 0
 copy_to_final := 0
 
-# Intermediate/Build directory
-build_dir := $(TARGET_OUT_BUILD)/$(LOCAL_MODULE)
+# Host/Target module customization
+# Prefix is used for variable like TARGET_xxx or LOCAL_xxx
+# Suffix is for macros.
+ifeq ("$(LOCAL_IS_HOST_MODULE)","1")
+  mode_prefix := HOST_
+  mode_suffix := -host
+else
+  mode_prefix := TARGET_
+  mode_suffix :=
+endif
+
+# Build directory
+build_dir := $(call module-get-build-dir,$(LOCAL_MODULE))
 
 # Full path to build module
 LOCAL_BUILD_MODULE := $(call module-get-build-filename,$(LOCAL_MODULE))
@@ -37,6 +48,7 @@ LOCAL_TARGETS := \
 ###############################################################################
 ## ARM specific checks.
 ###############################################################################
+ifneq ("$(LOCAL_IS_HOST_MODULE)","1")
 ifeq ("$(TARGET_ARCH)","arm")
 
 # Make sure LOCAL_ARM_MODE is valid
@@ -66,7 +78,8 @@ $(call check-flags,LOCAL_CXXFLAGS,$(check-flags-arm-mode),$(check-flags-arm-mode
 $(call check-flags,LOCAL_EXPORT_CFLAGS,$(check-flags-arm-mode),$(check-flags-arm-mode-message))
 $(call check-flags,LOCAL_EXPORT_CXXFLAGS,$(check-flags-arm-mode),$(check-flags-arm-mode-message))
 
-endif
+endif # ifeq ("$(TARGET_ARCH)","arm")
+endif # ifneq ("$(LOCAL_IS_HOST_MODULE)","1")
 
 ###############################################################################
 ## Generic checks.
@@ -182,6 +195,12 @@ all_prerequisites += \
 LOCAL_TARGETS += \
 	$(LOCAL_PREREQUISITES) \
 	$(LOCAL_EXPORT_PREREQUISITES)
+
+# Host modules required
+# TODO: use staging filename for internal modules
+all_prerequisites += \
+	$(foreach __mod,$(LOCAL_HOST_MODULES), \
+		$(call module-get-build-filename,$(__mod)))
 
 ###############################################################################
 ## Import of dependencies.
@@ -366,6 +385,7 @@ $(LOCAL_TARGETS): PRIVATE_MODULE := $(LOCAL_MODULE)
 $(LOCAL_TARGETS): PRIVATE_BUILD_DIR := $(build_dir)
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES := $(LOCAL_CLEAN_FILES) $(LOCAL_BUILD_MODULE)
 $(LOCAL_TARGETS): PRIVATE_CLEAN_DIRS := $(LOCAL_CLEAN_DIRS)
+$(LOCAL_TARGETS): PRIVATE_MODE := $(mode_prefix)
 
 ###############################################################################
 ## General rules.
@@ -645,7 +665,7 @@ $(foreach __pair,$(LOCAL_COPY_FILES), \
 	$(eval __w1 := $(word 1,$(__pair2))) \
 	$(eval __w2 := $(word 2,$(__pair2))) \
 	$(eval __src := $(call copy-get-src-path,$(__w1))) \
-	$(eval __dst := $(call copy-get-dst-path,$(__w2))) \
+	$(eval __dst := $(call copy-get-dst-path$(mode_suffix),$(__w2))) \
 	$(if $(call is-path-dir,$(__dst)), \
 		$(eval __dst := $(__dst)$(notdir $(__src))) \
 	) \
@@ -683,7 +703,7 @@ $(foreach __pair,$(LOCAL_CREATE_LINKS), \
 	$(eval __pair2 := $(subst :,$(space),$(__pair))) \
 	$(eval __w1 := $(word 1,$(__pair2))) \
 	$(eval __w2 := $(word 2,$(__pair2))) \
-	$(eval __name := $(TARGET_OUT_STAGING)/$(__w1)) \
+	$(eval __name := $($(mode_prefix)_OUT_STAGING)/$(__w1)) \
 	$(eval __target := $(__w2)) \
 	$(eval all_create_links += $(__name)) \
 	$(eval $(call create-one-link,$(__name),$(__target))) \
@@ -720,6 +740,7 @@ $(eval $(call copy-one-file,$(LOCAL_BUILD_MODULE),$(LOCAL_STAGING_MODULE)))
 # TODO: add to clean list ?
 ifeq ("$(copy_to_final)","1")
 
+ifneq ("$(LOCAL_IS_HOST_MODULE)","1")
 ifneq ("$(wildcard $(TARGET_OUT_FINAL))","")
 
 LOCAL_FINAL_MODULE := $(LOCAL_STAGING_MODULE:$(TARGET_OUT_STAGING)/%=$(TARGET_OUT_FINAL)/%)
@@ -738,6 +759,7 @@ $(LOCAL_FINAL_MODULE): $(LOCAL_STAGING_MODULE)
 endif
 
 endif # ifneq ("$(wildcard $(TARGET_OUT_FINAL))","")
+endif # ifneq ("$(LOCAL_IS_HOST_MODULE)","1")
 
 endif # ifeq ("$(copy_to_final)","1")
 

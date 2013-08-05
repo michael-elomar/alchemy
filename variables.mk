@@ -15,11 +15,14 @@ macros-LOCAL :=
 # Path of the root of module
 vars-LOCAL += PATH
 
-# Name of what's supposed to be generated
+# Name of the module
 vars-LOCAL += MODULE
 
 # Override the name of what will be generated
 vars-LOCAL += MODULE_FILENAME
+
+# Set to 1 for host module
+vars-LOCAL += IS_HOST_MODULE
 
 # Description of the module
 vars-LOCAL += DESCRIPTION
@@ -72,6 +75,9 @@ vars-LOCAL += DEPENDS_HEADERS
 # Other modules required (at runtime for example). But not required for build
 vars-LOCAL += DEPENDS_MODULES
 vars-LOCAL += REQUIRED_MODULES
+
+# Host modules required to build
+vars-LOCAL += HOST_MODULES
 
 # Additional include directories to pass into the C/C++ compilers
 # Format : <fullpath> (-I will be prepended automatically)

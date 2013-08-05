@@ -389,19 +389,6 @@ include $(BUILD_SYSTEM)/pbuild-hook/pbuild-hook.mk
 # Now that all modules have been registered, sort the variable
 __modules := $(sort $(__modules))
 
-# All modules
-ALL_MODULES := $(__modules)
-
-# All modules to actually build
-ALL_BUILD_MODULES := $(strip \
-	$(foreach __mod,$(ALL_MODULES), \
-		$(if $(call is-module-in-build-config,$(__mod)),$(__mod)) \
-	))
-
-$(shell mkdir -p $(TARGET_OUT_BUILD))
-$(shell echo "$(ALL_MODULES)" > $(TARGET_OUT_BUILD)/modules)
-$(shell echo "$(ALL_BUILD_MODULES)" > $(TARGET_OUT_BUILD)/build-modules)
-
 # Recompute all dependencies between modules
 $(call modules-compute-depends)
 
@@ -415,6 +402,25 @@ endif
 ifneq ("$(USE_GIT_REV)","0")
   $(call module-compute-revisions)
 endif
+
+# All modules
+ALL_MODULES := $(__modules)
+
+# All modules to actually build (without host modules)
+ALL_BUILD_MODULES := $(strip \
+	$(foreach __mod,$(ALL_MODULES), \
+		$(if $(call is-module-host,$(__mod)),$(empty), \
+			$(if $(call is-module-in-build-config,$(__mod)),$(__mod)) \
+		) \
+	))
+
+# All host modules to actually build (based on built modules)
+ALL_BUILD_MODULES_HOST := $(call modules-get-required-host,$(ALL_BUILD_MODULES))
+
+# Generate files with module list
+$(shell mkdir -p $(TARGET_OUT_BUILD))
+$(shell echo "$(ALL_MODULES)" > $(TARGET_OUT_BUILD)/modules)
+$(shell echo "$(ALL_BUILD_MODULES)" > $(TARGET_OUT_BUILD)/build-modules)
 
 ###############################################################################
 ## Module rules generation.
@@ -432,10 +438,16 @@ ifeq ("$(call is-targets-in-make-goals,$(__query-targets) clobber)","")
 # it is in the build config
 $(foreach __mod,$(ALL_MODULES), \
 	$(if $(call is-module-in-make-goals,$(__mod)), \
-		$(if $(call is-module-in-build-config,$(__mod)),, \
-			$(warning $(__mod) is not enabled in the config) \
-			$(eval ALL_BUILD_MODULES += $(__mod) \
-				$(call module-get-all-depends,$(__mod)) \
+		$(if $(call is-module-host,$(__mod)), \
+			$(if $(call is-not-item-in-list,$(__mod),$(ALL_BUILD_MODULES_HOST)), \
+				$(warning $(__mod) is not enabled in the config) \
+				$(eval ALL_BUILD_MODULES_HOST += $(__mod)) \
+			), \
+			$(if $(call is-not-item-in-list,$(__mod),$(ALL_BUILD_MODULES)), \
+				$(warning $(__mod) is not enabled in the config) \
+				$(eval ALL_BUILD_MODULES += $(__mod) \
+					$(call module-get-all-depends,$(__mod)) \
+				) \
 			) \
 		) \
 	) \
@@ -451,7 +463,7 @@ endif
 __dofilter := 0
 __modlist := $(empty)
 ifeq ("$(call is-targets-in-make-goals,all)","")
-$(foreach __mod,$(ALL_BUILD_MODULES), \
+$(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST), \
 	$(if $(call is-module-in-make-goals,$(__mod)), \
 		$(eval __dofilter := 1) \
 		$(eval __modlist += $(__mod) $(call module-get-all-depends,$(__mod))) \
@@ -466,6 +478,9 @@ ifeq ("$(__dofilter)","0")
 else
   __modlist := $(sort $(__modlist))
 endif
+
+# Add required host modules
+__modlist += $(call modules-get-required-host,$(__modlist))
 
 # Now, generate rules of selected modules
 $(foreach __mod,$(__modlist), \
@@ -531,6 +546,10 @@ clobber:
 	$(Q)rm -rf $(TARGET_OUT_BUILD)
 	@echo "Deleting staging directory..."
 	$(Q)rm -rf $(TARGET_OUT_STAGING)
+	@echo "Deleting build-host directory..."
+	$(Q)rm -rf $(HOST_OUT_BUILD)
+	@echo "Deleting staging-host directory..."
+	$(Q)rm -rf $(HOST_OUT_STAGING)
 ifneq ("$(TARGET_OS_FLAVOUR)","native-chroot")
 ifneq ("$(TARGET_OS_FLAVOUR)","native")
 	@echo "Deleting final directory..."

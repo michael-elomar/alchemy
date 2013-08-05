@@ -12,8 +12,106 @@
 # (we add the -p option to preserve timestamp of installed files)
 __autotools-install-bin := $(shell which install)
 
+## Get path to 'pkg-config' binary
+__autotools-pkg-config-bin := $(shell which pkg-config)
+
+# Update host compilation path
+__autotool-host-path := $(HOST_OUT_STAGING)/bin:$(HOST_OUT_STAGING)/usr/bin:$(PATH)
+
+# Update target compilation path
+__autotool-target-path := $(HOST_OUT_STAGING)/bin:$(HOST_OUT_STAGING)/usr/bin:$(PATH)
+
+# Common arguments to configure
+# * Avoid triggering regeneration of configure/Makefile.in. The regeneration
+#   could cause issues because it would remove the patches we made in libtool
+# * Disable locale support.
+# * Disable documentation.
+# * Don't display warning for unrecognized options (other disabled options may
+#   not be actually supported).
+__autotool-configure-args := \
+	--disable-maintainer-mode \
+	--disable-nls \
+	--disable-gtk-doc \
+	--disable-gtk-doc-html \
+	--disable-doxygen-docs \
+	--disable-doc \
+	--disable-docs \
+	--disable-documentation \
+	--disable-option-checking
+
 ###############################################################################
-## Variable used for autotools.
+## Variable used for autotools on host modules.
+###############################################################################
+
+# Setup flags
+HOST_AUTOTOOLS_CPPFLAGS := $(call normalize-c-includes,$(HOST_GLOBAL_C_INCLUDES))
+HOST_AUTOTOOLS_CFLAGS := $(HOST_AUTOTOOLS_CPPFLAGS) $(HOST_GLOBAL_CFLAGS)
+HOST_AUTOTOOLS_CXXFLAGS := $(HOST_AUTOTOOLS_CFLAGS) $(HOST_GLOBAL_CXXFLAGS)
+
+# Setup pkg-config
+# Use packages from both HOST_OUT_STAGING and standard places
+HOST_PKG_CONFIG_ENV := \
+	PKG_CONFIG="$(__autotools-pkg-config-bin)" \
+	PKG_CONFIG_PATH="$(HOST_OUT_STAGING)/usr/lib/pkgconfig:$(HOST_OUT_STAGING)/lib/pkgconfig" \
+	PKG_CONFIG_SYSROOT_DIR=""
+
+# Environment to use when executing configure script
+HOST_AUTOTOOLS_CONFIGURE_ENV := \
+	PATH="$(__autotool-host-path)" \
+	AR="$(HOST_AR)" \
+	AS="$(HOST_AS)" \
+	LD="$(HOST_LD)" \
+	NM="$(HOST_NM)" \
+	CC="$(CCACHE) $(HOST_CC)" \
+	GCC="$(CCACHE) $(HOST_CC)" \
+	CXX="$(CCACHE) $(HOST_CXX)" \
+	CPP="$(HOST_CPP)" \
+	RANLIB="$(HOST_RANLIB)" \
+	STRIP="$(HOST_STRIP)" \
+	OBJCOPY="$(HOST_OBJCOPY)" \
+	OBJDUMP="$(HOST_OBJDUMP)" \
+	INSTALL="$(__autotools-install-bin) -p" \
+	MANIFEST_TOOL=":" \
+	CPPFLAGS="$(HOST_AUTOTOOLS_CPPFLAGS)" \
+	CFLAGS="$(HOST_AUTOTOOLS_CFLAGS)" \
+	CPPFLAGS="$(HOST_AUTOTOOLS_CXXFLAGS)" \
+	LDFLAGS="$(HOST_GLOBAL_LDFLAGS) $(HOST_GLOBAL_LDLIBS)" \
+	DYN_LDFLAGS="$(HOST_GLOBAL_LDFLAGS_SHARED) $(HOST_GLOBAL_LDLIBS_SHARED)" \
+	$(HOST_PKG_CONFIG_ENV)
+
+HOST_AUTOTOOLS_CONFIGURE_PREFIX := $(HOST_OUT_STAGING)/usr
+HOST_AUTOTOOLS_CONFIGURE_SYSCONFDIR := $(HOST_OUT_STAGING)/etc
+HOST_AUTOTOOLS_INSTALL_DESTDIR :=
+
+HOST_AUTOTOOLS_CONFIGURE_ARGS += \
+	--prefix="$(HOST_AUTOTOOLS_CONFIGURE_PREFIX)" \
+	--sysconfdir="$(HOST_AUTOTOOLS_CONFIGURE_SYSCONFDIR)"
+
+# Only compile static libraries so we don't have to change LD_LIBRARY_PATH
+HOST_AUTOTOOLS_CONFIGURE_ARGS += \
+	--enable-static \
+	--disable-shared
+
+# Finally, add common arguments
+HOST_AUTOTOOLS_CONFIGURE_ARGS += \
+	$(__autotool-configure-args)
+
+# Environment to use when executing make
+# Use PKG_CONFIG_ENV in case a package needs automatic reconfiguration
+HOST_AUTOTOOLS_MAKE_ENV := $(HOST_PKG_CONFIG_ENV)
+
+# Arguments to give to make
+HOST_AUTOTOOLS_MAKE_ARGS := DESTDIR="$(HOST_AUTOTOOLS_INSTALL_DESTDIR)"
+
+# Quiet flags
+ifeq ("$(V)","0")
+  HOST_AUTOTOOLS_CONFIGURE_ARGS += --quiet --enable-silent-rules
+  HOST_AUTOTOOLS_MAKE_ENV += LIBTOOLFLAGS="--quiet"
+  HOST_AUTOTOOLS_MAKE_ARGS += -s --no-print-directory
+endif
+
+###############################################################################
+## Variable used for autotools on target modules.
 ###############################################################################
 
 # Setup compilations flags
@@ -24,8 +122,9 @@ TARGET_AUTOTOOLS_LDFLAGS := $(TARGET_GLOBAL_LDFLAGS) $(TARGET_GLOBAL_LDLIBS)
 TARGET_AUTOTOOLS_DYN_LDFLAGS := $(TARGET_GLOBAL_LDFLAGS_SHARED) $(TARGET_GLOBAL_LDLIBS_SHARED)
 
 # Setup pkg-config
+# Only use packages found in TARGET_OUT_STAGING by setting PKG_CONFIG_LIBDIR empty
 TARGET_PKG_CONFIG_ENV := \
-	PKG_CONFIG="$(shell which pkg-config)" \
+	PKG_CONFIG="$(__autotools-pkg-config-bin)" \
 	PKG_CONFIG_PATH="$(TARGET_OUT_STAGING)/usr/lib/pkgconfig:$(TARGET_OUT_STAGING)/lib/pkgconfig" \
 	PKG_CONFIG_LIBDIR=""
 ifeq ("$(TARGET_OS_FLAVOUR)","native")
@@ -36,6 +135,7 @@ endif
 
 # Environment to use when executing configure script
 TARGET_AUTOTOOLS_CONFIGURE_ENV := \
+	PATH="$(__autotool-target-path)" \
 	AR="$(TARGET_AR)" \
 	AS="$(TARGET_AS)" \
 	LD="$(TARGET_LD)" \
@@ -68,7 +168,7 @@ GNU_TARGET_NAME := $(TOOLCHAIN_TARGET_NAME)
 # on which the package will run and  we call it 'target'.
 TARGET_AUTOTOOLS_CONFIGURE_ARGS := \
 	--build="$(GNU_BUILD_NAME)" \
-	--host="$(GNU_TARGET_NAME)" \
+	--host="$(GNU_TARGET_NAME)"
 
 # For cross-compilation, use /usr as prefix and install in our staging dir
 # For native compilation, use staging as prefix and nothing for install dest dir
@@ -86,28 +186,9 @@ TARGET_AUTOTOOLS_CONFIGURE_ARGS += \
 	--prefix="$(TARGET_AUTOTOOLS_CONFIGURE_PREFIX)" \
 	--sysconfdir="$(TARGET_AUTOTOOLS_CONFIGURE_SYSCONFDIR)"
 
-# Avoid triggering regeneration of configure/Makefile.in. The regeneration
-# could cause issues because it would remove the patches we made in libtool
+# Finally, add common arguments
 TARGET_AUTOTOOLS_CONFIGURE_ARGS += \
-	--disable-maintainer-mode
-
-# Disable locale support
-TARGET_AUTOTOOLS_CONFIGURE_ARGS += \
-	--disable-nls
-
-# Disable documentation
-TARGET_AUTOTOOLS_CONFIGURE_ARGS += \
-	--disable-gtk-doc \
-	--disable-gtk-doc-html \
-	--disable-doxygen-docs \
-	--disable-doc \
-	--disable-docs \
-	--disable-documentation
-
-# Do'nt display warning for unrecognized options (abvove disabled options may
-# not be ctually supported)
-TARGET_AUTOTOOLS_CONFIGURE_ARGS += \
-	--disable-option-checking
+	$(__autotool-configure-args)
 
 # Environment to use when executing make
 # Use PKG_CONFIG_ENV in case a package needs automatic reconfiguration
