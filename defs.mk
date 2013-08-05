@@ -884,6 +884,20 @@ conditional-libraries-setup = \
 	)
 
 ###############################################################################
+## Filter a list of modules tp keep only internal or external ones.
+## $1 : list of modules to filter.
+###############################################################################
+filter-get-internal-modules = $(strip \
+	$(foreach __mod,$1, \
+		$(if $(call is-module-external,$(__mod)),$(empty),$(__mod)) \
+	))
+
+filter-get-external-modules = $(strip \
+	$(foreach __mod,$1, \
+		$(if $(call is-module-external,$(__mod)),$(__mod)) \
+	))
+
+###############################################################################
 ## Copy a macro.
 ## $1 : destination variable.
 ## $1 : source variable.

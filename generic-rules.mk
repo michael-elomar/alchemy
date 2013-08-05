@@ -59,7 +59,7 @@ __generic-msg = \
 $(configured_file): | $(all_prerequisites)
 
 # Restart build if any of dependencies have changed
-$(built_file): $(all_depends_build_filename)
+$(built_file): $(all_depends_build_filename) $(all_link_libs_filenames)
 
 # Configuration
 # If the user makefile is changed, restart at the configure step

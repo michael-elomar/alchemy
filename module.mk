@@ -35,6 +35,52 @@ LOCAL_TARGETS := \
 	$(LOCAL_MODULE)-pre-install
 
 ###############################################################################
+## ARM specific checks.
+###############################################################################
+ifeq ("$(TARGET_ARCH)","arm")
+
+# Make sure LOCAL_ARM_MODE is valid
+# If not set, use default mode
+LOCAL_ARM_MODE := $(strip $(LOCAL_ARM_MODE))
+ifeq ("$(LOCAL_ARM_MODE)","")
+  LOCAL_ARM_MODE := $(TARGET_DEFAULT_ARM_MODE)
+endif
+
+ifneq ("$(LOCAL_ARM_MODE)","arm")
+ifneq ("$(LOCAL_ARM_MODE)","thumb")
+  $(error $(LOCAL_PATH): LOCAL_ARM_MODE is not valid : $(LOCAL_ARM_MODE))
+endif
+endif
+
+# If default mode is not thumb, do not allow thumb, so the only practical use of
+# this variable is to allow arm if default is thumb, not the other way around
+ifneq ("$(TARGET_DEFAULT_ARM_MODE)","thumb")
+  LOCAL_ARM_MODE := $(TARGET_DEFAULT_ARM_MODE)
+endif
+
+# Check that -marm or -mthumb is not forced in compilation flags
+check-flags-arm-mode := -marm -mthumb
+check-flags-arm-mode-message := please use LOCAL_ARM_MODE
+$(call check-flags,LOCAL_CFLAGS,$(check-flags-arm-mode),$(check-flags-arm-mode-message))
+$(call check-flags,LOCAL_CXXFLAGS,$(check-flags-arm-mode),$(check-flags-arm-mode-message))
+$(call check-flags,LOCAL_EXPORT_CFLAGS,$(check-flags-arm-mode),$(check-flags-arm-mode-message))
+$(call check-flags,LOCAL_EXPORT_CXXFLAGS,$(check-flags-arm-mode),$(check-flags-arm-mode-message))
+
+endif
+
+###############################################################################
+## Generic checks.
+###############################################################################
+
+# Do not put -O0 in flags, use debug setup makefile
+check-flags-debug := -O0
+check-flags-debug-message := please use custom $(debug-setup-makefile) in top dir
+$(call check-flags,LOCAL_CFLAGS,$(check-flags-debug),$(check-flags-debug-message))
+$(call check-flags,LOCAL_CXXFLAGS,$(check-flags-debug),$(check-flags-debug-message))
+$(call check-flags,LOCAL_EXPORT_CFLAGS,$(check-flags-debug),$(check-flags-debug-message))
+$(call check-flags,LOCAL_EXPORT_CXXFLAGS,$(check-flags-debug),$(check-flags-debug-message))
+
+###############################################################################
 ## Dependencies.
 ###############################################################################
 
@@ -136,6 +182,115 @@ all_prerequisites += \
 LOCAL_TARGETS += \
 	$(LOCAL_PREREQUISITES) \
 	$(LOCAL_EXPORT_PREREQUISITES)
+
+###############################################################################
+## Import of dependencies.
+##
+## Note: LDLIBS only get ours and import from static dependencies.
+## Other import are done on full dependency to make sure that include path
+## are propagated even for shared library import.
+##
+## Note: external modules only import from internal modules, external module
+## shall handle by themself import of external stuff (using pkg-config for example)
+## we also don't add stuff exported by extarnal module for their own compilation.
+###############################################################################
+
+# Get list of exported stuff by our dependencies
+ifeq ("$(call is-module-external,$(LOCAL_MODULE))","")
+  # Internal module
+  imported_CFLAGS        := $(call module-get-listed-export,$(all_depends),CFLAGS)
+  imported_CXXFLAGS      := $(call module-get-listed-export,$(all_depends),CXXFLAGS)
+  imported_C_INCLUDES    := $(call module-get-listed-export,$(all_depends),C_INCLUDES)
+  imported_LDLIBS        := $(call module-get-listed-export,$(all_libs),LDLIBS)
+
+  imported_CFLAGS += $(LOCAL_EXPORT_CFLAGS)
+  imported_CXXFLAGS += $(LOCAL_EXPORT_CXXFLAGS)
+  imported_C_INCLUDES += $(LOCAL_EXPORT_C_INCLUDES)
+  imported_LDLIBS += $(LOCAL_EXPORT_LDLIBS)
+else
+  # External module, we only import from internal modules
+  imported_CFLAGS        := $(call module-get-listed-export,$(call filter-get-internal-modules,$(all_depends)),CFLAGS)
+  imported_CXXFLAGS      := $(call module-get-listed-export,$(call filter-get-internal-modules,$(all_depends)),CXXFLAGS)
+  imported_C_INCLUDES    := $(call module-get-listed-export,$(call filter-get-internal-modules,$(all_depends)),C_INCLUDES)
+  imported_LDLIBS        := $(call module-get-listed-export,$(call filter-get-internal-modules,$(all_libs)),LDLIBS)
+endif
+
+# Add includes of modules listed in LOCAL_DEPENDS_HEADERS
+imported_C_INCLUDES += $(call module-get-listed-export,$(LOCAL_DEPENDS_HEADERS),C_INCLUDES)
+
+# Import prerequisites (the one for this module are already in all_prerequisites)
+imported_PREREQUISITES := $(call module-get-listed-export,$(all_depends),PREREQUISITES)
+all_prerequisites += $(imported_PREREQUISITES)
+
+# The imported/exported compiler flags are prepended to their LOCAL_XXXX value
+# (this allows the module to override them).
+LOCAL_CFLAGS     := $(strip $(imported_CFLAGS) $(LOCAL_CFLAGS))
+LOCAL_CXXFLAGS   := $(strip $(imported_CXXFLAGS) $(LOCAL_CXXFLAGS))
+
+# The imported/exported include directories are appended to their LOCAL_XXX value
+# (this allows the module to override them)
+LOCAL_C_INCLUDES := $(strip $(LOCAL_C_INCLUDES) $(imported_C_INCLUDES))
+
+# Similarly, you want the imported/exported flags to appear _after_ the LOCAL_LDLIBS
+# due to the way Unix linkers work (depending libraries must appear before
+# dependees on final link command).
+LOCAL_LDLIBS     := $(strip $(LOCAL_LDLIBS) $(imported_LDLIBS))
+
+# Get all autoconf files that we depend on, don't forget to add ourself
+# TODO: In previous version ALL depends were added, now only internal modules
+# are added in this list. Mainly because we don't want to break build of external
+# modules that already handle external dependencies correctly.
+all_autoconf := $(call module-get-listed-autoconf, \
+	$(call filter-get-internal-modules,$(all_depends) $(LOCAL_MODULE)))
+
+# Force their inclusion (space after -include and before comma is important)
+LOCAL_CFLAGS += $(addprefix -include ,$(all_autoconf))
+
+# Notify that we build with dependencies
+# TODO: In previous version ALL depends were added, now only internal modules
+# are added in this list. Mainly because we don't want to break build of external
+# modules that already handle external dependencies correctly.
+LOCAL_CFLAGS += $(foreach __mod,$(call filter-get-internal-modules,$(all_depends)), \
+	-DBUILD_$(call module-get-define,$(__mod)))
+
+# Add debug flags at the end
+$(call add-debug-flags)
+
+###############################################################################
+## Determine flags that external modules will need to add manually.
+## External modules (AUTOTOOLS, CMAKE) only have CFLAGS CXXFLAGS and LDFLAGS.
+## Moreover CXXFLAGS does not inherit from CFLAGS so it must contains it.
+###############################################################################
+
+# Compilation flags
+__external-add_CFLAGS := $(LOCAL_CFLAGS) $(call normalize-c-includes,$(LOCAL_C_INCLUDES))
+__external-add_CXXFLAGS := $(__external-add_CFLAGS) $(LOCAL_CXXFLAGS)
+
+# Linker flags
+__external-add_LDFLAGS :=
+
+# Whole static libraries
+ifneq ("$(strip $(all_whole_static_libs_filename))","")
+__external-add_LDFLAGS += \
+	-Wl,--whole-archive \
+	$(all_whole_static_libs_filename) \
+	-Wl,--no-whole-archive
+endif
+
+# Static and shared libraries
+__external-add_LDFLAGS += \
+	$(all_static_libs_filename) \
+
+# Shared libraries
+ifneq ("$(strip $(all_shared_libs_filename))","")
+__external-add_LDFLAGS += \
+	-Wl,--as-needed \
+	$(all_shared_libs_filename) \
+	-Wl,--no-as-needed
+endif
+
+# Add local defined flags and libs
+__external-add_LDFLAGS += $(LOCAL_LDFLAGS) $(LOCAL_LDLIBS)
 
 ###############################################################################
 ## Skip some stuff to improve scanning.
@@ -357,52 +512,6 @@ $(LOCAL_TARGETS): PRIVATE_ARCHIVE_SUBDIR := $(LOCAL_ARCHIVE_SUBDIR)
 $(LOCAL_TARGETS): PRIVATE_ARCHIVE_PATCHES := $(patches)
 
 endif
-
-###############################################################################
-## ARM specific checks.
-###############################################################################
-ifeq ("$(TARGET_ARCH)","arm")
-
-# Make sure LOCAL_ARM_MODE is valid
-# If not set, use default mode
-LOCAL_ARM_MODE := $(strip $(LOCAL_ARM_MODE))
-ifeq ("$(LOCAL_ARM_MODE)","")
-  LOCAL_ARM_MODE := $(TARGET_DEFAULT_ARM_MODE)
-endif
-
-ifneq ("$(LOCAL_ARM_MODE)","arm")
-ifneq ("$(LOCAL_ARM_MODE)","thumb")
-  $(error $(LOCAL_PATH): LOCAL_ARM_MODE is not valid : $(LOCAL_ARM_MODE))
-endif
-endif
-
-# If default mode is not thumb, do not allow thumb, so the only practical use of
-# this variable is to allow arm if default is thumb, not the other way around
-ifneq ("$(TARGET_DEFAULT_ARM_MODE)","thumb")
-  LOCAL_ARM_MODE := $(TARGET_DEFAULT_ARM_MODE)
-endif
-
-# Check that -marm or -mthumb is not forced in compilation flags
-check-flags-arm-mode := -marm -mthumb
-check-flags-arm-mode-message := please use LOCAL_ARM_MODE
-$(call check-flags,LOCAL_CFLAGS,$(check-flags-arm-mode),$(check-flags-arm-mode-message))
-$(call check-flags,LOCAL_CXXFLAGS,$(check-flags-arm-mode),$(check-flags-arm-mode-message))
-$(call check-flags,LOCAL_EXPORT_CFLAGS,$(check-flags-arm-mode),$(check-flags-arm-mode-message))
-$(call check-flags,LOCAL_EXPORT_CXXFLAGS,$(check-flags-arm-mode),$(check-flags-arm-mode-message))
-
-endif
-
-###############################################################################
-## Generic checks.
-###############################################################################
-
-# Do not put -O0 in flags, use debug setup makefile
-check-flags-debug := -O0
-check-flags-debug-message := please use custom $(debug-setup-makefile) in top dir
-$(call check-flags,LOCAL_CFLAGS,$(check-flags-debug),$(check-flags-debug-message))
-$(call check-flags,LOCAL_CXXFLAGS,$(check-flags-debug),$(check-flags-debug-message))
-$(call check-flags,LOCAL_EXPORT_CFLAGS,$(check-flags-debug),$(check-flags-debug-message))
-$(call check-flags,LOCAL_EXPORT_CXXFLAGS,$(check-flags-debug),$(check-flags-debug-message))
 
 ###############################################################################
 ## Static library.

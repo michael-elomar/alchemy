@@ -11,29 +11,21 @@ ifeq ("$(CMAKE)","")
 endif
 
 ###############################################################################
-## Add compilation/debug flags.
+## Add compilation/linker flags.
 ###############################################################################
 
-# Add debug flags
-$(call add-debug-flags)
-
-# Compilation flags
-__cmake-add_CFLAGS := $(LOCAL_CFLAGS) $(call normalize-c-includes,$(LOCAL_C_INCLUDES))
-__cmake-add_CXXFLAGS := $(__cmake-add_CFLAGS) $(LOCAL_CXXFLAGS)
-__cmake-add_LDFLAGS := $(LOCAL_LDFLAGS)
-
 # Add flags in arguments (ALCHEMY_EXTRA are added by the toolchain file)
-ifneq ("$(strip $(__cmake-add_CFLAGS))","")
-  LOCAL_CMAKE_CONFIGURE_ARGS += -DALCHEMY_EXTRA_C_FLAGS="$(__cmake-add_CFLAGS)"
+ifneq ("$(strip $(__external-add_CFLAGS))","")
+  LOCAL_CMAKE_CONFIGURE_ARGS += -DALCHEMY_EXTRA_C_FLAGS="$(__external-add_CFLAGS)"
 endif
 
-ifneq ("$(strip $(__cmake-add_CXXFLAGS))","")
-  LOCAL_CMAKE_CONFIGURE_ARGS += -DALCHEMY_EXTRA_CXX_FLAGS="$(__cmake-add_CXXFLAGS)"
+ifneq ("$(strip $(__external-add_CXXFLAGS))","")
+  LOCAL_CMAKE_CONFIGURE_ARGS += -DALCHEMY_EXTRA_CXX_FLAGS="$(__external-add_CXXFLAGS)"
 endif
 
-ifneq ("$(strip $(__cmake-add_LDFLAGS))","")
-  LOCAL_CMAKE_CONFIGURE_ARGS += -DALCHEMY_EXTRA_EXE_LINKER_FLAGS="$(__cmake-add_LDFLAGS)"
-  LOCAL_CMAKE_CONFIGURE_ARGS += -DALCHEMY_EXTRA_SHARED_LINKER_FLAGS="$(__cmake-add_LDFLAGS)"
+ifneq ("$(strip $(__external-add_LDFLAGS))","")
+  LOCAL_CMAKE_CONFIGURE_ARGS += -DALCHEMY_EXTRA_EXE_LINKER_FLAGS="$(__external-add_LDFLAGS)"
+  LOCAL_CMAKE_CONFIGURE_ARGS += -DALCHEMY_EXTRA_SHARED_LINKER_FLAGS="$(__external-add_LDFLAGS)"
 endif
 
 ###############################################################################

@@ -79,58 +79,9 @@ all_objects := \
 	$(gen_s_objects) \
 	$(gen_S_objects)
 
-###############################################################################
-## Import of dependencies.
-###############################################################################
-
-# Get list of exported stuff by our dependencies
-# Note: LDLIBS only get ours and import from static dependencies.
-# Other import are done on full dependency to make sure that include path
-# are propagated even for shared library import
-imported_CFLAGS        := $(call module-get-listed-export,$(all_depends),CFLAGS)
-imported_CXXFLAGS      := $(call module-get-listed-export,$(all_depends),CXXFLAGS)
-imported_C_INCLUDES    := $(call module-get-listed-export,$(all_depends),C_INCLUDES)
-imported_LDLIBS        := $(call module-get-listed-export,$(all_libs),LDLIBS)
-imported_PREREQUISITES := $(call module-get-listed-export,$(all_depends),PREREQUISITES)
-
-# Add includes of modules listed in LOCAL_DEPENDS_HEADERS
-imported_C_INCLUDES += $(call module-get-listed-export,$(LOCAL_DEPENDS_HEADERS),C_INCLUDES)
-
-# The imported/exported compiler flags are prepended to their LOCAL_XXXX value
-# (this allows the module to override them).
-LOCAL_CFLAGS     := $(strip $(imported_CFLAGS) $(LOCAL_EXPORT_CFLAGS) $(LOCAL_CFLAGS))
-LOCAL_CXXFLAGS   := $(strip $(imported_CXXFLAGS) $(LOCAL_EXPORT_CXXFLAGS) $(LOCAL_CXXFLAGS))
-
-# The imported/exported include directories are appended to their LOCAL_XXX value
-# (this allows the module to override them)
-LOCAL_C_INCLUDES := $(strip $(LOCAL_C_INCLUDES) $(LOCAL_EXPORT_C_INCLUDES) $(imported_C_INCLUDES))
-
-# Similarly, you want the imported/exported flags to appear _after_ the LOCAL_LDLIBS
-# due to the way Unix linkers work (depending libraries must appear before
-# dependees on final link command).
-LOCAL_LDLIBS     := $(strip $(LOCAL_LDLIBS) $(LOCAL_EXPORT_LDLIBS) $(imported_LDLIBS))
-
-# Get all autoconf files that we depend on, don't forget to add ourself
-all_autoconf := \
-	$(call module-get-listed-autoconf,$(all_depends)) \
-	$(call module-get-autoconf,$(LOCAL_MODULE))
-
-# Force their inclusion (space after -include and before comma is important)
-LOCAL_CFLAGS += $(addprefix -include ,$(all_autoconf))
-
-# Inport prerequisites
-all_prerequisites += $(imported_PREREQUISITES)
-
-# Notify that we build with dependencies
-LOCAL_CFLAGS += $(foreach __mod,$(all_depends), \
-	-DBUILD_$(call module-get-define,$(__mod)))
-
 # User makefile is an internal dependencies
 all_internal_depends := $(LOCAL_PATH)/$(USER_MAKEFILE_NAME)
 all_internal_depends += $(all_autoconf)
-
-# Add debug flags at the end
-$(call add-debug-flags)
 
 ###############################################################################
 ## Actual rules.

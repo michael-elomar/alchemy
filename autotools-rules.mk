@@ -42,29 +42,21 @@ endef
 endif # ifndef __autotools-macros
 
 ###############################################################################
-## Add compilation/debug flags.
+## Add compilation/linker flags.
 ###############################################################################
 
-# Add debug flags
-$(call add-debug-flags)
-
-# Compilation flags
-__autotools-add_CFLAGS := $(LOCAL_CFLAGS) $(call normalize-c-includes,$(LOCAL_C_INCLUDES))
-__autotools-add_CXXFLAGS := $(__autotools-add_CFLAGS) $(LOCAL_CXXFLAGS)
-__autotools-add_LDFLAGS := $(LOCAL_LDFLAGS)
-
 # Add flags in environment
-ifneq ("$(strip $(__autotools-add_CFLAGS))","")
-  LOCAL_AUTOTOOLS_CONFIGURE_ENV += CFLAGS="$$CFLAGS $(__autotools-add_CFLAGS)"
+ifneq ("$(strip $(__external-add_CFLAGS))","")
+  LOCAL_AUTOTOOLS_CONFIGURE_ENV += CFLAGS="$$CFLAGS $(__external-add_CFLAGS)"
 endif
 
-ifneq ("$(strip $(__autotools-add_CXXFLAGS))","")
-  LOCAL_AUTOTOOLS_CONFIGURE_ENV += CXXFLAGS="$$CXXFLAGS $(__autotools-add_CXXFLAGS)"
+ifneq ("$(strip $(__external-add_CXXFLAGS))","")
+  LOCAL_AUTOTOOLS_CONFIGURE_ENV += CXXFLAGS="$$CXXFLAGS $(__external-add_CXXFLAGS)"
 endif
 
-ifneq ("$(strip $(__autotools-add_LDFLAGS))","")
-  LOCAL_AUTOTOOLS_CONFIGURE_ENV += LDFLAGS="$$LDFLAGS $(__autotools-add_LDFLAGS)"
-  LOCAL_AUTOTOOLS_CONFIGURE_ENV += DYN_LDFLAGS="$$DYN_LDFLAGS $(__autotools-add_LDFLAGS)"
+ifneq ("$(strip $(__external-add_LDFLAGS))","")
+  LOCAL_AUTOTOOLS_CONFIGURE_ENV += LDFLAGS="$$LDFLAGS $(__external-add_LDFLAGS)"
+  LOCAL_AUTOTOOLS_CONFIGURE_ENV += DYN_LDFLAGS="$$DYN_LDFLAGS $(__external-add_LDFLAGS)"
 endif
 
 ###############################################################################
