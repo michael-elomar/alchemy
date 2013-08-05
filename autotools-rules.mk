@@ -121,7 +121,7 @@ $(configured_file): $(src_dir)/configure
 endif
 
 # Setup commands
-$(LOCAL_TARGETS): PRIVATE_MSG := $(if $(LOCAL_IS_HOST_MODULE),Host )Autotools
+$(LOCAL_TARGETS): PRIVATE_MSG := $(if $(mode_host),Host )Autotools
 $(LOCAL_TARGETS): PRIVATE_CMD_PREFIX := AUTOTOOLS
 $(LOCAL_TARGETS): PRIVATE_DEFAULT_CMD_CONFIGURE := __autotools-default-cmd-configure
 $(LOCAL_TARGETS): PRIVATE_DEFAULT_CMD_BUILD := __autotools-default-cmd-build

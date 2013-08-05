@@ -18,11 +18,11 @@ vars-LOCAL += PATH
 # Name of the module
 vars-LOCAL += MODULE
 
+# Name of the module for host
+vars-LOCAL += HOST_MODULE
+
 # Override the name of what will be generated
 vars-LOCAL += MODULE_FILENAME
-
-# Set to 1 for host module
-vars-LOCAL += IS_HOST_MODULE
 
 # Description of the module
 vars-LOCAL += DESCRIPTION
@@ -73,11 +73,13 @@ vars-LOCAL += CONDITIONAL_LIBRARIES
 vars-LOCAL += DEPENDS_HEADERS
 
 # Other modules required (at runtime for example). But not required for build
+# TODO: change the meaning of DEPENDS_MODULES to introduce build order
+# keeping REQUIRED_MODULES with no build order
 vars-LOCAL += DEPENDS_MODULES
 vars-LOCAL += REQUIRED_MODULES
 
 # Host modules required to build
-vars-LOCAL += HOST_MODULES
+vars-LOCAL += DEPENDS_HOST_MODULES
 
 # Additional include directories to pass into the C/C++ compilers
 # Format : <fullpath> (-I will be prepended automatically)

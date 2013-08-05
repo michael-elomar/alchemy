@@ -6,6 +6,11 @@
 ## Build a shared library.
 ###############################################################################
 
+# Set also LOCAL_MODULE so that everything works correctly
+ifneq ("$(LOCAL_HOST_MODULE)","")
+  LOCAL_MODULE := $(LOCAL_HOST_MODULE)
+endif
+
 # check if we want to force static libraries
 force_static := 0
 ifeq ("$(TARGET_OS)","ecos")

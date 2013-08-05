@@ -20,12 +20,14 @@ copy_to_final := 0
 # Host/Target module customization
 # Prefix is used for variable like TARGET_xxx or LOCAL_xxx
 # Suffix is for macros.
-ifeq ("$(LOCAL_IS_HOST_MODULE)","1")
+ifneq ("$(LOCAL_HOST_MODULE)","")
+  mode_host := $(true)
   mode_prefix := HOST_
   mode_suffix := -host
 else
   mode_prefix := TARGET_
   mode_suffix :=
+  mode_host :=
 endif
 
 # Build directory
@@ -48,7 +50,7 @@ LOCAL_TARGETS := \
 ###############################################################################
 ## ARM specific checks.
 ###############################################################################
-ifneq ("$(LOCAL_IS_HOST_MODULE)","1")
+ifneq ("$(mode_host)","1")
 ifeq ("$(TARGET_ARCH)","arm")
 
 # Make sure LOCAL_ARM_MODE is valid
@@ -79,7 +81,7 @@ $(call check-flags,LOCAL_EXPORT_CFLAGS,$(check-flags-arm-mode),$(check-flags-arm
 $(call check-flags,LOCAL_EXPORT_CXXFLAGS,$(check-flags-arm-mode),$(check-flags-arm-mode-message))
 
 endif # ifeq ("$(TARGET_ARCH)","arm")
-endif # ifneq ("$(LOCAL_IS_HOST_MODULE)","1")
+endif # ifneq ("$(mode_host)","1")
 
 ###############################################################################
 ## Generic checks.
@@ -199,7 +201,7 @@ LOCAL_TARGETS += \
 # Host modules required
 # TODO: use staging filename for internal modules
 all_prerequisites += \
-	$(foreach __mod,$(LOCAL_HOST_MODULES), \
+	$(foreach __mod,$(LOCAL_DEPENDS_HOST_MODULES), \
 		$(call module-get-build-filename,$(__mod)))
 
 ###############################################################################
@@ -740,7 +742,7 @@ $(eval $(call copy-one-file,$(LOCAL_BUILD_MODULE),$(LOCAL_STAGING_MODULE)))
 # TODO: add to clean list ?
 ifeq ("$(copy_to_final)","1")
 
-ifneq ("$(LOCAL_IS_HOST_MODULE)","1")
+ifneq ("$(mode_host)","1")
 ifneq ("$(wildcard $(TARGET_OUT_FINAL))","")
 
 LOCAL_FINAL_MODULE := $(LOCAL_STAGING_MODULE:$(TARGET_OUT_STAGING)/%=$(TARGET_OUT_FINAL)/%)
@@ -759,7 +761,7 @@ $(LOCAL_FINAL_MODULE): $(LOCAL_STAGING_MODULE)
 endif
 
 endif # ifneq ("$(wildcard $(TARGET_OUT_FINAL))","")
-endif # ifneq ("$(LOCAL_IS_HOST_MODULE)","1")
+endif # ifneq ("$(mode_host)","1")
 
 endif # ifeq ("$(copy_to_final)","1")
 

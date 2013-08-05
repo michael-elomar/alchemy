@@ -195,7 +195,7 @@ check-cppflags-compat = \
 ## An internal prebuilt module (for example a bionic one) will take precedence
 ## over another module with the same name.
 ## A module comming from a sdk will be overidden by a standard module.
-## A host module (LOCAL_IS_HOST_MODULE set at 1) will have its internal name
+## A host module (LOCAL_HOST_MODULE set) will have its internal name
 ## prefixed by 'host.'.
 ###############################################################################
 module-add = \
@@ -203,9 +203,9 @@ module-add = \
 	$(if $(LOCAL_MODULE),$(empty), \
 		$(error $(LOCAL_PATH): LOCAL_MODULE is not defined)) \
 	$(if $(call $(not $(patsubst host.%,,$(LOCAL_MODULE)))), \
-		$(error $(LOCAL_PATH): Do NOT use 'host.' prefix, use LOCAL_IS_HOST_MODULE) \
+		$(error $(LOCAL_PATH): Do NOT use 'host.' prefix, use LOCAL_HOST_MODULE) \
 	) \
-	$(if $(LOCAL_IS_HOST_MODULE), \
+	$(if $(LOCAL_HOST_MODULE), \
 		$(if $(call streq,$(LOCAL_MODULE_CLASS),AUTOTOOLS), \
 			$(eval LOCAL_MODULE := host.$(LOCAL_MODULE)), \
 			$(error $(LOCAL_PATH): Only AUTOTOOLS is supported for host modules) \
@@ -329,7 +329,7 @@ modules-get-required-host = $(strip $(sort \
 
 # Get direct required list
 __modules-get-required-host-direct = $(strip $(sort \
-	$(foreach __mod,$1,$(__modules.$(__mod).HOST_MODULES))))
+	$(foreach __mod,$1,$(__modules.$(__mod).DEPENDS_HOST_MODULES))))
 
 ###############################################################################
 ## Check if a module will be built.
@@ -1318,11 +1318,11 @@ endef
 # Get local path
 local-get-path = $(call my-dir)
 
-# Get build directory (need to check LOCAL_IS_HOST_MODULE because module name
+# Get build directory (need to check LOCAL_HOST_MODULE because module name
 # does not yet contain the 'host.' prefix)
 local-get-build-dir = $(strip \
-	$(if $(LOCAL_IS_HOST_MODULE), \
-		$(call module-get-build-dir-host,$(LOCAL_MODULE)) \
+	$(if $(LOCAL_HOST_MODULE), \
+		$(call module-get-build-dir-host,$(LOCAL_HOST_MODULE)) \
 		, \
 		$(call module-get-build-dir,$(LOCAL_MODULE)) \
 	))
