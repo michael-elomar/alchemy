@@ -40,9 +40,9 @@ TARGET_SKEL ?=
 TARGET_SKEL_DIRS ?=
 TARGET_NOSTRIP_FINAL ?= 0
 
-# TODO: remove when all projects have been migrated
+# TODO: remove completely in next version (first step is error).
 ifneq ("$(TARGET_SKEL)","")
-$(warning Please use 'TARGET_SKEL_DIRS' instead of 'TARGET_SKEL')
+$(error Please use 'TARGET_SKEL_DIRS' instead of 'TARGET_SKEL')
 endif
 TARGET_SKEL_DIRS += $(TARGET_SKEL)
 

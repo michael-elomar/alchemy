@@ -20,9 +20,10 @@ TARGET_GLOBAL_LDLIBS_SHARED ?=
 TARGET_GLOBAL_PCH_FLAGS ?=
 
 # Compatibility: use provided variable and make sure no user makefile use it.
+# TODO: remove completely in next version (first step is error).
 ifdef TARGET_GLOBAL_CPPFLAGS
   TARGET_GLOBAL_CXXFLAGS += $(TARGET_GLOBAL_CPPFLAGS)
-  $(warning Please use TARGET_GLOBAL_CXXFLAGS instead of TARGET_GLOBAL_CPPFLAGS)
+  $(error Please use TARGET_GLOBAL_CXXFLAGS instead of TARGET_GLOBAL_CPPFLAGS)
 endif
 
 ###############################################################################

@@ -165,17 +165,18 @@ modules-fields-depends := \
 ###############################################################################
 ## Check for usage of CPPFLAGS instead of CXXFLAGS.
 ## Correctly save same in CXXFLAGS but warn user.
+## TODO: remove completely in next version (first step is error instead of warning).
 ###############################################################################
 check-cppflags-compat = \
 	$(if $(LOCAL_CPPFLAGS), \
 		$(eval LOCAL_CXXFLAGS += $(LOCAL_CPPFLAGS)) \
 		$(eval __msg := Please use LOCAL_CXXFLAGS instead of LOCAL_CPPFLAGS) \
-		$(warning $(LOCAL_PATH): module '$(__mod)': $(__msg)) \
+		$(error $(LOCAL_PATH): module '$(__mod)': $(__msg)) \
 	) \
 	$(if $(LOCAL_EXPORT_CPPFLAGS), \
 		$(eval LOCAL_EXPORT_CXXFLAGS += $(LOCAL_EXPORT_CPPFLAGS)) \
 		$(eval __msg := Please use LOCAL_EXPORT_CXXFLAGS instead of LOCAL_EXPORT_CPPFLAGS) \
-		$(warning $(LOCAL_PATH): module '$(__mod)': $(__msg)) \
+		$(error $(LOCAL_PATH): module '$(__mod)': $(__msg)) \
 	)
 
 ###############################################################################
@@ -642,8 +643,9 @@ module-get-depends = \
 
 # Get dependencies for configuration
 # Put build dependencies only if requested
-# FIXME: configurable until all modules remove conditional deps in atom.mk
+# TODO: remove completely in next version (first step is error).
 ifeq ("$(USE_BUILD_DEPS_CHECK_IN_CONFIG)","0")
+$(error Please do not set USE_BUILD_DEPS_CHECK_IN_CONFIG at 0)
 module-get-config-depends = \
 	$(__modules.$1.depends.other)
 else
@@ -1232,6 +1234,7 @@ local-get-path = $(call my-dir)
 local-get-build-dir = $(call module-get-build-dir,$(LOCAL_MODULE))
 
 # Register module (deprecated)
+# TODO: remove completely in next version (first step is error).
 local-add-module = \
-	$(warning Please use include $$(BUILD_CUSTOM) instead of local-add-module) \
+	$(error Please use include $$(BUILD_CUSTOM) instead of local-add-module) \
 	$(module-add)

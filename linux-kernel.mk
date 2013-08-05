@@ -40,8 +40,9 @@ ifeq ("$(wildcard $(LINUX_CONFIG_FILE))","")
 endif
 
 # Old name compat
+# TODO: remove completely in next version (first step is error).
 ifdef LINUX_CROSS
-  $(warning Please use TARGET_LINUX_CROSS instead of LINUX_CROSS)
+  $(error Please use TARGET_LINUX_CROSS instead of LINUX_CROSS)
   TARGET_LINUX_CROSS := $(LINUX_CROSS)
 endif
 
