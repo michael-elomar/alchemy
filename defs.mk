@@ -366,7 +366,6 @@ module-restore-locals = \
 ###############################################################################
 ## Used to check all dependencies once all module information has been
 ## recorded.
-## TODO: check coherence between target/host modules.
 ###############################################################################
 
 # Check dependencies of all modules. Only if module will be built and not from
@@ -387,6 +386,7 @@ __module-check-depends = \
 	$(call __module-check-depends-direct,$1) \
 	$(call __module-check-depends-other,$1) \
 	$(call __module-check-depends-headers,$1) \
+	$(call __module-check-depends-mode,$1) \
 	$(call __module-check-libs-class,$1,WHOLE_STATIC_LIBRARIES,STATIC_LIBRARY) \
 	$(call __module-check-libs-class,$1,STATIC_LIBRARIES,STATIC_LIBRARY) \
 	$(call __module-check-libs-class,$1,SHARED_LIBRARIES,SHARED_LIBRARY)
@@ -441,6 +441,37 @@ __module-check-lib-class = \
 		$(eval __path := $(__modules.$1.PATH)) \
 		$(error $(__path): module '$1' depends on module '$2' which is not of class '$3') \
 	)
+
+# Check coherence between host/target modules
+# $1 : module name.
+__module-check-depends-mode = \
+	$(if $(call is-module-host,$1), \
+		$(call __module-check-depends-host,$1), \
+		$(call __module-check-depends-target,$1) \
+	) \
+	$(foreach __lib,$(__modules.$1.DEPENDS_HOST_MODULES), \
+		$(if $(call is-module-host,$(__lib)),$(empty), \
+			$(error $(__path): module '$1': LOCAL_DEPENDS_HOST_MODULES contains non host module '$(__lib)') \
+		) \
+	)
+
+# Check that a host module only depends on host modules
+__module-check-depends-host = \
+	$(eval __path := $(__modules.$1.PATH)) \
+	$(foreach __lib,$(__modules.$1.depends.all), \
+		$(if $(call is-module-host,$(__lib)),$(empty), \
+			$(error $(__path): host module '$1' depends on non host module '$(__lib)') \
+		) \
+	)
+
+# Check that a target module only depends on target modules
+__module-check-depends-target = \
+	$(eval __path := $(__modules.$1.PATH)) \
+	$(foreach __lib,$(__modules.$1.depends.all), \
+		$(if $(call is-module-host,$(__lib)), \
+			$(error $(__path): module '$1' depends on host module '$(__lib)') \
+		) \
+	) \
 
 ###############################################################################
 ## Used to make some internal checks.
