@@ -52,7 +52,7 @@ endef
 
 define __cmake-default-cmd-install
 	$(Q) $(MAKE) -C $(PRIVATE_OBJ_DIR) \
-		$(CMAKE_MAKE_ARGS) $(PRIVATE_MAKE_INSTALL_ARGS) install
+		$(CMAKE_MAKE_ARGS) $(PRIVATE_MAKE_INSTALL_ARGS) install/fast
 endef
 
 # Force success for command in case "uninstall" or "clean" is not supported
