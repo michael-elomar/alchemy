@@ -14,32 +14,13 @@ endif
 ## Add compilation/debug flags.
 ###############################################################################
 
+# Add debug flags
+$(call add-debug-flags)
+
 # Compilation flags
 __cmake-add_CFLAGS := $(LOCAL_CFLAGS) $(call normalize-c-includes,$(LOCAL_C_INCLUDES))
 __cmake-add_CXXFLAGS := $(__cmake-add_CFLAGS) $(LOCAL_CXXFLAGS)
 __cmake-add_LDFLAGS := $(LOCAL_LDFLAGS)
-
-# Debug flags
-__cmake-debug_CFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),CFLAGS)
-__cmake-debug_CXXFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),CXXFLAGS)
-__cmake-debug_LDFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),LDFLAGS)
-
-# Print debug messages
-ifneq ("$(strip $(__cmake-debug_CFLAGS))","")
-  $(info Debug: Adding '$(__cmake-debug_CFLAGS)' to '$(LOCAL_MODULE)' CFLAGS and CXXFLAGS)
-  __cmake-add_CFLAGS += $(__cmake-debug_CFLAGS)
-  __cmake-add_CXXFLAGS += $(__cmake-debug_CFLAGS)
-endif
-
-ifneq ("$(strip $(__cmake-debug_CXXFLAGS))","")
-  $(info Debug: Adding '$(__cmake-debug_CXXFLAGS)' to '$(LOCAL_MODULE)' CXXFLAGS)
-  __cmake-add_CXXFLAGS += $(__cmake-debug_CXXFLAGS)
-endif
-
-ifneq ("$(strip $(__cmake-debug_LDFLAGS))","")
-  $(info Debug: Adding '$(__cmake-debug_LDFLAGS)' to '$(LOCAL_MODULE)' LDFLAGS)
-  __cmake-add_LDFLAGS += $(__cmake-debug_LDFLAGS)
-endif
 
 # Add flags in arguments (ALCHEMY_EXTRA are added by the toolchain file)
 ifneq ("$(strip $(__cmake-add_CFLAGS))","")

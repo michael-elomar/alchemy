@@ -789,6 +789,26 @@ check-flags = \
 	)
 
 ###############################################################################
+## Add debug flags to current LOCAL_xxx macros.
+###############################################################################
+add-debug-flags = \
+	$(eval __debug_CFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),CFLAGS)) \
+	$(eval __debug_CXXFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),CXXFLAGS)) \
+	$(eval __debug_LDFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),LDFLAGS)) \
+	$(if $(strip $(__debug_CFLAGS)), \
+		$(info Debug: Adding '$(__debug_CFLAGS)' to '$(LOCAL_MODULE)' CFLAGS) \
+		$(eval LOCAL_CFLAGS += $(__debug_CFLAGS)) \
+	) \
+	$(if $(strip $(__debug_CXXFLAGS)), \
+		$(info Debug: Adding '$(__debug_CXXFLAGS)' to '$(LOCAL_MODULE)' CXXFLAGS) \
+		$(eval LOCAL_CXXFLAGS += $(__debug_CXXFLAGS)) \
+	) \
+	$(if $(strip $(__debug_LDFLAGS)), \
+		$(info Debug: Adding '$(__debug_LDFLAGS)' to '$(LOCAL_MODULE)' LDFLAGS) \
+		$(eval LOCAL_LDFLAGS += $(__debug_LDFLAGS)) \
+	)
+
+###############################################################################
 ## Normalize a list of includes. It adds -I if needed.
 ## $1 : list of includes
 ###############################################################################

@@ -45,32 +45,13 @@ endif # ifndef __autotools-macros
 ## Add compilation/debug flags.
 ###############################################################################
 
+# Add debug flags
+$(call add-debug-flags)
+
 # Compilation flags
 __autotools-add_CFLAGS := $(LOCAL_CFLAGS) $(call normalize-c-includes,$(LOCAL_C_INCLUDES))
 __autotools-add_CXXFLAGS := $(__autotools-add_CFLAGS) $(LOCAL_CXXFLAGS)
 __autotools-add_LDFLAGS := $(LOCAL_LDFLAGS)
-
-# Debug flags
-__autotools-debug_CFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),CFLAGS)
-__autotools-debug_CXXFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),CXXFLAGS)
-__autotools-debug_LDFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),LDFLAGS)
-
-# Print debug messages
-ifneq ("$(strip $(__autotools-debug_CFLAGS))","")
-  $(info Debug: Adding '$(__autotools-debug_CFLAGS)' to '$(LOCAL_MODULE)' CFLAGS and CXXFLAGS)
-  __autotools-add_CFLAGS += $(__autotools-debug_CFLAGS)
-  __autotools-add_CXXFLAGS += $(__autotools-debug_CFLAGS)
-endif
-
-ifneq ("$(strip $(__autotools-debug_CXXFLAGS))","")
-  $(info Debug: Adding '$(__autotools-debug_CXXFLAGS)' to '$(LOCAL_MODULE)' CXXFLAGS)
-  __autotools-add_CXXFLAGS += $(__autotools-debug_CXXFLAGS)
-endif
-
-ifneq ("$(strip $(__autotools-debug_LDFLAGS))","")
-  $(info Debug: Adding '$(__autotools-debug_LDFLAGS)' to '$(LOCAL_MODULE)' LDFLAGS)
-  __autotools-add_LDFLAGS += $(__autotools-debug_LDFLAGS)
-endif
 
 # Add flags in environment
 ifneq ("$(strip $(__autotools-add_CFLAGS))","")

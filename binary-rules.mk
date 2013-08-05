@@ -79,43 +79,6 @@ all_objects := \
 	$(gen_s_objects) \
 	$(gen_S_objects)
 
-# Get libraries used by us and static libraries
-LOCAL_EXTERNAL_LIBRARIES := \
-	$(call module-get-static-depends,$(LOCAL_MODULE),EXTERNAL_LIBRARIES)
-LOCAL_STATIC_LIBRARIES := \
-	$(call module-get-static-depends,$(LOCAL_MODULE),STATIC_LIBRARIES)
-LOCAL_WHOLE_STATIC_LIBRARIES := \
-	$(call module-get-static-depends,$(LOCAL_MODULE),WHOLE_STATIC_LIBRARIES)
-LOCAL_SHARED_LIBRARIES := \
-	$(call module-get-static-depends,$(LOCAL_MODULE),SHARED_LIBRARIES)
-
-# Get path
-all_static_libraries := \
-	$(foreach lib,$(LOCAL_STATIC_LIBRARIES), \
-		$(call module-get-staging-filename,$(lib)))
-
-all_whole_static_libraries := \
-	$(foreach lib,$(LOCAL_WHOLE_STATIC_LIBRARIES), \
-		$(call module-get-staging-filename,$(lib)))
-
-all_shared_libraries := \
-	$(foreach lib,$(LOCAL_SHARED_LIBRARIES), \
-		$(call module-get-staging-filename,$(lib)))
-
-# all_libraries is used for the dependencies at link time
-# external libraries are used as prerequisites in module.mk
-all_libraries := \
-	$(all_static_libraries) \
-	$(all_whole_static_libraries) \
-	$(all_shared_libraries)
-
-# List of our dependencies and from static
-LOCAL_LIBRARIES := \
-	$(LOCAL_EXTERNAL_LIBRARIES) \
-	$(LOCAL_STATIC_LIBRARIES) \
-	$(LOCAL_WHOLE_STATIC_LIBRARIES) \
-	$(LOCAL_SHARED_LIBRARIES)
-
 ###############################################################################
 ## Import of dependencies.
 ###############################################################################
@@ -127,7 +90,7 @@ LOCAL_LIBRARIES := \
 imported_CFLAGS        := $(call module-get-listed-export,$(all_depends),CFLAGS)
 imported_CXXFLAGS      := $(call module-get-listed-export,$(all_depends),CXXFLAGS)
 imported_C_INCLUDES    := $(call module-get-listed-export,$(all_depends),C_INCLUDES)
-imported_LDLIBS        := $(call module-get-listed-export,$(LOCAL_LIBRARIES),LDLIBS)
+imported_LDLIBS        := $(call module-get-listed-export,$(all_libs),LDLIBS)
 imported_PREREQUISITES := $(call module-get-listed-export,$(all_depends),PREREQUISITES)
 
 # Add includes of modules listed in LOCAL_DEPENDS_HEADERS
@@ -166,28 +129,8 @@ LOCAL_CFLAGS += $(foreach __mod,$(all_depends), \
 all_internal_depends := $(LOCAL_PATH)/$(USER_MAKEFILE_NAME)
 all_internal_depends += $(all_autoconf)
 
-###############################################################################
-## Add debug flags.
-###############################################################################
-
-debug_CFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),CFLAGS)
-debug_CXXFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),CXXFLAGS)
-debug_LDFLAGS := $(call module-get-debug-flags,$(LOCAL_MODULE),LDFLAGS)
-
-ifneq ("$(debug_CFLAGS)","")
-  $(info Debug: Adding '$(debug_CFLAGS)' to '$(LOCAL_MODULE)' CFLAGS)
-  LOCAL_CFLAGS += $(debug_CFLAGS)
-endif
-
-ifneq ("$(debug_CXXFLAGS)","")
-  $(info Debug: Adding '$(debug_CXXFLAGS)' to '$(LOCAL_MODULE)' CXXFLAGS)
-  LOCAL_CXXFLAGS += $(debug_CXXFLAGS)
-endif
-
-ifneq ("$(debug_LDFLAGS)","")
-  $(info Debug: Adding '$(debug_LDFLAGS)' to '$(LOCAL_MODULE)' LDFLAGS)
-  LOCAL_LDFLAGS += $(debug_LDFLAGS)
-endif
+# Add debug flags at the end
+$(call add-debug-flags)
 
 ###############################################################################
 ## Actual rules.
@@ -367,13 +310,6 @@ else
   mode := $(TARGET_ARCH)
 endif
 
-# Force pbuild hook if a static library needs it
-$(foreach __mod,$(LOCAL_STATIC_LIBRARIES) $(LOCAL_WHOLE_STATIC_LIBRARIES), \
-	$(if $(__modules.$(__mod).PBUILD_HOOK), \
-		$(eval LOCAL_PBUILD_HOOK := 1) \
-	) \
-)
-
 $(LOCAL_TARGETS): PRIVATE_CFLAGS := $(LOCAL_CFLAGS)
 $(LOCAL_TARGETS): PRIVATE_C_INCLUDES := $(LOCAL_C_INCLUDES)
 $(LOCAL_TARGETS): PRIVATE_CXXFLAGS := $(LOCAL_CXXFLAGS)
@@ -382,7 +318,7 @@ $(LOCAL_TARGETS): PRIVATE_LDFLAGS := $(LOCAL_LDFLAGS)
 $(LOCAL_TARGETS): PRIVATE_LDLIBS := $(LOCAL_LDLIBS)
 $(LOCAL_TARGETS): PRIVATE_MODE := $(mode)
 $(LOCAL_TARGETS): PRIVATE_PBUILD_HOOK := $(LOCAL_PBUILD_HOOK)
-$(LOCAL_TARGETS): PRIVATE_ALL_SHARED_LIBRARIES := $(all_shared_libraries)
-$(LOCAL_TARGETS): PRIVATE_ALL_STATIC_LIBRARIES := $(all_static_libraries)
-$(LOCAL_TARGETS): PRIVATE_ALL_WHOLE_STATIC_LIBRARIES := $(all_whole_static_libraries)
+$(LOCAL_TARGETS): PRIVATE_ALL_SHARED_LIBRARIES := $(all_shared_libs_filename)
+$(LOCAL_TARGETS): PRIVATE_ALL_STATIC_LIBRARIES := $(all_static_libs_filename)
+$(LOCAL_TARGETS): PRIVATE_ALL_WHOLE_STATIC_LIBRARIES := $(all_whole_static_libs_filename)
 $(LOCAL_TARGETS): PRIVATE_ALL_OBJECTS := $(all_objects)

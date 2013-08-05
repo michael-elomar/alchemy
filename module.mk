@@ -34,12 +34,67 @@ LOCAL_TARGETS := \
 	$(LOCAL_MODULE)-path \
 	$(LOCAL_MODULE)-pre-install
 
-# Get all modules we depend on
+###############################################################################
+## Dependencies.
+###############################################################################
+
+# Get all modules we depend on (fully recursive)
 all_depends := $(call module-get-all-depends,$(LOCAL_MODULE))
+
+# Get libraries used by us and static libraries
+all_external_libs := \
+	$(call module-get-static-depends,$(LOCAL_MODULE),EXTERNAL_LIBRARIES)
+all_static_libs := \
+	$(call module-get-static-depends,$(LOCAL_MODULE),STATIC_LIBRARIES)
+all_whole_static_libs := \
+	$(call module-get-static-depends,$(LOCAL_MODULE),WHOLE_STATIC_LIBRARIES)
+all_shared_libs := \
+	$(call module-get-static-depends,$(LOCAL_MODULE),SHARED_LIBRARIES)
+
+# List of our dependencies and from static (recursive on static libs)
+all_libs := \
+	$(all_external_libs) \
+	$(all_static_libs) \
+	$(all_whole_static_libs) \
+	$(all_shared_libs)
+
+# Path of previous variables
+
 all_depends_build_filename := \
 	$(foreach __lib,$(all_depends), \
-		$(call module-get-build-filename,$(__lib)) \
-	)
+		$(call module-get-build-filename,$(__lib)))
+
+# External libs only have something in build dir
+all_external_libs_build_filename := \
+	$(foreach __lib,$(all_external_libs), \
+		$(call module-get-build-filename,$(__lib)))
+
+# We use staging dir for linking static/shared libs
+
+all_static_libs_filename := \
+	$(foreach __lib,$(all_static_libs), \
+		$(call module-get-staging-filename,$(__lib)))
+
+all_whole_static_libs_filename := \
+	$(foreach __lib,$(all_whole_static_libs), \
+		$(call module-get-staging-filename,$(__lib)))
+
+all_shared_libs_filename := \
+	$(foreach __lib,$(all_shared_libs), \
+		$(call module-get-staging-filename,$(__lib)))
+
+# all_link_libs_filenames is used for the dependencies at link time
+all_link_libs_filenames := \
+	$(all_static_libs_filename) \
+	$(all_whole_static_libs_filename) \
+	$(all_shared_libs_filename)
+
+# Force pbuild hook if a static library needs it
+$(foreach __mod,$(all_static_libs) $(all_whole_static_libs), \
+	$(if $(__modules.$(__mod).PBUILD_HOOK), \
+		$(eval LOCAL_PBUILD_HOOK := 1) \
+	) \
+)
 
 ###############################################################################
 ## Last revision used management
@@ -61,14 +116,9 @@ endif
 # List of all prerequisites (ours + dependencies)
 all_prerequisites :=
 
-## Determine external libraries that are needed as prerequisites.
-$(foreach __lib,$(all_depends), \
-	$(if $(call is-module-external,$(__lib)), \
-		$(eval all_prerequisites += \
-			$(call module-get-build-filename,$(__lib)) \
-		) \
-	) \
-)
+# We need all external libraries as prerequisites.
+all_prerequisites += \
+	$(all_external_libs_build_filename)
 
 # Remove our build module from the list of global deps to avoid circular chain
 all_prerequisites += \
@@ -381,7 +431,7 @@ ifeq ("$(LOCAL_SDK)","")
 
 include $(BUILD_SYSTEM)/binary-rules.mk
 
-$(LOCAL_BUILD_MODULE): $(all_objects) $(all_libraries)
+$(LOCAL_BUILD_MODULE): $(all_objects) $(all_link_libs_filenames)
 	$(transform-o-to-shared-lib)
 ifneq ("$(TARGET_ADD_DEPENDS_SECTION)","0")
 	$(add-depends-section)
@@ -402,7 +452,7 @@ ifeq ("$(LOCAL_MODULE_CLASS)","EXECUTABLE")
 
 include $(BUILD_SYSTEM)/binary-rules.mk
 
-$(LOCAL_BUILD_MODULE): $(all_objects) $(all_libraries)
+$(LOCAL_BUILD_MODULE): $(all_objects) $(all_link_libs_filenames)
 	$(transform-o-to-executable)
 ifneq ("$(TARGET_ADD_DEPENDS_SECTION)","0")
 	$(add-depends-section)
