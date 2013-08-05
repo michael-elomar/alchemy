@@ -599,7 +599,10 @@ endif
 
 ifeq ("$(LOCAL_MODULE_CLASS)","PREBUILT")
 
-# Nothing to do
+# Simply 'touch' the 'done' file
+$(LOCAL_BUILD_MODULE):
+	@mkdir -p $(dir $@)
+	@touch $@
 
 endif
 
@@ -609,7 +612,18 @@ endif
 
 ifeq ("$(LOCAL_MODULE_CLASS)","CUSTOM")
 
-# Nothing to do
+# This makes sure that the done file will be created. However this may trigger
+# a rebuilt of some modules in a new execution of the build because this rule
+# is executed at any time, and there is no build order associated.
+$(LOCAL_MODULE):
+	@( \
+		done_file=$(call module-get-build-filename,$@); \
+		if [ ! -f "$${done_file}" ]; then \
+			echo "warning: custom module '$@' did not create $${done_file}"; \
+			mkdir -p $$(dirname $${done_file}); \
+			touch $${done_file}; \
+		fi; \
+	)
 
 endif
 

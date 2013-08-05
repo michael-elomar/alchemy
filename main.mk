@@ -473,20 +473,6 @@ $(foreach __mod,$(__modlist), \
 	$(eval include $(BUILD_SYSTEM)/module.mk) \
 )
 
-# Make sure that custom modules have commands to create the done file
-__all_custom_build_filename := $(foreach __mod,$(__modlist), \
-	$(if $(call streq,$(__modules.$(__mod).MODULE_CLASS),CUSTOM), \
-		$(call module-get-build-filename,$(__mod)) \
-	))
-# Default rule that matches anything as a last resort, check if it is for one
-# of the done file and create it
-%::
-	@for f in $(__all_custom_build_filename); do \
-		if [ "$$f" = "$@" ]; then \
-			mkdir -p $(dir $@); touch $@; \
-		fi; \
-	done
-
 ifneq ("$(V)","0")
   $(info Generating rules: done)
 endif
