@@ -56,7 +56,6 @@ __autotools-add_LDFLAGS := $(LOCAL_LDFLAGS)
 # Add flags in environment
 ifneq ("$(strip $(__autotools-add_CFLAGS))","")
   LOCAL_AUTOTOOLS_CONFIGURE_ENV += CFLAGS="$$CFLAGS $(__autotools-add_CFLAGS)"
-  LOCAL_AUTOTOOLS_CONFIGURE_ENV += CPPFLAGS="$$CPPFLAGS $(__autotools-add_CFLAGS)"
 endif
 
 ifneq ("$(strip $(__autotools-add_CXXFLAGS))","")
