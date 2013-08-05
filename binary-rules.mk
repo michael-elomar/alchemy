@@ -253,12 +253,12 @@ endif
 ## Rule-specific variable definitions.
 ###############################################################################
 
-# Mode to display
-mode :=
+# Arch to display
+arch :=
 ifeq ("$(TARGET_ARCH)","arm")
-  mode := $(LOCAL_ARM_MODE)
+  arch := $(LOCAL_ARM_MODE)
 else
-  mode := $(TARGET_ARCH)
+  arch := $(TARGET_ARCH)
 endif
 
 $(LOCAL_TARGETS): PRIVATE_CFLAGS := $(LOCAL_CFLAGS)
@@ -267,7 +267,7 @@ $(LOCAL_TARGETS): PRIVATE_CXXFLAGS := $(LOCAL_CXXFLAGS)
 $(LOCAL_TARGETS): PRIVATE_ARFLAGS := $(LOCAL_ARFLAGS)
 $(LOCAL_TARGETS): PRIVATE_LDFLAGS := $(LOCAL_LDFLAGS)
 $(LOCAL_TARGETS): PRIVATE_LDLIBS := $(LOCAL_LDLIBS)
-$(LOCAL_TARGETS): PRIVATE_MODE := $(mode)
+$(LOCAL_TARGETS): PRIVATE_ARCH := $(arch)
 $(LOCAL_TARGETS): PRIVATE_PBUILD_HOOK := $(LOCAL_PBUILD_HOOK)
 $(LOCAL_TARGETS): PRIVATE_ALL_SHARED_LIBRARIES := $(all_shared_libs_filename)
 $(LOCAL_TARGETS): PRIVATE_ALL_STATIC_LIBRARIES := $(all_static_libs_filename)

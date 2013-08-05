@@ -145,7 +145,7 @@ TARGET_GLOBAL_LDFLAGS += $(__extra-ldflags)
 TARGET_GLOBAL_LDFLAGS_SHARED += $(__extra-ldflags)
 
 # Make sure the architecture specific flags is defined
-# For arm/thumb it is done above
+# For arm/thumb it is done in toolchain setup
 TARGET_GLOBAL_CFLAGS_$(TARGET_ARCH) ?=
 
 # Don't emit warning for unused driver arguments
