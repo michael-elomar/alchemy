@@ -1,6 +1,10 @@
 #!/bin/bash
 
-PATTERN="${1}*"
+if [ "$#" == "1" ]; then
+	PATTERN="${1}*"
+else
+	PATTERN=""
+fi
 
 # try to get a CVS tag
 if [ -f CVS/Tag ]; then
@@ -35,4 +39,4 @@ elif head=$(git rev-parse --verify HEAD 2>/dev/null); then
 			printf "${SHA1}-dirty"
 		fi
 	fi
-fi 
+fi

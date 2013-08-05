@@ -1001,9 +1001,11 @@ print-banner2 = \
 link-hook = $(strip \
 	$(if $(PRIVATE_PBUILD_HOOK), \
 		$(eval __depsdata := $(empty)) \
-		$(foreach __lib,$(sort $1 $(__modules.$1.depends.all)), \
-			$(eval __depsdata += $(__lib):$(__modules.$(__lib).PATH)) \
-		)\
+		$(if $(call streq,$(TARGET_PBUILD_HOOK_USE_DESCRIBE),1), \
+			$(foreach __lib,$(sort $1 $(__modules.$1.depends.all)), \
+				$(eval __depsdata += $(__lib):$(__modules.$(__lib).PATH)) \
+			)\
+		) \
 		$(shell $(BUILD_SYSTEM)/pbuild-hook/pbuild-link-hook.sh \
 			"$(TARGET_NM)" "$(TARGET_CC) $(TARGET_GLOBAL_CFLAGS)" \
 			$1 $2 "$(__depsdata)" $3 \

@@ -48,7 +48,12 @@ TARGET_SKEL_DIRS += $(TARGET_SKEL)
 
 TARGET_CONFIG_DIR ?= $(TOP_DIR)/Alchemy-config/$(TARGET_PRODUCT)-$(TARGET_PRODUCT_VARIANT)
 
+# Force usind static libraries instead of shared for module that specifies they support it
 TARGET_PBUILD_FORCE_STATIC ?= 0
+
+# Register list of tags used by a module. It can be retrieved at run time with
+# pal function 'pal_lib_desc_get_table_entry'
+TARGET_PBUILD_HOOK_USE_DESCRIBE ?= 0
 
 # Extra directories to skip/add during makefile scan
 TARGET_SCAN_PRUNE_DIRS ?=

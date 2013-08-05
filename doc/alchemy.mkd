@@ -155,6 +155,10 @@ Mainly used by the android wrapper.
   to compile ecos target and prepare the transition from monolithic SoftAT
   executable to separate shared libraries.
   Default is `0`.
+* `TARGET_PBUILD_HOOK_USE_DESCRIBE` : Can be set to `1` to save tags of libraries
+  used in binary. It can be retrieved at run time with pal function
+  `pal_lib_desc_get_table_entry`.
+  Default is `0`.
 * `TARGET_SCAN_PRUNE_DIRS` : A list of directories to exclude from the scan when
   searching for `atom.mk`. It can be absolute path or single name like `raptor`.
   `Alchemy` automatically excludes its own output directory, but feel free to

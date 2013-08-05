@@ -135,11 +135,7 @@ if [ "${DEPS_DATA}" != "" ]; then
 		lib=$(echo "${x}" | cut -d: -f1)
 		path=$(echo "${x}" | cut -d: -f2)
 		pattern=$(echo "${lib}" | cut -d- -f1)
-		# TODO: using describe for all libs of all module is too much.
-		# Only use SHA1 for the moment. See if possible to store this
-		# information in module database.
-#		desc=$(cd ${path} && ${SCRIPT_PATH}/describe.sh ${pattern})
-		desc=$(cd ${path} && git rev-parse HEAD 2>/dev/null)
+		desc=$(cd ${path} && ${SCRIPT_PATH}/describe.sh ${pattern})
 		outwrite "    {\"${lib}\", \"${desc}\", 0},"
 	done
 	outwrite "    {0, 0, 0}"
