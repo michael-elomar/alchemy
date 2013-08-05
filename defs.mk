@@ -265,7 +265,7 @@ is-module-external = $(strip \
 	$(eval __class := $(__modules.$1.MODULE_CLASS)) \
 	$(or $(call streq,$(__class),AUTOTOOLS), \
 		$(call streq,$(__class),CMAKE), \
-		$(call streq,$(__class),GENERIC), \
+		$(call streq,$(__class),GENERIC), \
 		$(call streq,$(__class),CUSTOM) \
 	))
 
