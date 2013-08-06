@@ -440,7 +440,6 @@ $(foreach __mod,$(ALL_MODULES), \
 	$(if $(call is-module-in-make-goals,$(__mod)), \
 		$(if $(call is-module-host,$(__mod)), \
 			$(if $(call is-not-item-in-list,$(__mod),$(ALL_BUILD_MODULES_HOST)), \
-				$(warning $(__mod) is not enabled in the config) \
 				$(eval ALL_BUILD_MODULES_HOST += $(__mod)) \
 			), \
 			$(if $(call is-not-item-in-list,$(__mod),$(ALL_BUILD_MODULES)), \
