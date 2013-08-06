@@ -972,7 +972,10 @@ install-headers-setup = \
 		$(eval __w2 := $(word 2,$(__pair2))) \
 		$(if $(__w2),$(empty),$(eval __w2 := usr/include/)) \
 		$(eval __src := $(call copy-get-src-path,$(__w1))) \
-		$(eval __dst := $(call copy-get-dst-path,$(__w2))) \
+		$(if $(call is-module-host,$1), \
+			$(eval __dst := $(call copy-get-dst-path-host,$(__w2))), \
+			$(eval __dst := $(call copy-get-dst-path,$(__w2))) \
+		) \
 		$(if $(call is-path-dir,$(__dst)), \
 			$(eval __dst := $(__dst)$(notdir $(__src))) \
 		) \
