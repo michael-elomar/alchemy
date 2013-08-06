@@ -630,6 +630,16 @@ LOCAL_PREREQUISITES += \
 	$(SOFTAT_CONFIG_READ_H)
 </pre>
 
+### `LOCAL_CUSTOM_TARGETS`
+
+List of custom targets directly managed by the `atom.mk`. Put here anything that
+is a target of a rule with commands. Doing so will ensure that the all the
+prerequisites that `alchemy` will collect for the module will be applied for
+your custom rules.
+
+**Note** : there is no need to put in this list files that are already in
+`LOCAL_PREREQUISITES` or `LOCAL_EXPORT_PREREQUISITES`.
+
 ### `LOCAL_EXPORT_C_INCLUDES`, `LOCAL_EXPORT_CFLAGS`, `LOCAL_EXPORT_CXXFLAGS`, `LOCAL_EXPORT_LDLIBS`, `LOCAL_EXPORT_PREREQUISITES`
 
 Variables to be exported by this module and then imported by modules depending

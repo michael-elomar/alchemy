@@ -727,6 +727,17 @@ endif
 # But do NOT force recompilation (order only)
 $(LOCAL_BUILD_MODULE): | $(all_prerequisites)
 
+# Prerequisites that are not ours
+all_external_prerequisites := $(filter-out \
+	$(LOCAL_CUSTOM_TARGETS) \
+	$(LOCAL_PREREQUISITES) \
+	$(LOCAL_EXPORT_PREREQUISITES), $(all_prerequisites))
+
+# Same thing for custom targets of the module (but excludes the ones of the module)
+$(LOCAL_CUSTOM_TARGETS): | $(all_external_prerequisites)
+$(LOCAL_PREREQUISITES): | $(all_external_prerequisites)
+$(LOCAL_EXPORT_PREREQUISITES): | $(all_external_prerequisites)
+
 ###############################################################################
 ## Copy to staging/final dir
 ###############################################################################

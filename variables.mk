@@ -35,6 +35,12 @@ vars-LOCAL += CATEGORY_PATH
 # Name is relative to build directory
 vars-LOCAL += DONE_FILES
 
+# List of custom targets in atom.mk. This list is used to propagate correctly
+# dependencies (mainly prerequisites). Without it a commands of a custom target
+# may be executed BEFORE other prerequisites of the module, causing all sort of
+# issues
+vars-LOCAL += CUSTOM_TARGETS
+
 # Source files to compile
 # All files are relative to LOCAL_PATH
 vars-LOCAL += SRC_FILES
@@ -182,6 +188,7 @@ vars-LOCAL += EXPORT_PREREQUISITES
 # EXECUTABLE
 # PREBUILT
 # AUTOTOOLS
+# CMAKE
 # CUSTOM
 vars-LOCAL += MODULE_CLASS
 
