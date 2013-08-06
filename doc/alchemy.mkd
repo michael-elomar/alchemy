@@ -18,6 +18,10 @@ This build system differs mainly in the set of `LOCAL_XXX` variables supported.
 
 [Android ndk build system](http://jyraphe.b219.org/file.php?h=R630e0caa0faeed93d96adddc8fd404ef)
 
+**Note** : This documentation tries to be up to date but take a look at
+the file `variables.mk` for a complete list of `LOCAL_xxx` and `TARGET_xxx`
+variables that can be used. It also has some description of variables.
+
 * * *
 
 [TOC]
