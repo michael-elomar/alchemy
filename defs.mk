@@ -1049,6 +1049,20 @@ define copy-license-files
 endef
 
 ###############################################################################
+## Fix a .d file with compilation dependencies.
+## It will ensurze that full paths are specified.
+## $1 : file to fix.
+###############################################################################
+define fix-deps-file
+@( \
+	[ ! -f $1 ] || sed \
+		-e 's| \([^/\\: ]\)| $(TOP_DIR)/\1|g' \
+		-e 's|^\([^/\\: ]\)|$(TOP_DIR)/\1|g' \
+		-i $1 \
+)
+endef
+
+###############################################################################
 ## Commands to generate a precompiled file.
 ###############################################################################
 
@@ -1063,6 +1077,7 @@ $(Q)$(CCACHE) $(TARGET_CXX) \
 	$(PRIVATE_CFLAGS) $(PRIVATE_CXXFLAGS) \
 	$(TARGET_GLOBAL_PCH_FLAGS) -MMD -MP -o $@ \
 	$(call path-from-top,$<)
+$(call fix-deps-file,$(@:.o=.d))
 endef
 
 ###############################################################################
@@ -1081,6 +1096,7 @@ $(Q)$(CCACHE) $(TARGET_CXX) \
 	$(PRIVATE_CFLAGS) $(PRIVATE_CXXFLAGS) \
 	-c -MMD -MP -o $@ \
 	$(call path-from-top,$<)
+$(call fix-deps-file,$(@:.o=.d))
 endef
 
 ###############################################################################
@@ -1099,6 +1115,7 @@ $(Q)$(CCACHE) $(TARGET_CC) \
 	$(PRIVATE_CFLAGS) \
 	-c -MMD -MP -o $@ \
 	$(call path-from-top,$<)
+$(call fix-deps-file,$(@:.o=.d))
 endef
 
 ###############################################################################
@@ -1117,6 +1134,7 @@ $(Q)$(CCACHE) $(TARGET_CC) \
 	$(PRIVATE_CFLAGS) \
 	-c -MMD -MP -o $@ \
 	$(call path-from-top,$<)
+$(call fix-deps-file,$(@:.o=.d))
 endef
 
 ###############################################################################
