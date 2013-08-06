@@ -568,6 +568,21 @@ on the one copying the file. If you want to make sure that copied files are
 available for other module, either put copied files in `LOCAL_EXPORT_PREREQUISITES`
 or use `LOCAL_INSTALL_HEADERS`.
 
+### `LOCAL_CREATE_LINKS`
+
+List of symbolic links to be created in the staging directory. Format is
+`name:target`
+
+* `name` : name of the link, relative to `TARGET_OUT_STAGING`.
+* `target` : target of the link. This path will be interpreted in the final
+  target so there is no restriction on the actual format.
+
+If `name` starts with a `'/'` it is assumed to be a full path, in this
+case `TARGET_OUT_STAGING` is not prepended.
+
+**Note** : There is no build order between created links and modules depending
+on the one creating the link. Use `LOCAL_EXPORT_PREREQUISITES` also.
+
 ### `LOCAL_INSTALL_HEADERS`
 
 List of headers to be installed in the staging directory. The format is the same
