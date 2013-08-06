@@ -471,15 +471,14 @@ $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST), \
 endif
 
 # Update module list, based on filtering
-# Sorting will ensure they appear only once as well
 ifeq ("$(__dofilter)","0")
   __modlist := $(ALL_BUILD_MODULES)
-else
-  __modlist := $(sort $(__modlist))
 endif
 
 # Add required host modules
+# Sorting will ensure they appear only once as well
 __modlist += $(call modules-get-required-host,$(__modlist))
+__modlist := $(sort $(__modlist))
 
 # Now, generate rules of selected modules
 $(foreach __mod,$(__modlist), \
