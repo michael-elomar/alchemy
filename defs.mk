@@ -1255,7 +1255,7 @@ $(Q)$(CCACHE) $(TARGET_CC) \
 	$(PRIVATE_CFLAGS) \
 	-c -MMD -MP -o $@ \
 	$(call path-from-top,$<)
-$(call fix-deps-file,$(@.o=.d)
+$(call fix-deps-file,$(@:.o=.d))
 endef
 
 ###############################################################################
