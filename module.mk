@@ -705,7 +705,7 @@ $(foreach __pair,$(LOCAL_CREATE_LINKS), \
 	$(eval __pair2 := $(subst :,$(space),$(__pair))) \
 	$(eval __w1 := $(word 1,$(__pair2))) \
 	$(eval __w2 := $(word 2,$(__pair2))) \
-	$(eval __name := $($(mode_prefix)_OUT_STAGING)/$(__w1)) \
+	$(eval __name := $($(mode_prefix)OUT_STAGING)/$(__w1)) \
 	$(eval __target := $(__w2)) \
 	$(eval all_create_links += $(__name)) \
 	$(eval $(call create-one-link,$(__name),$(__target))) \
