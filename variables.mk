@@ -41,6 +41,8 @@ vars-LOCAL += DONE_FILES
 # issues
 vars-LOCAL += CUSTOM_TARGETS
 
+vars-LOCAL += CUSTOM_MACROS
+
 # Source files to compile
 # All files are relative to LOCAL_PATH
 vars-LOCAL += SRC_FILES
