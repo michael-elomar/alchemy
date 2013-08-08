@@ -40,6 +40,10 @@ USE_COLORS ?= 0
 USE_BUILD_DEPS_CHECK_IN_CONFIG ?= 1
 USE_GIT_REV ?= 1
 
+# The host module feature might break temporatily some atom/mk, add a flag
+# so it can be checked
+ALCHEMY_SUPPORT_HOST_MODULE := 1
+
 # Quiet command if V is 0
 ifeq ("$(V)","0")
   Q := @
