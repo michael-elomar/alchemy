@@ -1,7 +1,7 @@
 Source: parrot-tools-alchemy
 Section: utils
 Priority: optional
-Maintainer: Ivan Djelic <ivan.djelic@parrot.com>
+Maintainer: Yves-Marie Morgan <yves-marie.morgan@parrot.com>
 Standards-Version: 3.8.4
 Build-Depends: debhelper (>= 8)
 

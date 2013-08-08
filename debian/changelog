@@ -1,3 +1,22 @@
+parrot-tools-alchemy (1.0.7) unstable; urgency=low
+  * Fix CXXFLAGS addition for autotools.
+  * [CR 0116460] Add support for cmake modules.
+  * Fix linux/perf clean rule.
+  * Add TARGET_SCAN_FOLLOW_LINKS option.
+  * [CR 0116458] Allow to depends on a module only if it is enabled.
+  * Add support for police (automatic copy of license files).
+  * Add a strong dependency on all build file names of modules.
+  * Force using arm-2012 toolchain by default (except for p6/p6i).
+  * Add dependencies between all/final/plf if needed.
+  * Do NOT force rebuild if a copied files is changed.
+  * [CR 0119019] Allow autotools/cmake to depends on internal modules.
+  * Add error messages for deprecated stuff.
+  * USE_GIT_REV is now enabled by default.
+  * [CR 0119020] Add TARGET_PBUILD_HOOK_USE_DESCRIBE option to register tags in pal.
+  * Make sure generated dependencies have full path.
+
+ -- Yves-Marie Morgan (Parrot) <yves-marie.morgan@parrot.com>  Thu, 08 Aug 2013 17:56:21 +0200
+
 parrot-tools-alchemy (1.0.6) unstable; urgency=low
   * Add TARGET_STRIP_FILTER option.
   * Fix copy of native libraries in the final directory.
