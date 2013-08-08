@@ -110,6 +110,7 @@ __generate-config-module-args = $(strip \
 ## Do not include prebuilt modules, it has no real sense.
 ## Autotools modules won't compile under ecos, so don't bother display them or
 ## any module that has a dependency on it.
+## Host module will be activated internally when necessary so don't display them.
 ###############################################################################
 
 # Check if a module has a dependency on an autotools module
@@ -122,7 +123,7 @@ __has-autotools-deps = $(strip \
 # Check if a single module shall be displayed in the config
 # $1 : module name
 __show-in-config = $(strip \
-	$(if $(call is-module-prebuilt,$1), \
+	$(if $(or $(call is-module-prebuilt,$1),$(call is-module-host,$1)), \
 		$(false), \
 		$(if $(call strneq,$(TARGET_OS),ecos), \
 			$(true), \

@@ -113,6 +113,16 @@ is-var-defined = $(call strneq,$(origin $1),undefined)
 # $1 : name of the variable (not its content)
 is-var-undefined = $(call streq,$(origin $1),undefined)
 
+# Dertermine if an item is in a list
+# $1 : item to search.
+# $2 : list.
+is-item-in-list = $(strip $(foreach __it,$2,$(call streq,$(__it),$1)))
+
+# Dertermine if an item is not in a list
+# $1 : item to search.
+# $2 : list.
+is-not-item-in-list = $(call not $(call is-item-in-list,$1,$2))
+
 ###############################################################################
 ## Use some colors if requested.
 ###############################################################################
@@ -185,11 +195,23 @@ check-cppflags-compat = \
 ## An internal prebuilt module (for example a bionic one) will take precedence
 ## over another module with the same name.
 ## A module comming from a sdk will be overidden by a standard module.
+## A host module (LOCAL_HOST_MODULE set) will have its internal name
+## prefixed by 'host.'.
 ###############################################################################
 module-add = \
 	$(eval LOCAL_MODULE := $(strip $(LOCAL_MODULE))) \
 	$(if $(LOCAL_MODULE),$(empty), \
 		$(error $(LOCAL_PATH): LOCAL_MODULE is not defined)) \
+	$(if $(call $(not $(patsubst host.%,,$(LOCAL_MODULE)))), \
+		$(error $(LOCAL_PATH): Do NOT use 'host.' prefix, use LOCAL_HOST_MODULE) \
+	) \
+	$(if $(LOCAL_HOST_MODULE), \
+		$(if $(or $(call streq,$(LOCAL_MODULE_CLASS),AUTOTOOLS), \
+				$(call streq,$(LOCAL_MODULE_CLASS),CUSTOM)), \
+			$(eval LOCAL_MODULE := host.$(LOCAL_MODULE)), \
+			$(error $(LOCAL_PATH): Only AUTOTOOLS/CUSTOM supported for host modules) \
+		) \
+	) \
 	$(eval __mod := $(LOCAL_MODULE)) \
 	$(eval __add := 1) \
 	$(if $(call is-module-registered,$(__mod)), \
@@ -248,7 +270,7 @@ is-targets-in-make-goals = $(strip \
 ## $1 : module to check.
 ###############################################################################
 is-module-in-make-goals = $(strip \
-	$(call is-targets-in-make-goals,$1 $1-clean $1-dirclean))
+	$(call is-targets-in-make-goals,$1 $1-clean $1-dirclean $1-path))
 
 ###############################################################################
 ## Check if a module is registered. It simply verifies that the variable
@@ -283,14 +305,42 @@ is-module-prebuilt = $(strip \
 	))
 
 ###############################################################################
+## Check if a module is for the host.
+## $1 : module to check.
+## A module is for the host if the name starts with 'host.'
+###############################################################################
+is-module-host = $(strip $(call not,$(patsubst host.%,,$1)))
+
+###############################################################################
+## Normalize a host module by removing the 'host.' prefix.
+## $1 : host module to normalize.
+###############################################################################
+module-normalize-host = $(patsubst host.%,%,$1)
+
+###############################################################################
+## Get the list of required host modules by the input list of modules.
+## $1 : list of modules (it may contains host modules that will be ignored).
+## It first creates a list of all directly needed host modules, then expands
+## with dependencies of those modules.
+###############################################################################
+modules-get-required-host = $(strip $(sort \
+	$(foreach __mod,$(call __modules-get-required-host-direct,$1), \
+		$(__mod) $(__modules.$(__mod).depends) \
+	)))
+
+# Get direct required list
+__modules-get-required-host-direct = $(strip $(sort \
+	$(foreach __mod,$1,$(__modules.$(__mod).DEPENDS_HOST_MODULES))))
+
+###############################################################################
 ## Check if a module will be built.
 ## $1 : module to check.
-## Prebuild modules are considered as in the config (even if they are not
-## actually in it).
+## Prebuild and host modules are considered as in the config (even if they are
+## not actually in it).
 ## If no configuration directory present, always return true.
 ###############################################################################
 is-module-in-build-config = $(strip \
-	$(if $(call is-module-prebuilt,$1),$(true), \
+	$(if $(or $(call is-module-prebuilt,$1),$(call is-module-host,$1)),$(true), \
 		$(eval __var := CONFIG_ALCHEMY_BUILD_$(call module-get-define,$1)) \
 		$(if $(call streq,$(CONFIG_DIR_AVAILABLE),0),$(true), \
 			$(if $(call is-var-defined,$(__var)), \
@@ -337,6 +387,7 @@ __module-check-depends = \
 	$(call __module-check-depends-direct,$1) \
 	$(call __module-check-depends-other,$1) \
 	$(call __module-check-depends-headers,$1) \
+	$(call __module-check-depends-mode,$1) \
 	$(call __module-check-libs-class,$1,WHOLE_STATIC_LIBRARIES,STATIC_LIBRARY) \
 	$(call __module-check-libs-class,$1,STATIC_LIBRARIES,STATIC_LIBRARY) \
 	$(call __module-check-libs-class,$1,SHARED_LIBRARIES,SHARED_LIBRARY)
@@ -391,6 +442,37 @@ __module-check-lib-class = \
 		$(eval __path := $(__modules.$1.PATH)) \
 		$(error $(__path): module '$1' depends on module '$2' which is not of class '$3') \
 	)
+
+# Check coherence between host/target modules
+# $1 : module name.
+__module-check-depends-mode = \
+	$(if $(call is-module-host,$1), \
+		$(call __module-check-depends-host,$1), \
+		$(call __module-check-depends-target,$1) \
+	) \
+	$(foreach __lib,$(__modules.$1.DEPENDS_HOST_MODULES), \
+		$(if $(call is-module-host,$(__lib)),$(empty), \
+			$(error $(__path): module '$1': LOCAL_DEPENDS_HOST_MODULES contains non host module '$(__lib)') \
+		) \
+	)
+
+# Check that a host module only depends on host modules
+__module-check-depends-host = \
+	$(eval __path := $(__modules.$1.PATH)) \
+	$(foreach __lib,$(__modules.$1.depends.all), \
+		$(if $(call is-module-host,$(__lib)),$(empty), \
+			$(error $(__path): host module '$1' depends on non host module '$(__lib)') \
+		) \
+	)
+
+# Check that a target module only depends on target modules
+__module-check-depends-target = \
+	$(eval __path := $(__modules.$1.PATH)) \
+	$(foreach __lib,$(__modules.$1.depends.all), \
+		$(if $(call is-module-host,$(__lib)), \
+			$(error $(__path): module '$1' depends on host module '$(__lib)') \
+		) \
+	) \
 
 ###############################################################################
 ## Used to make some internal checks.
@@ -564,7 +646,7 @@ __module-compute-depends-link = \
 
 # Compute all dependencies of a module.
 # $1 : module name.
-# Note : it recursively descends into libraries to get their dependencies.
+# Note : it recursively descends into modules to get their dependencies.
 # See above the way we use 'local' variable.
 __module-compute-depends-all = \
 	$(if $(call __is-in-depends-loop,$1), \
@@ -583,7 +665,6 @@ __module-compute-depends-all = \
 # Internal macro called by __module-compute-depends-all to do the recursion
 # by calling again __module-compute-depends-all.
 # $1 : module name.
-# $2 : class of library to compute dependencies.
 __module-compute-depends-all-internal = \
 	$(__modules.$1.depends) \
 	$(foreach __mod,$(__modules.$1.depends), \
@@ -609,8 +690,14 @@ module-get-listed-export = $(strip \
 
 # Return the autoconf.h file, if any, for module $1.
 # $1 : module name.
-module-get-autoconf = \
-	$(if $(__modules.$1.CONFIG_FILES),$(TARGET_OUT_BUILD)/$1/autoconf-$1.h)
+module-get-autoconf = $(strip \
+	$(if $(__modules.$1.CONFIG_FILES), \
+		$(if $(call is-module-host,$1), \
+			$(HOST_OUT_BUILD)/$(call module-normalize-host,$1)/autoconf-$(call module-normalize-host,$1).h \
+			, \
+			$(TARGET_OUT_BUILD)/$1/autoconf-$1.h \
+		) \
+	))
 
 # Return the autoconf.h files, if any, for modules listed in $1.
 # $1 : list of module names.
@@ -658,17 +745,41 @@ endif
 ## Get path of module main target file (in build or staging directory).
 ## $1 : module name.
 ###############################################################################
-module-get-build-dir = \
-	$(TARGET_OUT_BUILD)/$1
 
-module-get-build-filename = \
-	$(TARGET_OUT_BUILD)/$1/$(__modules.$1.MODULE_FILENAME)
+# Get build directory of a module
+# It handle host/target modules
+module-get-build-dir = $(strip \
+	$(if $(call is-module-host,$1), \
+		$(call module-get-build-dir-host,$(call module-normalize-host,$1)) \
+		, \
+		$(TARGET_OUT_BUILD)/$1 \
+	))
 
-# Check if module is part of a sdk
+# Get build directory of a host module
+# $1 : nomalized host moduel (without 'host.' prefix)
+module-get-build-dir-host = $(strip $(HOST_OUT_BUILD)/$1)
+
+# Get build file name of a module
+# It handle host/target modules
+module-get-build-filename = $(strip \
+	$(if $(call is-module-host,$1), \
+		$(HOST_OUT_BUILD)/$(call module-normalize-host,$1)/$(__modules.$1.MODULE_FILENAME) \
+		, \
+		$(TARGET_OUT_BUILD)/$1/$(__modules.$1.MODULE_FILENAME) \
+	))
+
+# Get staging file name of a module.
+# It handle host/target modules as well as SDK modules.
 module-get-staging-filename = $(strip \
-	$(if $(__modules.$1.SDK), \
-		$(__modules.$1.SDK)/$(__modules.$1.DESTDIR)/$(__modules.$1.MODULE_FILENAME), \
-		$(TARGET_OUT_STAGING)/$(__modules.$1.DESTDIR)/$(__modules.$1.MODULE_FILENAME) \
+	$(if $(call is-module-host,$1), \
+		$(if $(__modules.$1.SDK), \
+			$(__modules.$1.SDK)/host/$(__modules.$1.DESTDIR)/$(__modules.$1.MODULE_FILENAME), \
+			$(HOST_OUT_STAGING)/$(__modules.$1.DESTDIR)/$(__modules.$1.MODULE_FILENAME) \
+		), \
+		$(if $(__modules.$1.SDK), \
+			$(__modules.$1.SDK)/$(__modules.$1.DESTDIR)/$(__modules.$1.MODULE_FILENAME), \
+			$(TARGET_OUT_STAGING)/$(__modules.$1.DESTDIR)/$(__modules.$1.MODULE_FILENAME) \
+		) \
 	))
 
 ###############################################################################
@@ -843,6 +954,13 @@ copy-get-dst-path = $(strip \
 		$1,$(addprefix $(TARGET_OUT_STAGING)/,$1) \
 	))
 
+# Get full destination path for the copy in a host module.
+# $1 : path relative to HOST_OUT_STAGING, or directly the full path.
+copy-get-dst-path-host = $(strip \
+	$(if $(call is-path-absolute,$1), \
+		$1,$(addprefix $(HOST_OUT_STAGING)/,$1) \
+	))
+
 ###############################################################################
 ## Setup installed headers in LOCAL_COPY_FILES and LOCAL_EXPORT_PREREQUISITES.
 ## $1 : module name.
@@ -854,7 +972,10 @@ install-headers-setup = \
 		$(eval __w2 := $(word 2,$(__pair2))) \
 		$(if $(__w2),$(empty),$(eval __w2 := usr/include/)) \
 		$(eval __src := $(call copy-get-src-path,$(__w1))) \
-		$(eval __dst := $(call copy-get-dst-path,$(__w2))) \
+		$(if $(call is-module-host,$1), \
+			$(eval __dst := $(call copy-get-dst-path-host,$(__w2))), \
+			$(eval __dst := $(call copy-get-dst-path,$(__w2))) \
+		) \
 		$(if $(call is-path-dir,$(__dst)), \
 			$(eval __dst := $(__dst)$(notdir $(__src))) \
 		) \
@@ -1250,8 +1371,14 @@ endef
 # Get local path
 local-get-path = $(call my-dir)
 
-# Get build directory
-local-get-build-dir = $(call module-get-build-dir,$(LOCAL_MODULE))
+# Get build directory (need to check LOCAL_HOST_MODULE because module name
+# does not yet contain the 'host.' prefix)
+local-get-build-dir = $(strip \
+	$(if $(LOCAL_HOST_MODULE), \
+		$(call module-get-build-dir-host,$(LOCAL_HOST_MODULE)) \
+		, \
+		$(call module-get-build-dir,$(LOCAL_MODULE)) \
+	))
 
 # Register module (deprecated)
 # TODO: remove completely in next version (first step is error).

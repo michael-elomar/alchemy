@@ -6,6 +6,11 @@
 ## Build a static library.
 ###############################################################################
 
+# Set also LOCAL_MODULE so that everything works correctly
+ifneq ("$(LOCAL_HOST_MODULE)","")
+  LOCAL_MODULE := $(LOCAL_HOST_MODULE)
+endif
+
 LOCAL_MODULE_CLASS := STATIC_LIBRARY
 
 ifeq ("$(LOCAL_DESTDIR)","")

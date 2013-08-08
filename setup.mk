@@ -103,25 +103,84 @@ include $(BUILD_SYSTEM)/toolchains/toolchains-setup.mk
 ###############################################################################
 ## Host setup.
 ###############################################################################
+
 HOST_OS := linux
+HOST_OUT_BUILD ?= $(TARGET_OUT)/build-host
+HOST_OUT_STAGING ?= $(TARGET_OUT)/staging-host
+
+# Setup flags
+HOST_GLOBAL_C_INCLUDES ?=
+HOST_GLOBAL_CFLAGS ?=
+HOST_GLOBAL_CXXFLAGS ?=
+HOST_GLOBAL_ARFLAGS ?=
+HOST_GLOBAL_LDFLAGS ?=
+HOST_GLOBAL_LDFLAGS_SHARED ?=
+HOST_GLOBAL_LDLIBS ?=
+HOST_GLOBAL_LDLIBS_SHARED ?=
+HOST_GLOBAL_PCH_FLAGS ?=
+
+# Add some generic flags
+HOST_GLOBAL_CFLAGS += -pipe -O2 -g0
+HOST_GLOBAL_ARFLAGS += rcs
+HOST_GLOBAL_LDFLAGS +=
 
 HOST_CC ?= gcc
 HOST_CXX ?= g++
+HOST_AS ?= as
 HOST_AR ?= ar
 HOST_LD ?= ld
 HOST_NM ?= nm
 HOST_STRIP ?= strip
+HOST_CPP ?= cpp
+HOST_RANLIB ?= ranlib
+HOST_OBJCOPY ?= objcopy
+HOST_OBJDUMP ?= objdump
 
 ###############################################################################
-## Update flags.
+## Update host flags.
 ###############################################################################
 
 # Make sure that staging dir are found first in case we want to override something
-__extra-c-includes := $(strip \
+# TODO add SDK dirs
+__extra-host-c-includes := $(strip \
+	$(foreach __dir,$(HOST_OUT_STAGING), \
+		$(__dir)/usr/include \
+	))
+HOST_GLOBAL_C_INCLUDES := $(__extra-host-c-includes) $(HOST_GLOBAL_C_INCLUDES)
+
+# Notify that build is performed by alchemy
+HOST_GLOBAL_CFLAGS += -DALCHEMY_BUILD
+
+# Add staging/sdk dirs to linker
+# To make sure linker does not hardcode path to libs, set rpath-link.
+# TODO add SDK dirs
+# TODO should not be needed because we don't support dynamic linking in host.
+__extra-host-ldflags := $(strip \
+	$(foreach __dir,$(HOST_OUT_STAGING), \
+		-L$(__dir)/lib \
+		-L$(__dir)/usr/lib \
+		-Wl,-rpath-link=$(__dir)/lib \
+		-Wl,-rpath-link=$(__dir)/usr/lib \
+	))
+
+HOST_GLOBAL_LDFLAGS += $(__extra-host-ldflags)
+HOST_GLOBAL_LDFLAGS_SHARED += $(__extra-host-ldflags)
+
+# Don't emit warning for unused driver arguments
+ifeq ("$(USE_CLANG)","1")
+  HOST_GLOBAL_CFLAGS += -Qunused-arguments
+endif
+
+###############################################################################
+## Update target flags.
+###############################################################################
+
+# Make sure that staging dir are found first in case we want to override something
+__extra-target-c-includes := $(strip \
 	$(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
 		$(__dir)/usr/include \
 	))
-TARGET_GLOBAL_C_INCLUDES := $(__extra-c-includes) $(TARGET_GLOBAL_C_INCLUDES)
+TARGET_GLOBAL_C_INCLUDES := $(__extra-target-c-includes) $(TARGET_GLOBAL_C_INCLUDES)
 
 # So that everyone knowns we are building with alchemy.
 TARGET_GLOBAL_CFLAGS += -DALCHEMY_BUILD
@@ -133,7 +192,7 @@ endif
 
 # Add staging/sdk dirs to linker
 # To make sure linker does not hardcode path to libs, set rpath-link
-__extra-ldflags := $(strip \
+__extra-target-ldflags := $(strip \
 	$(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
 		-L$(__dir)/lib \
 		-L$(__dir)/usr/lib \
@@ -141,8 +200,8 @@ __extra-ldflags := $(strip \
 		-Wl,-rpath-link=$(__dir)/usr/lib \
 	))
 
-TARGET_GLOBAL_LDFLAGS += $(__extra-ldflags)
-TARGET_GLOBAL_LDFLAGS_SHARED += $(__extra-ldflags)
+TARGET_GLOBAL_LDFLAGS += $(__extra-target-ldflags)
+TARGET_GLOBAL_LDFLAGS_SHARED += $(__extra-target-ldflags)
 
 # Make sure the architecture specific flags is defined
 # For arm/thumb it is done in toolchain setup
@@ -153,6 +212,10 @@ ifeq ("$(USE_CLANG)","1")
   TARGET_GLOBAL_CFLAGS += -Qunused-arguments
 endif
 
+###############################################################################
+## ccache setup.
+###############################################################################
+
 # To be able to use ccache with pre-compiled headers, some environment
 # variables are required
 CCACHE :=
@@ -161,6 +224,7 @@ ifeq ("$(USE_CCACHE)","1")
     export CCACHE_SLOPPINESS := time_macros
     CCACHE := ccache
     TARGET_GLOBAL_CFLAGS += -fpch-preprocess
+    HOST_GLOBAL_CFLAGS += -fpch-preprocess
   endif
 endif
 

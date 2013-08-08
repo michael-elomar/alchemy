@@ -23,8 +23,8 @@ ifndef __autotools-macros
 define __autotools-libtool_patch
 	$(Q) for f in `find $(PRIVATE_OBJ_DIR) -name libtool -o -name ltmain.sh`; do \
 		echo "Patching $$f"; \
-		$(if $(TARGET_AUTOTOOLS_INSTALL_DESTDIR), \
-			sed -i -e "s|^libdir='\$$install_libdir'|libdir='\$${install_libdir:\+$(TARGET_OUT_STAGING)\$$install_libdir}'|1" $$f; \
+		$(if $($(PRIVATE_MODE)AUTOTOOLS_INSTALL_DESTDIR), \
+			sed -i -e "s|^libdir='\$$install_libdir'|libdir='\$${install_libdir:\+$($(PRIVATE_MODE)OUT_STAGING)\$$install_libdir}'|1" $$f; \
 		) \
 		sed -i -e "s|{wl}-rpath|{wl}-rpath-link|1" $$f; \
 		sed -i -e "s|{wl}--rpath|{wl}-rpath-link|1" $$f; \
@@ -69,34 +69,34 @@ ifndef __autotools-macros
 
 define __autotools-default-cmd-configure
 	$(Q) cd $(PRIVATE_OBJ_DIR) && \
-		$(TARGET_AUTOTOOLS_CONFIGURE_ENV) $(PRIVATE_CONFIGURE_ENV) \
+		$($(PRIVATE_MODE)AUTOTOOLS_CONFIGURE_ENV) $(PRIVATE_CONFIGURE_ENV) \
 		$(PRIVATE_SRC_DIR)/configure \
-		$(TARGET_AUTOTOOLS_CONFIGURE_ARGS) $(PRIVATE_CONFIGURE_ARGS)
+		$($(PRIVATE_MODE)AUTOTOOLS_CONFIGURE_ARGS) $(PRIVATE_CONFIGURE_ARGS)
 endef
 
 define __autotools-default-cmd-build
-	$(Q) $(TARGET_AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_BUILD_ENV) \
+	$(Q) $($(PRIVATE_MODE)AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_BUILD_ENV) \
 		$(MAKE) -C $(PRIVATE_OBJ_DIR) \
-		$(TARGET_AUTOTOOLS_MAKE_ARGS) $(PRIVATE_MAKE_BUILD_ARGS)
+		$($(PRIVATE_MODE)AUTOTOOLS_MAKE_ARGS) $(PRIVATE_MAKE_BUILD_ARGS)
 endef
 
 define __autotools-default-cmd-install
-	$(Q) $(TARGET_AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) \
+	$(Q) $($(PRIVATE_MODE)AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) \
 		$(MAKE) -C $(PRIVATE_OBJ_DIR) \
-		$(TARGET_AUTOTOOLS_MAKE_ARGS) $(PRIVATE_MAKE_INSTALL_ARGS) install
+		$($(PRIVATE_MODE)AUTOTOOLS_MAKE_ARGS) $(PRIVATE_MAKE_INSTALL_ARGS) install
 endef
 
 # Force success for command in case "uninstall" or "clean" is not supported
 # or Makefile not present
 define __autotools-default-cmd-clean
 	$(Q) if [ -f $(PRIVATE_OBJ_DIR)/Makefile ]; then \
-		$(TARGET_AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) \
+		$($(PRIVATE_MODE)AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) \
 			$(MAKE) --keep-going --ignore-errors -C $(PRIVATE_OBJ_DIR) \
-			$(TARGET_AUTOTOOLS_MAKE_ARGS) $(PRIVATE_MAKE_INSTALL_ARGS) \
+			$($(PRIVATE_MODE)AUTOTOOLS_MAKE_ARGS) $(PRIVATE_MAKE_INSTALL_ARGS) \
 			uninstall || echo "Ignoring uninstall errors"; \
-		$(TARGET_AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) \
+		$($(PRIVATE_MODE)AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) \
 			$(MAKE) --keep-going --ignore-errors -C $(PRIVATE_OBJ_DIR) \
-			$(TARGET_AUTOTOOLS_MAKE_ARGS) \
+			$($(PRIVATE_MODE)AUTOTOOLS_MAKE_ARGS) \
 			clean || echo "Ignoring clean errors"; \
 	fi;
 endef
@@ -121,7 +121,7 @@ $(configured_file): $(src_dir)/configure
 endif
 
 # Setup commands
-$(LOCAL_TARGETS): PRIVATE_MSG := Autotools
+$(LOCAL_TARGETS): PRIVATE_MSG := $(if $(mode_host),Host )Autotools
 $(LOCAL_TARGETS): PRIVATE_CMD_PREFIX := AUTOTOOLS
 $(LOCAL_TARGETS): PRIVATE_DEFAULT_CMD_CONFIGURE := __autotools-default-cmd-configure
 $(LOCAL_TARGETS): PRIVATE_DEFAULT_CMD_BUILD := __autotools-default-cmd-build

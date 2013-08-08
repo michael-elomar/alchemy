@@ -6,6 +6,11 @@
 ## Build an executable.
 ###############################################################################
 
+# Set also LOCAL_MODULE so that everything works correctly
+ifneq ("$(LOCAL_HOST_MODULE)","")
+  LOCAL_MODULE := $(LOCAL_HOST_MODULE)
+endif
+
 LOCAL_MODULE_CLASS := EXECUTABLE
 
 ifeq ("$(LOCAL_DESTDIR)","")

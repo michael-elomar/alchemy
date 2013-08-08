@@ -15,8 +15,11 @@ macros-LOCAL :=
 # Path of the root of module
 vars-LOCAL += PATH
 
-# Name of what's supposed to be generated
+# Name of the module
 vars-LOCAL += MODULE
+
+# Name of the module for host
+vars-LOCAL += HOST_MODULE
 
 # Override the name of what will be generated
 vars-LOCAL += MODULE_FILENAME
@@ -31,6 +34,14 @@ vars-LOCAL += CATEGORY_PATH
 # to be executed next time unless a force is requested
 # Name is relative to build directory
 vars-LOCAL += DONE_FILES
+
+# List of custom targets in atom.mk. This list is used to propagate correctly
+# dependencies (mainly prerequisites). Without it a commands of a custom target
+# may be executed BEFORE other prerequisites of the module, causing all sort of
+# issues
+vars-LOCAL += CUSTOM_TARGETS
+
+vars-LOCAL += CUSTOM_MACROS
 
 # Source files to compile
 # All files are relative to LOCAL_PATH
@@ -70,8 +81,13 @@ vars-LOCAL += CONDITIONAL_LIBRARIES
 vars-LOCAL += DEPENDS_HEADERS
 
 # Other modules required (at runtime for example). But not required for build
+# TODO: change the meaning of DEPENDS_MODULES to introduce build order
+# keeping REQUIRED_MODULES with no build order
 vars-LOCAL += DEPENDS_MODULES
 vars-LOCAL += REQUIRED_MODULES
+
+# Host modules required to build
+vars-LOCAL += DEPENDS_HOST_MODULES
 
 # Additional include directories to pass into the C/C++ compilers
 # Format : <fullpath> (-I will be prepended automatically)
@@ -174,6 +190,7 @@ vars-LOCAL += EXPORT_PREREQUISITES
 # EXECUTABLE
 # PREBUILT
 # AUTOTOOLS
+# CMAKE
 # CUSTOM
 vars-LOCAL += MODULE_CLASS
 
