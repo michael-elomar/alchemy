@@ -278,21 +278,29 @@ LOCAL_C_INCLUDES := $(strip $(LOCAL_C_INCLUDES) $(imported_C_INCLUDES))
 LOCAL_LDLIBS     := $(strip $(LOCAL_LDLIBS) $(imported_LDLIBS))
 
 # Get all autoconf files that we depend on, don't forget to add ourself
-# TODO: In previous version ALL depends were added, now only internal modules
-# are added in this list. Mainly because we don't want to break build of external
-# modules that already handle external dependencies correctly.
+# External modules only get internal ones. Mainly because we don't want to break
+# build of external modules that already handle external dependencies correctly.
+ifeq ("$(call is-module-external,$(LOCAL_MODULE))","")
+all_autoconf := $(call module-get-listed-autoconf, \
+	$(all_depends) $(LOCAL_MODULE))
+else
 all_autoconf := $(call module-get-listed-autoconf, \
 	$(call filter-get-internal-modules,$(all_depends) $(LOCAL_MODULE)))
+endif
 
 # Force their inclusion (space after -include and before comma is important)
 LOCAL_CFLAGS += $(addprefix -include ,$(all_autoconf))
 
 # Notify that we build with dependencies
-# TODO: In previous version ALL depends were added, now only internal modules
-# are added in this list. Mainly because we don't want to break build of external
-# modules that already handle external dependencies correctly.
+# External modules only get internal ones. Mainly because we don't want to break
+# build of external modules that already handle external dependencies correctly.
+ifeq ("$(call is-module-external,$(LOCAL_MODULE))","")
+LOCAL_CFLAGS += $(foreach __mod,$(all_depends), \
+	-DBUILD_$(call module-get-define,$(__mod)))
+else
 LOCAL_CFLAGS += $(foreach __mod,$(call filter-get-internal-modules,$(all_depends)), \
 	-DBUILD_$(call module-get-define,$(__mod)))
+endif
 
 # Add debug flags at the end
 $(call add-debug-flags)
