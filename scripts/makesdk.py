@@ -166,15 +166,16 @@ def processModule(ctx, module):
 				os.path.join(ctx.buildDir, module.name, autoconfFileName),
 				os.path.join(ctx.outDir, "usr/include", module.name, autoconfFileName))
 
+	# Set LOCAL_LIBRARIES with the content of 'depends'
+	if "depends" in module.fields:
+		ctx.atom.write("LOCAL_LIBRARIES := %s\n" % module.fields["depends"])
+
 	# Register shared/static libraries as normal so we can manage dependencies
 	# Other are simply put as prebuilt
 	ctx.atom.write("LOCAL_SDK := $(LOCAL_PATH)\n")
 	if moduleClass == "SHARED_LIBRARY" or moduleClass == "STATIC_LIBRARY":
 		ctx.atom.write("LOCAL_DESTDIR := %s\n" % module.fields["DESTDIR"])
 		ctx.atom.write("LOCAL_MODULE_FILENAME := %s\n" % module.fields["MODULE_FILENAME"])
-		# Set LOCAL_LIBRARIES with the content of 'depends'
-		if "depends" in module.fields:
-			ctx.atom.write("LOCAL_LIBRARIES := %s\n" % module.fields["depends"])
 		ctx.atom.write("include $(BUILD_%s)\n" % moduleClass)
 	else:
 		ctx.atom.write("include $(BUILD_PREBUILT)\n")
