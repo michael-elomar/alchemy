@@ -22,8 +22,8 @@ else
 endif
 
 # Assume everybody will want this
-TARGET_GLOBAL_LDLIBS += -lpthread -lrt
-TARGET_GLOBAL_LDLIBS_SHARED += -lpthread -lrt
+TARGET_GLOBAL_LDLIBS += -pthread -lrt
+TARGET_GLOBAL_LDLIBS_SHARED += -pthread -lrt
 
 # Machine targetted by toolchain to be used by autotools
 ifeq ("$(TARGET_ARCH)","x64")

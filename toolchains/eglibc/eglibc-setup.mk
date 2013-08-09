@@ -20,8 +20,8 @@ ifndef TARGET_CROSS
 endif
 
 # Assume everybody will wants this
-TARGET_GLOBAL_LDLIBS += -lpthread -lrt
-TARGET_GLOBAL_LDLIBS_SHARED += -lpthread -lrt
+TARGET_GLOBAL_LDLIBS += -pthread -lrt
+TARGET_GLOBAL_LDLIBS_SHARED += -pthread -lrt
 
 # Gcc sysroot
 # We use cflags as well as arm/thumb mode to select correct variant
