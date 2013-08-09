@@ -69,6 +69,11 @@ define cmake-gen-toolchain-file
 	echo "set(CMAKE_COLOR_MAKEFILE OFF CACHE BOOL \"COLOR_MAKEFILE\" FORCE)";
 endef
 
+# Regenerate the toolchain file if toolchain setup makefiles are updated
+$(CMAKE_TOOLCHAIN_FILE): $(BUILD_SYSTEM)/cmake-setup.mk
+$(CMAKE_TOOLCHAIN_FILE): $(BUILD_SYSTEM)/toolchains/*.mk
+$(CMAKE_TOOLCHAIN_FILE): $(BUILD_SYSTEM)/toolchains/*/*.mk
+
 $(CMAKE_TOOLCHAIN_FILE):
 	@mkdir -p $(dir $@)
 	@($(cmake-gen-toolchain-file)) > $@
