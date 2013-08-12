@@ -1196,7 +1196,7 @@ $(Q)$(CCACHE) $(TARGET_CXX) \
 	$(call normalize-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CXXFLAGS) $(WARNINGS_CXXFLAGS) \
 	$(PRIVATE_CFLAGS) $(PRIVATE_CXXFLAGS) \
-	$(TARGET_GLOBAL_PCH_FLAGS) -MMD -MP -o $@ \
+	$(TARGET_GLOBAL_PCH_FLAGS) -MMD -MP -MF $(@:.o=.d) -MT $@ -o $@ \
 	$(call path-from-top,$<)
 $(call fix-deps-file,$(@:.o=.d))
 endef
@@ -1215,7 +1215,7 @@ $(Q)$(CCACHE) $(TARGET_CXX) \
 	$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CXXFLAGS) $(WARNINGS_CXXFLAGS) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARCH)) \
 	$(PRIVATE_CFLAGS) $(PRIVATE_CXXFLAGS) \
-	-c -MMD -MP -o $@ \
+	-c -MMD -MP -MF $(@:.o=.d) -MT $@ -o $@ \
 	$(call path-from-top,$<)
 $(call fix-deps-file,$(@:.o=.d))
 endef
@@ -1234,7 +1234,7 @@ $(Q)$(CCACHE) $(TARGET_CC) \
 	$(TARGET_GLOBAL_CFLAGS) $(WARNINGS_CFLAGS) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARCH)) \
 	$(PRIVATE_CFLAGS) \
-	-c -MMD -MP -o $@ \
+	-c -MMD -MP -MF $(@:.o=.d) -MT $@ -o $@ \
 	$(call path-from-top,$<)
 $(call fix-deps-file,$(@:.o=.d))
 endef
@@ -1253,7 +1253,7 @@ $(Q)$(CCACHE) $(TARGET_CC) \
 	$(TARGET_GLOBAL_CFLAGS) $(WARNINGS_CFLAGS) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARCH)) \
 	$(PRIVATE_CFLAGS) \
-	-c -MMD -MP -o $@ \
+	-c -MMD -MP -MF $(@:.o=.d) -MT $@ -o $@ \
 	$(call path-from-top,$<)
 $(call fix-deps-file,$(@:.o=.d))
 endef
