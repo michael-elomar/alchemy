@@ -564,6 +564,41 @@ $(LOCAL_TARGETS): PRIVATE_ARCHIVE_PATCHES := $(patches)
 endif
 
 ###############################################################################
+## Code check rules.
+###############################################################################
+
+# Original data before import
+codecheck_src_files := $(addprefix $(LOCAL_PATH)/,$(__modules.$(LOCAL_MODULE).SRC_FILES))
+codecheck_c_includes := $(addprefix $(LOCAL_PATH)/,$(__modules.$(LOCAL_MODULE).C_INCLUDES))
+codecheck_c_includes += $(addprefix $(LOCAL_PATH)/,$(__modules.$(LOCAL_MODULE).EXPORT_C_INCLUDES))
+codecheck_c_includes += $(LOCAL_PATH)
+
+# Search for include files in directories with source files
+codecheck_c_includes += $(sort $(foreach __src,$(codecheck_src_files),$(dir $(__src))))
+codecheck_c_includes := $(sort $(codecheck_c_includes))
+
+# Checkpatch is only for c files
+codecheck_files := $(filter %.c,$(codecheck_src_files))
+codecheck_files += $(foreach __inc,$(codecheck_c_includes),$(wildcard $(__inc)/*.h))
+
+codecheck_files := $(sort $(codecheck_files))
+
+.PHONY: $(LOCAL_MODULE)-codecheck
+$(LOCAL_MODULE)-codecheck:
+	@for f in $(PRIVATE_CODECHECK_FILES); do \
+		echo "$(PRIVATE_MODULE): Checking file $${f#$(TOP_DIR)/}"; \
+		$(BUILD_SYSTEM)/scripts/checkpatch.pl \
+			--no-tree --no-summary --terse --show-types -f \
+			$(PRIVATE_CODECHECK_ARGS) $$f \
+		|| true; \
+	done
+
+# Define target variables because we don't inherit from 'standard' targets
+$(LOCAL_MODULE)-codecheck: PRIVATE_MODULE := $(LOCAL_MODULE)
+$(LOCAL_MODULE)-codecheck: PRIVATE_CODECHECK_FILES := $(codecheck_files)
+$(LOCAL_MODULE)-codecheck: PRIVATE_CODECHECK_ARGS := $(LOCAL_CODECHECK_ARGS)
+
+###############################################################################
 ## Static library.
 ###############################################################################
 

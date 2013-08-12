@@ -215,6 +215,9 @@ vars-LOCAL += CREATE_LINKS
 #       usr/include directory of staging directory
 vars-LOCAL += INSTALL_HEADERS
 
+# Arguments to pass to code checker (linux checkpatch by default)
+vars-LOCAL += CODECHECK_ARGS
+
 # Other variables used internally
 vars-LOCAL += BUILD_MODULE
 vars-LOCAL += STAGING_MODULE
