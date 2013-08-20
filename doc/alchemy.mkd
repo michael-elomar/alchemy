@@ -31,6 +31,23 @@ variables that can be used. It also has some description of variables.
 To work correctly, the build system needs to be configured with target specific
 information.
 
+At a minimun, `TARGET_PRODUCT`, `TARGET_PRODUCT_VARIANT` and `TARGET_CONFIG_DIR`
+are required. Other variables can be set in the `product.mk` file located in
+`TARGET_CONFIG_DIR`. This way environment is not cluttered with variables.
+
+Optionally, some `TARGET_XXX` variables can be prefixed with `ALCHEMY_` to avoid
+conflict with other build systems (android for example).
+
+* `ALCHEMY_TARGET_PRODUCT`
+* `ALCHEMY_TARGET_PRODUCT_VARIANT`
+* `ALCHEMY_TARGET_CONFIG_DIR`
+* `ALCHEMY_TARGET_OUT`
+* `ALCHEMY_TARGET_SKEL_DIRS`
+* `ALCHEMY_TARGET_SCAN_ADD_DIRS`
+* `ALCHEMY_TARGET_SCAN_PRUNE_DIRS`
+* `ALCHEMY_TARGET_SDK_DIRS`
+* `ALCHEMY_USE_COLORS`
+
 ### Target
 
 * `TARGET_OS` : Specify the OS of the target. Possible values are :
@@ -220,6 +237,28 @@ Mainly used by the android wrapper.
   * `user`, `group` : name of user and group to apply. The uid and gid is
     extracted automatically from `/etc/passwd` and `/etc/group` files found in
     final directory.
+* `TARGET_CHROOT` : Set to 1 if the result of the compilation will be executed
+  in a chroot environment. Used by some modules to adapt their configuration.
+  Default is `0`.
+* `TARGET_IMAGE_PATH_MAP_FILE` : File containing path mapping to be used when
+  generating the image (plf). Used by chroot targets that are not flashed in the
+  same root as the build. Format of this file is lines with 3 columns :
+  `dir target-dir mount-point`
+  * `dir` : directory prefix of chroot target.
+  * `target-dir` : real target directory.
+  * `mount-point` : directory where `target-dir` will be mounted.
+  As it is a first match list, more specific names shall be first
+  Example :
+  <pre>
+  /data /data/pulsar    /system/pulsar/data
+  /     /system/pulsar  /system/pulsar
+  </pre>
+  * The root of the final tree will actually be flashed in /system/pulsar (3rd
+    column is not useful here).
+  * The /data directory of the final tree will actually be flashed in /data/pulsar
+  At runtime the /data/pulsar will be mounted in /system/pulsar/data so this
+  directory needs to be created as well. Finally when the target will be executed
+  in its chroot environment, the final tree will be found correctly.
 
 * `USE_CLANG` : Use clang instead of gcc for compilation.
   Default is `0`.

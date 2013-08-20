@@ -95,6 +95,19 @@ TARGET_BUILDID_SECTION_NAME ?= .alchemy.build-id
 # module.mk will also look in this list to filter, not only final.mk)
 TARGET_STRIP_FILTER :=
 
+# List of files with permissions to be applied
+# See documentation for format of file.
+TARGET_PERMISSIONS_FILES ?=
+
+# Set to 1 if the result of the compilation will be executed in a chroot
+# environment. Used by some modules to adapt their configuration
+TARGET_CHROOT ?= 0
+
+# File containing path mapping to be used when generating image (plf for example)
+# Used by chroot target that are not flashed in the same root as the build.
+# See documentation for format of file.
+TARGET_IMAGE_PATH_MAP_FILE ?=
+
 ###############################################################################
 ## Toolchain setup.
 ###############################################################################

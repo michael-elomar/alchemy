@@ -6,9 +6,6 @@
 ## Image generation.
 ###############################################################################
 
-# List of files with permissions to be applied
-TARGET_PERMISSIONS_FILES ?=
-
 # Script that will modify mode/uid/gid of files while generating the image
 FIXSTAT := $(BUILD_SYSTEM)/scripts/fixstat.py \
 	--user-file=$(TARGET_OUT_FINAL)/etc/passwd \
@@ -57,6 +54,11 @@ endif
 	$(Q) cd $(TARGET_OUT_FINAL); \
 		find . ! -name '.' -printf '%P\n' | $(FIXSTAT) | \
 			plfbatch '-a u_unixfile="&"' $(IMAGE_FILE_PLF)
+ifneq ("$(TARGET_IMAGE_PATH_MAP_FILE)","")
+	$(Q) PLFTOOL=$(PLFTOOL) $(BUILD_SYSTEM)/scripts/plfremap.py \
+		$(TARGET_IMAGE_PATH_MAP_FILE) \
+		$(IMAGE_FILE_PLF)
+endif
 	@echo "Image plf: done -> $(IMAGE_FILE_PLF)"
 
 .PHONY: image-plf-clean
