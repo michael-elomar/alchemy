@@ -45,7 +45,7 @@ MSGBUILDER_OBJ :=
 
 # Source files and flags to create the msgbuilder host executable
 MSGBUILDER_CKCM_MSG_FILES := $(__modules.ckcm.PATH)/msgbuilder/msgbuilder.c
-MSGBUILDER_CKCM_CFLAGS := -DNATIVE_COMPILER -I$(LOCAL_PATH)
+MSGBUILDER_CKCM_CFLAGS := -DNATIVE_COMPILER -DTARGET_PRODUCT=$(TARGET_PRODUCT) -I$(LOCAL_PATH)
 
 # ParrotOS in ckcm
 ifneq ("$(call is-module-registered,ckcm)","")
