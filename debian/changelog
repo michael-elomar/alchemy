@@ -1,3 +1,15 @@
+parrot-tools-alchemy (1.0.8) unstable; urgency=low
+  * [CR 0119054] Add support for compilation of host tools.
+  * Fix armv5 flags.
+  * Use -pthread instead of -lpthread.
+  * Regenerate the cmake toolchain file if toolchain setup makefiles are updated.
+  * [CR 0119240] Integration of checkpatch.pl from linux kernel.
+  * [BUGFIX 119847] On android , the gcc version is not correctly parsed.
+  * Script to push a complete plf on a target.
+  * Fix autoconf dependency for autotools/cmake.
+
+ -- Yves-Marie Morgan (Parrot) <yves-marie.morgan@parrot.com>  Fri, 30 Aug 2013 17:19:51 +0200
+
 parrot-tools-alchemy (1.0.7) unstable; urgency=low
   * Fix CXXFLAGS addition for autotools.
   * [CR 0116460] Add support for cmake modules.
