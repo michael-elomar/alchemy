@@ -285,7 +285,7 @@ all_autoconf := $(call module-get-listed-autoconf, \
 	$(all_depends) $(LOCAL_MODULE))
 else
 all_autoconf := $(call module-get-listed-autoconf, \
-	$(call filter-get-internal-modules,$(all_depends) $(LOCAL_MODULE)))
+	$(call filter-get-internal-modules,$(all_depends)) $(LOCAL_MODULE))
 endif
 
 # Force their inclusion (space after -include and before comma is important)

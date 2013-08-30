@@ -58,6 +58,9 @@ __generic-msg = \
 # But do NOT force recompilation (order only)
 $(configured_file): | $(all_prerequisites)
 
+# If an autoconf file has changed, restart at the configure step
+$(configured_file): $(all_autoconf)
+
 # Restart build if any of dependencies have changed
 $(built_file): $(all_depends_build_filename) $(all_link_libs_filenames)
 
