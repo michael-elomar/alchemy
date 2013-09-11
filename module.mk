@@ -569,8 +569,8 @@ endif
 
 # Original data before import
 codecheck_src_files := $(addprefix $(LOCAL_PATH)/,$(__modules.$(LOCAL_MODULE).SRC_FILES))
-codecheck_c_includes := $(addprefix $(LOCAL_PATH)/,$(__modules.$(LOCAL_MODULE).C_INCLUDES))
-codecheck_c_includes += $(addprefix $(LOCAL_PATH)/,$(__modules.$(LOCAL_MODULE).EXPORT_C_INCLUDES))
+codecheck_c_includes := $(__modules.$(LOCAL_MODULE).C_INCLUDES)
+codecheck_c_includes += $(__modules.$(LOCAL_MODULE).EXPORT_C_INCLUDES)
 codecheck_c_includes += $(LOCAL_PATH)
 
 # Search for include files in directories with source files
