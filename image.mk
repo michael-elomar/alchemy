@@ -26,31 +26,22 @@ endif
 PLFTOOL ?= plftool
 MK_KERNEL_PLF ?= mk_kernel_plf
 IMAGE_FILE_PLF := $(TARGET_OUT)/$(TARGET_PRODUCT_FULL_NAME).plf
-
-# zImage can be found at 2 places
-# TODO: migrate all atom.mk of kernel so that they use boot directory
-ifneq ("$(wildcard $(TARGET_OUT_STAGING)/zImage)","")
-  KERNEL_ZIMAGE := $(TARGET_OUT_STAGING)/zImage
-else ifneq ("$(wildcard $(TARGET_OUT_STAGING)/boot/zImage)","")
-  KERNEL_ZIMAGE := $(TARGET_OUT_STAGING)/boot/zImage
-else
-  KERNEL_ZIMAGE :=
-endif
+KERNEL_ZIMAGE := $(TARGET_OUT_STAGING)/boot/zImage
 
 .PHONY: image-plf
 image-plf:
 	@echo "Image plf: start"
 	$(Q) rm -f $(IMAGE_FILE_PLF)
-ifneq ("$(KERNEL_ZIMAGE)","")
-	$(Q) $(MK_KERNEL_PLF) \
-		"ignore-boot.cfg" \
-		$(KERNEL_ZIMAGE) \
-		$(TARGET_OUT_BUILD)/linux/.config \
-		$(TARGET_OUT)/kernel.plf
-	$(Q) $(PLFTOOL) -a u_data=$(TARGET_OUT)/kernel.plf $(IMAGE_FILE_PLF)
-else
-	@echo "Image plf: no kernel image found"
-endif
+	$(Q) if [ -f "$(KERNEL_ZIMAGE)" ]; then \
+		$(MK_KERNEL_PLF) \
+			"ignore-boot.cfg" \
+			$(KERNEL_ZIMAGE) \
+			$(TARGET_OUT_BUILD)/linux/.config \
+			$(TARGET_OUT)/kernel.plf; \
+		$(PLFTOOL) -a u_data=$(TARGET_OUT)/kernel.plf $(IMAGE_FILE_PLF); \
+	else \
+		echo "Image plf: no kernel image found"; \
+	fi
 	$(Q) cd $(TARGET_OUT_FINAL); \
 		find . ! -name '.' -printf '%P\n' | $(FIXSTAT) | \
 			plfbatch '-a u_unixfile="&"' $(IMAGE_FILE_PLF)
