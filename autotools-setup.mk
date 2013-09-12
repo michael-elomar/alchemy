@@ -98,7 +98,9 @@ HOST_AUTOTOOLS_CONFIGURE_ARGS += \
 
 # Environment to use when executing make
 # Use PKG_CONFIG_ENV in case a package needs automatic reconfiguration
-HOST_AUTOTOOLS_MAKE_ENV := $(HOST_PKG_CONFIG_ENV)
+HOST_AUTOTOOLS_MAKE_ENV := \
+	PATH="$(__autotool-host-path)" \
+	$(HOST_PKG_CONFIG_ENV)
 
 # Arguments to give to make
 HOST_AUTOTOOLS_MAKE_ARGS := DESTDIR="$(HOST_AUTOTOOLS_INSTALL_DESTDIR)"
@@ -192,7 +194,9 @@ TARGET_AUTOTOOLS_CONFIGURE_ARGS += \
 
 # Environment to use when executing make
 # Use PKG_CONFIG_ENV in case a package needs automatic reconfiguration
-TARGET_AUTOTOOLS_MAKE_ENV := $(TARGET_PKG_CONFIG_ENV)
+TARGET_AUTOTOOLS_MAKE_ENV := \
+	PATH="$(__autotool-host-path)" \
+	$(TARGET_PKG_CONFIG_ENV)
 
 # Arguments to give to make
 TARGET_AUTOTOOLS_MAKE_ARGS := DESTDIR="$(TARGET_AUTOTOOLS_INSTALL_DESTDIR)"
