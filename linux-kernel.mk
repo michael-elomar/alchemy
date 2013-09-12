@@ -155,9 +155,10 @@ endif
 	@touch $@
 
 # Linux headers
+# Order-only dependency on config to avoid parallel execution of linux makefile
 .PHONY: linux-headers
 linux-headers: $(LINUX_HEADERS_DONE_FILE)
-$(LINUX_HEADERS_DONE_FILE): $(LINUX_BUILD_DIR)/.config
+$(LINUX_HEADERS_DONE_FILE): | $(LINUX_BUILD_DIR)/.config
 	@mkdir -p $(LINUX_BUILD_DIR)
 	@mkdir -p $(TARGET_OUT_STAGING)/usr/src/linux-headers
 	@echo "Installing linux kernel headers"
