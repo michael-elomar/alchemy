@@ -39,6 +39,8 @@ def pushDir(ctx, section):
 	execAdb(ctx, args)
 	args = ["shell", "chmod", "0%o" % section.mode, section.path]
 	execAdb(ctx, args)
+	args = ["shell", "chown", "%d:%d" % (section.gid, section.uid), section.path]
+	execAdb(ctx, args)
 
 #===============================================================================
 #===============================================================================
@@ -74,6 +76,8 @@ def pushFile(ctx, section):
 	args = ["push", tmpFilePath, section.path]
 	execAdb(ctx, args)
 	args = ["shell", "chmod", "0%o" % section.mode, section.path]
+	execAdb(ctx, args)
+	args = ["shell", "chown", "%d:%d" % (section.gid, section.uid), section.path]
 	execAdb(ctx, args)
 
 	# Cleanup
