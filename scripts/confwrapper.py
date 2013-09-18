@@ -146,10 +146,11 @@ class Module:
 		self.dependsCond = [pair.split(":") for pair in fields[3].split()]
 		self.path = fields[4].rstrip("/")
 		self.categoryPath = fields[5].rstrip("/")
-		self.configPath = fields[6]
-		self.configInPathList = fields[7:]
+		self.sdk = fields[6].rstrip("/")
+		self.configPath = fields[7]
+		self.configInPathList = fields[8:]
 		# Remove from self.depends, conditionals from self.dependsCond
-		# Remove CONFIG_PREFIX from conditional
+		# Remove CONFIG_ prefix from conditional
 		for depCond in self.dependsCond:
 			if depCond[1] in self.depends:
 				self.depends.remove(depCond[1])
@@ -217,6 +218,9 @@ def buildMenuTree(modules):
 	# Create root first
 	menuRoot = Menu(None, "")
 	for module in modules:
+		# Skip modules from sdk
+		if module.sdk:
+			continue
 		# Get path, split it in components
 		if module.categoryPath != "":
 			components = module.categoryPath.split("/")
@@ -335,6 +339,19 @@ def writeTargetVarConfigIn(outFile):
 		outFile.write("\n")
 
 #===============================================================================
+# Write the config.in file for the SDK modules.
+# outFile : output file object.
+# modules : module list.
+#===============================================================================
+def writeSdkModulesConfigIn(outFile, modules):
+	for module in modules:
+		if module.sdk:
+			outFile.write("config ALCHEMY_BUILD_%s\n" % getDefine(module.name))
+			outFile.write("  bool\n")
+			outFile.write("  default 'y'\n")
+			outFile.write("\n")
+
+#===============================================================================
 # Write the config.in file for a module.
 # outFile : output file object.
 # module : module to generate.
@@ -438,6 +455,15 @@ def writeConfigTargetVar(outFile):
 		outFile.write("CONFIG_%s=\"%s\"\n" % (var, val))
 
 #===============================================================================
+# Write SDK modules in config file.
+# modules : module list.
+#===============================================================================
+def writeConfigSdkModules(outFile, modules):
+	for module in modules:
+		if module.sdk:
+			outFile.write("CONFIG_ALCHEMY_BUILD_%s=y\n" % getDefine(module.name))
+
+#===============================================================================
 # Copy configuration file to '.new' file for edition.
 # configName : configuration file name to copy.
 #===============================================================================
@@ -521,8 +547,9 @@ def writeConfigMenu(outFile, menu, mainConfig):
 # outFile : output file object.
 # menu : root of menu with modules.
 # mainConfigPath : main config path.
+# modules : module list.
 #===============================================================================
-def prepareFullConfig(outFile, menu, mainConfigPath):
+def prepareFullConfig(outFile, menu, mainConfigPath, modules):
 	# Read main configuration file
 	mainConfig = []
 	try:
@@ -537,6 +564,7 @@ def prepareFullConfig(outFile, menu, mainConfigPath):
 	writeConfigHeader(outFile)
 	writeConfigTargetVar(outFile)
 	writeConfigMenu(outFile, menu, mainConfig)
+	writeConfigSdkModules(outFile, modules)
 
 #===============================================================================
 # Process ful configuration after its edition.
@@ -646,6 +674,10 @@ def processFullConfig(inFile, modules, mainConfigPath):
 	writeConfigHeader(mainConfigFile)
 	# Write modules in a sorted order to ease merge.
 	for key in sorted(moduleStatus.keys()):
+		module = findModule(modules, getDefine(key))
+		# Skip modules from sdk
+		if module and module.sdk:
+			continue
 		if moduleStatus[key] == True:
 			mainConfigFile.write("CONFIG_ALCHEMY_BUILD_%s=y\n" % \
 					getDefine(key))
@@ -930,10 +962,12 @@ def main():
 			 modules[0].name, configInPath)
 		writeTargetVarConfigIn(configInFile)
 		writeModuleConfigIn(configInFile, modules[0])
+		writeSdkModulesConfigIn(configInFile, modules)
 	else:
 		logging.info("Generating full 'config.in' file as %s", configInPath)
 		writeTargetVarConfigIn(configInFile)
 		writeFullConfigIn(configInFile, menuRoot)
+		writeSdkModulesConfigIn(configInFile, modules)
 	configInFile.close()
 
 	# prepare input config file
@@ -945,7 +979,7 @@ def main():
 		(fullConfigFd, fullConfigPath) = tempfile.mkstemp(suffix=TEMP_SUFFIX)
 		fullConfigFile = os.fdopen(fullConfigFd, "w")
 		logging.info("Generating full '.config' file as %s", fullConfigPath)
-		prepareFullConfig(fullConfigFile, menuRoot, options.main)
+		prepareFullConfig(fullConfigFile, menuRoot, options.main, modules)
 		fullConfigFile.close()
 
 	# Cleanup function (in main context)

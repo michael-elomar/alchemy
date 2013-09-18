@@ -93,13 +93,14 @@ __generate-config-module-args = $(strip \
 	$(eval __dependsCond := $(__modules.$(__mod).CONDITIONAL_LIBRARIES)) \
 	$(eval __modPath := $(call path-from-top,$(__modules.$(__mod).PATH))) \
 	$(eval __categoryPath := $(__modules.$(__mod).CATEGORY_PATH)) \
+	$(eval __sdk := $(__modules.$(__mod).SDK)) \
 	$(eval __configInFiles := $(call __get-module-config-in-files,$(__mod))) \
 	$(if $(__configInFiles), \
 		$(eval __configPath := $(call __get-orig-module-config,$(__mod))), \
 		$(eval __configPath := $(empty)) \
 	) \
 	$(eval __arg := $(__mod)|$(__desc)|$(__depends)|$(__dependsCond)|$(__modPath)) \
-	$(eval __arg := $(__arg)|$(__categoryPath)|$(__configPath)) \
+	$(eval __arg := $(__arg)|$(__categoryPath)|$(__sdk)|$(__configPath)) \
 	$(foreach __f,$(__configInFiles), \
 		$(eval __arg := $(__arg)|$(abspath $(__f))) \
 	) \
@@ -137,7 +138,7 @@ __show-in-config = $(strip \
 # No arguments
 __generate-config-args = $(strip \
 	$(foreach __mod,$(__modules), \
-		$(if $(call __show-in-config,$(__mod)), \
+		$(if $(or $(call __show-in-config,$(__mod)),$(__modules.$(__mod).SDK)), \
 			$(call __generate-config-module-args,$(__mod)) \
 		) \
 	))
