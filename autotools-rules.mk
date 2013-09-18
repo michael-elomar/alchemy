@@ -123,8 +123,12 @@ $(foreach __f,$(__autotools-src-files), \
 	$(eval $(call copy-one-file,$(__f),$(patsubst $(LOCAL_PATH)/%,$(__autotools-dst-dir)/%,$(__f)))) \
 )
 
-# Make sure they will be copied before configuration step
+# Make sure they will be copied before the unpack or configure step
+ifneq ("$(value LOCAL_ARCHIVE_CMD_POST_UNPACK)","")
+$(unpacked_file): $(__autotools-dst-files)
+else
 $(configured_file): $(__autotools-dst-files)
+endif
 
 endif
 
