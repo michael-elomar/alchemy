@@ -588,6 +588,7 @@ $(LOCAL_MODULE)-codecheck:
 		echo "$(PRIVATE_MODULE): Checking file $${f#$(TOP_DIR)/}"; \
 		$(BUILD_SYSTEM)/scripts/checkpatch.pl \
 			--no-tree --no-summary --terse --show-types -f \
+			--ignore SPLIT_STRING \
 			$(PRIVATE_CODECHECK_ARGS) $$f \
 		|| true; \
 	done
