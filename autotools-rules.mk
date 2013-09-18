@@ -106,6 +106,28 @@ endif # ifndef __autotools-macros
 ###############################################################################
 ###############################################################################
 
+ifeq ("$(LOCAL_AUTOTOOLS_COPY_TO_BUILD_DIR)","1")
+
+# All files under LOCAL_PATH
+__autotools-src-files := $(shell find $(LOCAL_PATH) \
+	-name '.git' -prune -o \
+	-name '$(USER_MAKEFILE_NAME)' -prune \
+	-o -not -type d -print)
+
+# Where they wil be copied
+__autotools-dst-dir := $(build_dir)/src
+__autotools-dst-files := $(patsubst $(LOCAL_PATH)/%,$(__autotools-dst-dir)/%,$(__autotools-src-files))
+
+# Add rule to copy them
+$(foreach __f,$(__autotools-src-files), \
+	$(eval $(call copy-one-file,$(__f),$(patsubst $(LOCAL_PATH)/%,$(__autotools-dst-dir)/%,$(__f)))) \
+)
+
+# Make sure they will be copied before configuration step
+$(configured_file): $(__autotools-dst-files)
+
+endif
+
 # Because autootools is widely used for generic build to not try to support
 # out ouf source build
 generic-build-out-of-src := 0

@@ -21,6 +21,8 @@ endif
 # Where the source will actually be found once unpacked
 ifneq ("$(LOCAL_ARCHIVE)","")
   src_dir := $(unpack_dir)/$(LOCAL_ARCHIVE_SUBDIR)
+else ifeq ("$(LOCAL_AUTOTOOLS_COPY_TO_BUILD_DIR)","1")
+  src_dir := $(build_dir)/src
 else
   src_dir := $(LOCAL_PATH)
 endif

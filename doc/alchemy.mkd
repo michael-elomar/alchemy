@@ -943,6 +943,12 @@ Some variables containing generic content can also be used :
 * `AUTOTOOLS_MAKE_ENV`
 * `AUTOTOOLS_MAKE_ARGS`
 
+### LOCAL_AUTOTOOLS_COPY_TO_BUILD_DIR
+
+If set to 1, all files under LOCAL_PATH will be copied to the build directory
+before the configure step. This allows modules to execute autoreconf out of the
+original source tree.
+
 ## CMake modules
 
 This class of modules if for the compilation of packages that use `cmake`.
