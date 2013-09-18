@@ -145,11 +145,6 @@ all_depends_build_filename := \
 	$(foreach __lib,$(all_depends), \
 		$(call module-get-build-filename,$(__lib)))
 
-# External libs only have something in build dir
-all_external_libs_build_filename := \
-	$(foreach __lib,$(all_external_libs), \
-		$(call module-get-build-filename,$(__lib)))
-
 # We use staging dir for linking static/shared libs
 
 all_static_libs_filename := \
@@ -199,7 +194,11 @@ all_prerequisites :=
 
 # We need all external libraries as prerequisites.
 all_prerequisites += \
-	$(all_external_libs_build_filename)
+	$(foreach __lib,$(all_depends), \
+		$(if $(call is-module-external,$(__lib)), \
+			$(call module-get-build-filename,$(__lib)) \
+		) \
+	)
 
 # Remove our build module from the list of global deps to avoid circular chain
 all_prerequisites += \
@@ -233,7 +232,7 @@ all_prerequisites += \
 ##
 ## Note: external modules only import from internal modules, external module
 ## shall handle by themself import of external stuff (using pkg-config for example)
-## we also don't add stuff exported by extarnal module for their own compilation.
+## we also don't add stuff exported by external module for their own compilation.
 ###############################################################################
 
 # Get list of exported stuff by our dependencies
