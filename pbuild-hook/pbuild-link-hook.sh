@@ -135,7 +135,7 @@ if [ "${DEPS_DATA}" != "" ]; then
 		lib=$(echo "${x}" | cut -d: -f1)
 		path=$(echo "${x}" | cut -d: -f2)
 		pattern=$(echo "${lib}" | cut -d- -f1)
-		desc=$(cd ${path} && ${SCRIPT_PATH}/describe.sh ${pattern})
+		desc=$(cd ${path} && ${SCRIPT_PATH}/describe.sh)
 		outwrite "    {\"${lib}\", \"${desc}\", 0},"
 	done
 	outwrite "    {0, 0, 0}"
