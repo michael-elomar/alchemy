@@ -70,9 +70,9 @@ def addBuildId(options, filePath, buildId):
 			process = subprocess.Popen(args)
 			process.wait()
 			# Restore dates (more precise that -p option of objcopy)
-			# To make sure we don't put an older date due to truncation, add a
+			# To make sure we don't put an older date due to truncation, add 2
 			# micro-second to the times
-			os.utime(filePath, (st.st_atime+0.000001, st.st_mtime+0.000001))
+			os.utime(filePath, (st.st_atime+0.000002, st.st_mtime+0.000002))
 			if process.returncode != 0:
 				logging.error("Failed to add '%s' section (err=%d) : %s",
 						options.sectionName, process.returncode, filePath)
