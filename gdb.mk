@@ -12,9 +12,18 @@ GDB_ABSOLUTE_PREFIX := $(TARGET_OUT_STAGING)
 
 GDB_SEARCH_PATH :=
 
+ifeq ("$(TARGET_OS)","linux")
+ifeq ("$(TARGET_OS_FLAVOUR)","native-chroot")
+  GDB_SEARCH_PATH := $(GDB_SEARCH_PATH):$(TARGET_OUT_FINAL)/usr/lib/debug/lib
+endif
+endif
+
 ifneq ("$(TOOLCHAIN_LIBC)","")
   GDB_SEARCH_PATH := $(GDB_SEARCH_PATH):$(TOOLCHAIN_LIBC)/lib
   GDB_SEARCH_PATH := $(GDB_SEARCH_PATH):$(TOOLCHAIN_LIBC)/usr/lib
+else
+  GDB_SEARCH_PATH := $(GDB_SEARCH_PATH):$(TARGET_OUT_FINAL)/lib
+  GDB_SEARCH_PATH := $(GDB_SEARCH_PATH):$(TARGET_OUT_FINAL)/usr/lib
 endif
 
 # Create a wrapper to be used in gdb with internal macro 'set-lib-path'
