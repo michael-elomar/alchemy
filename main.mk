@@ -163,6 +163,11 @@ $(foreach __var,$(vars-TARGET), \
 	) \
 )
 
+# If a sdk has a setup.mk file, include it
+$(foreach __dir,$(TARGET_SDK_DIRS), \
+	$(eval -include $(__dir)/setup.mk) \
+)
+
 # Setup configuration
 include $(BUILD_SYSTEM)/setup.mk
 
