@@ -318,6 +318,38 @@ our @typeList = (
 	qr{${Ident}_t},
 	qr{${Ident}_handler},
 	qr{${Ident}_handler_fn},
+
+	# Words begining by an uppercase letter, ending by a lowercase letter
+	# and containing only letters is considered as a type (typedef)
+	qr{[A-Z][A-z]*[a-z]},
+
+	# GLib basic types
+	qr{gboolean},
+	qr{gpointer},
+	qr{gconstpointer},
+	qr{gchar},
+	qr{guchar},
+	qr{gint},
+	qr{guint},
+	qr{gshort},
+	qr{gushort},
+	qr{glong},
+	qr{gulong},
+	qr{gint8},
+	qr{guint8},
+	qr{gint16},
+	qr{guint16},
+	qr{gint32},
+	qr{guint32},
+	qr{gint64},
+	qr{guint64},
+	qr{gfloat},
+	qr{gdouble},
+	qr{gsize},
+	qr{gssize},
+	qr{goffset},
+	qr{gintptr},
+	qr{guintptr},
 );
 our @modifierList = (
 	qr{fastcall},
