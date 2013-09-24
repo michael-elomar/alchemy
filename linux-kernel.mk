@@ -79,6 +79,7 @@ LINUX_MAKE_ARGS := \
 LINUX_EXPORTED_HEADERS_OVER := \
 	include/linux/media.h \
 	include/linux/videodev2.h \
+	include/linux/v4l2-common.h \
 	include/linux/v4l2-mediabus.h \
 	include/linux/v4l2-subdev.h \
 	include/linux/i2c-dev.h \
@@ -170,8 +171,10 @@ $(LINUX_HEADERS_DONE_FILE): | $(LINUX_BUILD_DIR)/.config
 			$(TARGET_OUT_STAGING)/usr/include/linux/$(notdir $(header)); \
 	)
 	$(Q)$(foreach header,$(LINUX_EXPORTED_HEADERS_OVER),\
-		install -m 0644 -p -D $(TARGET_OUT_STAGING)/usr/src/linux-headers/$(header) \
-			$(TARGET_OUT_STAGING)/usr/$(header); \
+		if [ -f $(TARGET_OUT_STAGING)/usr/src/linux-headers/$(header) ]; then \
+			install -m 0644 -p -D $(TARGET_OUT_STAGING)/usr/src/linux-headers/$(header) \
+				$(TARGET_OUT_STAGING)/usr/$(header); \
+		fi; \
 	)
 	@echo "Installing linux kernel headers: done"
 	@touch $@
