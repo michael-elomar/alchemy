@@ -6,6 +6,9 @@
 ## This file contains package definition specific to bionic (android).
 ###############################################################################
 
+# Skip most of this if a sdk is used for the android part
+ifndef USE_ALCHEMY_ANDROID_SDK
+
 LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
@@ -90,6 +93,8 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := libGLESv1_CM
 LOCAL_EXPORT_LDLIBS := -lGLESv1_CM
 include $(BUILD_PREBUILT)
+
+endif # ifndef USE_ALCHEMY_ANDROID_SDK
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := busybox
