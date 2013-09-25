@@ -46,6 +46,26 @@ def copyStaging(srcDir, dstDir):
 
 #===============================================================================
 #===============================================================================
+def copySdk(srcDir, dstDir):
+	for (dirPath, dirNames, fileNames) in os.walk(srcDir):
+		for fileName in fileNames:
+			srcFilePath = os.path.join(dirPath, fileName)
+			relPath = os.path.relpath(srcFilePath, srcDir)
+			dstFilePath = os.path.join(dstDir, relPath)
+			# When combining several sdk the same file could be found several times
+			if not os.path.exists(dstFilePath):
+				if not os.path.exists(os.path.split(dstFilePath)[0]):
+					os.makedirs(os.path.split(dstFilePath)[0], mode=0755)
+				if os.path.islink(srcFilePath):
+					logging.debug("Link: %s -> %s", srcFilePath, dstFilePath)
+					linkTarget = os.readlink(srcFilePath)
+					os.symlink(linkTarget, dstFilePath)
+				else:
+					logging.debug("Copy: %s -> %s", srcFilePath, dstFilePath)
+					shutil.copy2(srcFilePath, dstFilePath)
+
+#===============================================================================
+#===============================================================================
 def copyHeaders(srcDir, dstDir):
 	extensions = [".h", ".hpp", ".hxx"]
 	if not os.path.exists(srcDir):
@@ -81,8 +101,8 @@ def processModuleSdk(ctx, module):
 		ctx.atom.write(line)
 	sdkAtomFile.close()
 
-	# Copy content of sdk (like if it was a staging dir)
-	copyStaging(sdkDir, ctx.outDir)
+	# Copy content of sdk
+	copySdk(sdkDir, ctx.outDir)
 
 #===============================================================================
 #===============================================================================
