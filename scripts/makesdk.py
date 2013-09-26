@@ -63,6 +63,19 @@ def copySdk(srcDir, dstDir):
 				else:
 					logging.debug("Copy: %s -> %s", srcFilePath, dstFilePath)
 					shutil.copy2(srcFilePath, dstFilePath)
+		# Link to directories are in dirNames...
+		for dirName in dirNames:
+			srcDirPath = os.path.join(dirPath, dirName)
+			relPath = os.path.relpath(srcDirPath, srcDir)
+			dstDirPath = os.path.join(dstDir, relPath)
+			# When combining several sdk the same file could be found several times
+			if not os.path.exists(dstDirPath):
+				if not os.path.exists(os.path.split(dstDirPath)[0]):
+					os.makedirs(os.path.split(dstDirPath)[0], mode=0755)
+				if os.path.islink(srcDirPath):
+					logging.debug("Link: %s -> %s", srcDirPath, dstDirPath)
+					linkTarget = os.readlink(srcDirPath)
+					os.symlink(linkTarget, dstDirPath)
 
 #===============================================================================
 #===============================================================================
