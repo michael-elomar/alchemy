@@ -10,7 +10,7 @@ import moduledb
 #===============================================================================
 def genCdtProjectProperties(fd, modules, module):
 	# Get dependencies of given module
-	depends = [modules[dep] for dep in module.fields.get("depends", "").split()]
+	depends = [modules[dep] for dep in module.fields.get("depends.all", "").split()]
 
 	# Langauges to generate
 	languages = ["C++ Source File", "C Source File"]
