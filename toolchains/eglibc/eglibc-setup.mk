@@ -22,6 +22,7 @@ endif
 # Assume everybody will wants this
 TARGET_GLOBAL_LDLIBS += -pthread -lrt
 TARGET_GLOBAL_LDLIBS_SHARED += -pthread -lrt
+TARGET_GLOBAL_CFLAGS += -funwind-tables
 
 # Gcc sysroot
 # We use cflags as well as arm/thumb mode to select correct variant
@@ -40,4 +41,3 @@ ifneq ("$(gcc-sysroot)","")
     endif
   endif
 endif
-
