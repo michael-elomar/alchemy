@@ -1,3 +1,20 @@
+parrot-tools-alchemy (1.0.9) unstable; urgency=low
+  * Prevent parallel installation of kernel headers an check of config.
+  * fix codecheck c includes filepath
+  * Fix linux headers dependencies.
+  * Setup uid/gid in plfpush.
+  * [BUGFIX 0121913] All external libraries shall be prerequisites, not only direct ones.
+  * [CR 0120545] Do not use module name as pattern for tag.
+  * [CR 0119929] Keep ALCHEMY_BUILD_<MODULE> configs in global.config when building with SDK.
+  * [CR 0118603] Allow to copy source tree of autotools before building.
+  * Add --ignore SPLIT_STRING to chekpatch.
+  * Fix timestamp after adding build id.
+  * Fix gdb file for pclinux native chroot.
+  * Update checkpatch to handle glib-based source code correctly.
+  * Put -Wmissing-prototypes in W=0 mode.
+
+ -- Yves-Marie Morgan (Parrot) <yves-marie.morgan@parrot.com>  Fri, 27 Sep 2013 16:33:47 +0200
+
 parrot-tools-alchemy (1.0.8) unstable; urgency=low
   * [CR 0119054] Add support for compilation of host tools.
   * Fix armv5 flags.
