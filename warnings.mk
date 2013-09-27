@@ -65,6 +65,8 @@ endif
 
 # C specific
 
+WARNINGS_CFLAGS += -Wmissing-prototypes
+
 # ecos forces it, remove it, not useful only problems found are :
 # 'function declaration is not a prototype'
 # if void is missing in function with no parameters
@@ -102,7 +104,6 @@ WARNINGS_COMMON_FLAGS += -Wswitch-default
 WARNINGS_COMMON_FLAGS += -Wwrite-strings
 WARNINGS_COMMON_FLAGS += -Wundef
 WARNINGS_CFLAGS += -Wmissing-declarations
-WARNINGS_CFLAGS += -Wmissing-prototypes
 
 # Possibly many false positives so only in W=1
 WARNINGS_COMMON_FLAGS += -Wconversion
