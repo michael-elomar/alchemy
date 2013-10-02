@@ -86,7 +86,7 @@ if [ "${ARCH}" = "x64" ]; then
 fi
 
 # /usr/lib libraries
-usr_lib_names="libstdc++ libICE libSM"
+usr_lib_names="libstdc++"
 for n in ${usr_lib_names}; do
 	# Normal files
 	copy_file_pattern "${BASE_USRLIB_PATH}/${n}.so*" "${SYSROOT}/usr/lib"
