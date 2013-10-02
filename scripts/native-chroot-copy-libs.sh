@@ -62,7 +62,7 @@ mkdir -p ${SYSROOT}/usr/lib/debug/lib
 
 # /lib system libraries
 lib_names=" \
-  libc libpthread libm librt libdl libutil \
+  libc libpthread libm librt libdl libutil libcrypt \
   libresolv libnss_files libthread_db \
 "
 for n in ${lib_names}; do
