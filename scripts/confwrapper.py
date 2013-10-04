@@ -9,6 +9,7 @@ import re
 import signal
 import shutil
 import difflib
+import hashlib
 
 # Full path to this script
 SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -290,13 +291,22 @@ def safeCreateFile(path):
 #===============================================================================
 # Get the path to use for config edition.
 # path : original config path.
+#
+# When this script is executed in parallel on the same workspace, we need
+# dedicated unique files because we will read again this file and delete it at
+# the end, so it really is a temp file. Use pid, to separate processes and hash
+# to separate path.
 #===============================================================================
 def getEditConfigPath(origPath):
-	return origPath + ".new"
+	return os.path.join(tempfile.gettempdir(), "alchemy-%d-%s.new" %
+			(os.getpid(), hashlib.md5(origPath).hexdigest())) # IGNORE:E1101
 
 #===============================================================================
 # Get the path to use for config diff.
 # path : original config path.
+#
+# This path is only used as a final output, and not read again, we don't need
+# special case as getEditConfigPath
 #===============================================================================
 def getDiffConfigPath(origPath):
 	return origPath + ".diff"
