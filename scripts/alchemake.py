@@ -245,8 +245,13 @@ def main():
 
 	# Restore stuff
 	if jobCtrl.tcpgrp != os.tcgetpgrp(0):
-		logging.debug("tcsetpgrp(0, %d)", jobCtrl.tcpgrp)
-		os.tcsetpgrp(0, jobCtrl.tcpgrp)
+		try:
+			logging.debug("tcsetpgrp(0, %d)", jobCtrl.tcpgrp)
+			os.tcsetpgrp(0, jobCtrl.tcpgrp)
+		except OSError as ex:
+			# Seems to occurs when launched in background and initial foreground
+			# process is not there anymore, just ignore
+			pass
 
 	# Exit with same result as sub-process
 	logging.debug("exit(%d)", jobCtrl.job.process.returncode)
