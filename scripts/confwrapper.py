@@ -277,7 +277,7 @@ def safeUnlink(path):
 def safeRename(old, new):
 	if platform.system() == "Windows" and os.path.exists(new):
 		safeUnlink(new)
-	os.rename(old, new)
+	shutil.copy(old, new)
 
 #===============================================================================
 # Create a file, creating missing directories if needed.
