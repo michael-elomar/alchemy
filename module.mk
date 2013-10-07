@@ -574,7 +574,7 @@ codecheck_c_includes += $(LOCAL_PATH)
 
 # Search for include files in directories with source files
 codecheck_c_includes += $(sort $(foreach __src,$(codecheck_src_files),$(dir $(__src))))
-codecheck_c_includes := $(sort $(codecheck_c_includes))
+codecheck_c_includes := $(sort $(abspath $(codecheck_c_includes)))
 
 # Checkpatch is only for c files
 codecheck_files := $(filter %.c,$(codecheck_src_files))
