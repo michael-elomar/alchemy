@@ -23,12 +23,16 @@ ifneq ("$(TARGET_OS)","ecos")
 endif
 
 # arm v5te flags (to be used in cpu flags below)
+ifneq ("$(TARGET_OS)","ecos")
 cflags_armv5te := \
 	-march=armv5te \
 	-mfloat-abi=soft \
 	-D__ARM_ARCH_5__ \
 	-D__ARM_ARCH_5T__ \
 	-D__ARM_ARCH_5TE__
+else
+cflags_armv5te :=
+endif
 
 # armv7-a neon flags (to be used in cpu flags below)
 cflags_armv7a_neon := \
