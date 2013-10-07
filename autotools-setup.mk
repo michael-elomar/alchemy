@@ -123,11 +123,17 @@ TARGET_AUTOTOOLS_CXXFLAGS := $(TARGET_AUTOTOOLS_CFLAGS) $(TARGET_GLOBAL_CXXFLAGS
 TARGET_AUTOTOOLS_LDFLAGS := $(TARGET_GLOBAL_LDFLAGS) $(TARGET_GLOBAL_LDLIBS)
 TARGET_AUTOTOOLS_DYN_LDFLAGS := $(TARGET_GLOBAL_LDFLAGS_SHARED) $(TARGET_GLOBAL_LDLIBS_SHARED)
 
+__target_pkg_config_path :=
+$(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
+	$(eval __target_pkg_config_path := $(__target_pkg_config_path):$(__dir)/usr/lib/pkgconfig) \
+	$(eval __target_pkg_config_path := $(__target_pkg_config_path):$(__dir)/lib/pkgconfig) \
+)
+
 # Setup pkg-config
 # Only use packages found in TARGET_OUT_STAGING by setting PKG_CONFIG_LIBDIR empty
 TARGET_PKG_CONFIG_ENV := \
 	PKG_CONFIG="$(__autotools-pkg-config-bin)" \
-	PKG_CONFIG_PATH="$(TARGET_OUT_STAGING)/usr/lib/pkgconfig:$(TARGET_OUT_STAGING)/lib/pkgconfig" \
+	PKG_CONFIG_PATH="$(__target_pkg_config_path)" \
 	PKG_CONFIG_LIBDIR=""
 ifeq ("$(TARGET_OS_FLAVOUR)","native")
   TARGET_PKG_CONFIG_ENV += PKG_CONFIG_SYSROOT_DIR=""
