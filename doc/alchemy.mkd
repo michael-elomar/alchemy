@@ -557,11 +557,15 @@ This is a list of modules whose headers are required to compile but not for
 link. This does **NOT** introduce a build order, just an automatic import of
 exported headers.
 
-### `LOCAL_DEPENDS_MODULES`
+### `LOCAL_DEPENDS_MODULES` `LOCAL_REQUIRED_MODULES`
 
 This is a list of modules required at runtime that will automatically be
 selected in the `qconf` configuration window. This does **NOT** introduce a
 build order.
+
+**Note**: `LOCAL_REQUIRED_MODULES` is preferred over `LOCAL_DEPENDS_MODULES`.
+Once migrated to `LOCAL_REQUIRED_MODULES`, `LOCAL_DEPENDS_MODULES` might be used
+for another purpose (like really have a build dependency).
 
 ### `CONFIG_FILES`
 
