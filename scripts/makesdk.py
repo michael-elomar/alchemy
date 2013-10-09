@@ -136,12 +136,17 @@ def processModule(ctx, module):
 	moduleClass = module.fields["MODULE_CLASS"]
 
 	# Write verbatim some fields
-	fields = ["MODULE", "DESCRIPTION", "CATEGORY_PATH",
+	fields = ["DESCRIPTION", "CATEGORY_PATH",
 			"REVISION", "FORCE_WHOLE_STATIC_LIBRARY",
 			"EXPORT_CFLAGS", "EXPORT_CXXFLAGS", "EXPORT_LDLIBS"]
 	for field in fields:
 		if field in module.fields and module.fields[field] :
 			ctx.atom.write("LOCAL_%s := %s\n" % (field, module.fields[field]))
+
+	if module.name.startswith("host."):
+		ctx.atom.write("LOCAL_HOST_MODULE := %s\n" % module.name[5:])
+	else:
+		ctx.atom.write("LOCAL_MODULE := %s\n" % module.name)
 
 	# Include directories
 	if "EXPORT_C_INCLUDES" in module.fields:

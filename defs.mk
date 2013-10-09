@@ -203,13 +203,14 @@ module-add = \
 	$(if $(LOCAL_MODULE),$(empty), \
 		$(error $(LOCAL_PATH): LOCAL_MODULE is not defined)) \
 	$(if $(call not,$(patsubst host.%,,$(LOCAL_MODULE))), \
-		$(warning $(LOCAL_PATH): Do NOT use 'host.' prefix, use LOCAL_HOST_MODULE) \
+		$(error $(LOCAL_PATH): Do NOT use 'host.' prefix, use LOCAL_HOST_MODULE) \
 	) \
 	$(if $(LOCAL_HOST_MODULE), \
 		$(if $(or $(call streq,$(LOCAL_MODULE_CLASS),AUTOTOOLS), \
-				$(call streq,$(LOCAL_MODULE_CLASS),CUSTOM)), \
+				$(call streq,$(LOCAL_MODULE_CLASS),CUSTOM), \
+				$(call streq,$(LOCAL_MODULE_CLASS),PREBUILT)), \
 			$(eval LOCAL_MODULE := host.$(LOCAL_MODULE)), \
-			$(error $(LOCAL_PATH): Only AUTOTOOLS/CUSTOM supported for host modules) \
+			$(error $(LOCAL_PATH): Only AUTOTOOLS/CUSTOM/PREBUILT supported for host modules) \
 		) \
 	) \
 	$(eval __mod := $(LOCAL_MODULE)) \
