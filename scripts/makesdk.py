@@ -24,7 +24,7 @@ class Context(object):
 #===============================================================================
 #===============================================================================
 def copyStaging(srcDir, dstDir):
-	extensions = [".h", ".hpp", ".hxx", ".so", ".a", ".pc", ".tcc"]
+	extensions = [".h", ".hpp", ".hxx", ".so", ".a", ".pc", ".tcc", ".doxygen"]
 	for (dirPath, dirNames, fileNames) in os.walk(srcDir):
 		for fileName in fileNames:
 			srcFilePath = os.path.join(dirPath, fileName)
