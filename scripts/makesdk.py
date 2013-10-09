@@ -188,11 +188,11 @@ def processModule(ctx, module):
 		ctx.atom.write("\n")
 
 	# Autoconf file
+	# Note: for sdk modules, LOCAL_CONFIG_FILES will simply indicate that a
+	# autoconf file is present, reconfiguration will not be possible.
 	if "CONFIG_FILES" in module.fields:
 		autoconfFileName = "autoconf-%s.h" % module.name
-		ctx.atom.write("LOCAL_EXPORT_CFLAGS += \\\n")
-		ctx.atom.write("\t-include $(LOCAL_PATH)/usr/include/%s/%s\n" % \
-				(module.name, autoconfFileName))
+		ctx.atom.write("LOCAL_CONFIG_FILES := 1\n")
 		if not os.path.exists(os.path.join(ctx.outDir, "usr/include", module.name)):
 			os.makedirs(os.path.join(ctx.outDir, "usr/include", module.name), mode=0755)
 		shutil.copy2(
