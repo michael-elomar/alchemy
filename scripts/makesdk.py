@@ -80,7 +80,7 @@ def copySdk(srcDir, dstDir):
 #===============================================================================
 #===============================================================================
 def copyHeaders(srcDir, dstDir):
-	extensions = [".h", ".hpp", ".hxx"]
+	extensions = [".h", ".hpp", ".hxx", ".doxygen"]
 	if not os.path.exists(srcDir):
 		logging.warning("Missing include directory: %s", srcDir)
 	for (dirPath, dirNames, fileNames) in os.walk(srcDir):
