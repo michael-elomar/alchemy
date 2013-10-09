@@ -46,7 +46,7 @@ def copyHostStaging(srcDir, dstDir):
 #===============================================================================
 #===============================================================================
 def copyStaging(srcDir, dstDir):
-	extensions = [".h", ".hpp", ".hxx", ".so", ".a", ".pc", ".tcc", ".doxygen"]
+	extensions = [".h", ".hpp", ".hxx", ".so", ".a", ".pc", ".tcc", ".doxygen", ".inl"]
 	for (dirPath, dirNames, fileNames) in os.walk(srcDir):
 		for fileName in fileNames:
 			srcFilePath = os.path.join(dirPath, fileName)
@@ -102,7 +102,7 @@ def copySdk(srcDir, dstDir):
 #===============================================================================
 #===============================================================================
 def copyHeaders(srcDir, dstDir):
-	extensions = [".h", ".hpp", ".hxx", ".doxygen"]
+	extensions = [".h", ".hpp", ".hxx", ".doxygen", ".inl"]
 	if not os.path.exists(srcDir):
 		logging.warning("Missing include directory: %s", srcDir)
 	for (dirPath, dirNames, fileNames) in os.walk(srcDir):
