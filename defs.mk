@@ -889,6 +889,24 @@ all-cxx-files-under = $(call all-files-under,$1,.cxx)
 all-cc-files-under = $(call all-files-under,$1,.cc)
 
 ###############################################################################
+## Search files matching an extension under LOCAL_PATH, non-recursively.
+###############################################################################
+
+# $1 : directory relative to LOCAL_PATH to search
+# $2 : extension to search (.c, .cpp ...)
+all-files-in = $(strip \
+	$(patsubst ./%,%, \
+	$(shell cd $(LOCAL_PATH); \
+		ls $1/*$2) \
+	))
+
+# $1 : directory relative to LOCAL_PATH to search
+all-c-files-in = $(call all-files-in,$1,.c)
+all-cpp-files-in = $(call all-files-in,$1,.cpp)
+all-cxx-files-in = $(call all-files-in,$1,.cxx)
+all-cc-files-in = $(call all-files-in,$1,.cc)
+
+###############################################################################
 ## Check compilation flags for some forbidden stuff.
 ## $1 : variable to check (its name, not its value).
 ## $2 : list of flags to check for their presence in $1.
