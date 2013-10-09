@@ -14,12 +14,34 @@ import moduledb
 class Context(object):
 	def __init__(self, args):
 		self.dumpXmlPath = os.path.abspath(args[0])
-		self.buildDir = os.path.abspath(args[1])
-		self.stagingDir = os.path.abspath(args[2])
-		self.outDir = os.path.abspath(args[3])
+		self.hostBuildDir = os.path.abspath(args[1])
+		self.hostStagingDir = os.path.abspath(args[2])
+		self.buildDir = os.path.abspath(args[3])
+		self.stagingDir = os.path.abspath(args[4])
+		self.outDir = os.path.abspath(args[5])
 		self.atom = StringIO()
 		self.sdkDirs = []
 		self.modules = None
+
+#===============================================================================
+#===============================================================================
+def copyHostStaging(srcDir, dstDir):
+	for (dirPath, dirNames, fileNames) in os.walk(srcDir):
+		for fileName in fileNames:
+			srcFilePath = os.path.join(dirPath, fileName)
+			relPath = os.path.relpath(srcFilePath, srcDir)
+			dstFilePath = os.path.join(dstDir, relPath)
+			# When combining several sdk the same file could be found several times
+			if not os.path.exists(dstFilePath):
+				if not os.path.exists(os.path.split(dstFilePath)[0]):
+					os.makedirs(os.path.split(dstFilePath)[0], mode=0755)
+				if os.path.islink(srcFilePath):
+					logging.debug("Link: %s -> %s", srcFilePath, dstFilePath)
+					linkTarget = os.readlink(srcFilePath)
+					os.symlink(linkTarget, dstFilePath)
+				else:
+					logging.debug("Copy: %s -> %s", srcFilePath, dstFilePath)
+					shutil.copy2(srcFilePath, dstFilePath)
 
 #===============================================================================
 #===============================================================================
@@ -255,6 +277,11 @@ def main():
 		shutil.rmtree(ctx.outDir)
 	os.makedirs(ctx.outDir, mode=0755)
 
+	# Copy content of host staging directory
+	if os.path.exists(ctx.hostStagingDir):
+		logging.info("Copying host staging directory")
+		copyHostStaging(ctx.hostStagingDir, os.path.join(ctx.outDir, "host"))
+
 	# Copy content of staging directory
 	logging.info("Copying staging directory")
 	copyStaging(ctx.stagingDir, ctx.outDir)
@@ -283,7 +310,8 @@ def main():
 #===============================================================================
 def parseArgs():
 	# Setup parser
-	usage = "usage: %prog [options] <dump-xml> <build-dir> <staging-dir> <out-dir>"
+	usage = "usage: %prog [options] <dump-xml> <host-build-dir>" \
+			" <host-staging-dir> <build-dir> <staging-dir> <out-dir>"
 	parser = optparse.OptionParser(usage=usage)
 
 	# Main options
@@ -302,7 +330,7 @@ def parseArgs():
 
 	# Parse arguments and check validity
 	(options, args) = parser.parse_args()
-	if len(args) != 4:
+	if len(args) != 6:
 		parser.error("Bad number of arguments")
 	return (options, args)
 

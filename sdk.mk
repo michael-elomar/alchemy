@@ -14,6 +14,7 @@ MAKESDK_SCRIPT := $(BUILD_SYSTEM)/scripts/makesdk.py
 sdk: dump-xml
 	@echo "Sdk: start"
 	$(Q) $(MAKESDK_SCRIPT) $(DUMP_DATABASE_XML_FILE) \
+		$(HOST_OUT_BUILD) $(HOST_OUT_STAGING) \
 		$(TARGET_OUT_BUILD) $(TARGET_OUT_STAGING) $(SDK_DIR)
 	@rm -f $(SDK_TGZ)
 	$(Q) tar -C $(dir $(SDK_DIR)) -czf $(SDK_TGZ) $(notdir $(SDK_DIR))

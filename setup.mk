@@ -149,6 +149,14 @@ HOST_RANLIB ?= ranlib
 HOST_OBJCOPY ?= objcopy
 HOST_OBJDUMP ?= objdump
 
+# Copy content of host staging from sdk
+$(foreach __dir,$(TARGET_SDK_DIRS), \
+	$(if $(wildcard $(__dir)/host), \
+		$(shell mkdir -p $(HOST_OUT_STAGING)) \
+		$(shell cp -Raf $(__dir)/host/* $(HOST_OUT_STAGING)) \
+	) \
+)
+
 ###############################################################################
 ## Update host flags.
 ###############################################################################
