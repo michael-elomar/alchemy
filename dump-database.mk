@@ -99,6 +99,13 @@ __dump-database-xml = \
 		$(call __write-xml,$(space4)</module>) \
 	) \
 	$(call __write-xml,</modules>) \
+	$(call __write-xml,<custom-macros>) \
+	$(foreach __macro,$(__custom-macros), \
+		$(call __write-xml,$(space4)<macro name='$(__macro)'>) \
+		$(call __write-xml,$(space4)$(space4)$(call __xml-escape,$(value $(__macro)))) \
+		$(call __write-xml,$(space4)</macro>) \
+	) \
+	$(call __write-xml,</custom-macros>) \
 	$(call __write-xml,</alchemy>)
 
 # Dump a field in xml format if not empty

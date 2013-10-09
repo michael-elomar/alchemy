@@ -298,6 +298,12 @@ def main():
 	for module in ctx.modules:
 		processModule(ctx, module)
 
+	# Process custom macros
+	for macro in ctx.modules.customMacros.values():
+		ctx.atom.write("define %s\n" % macro.name)
+		ctx.atom.write(macro.value)
+		ctx.atom.write("\nendef\n")
+
 	# Write the atom.mk
 	atomFile = open(os.path.join(ctx.outDir, "atom.mk"), "w")
 	atomFile.write("# GENERATED FILE, DO NOT EDIT\n\n")

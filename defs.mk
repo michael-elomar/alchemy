@@ -154,6 +154,13 @@ endif
 __modules := $(empty)
 
 ###############################################################################
+## Custom macros database.
+## Contains a list of macros that can be used in LOCAL_CUSTOM_MACROS by module.
+## A module can register a global custom macros with local-register-custom-macro.
+###############################################################################
+__custom-macros := $(empty)
+
+###############################################################################
 ## Clear a list of variables.
 ###############################################################################
 clear-vars = $(foreach __varname,$1,$(eval $(__varname) := $(empty)))
@@ -1398,6 +1405,11 @@ local-get-build-dir = $(strip \
 		, \
 		$(call module-get-build-dir,$(LOCAL_MODULE)) \
 	))
+
+# Register custom macro
+# $1 : name of the macro to register
+local-register-custom-macro = \
+	$(eval __custom-macros += $1)
 
 # Register module (deprecated)
 # TODO: remove completely in next version (first step is error).

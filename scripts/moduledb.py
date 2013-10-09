@@ -34,13 +34,24 @@ class Module(object):
 
 #===============================================================================
 #===============================================================================
+class CustomMacro(object):
+	def __init__(self, macroNode):
+		self.name = macroNode.getAttribute("name")
+		self.value = getNodeContent(macroNode)
+
+#===============================================================================
+#===============================================================================
 class ModuleDb(object):
 	def __init__(self):
 		self._modules = {}
 		self.targetVars = {}
+		self.customMacros = {}
 
 	def append(self, module):
 		self._modules[module.name] = module
+
+	def appendCustomMacro(self, macro):
+		self.customMacros[macro.name] = macro
 
 	def __getitem__(self, key):
 		return self._modules[key]
@@ -73,6 +84,11 @@ def loadXml(xmlPath):
 	moduleNodes = xmlDom.documentElement.getElementsByTagName("module")
 	for moduleNode in moduleNodes:
 		modules.append(Module(moduleNode))
+
+	# Load custom macros
+	macroNodes = xmlDom.documentElement.getElementsByTagName("macro")
+	for macroNode in macroNodes:
+		modules.appendCustomMacro(CustomMacro(macroNode))
 
 	# Return list of loaded modules
 	return modules
