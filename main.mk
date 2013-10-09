@@ -481,7 +481,7 @@ endif
 
 # Update module list, based on filtering
 ifeq ("$(__dofilter)","0")
-  __modlist := $(ALL_BUILD_MODULES)
+  __modlist := $(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST)
 endif
 
 # Add required host modules
