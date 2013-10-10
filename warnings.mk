@@ -6,9 +6,14 @@
 ## Setup warning flags.
 ###############################################################################
 
+# Internal use
 WARNINGS_COMMON_FLAGS :=
 WARNINGS_CFLAGS :=
 WARNINGS_CXXFLAGS :=
+
+# Externally overridable
+WARNINGS_EXTRA_CFLAGS ?=
+WARNINGS_EXTRA_CXXFLAGS ?=
 
 # show option associated with warning (clang or gcc >= 4.0.0)
 ifeq ("$(USE_CLANG)","1")
@@ -123,5 +128,5 @@ endif
 ## Add common flags to specific flags.
 ###############################################################################
 
-WARNINGS_CFLAGS += $(WARNINGS_COMMON_FLAGS)
-WARNINGS_CXXFLAGS += $(WARNINGS_COMMON_FLAGS)
+WARNINGS_CFLAGS += $(WARNINGS_COMMON_FLAGS) $(WARNINGS_EXTRA_CFLAGS)
+WARNINGS_CXXFLAGS += $(WARNINGS_COMMON_FLAGS) $(WARNINGS_EXTRA_CXXFLAGS)
