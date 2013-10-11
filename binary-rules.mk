@@ -57,6 +57,10 @@ gen_s_objects := $(addprefix $(build_dir)/obj/,$(gen_s_sources:.s=.s.o))
 gen_S_sources := $(filter %.S,$(LOCAL_GENERATED_SRC_FILES))
 gen_S_objects := $(addprefix $(build_dir)/obj/,$(gen_S_sources:.S=.S.o))
 
+vala_sources := $(filter %.vala,$(LOCAL_SRC_FILES))
+vala_c_sources := $(addprefix $(build_dir)/obj/,$(vala_sources:.vala=.c))
+vala_objects := $(addprefix $(build_dir)/obj/,$(vala_sources:.vala=.c.o))
+
 all_gen_sources := \
 	$(gen_cpp_sources) \
 	$(gen_cxx_sources) \
@@ -77,7 +81,8 @@ all_objects := \
 	$(gen_cc_objects) \
 	$(gen_c_objects) \
 	$(gen_s_objects) \
-	$(gen_S_objects)
+	$(gen_S_objects) \
+	$(vala_objects)
 
 # User makefile is an internal dependencies
 all_internal_depends := $(LOCAL_PATH)/$(USER_MAKEFILE_NAME)
@@ -193,6 +198,22 @@ ifneq ("$(skip_include_deps)","1")
 endif
 endif
 
+# vala files (.vala files are in LOCAL_PATH, generated .c and .o are in build_dir)
+ifneq ("$(strip $(vala_objects))","")
+$(vala_objects): $(build_dir)/obj/%.c.o: $(build_dir)/obj/%.c
+	$(transform-c-to-o)
+$(vala_c_sources): $(build_dir)/obj/vala.done
+	$(empty)
+$(build_dir)/obj/vala.done: $(addprefix $(LOCAL_PATH)/,$(vala_sources))
+	@mkdir -p $(dir $@)
+	@touch $@.tmp
+	$(transform-vala-to-c)
+	@mv -f $@.tmp $@
+ifneq ("$(skip_include_deps)","1")
+-include $(vala_objects:%.o=%.d)
+endif
+endif
+
 # Make sure all prerequisites files are generated first
 # But do NOT force recompilation (order only)
 ifneq ("$(all_prerequisites)","")
@@ -214,6 +235,9 @@ $(all_objects): $(all_internal_depends)
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(build_dir)/$(LOCAL_MODULE).map
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(all_objects)
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(all_objects:%.o=%.d)
+$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(vala_c_sources)
+$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(build_dir)/obj/vala.done
+$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(build_dir)/obj/vala.done.tmp
 
 ###############################################################################
 ## Precompiled headers.
@@ -264,6 +288,9 @@ endif
 $(LOCAL_TARGETS): PRIVATE_CFLAGS := $(LOCAL_CFLAGS)
 $(LOCAL_TARGETS): PRIVATE_C_INCLUDES := $(LOCAL_C_INCLUDES)
 $(LOCAL_TARGETS): PRIVATE_CXXFLAGS := $(LOCAL_CXXFLAGS)
+$(LOCAL_TARGETS): PRIVATE_VALAFLAGS := $(LOCAL_VALAFLAGS)
+$(LOCAL_TARGETS): PRIVATE_VALA_SOURCES := $(addprefix $(LOCAL_PATH)/,$(vala_sources))
+$(LOCAL_TARGETS): PRIVATE_VALA_OUT_DIR := $(build_dir)/obj
 $(LOCAL_TARGETS): PRIVATE_ARFLAGS := $(LOCAL_ARFLAGS)
 $(LOCAL_TARGETS): PRIVATE_LDFLAGS := $(LOCAL_LDFLAGS)
 $(LOCAL_TARGETS): PRIVATE_LDLIBS := $(LOCAL_LDLIBS)

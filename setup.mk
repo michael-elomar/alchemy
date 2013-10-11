@@ -233,6 +233,12 @@ ifeq ("$(USE_CLANG)","1")
   TARGET_GLOBAL_CFLAGS += -Qunused-arguments
 endif
 
+# TODO : get this based on real version of valac and glib used.
+TARGET_GLOBAL_VALAFLAGS += \
+	--vapidir=$(HOST_OUT_STAGING)/usr/share/vala-0.20/vapi \
+	--vapidir=$(TARGET_OUT_STAGING)/usr/share/vala/vapi \
+	--target-glib=2.32
+
 ###############################################################################
 ## ccache setup.
 ###############################################################################

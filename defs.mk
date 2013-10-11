@@ -1285,6 +1285,19 @@ $(call fix-deps-file,$(@:.o=.d))
 endef
 
 ###############################################################################
+## Commands to compile vala files.
+###############################################################################
+define transform-vala-to-c
+$(call print-banner1,"Valac",$(PRIVATE_MODULE),$(call path-from-top,$(PRIVATE_VALA_SOURCES)))
+$(call check-pwd-is-top-dir)
+$(Q) $(HOST_OUT_STAGING)/usr/bin/valac \
+	$(TARGET_GLOBAL_VALAFLAGS) \
+	$(PRIVATE_VALAFLAGS) \
+	-C -d $(PRIVATE_VALA_OUT_DIR) -b $(PRIVATE_PATH) \
+	$(PRIVATE_VALA_SOURCES)
+endef
+
+###############################################################################
 ## Commands for running ar.
 ###############################################################################
 

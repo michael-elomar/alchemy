@@ -99,6 +99,9 @@ vars-LOCAL += CFLAGS
 # Additional flags to pass into only the C++ compiler
 vars-LOCAL += CXXFLAGS
 
+# Additional flags to pass into the vala compiler
+vars-LOCAL += VALAFLAGS
+
 # Additional flags to pass into the static library generator
 vars-LOCAL += ARFLAGS
 
