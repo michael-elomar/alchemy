@@ -60,6 +60,18 @@ gen_S_objects := $(addprefix $(build_dir)/obj/,$(gen_S_sources:.S=.S.o))
 vala_sources := $(filter %.vala,$(LOCAL_SRC_FILES))
 vala_c_sources := $(addprefix $(build_dir)/obj/,$(vala_sources:.vala=.c))
 vala_objects := $(addprefix $(build_dir)/obj/,$(vala_sources:.vala=.c.o))
+vala_done_file := $(build_dir)/obj/vala.done
+vala_header_file := $(build_dir)/include/$(LOCAL_MODULE).vala.h
+vala_vapi_file := $(build_dir)/include/$(LOCAL_MODULE).vapi
+
+ifneq ("$(vala_objects)","")
+all_prerequisites += $(vala_header_file)
+LOCAL_VALAFLAGS += \
+	--header=$(vala_header_file) \
+	--vapi=$(vala_vapi_file)
+LOCAL_C_INCLUDES += \
+	$(build_dir)/include
+endif
 
 all_gen_sources := \
 	$(gen_cpp_sources) \
@@ -202,9 +214,9 @@ endif
 ifneq ("$(strip $(vala_objects))","")
 $(vala_objects): $(build_dir)/obj/%.c.o: $(build_dir)/obj/%.c
 	$(transform-c-to-o)
-$(vala_c_sources): $(build_dir)/obj/vala.done
+$(vala_c_sources) $(vala_header_file) $(vala_vapi_file): $(build_dir)/obj/vala.done
 	$(empty)
-$(build_dir)/obj/vala.done: $(addprefix $(LOCAL_PATH)/,$(vala_sources))
+$(vala_done_file): $(addprefix $(LOCAL_PATH)/,$(vala_sources))
 	@mkdir -p $(dir $@)
 	@touch $@.tmp
 	$(transform-vala-to-c)
@@ -230,14 +242,15 @@ endif
 
 # Force recompilation if internal dependencies are changed
 $(all_objects): $(all_internal_depends)
+$(vala_done_file): $(all_internal_depends)
 
 # Clean objects
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(build_dir)/$(LOCAL_MODULE).map
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(all_objects)
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(all_objects:%.o=%.d)
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(vala_c_sources)
-$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(build_dir)/obj/vala.done
-$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(build_dir)/obj/vala.done.tmp
+$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(vala_done_file)
+$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(vala_done_file).tmp
 
 ###############################################################################
 ## Precompiled headers.
