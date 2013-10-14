@@ -753,7 +753,9 @@ $(foreach __pair,$(LOCAL_COPY_FILES), \
 all_copy_files_prerequisites := \
 	$(filter-out $(all_copy_files_src) $(all_copy_files_dst),$(all_prerequisites))
 $(foreach __src,$(all_copy_files_src), \
-	$(eval $(__src): | $(all_copy_files_prerequisites)) \
+	$(if $(filter $(__src),$(all_prerequisites)),$(empty), \
+		$(eval $(__src): | $(all_copy_files_prerequisites)) \
+	) \
 )
 
 # Add files to be copied as an order-only dependency (does not force rebuild)
