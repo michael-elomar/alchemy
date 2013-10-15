@@ -27,6 +27,11 @@ LOCAL_EXPORT_LDLIBS := -lcutils
 include $(BUILD_PREBUILT)
 
 include $(CLEAR_VARS)
+LOCAL_MODULE := libnativehelper
+LOCAL_EXPORT_LDLIBS := -lnativehelper
+include $(BUILD_PREBUILT)
+
+include $(CLEAR_VARS)
 LOCAL_MODULE := zlib
 LOCAL_EXPORT_LDLIBS := -lz
 include $(BUILD_PREBUILT)
