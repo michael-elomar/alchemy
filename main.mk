@@ -532,7 +532,7 @@ $(AUTOCONF_MERGE_FILE): $(__autoconf-list)
 ###############################################################################
 
 .PHONY: all
-all: $(ALL_BUILD_MODULES)
+all: $(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST)
 	@echo "Done building all"
 
 .PHONY: clean
