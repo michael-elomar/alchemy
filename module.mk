@@ -640,6 +640,9 @@ $(LOCAL_BUILD_MODULE): $(all_objects) $(all_link_libs_filenames)
 ifneq ("$(TARGET_ADD_DEPENDS_SECTION)","0")
 	$(add-depends-section)
 endif
+ifneq ("$(TARGET_ADD_BUILDID_SECTION)","0")
+	$(add-buildid-section)
+endif
 	$(call copy-license-files,$(PRIVATE_PATH),$(PRIVATE_BUILD_DIR))
 
 copy_to_staging := 1
@@ -660,6 +663,9 @@ $(LOCAL_BUILD_MODULE): $(all_objects) $(all_link_libs_filenames)
 	$(transform-o-to-executable)
 ifneq ("$(TARGET_ADD_DEPENDS_SECTION)","0")
 	$(add-depends-section)
+endif
+ifneq ("$(TARGET_ADD_BUILDID_SECTION)","0")
+	$(add-buildid-section)
 endif
 	$(call copy-license-files,$(PRIVATE_PATH),$(PRIVATE_BUILD_DIR))
 
