@@ -15,6 +15,7 @@ import sys, os, logging
 import subprocess
 import optparse
 import re
+import addbuildid
 
 #===============================================================================
 # Global variables.
@@ -55,7 +56,7 @@ class CopyType:
 # Execute a command and get its output
 #==============================================================================
 def executeCmd(cmd):
-	p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell = True)
+	p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell = True)
 	return p.communicate()[0].rstrip("\n").split("\n")
 
 #===============================================================================
@@ -141,6 +142,22 @@ def getRealPath(finalDir, path):
 				return getRealPath(finalDir, os.path.join(*([resolved] + bits[i:])))
 
 	return os.path.abspath(path)
+
+
+#===============================================================================
+#===============================================================================
+def addBuildId(filePath, options):
+	class AddBuildIdOptions(object):
+		def __init__(self):
+			self.objcopy = options.buildIdObjcopy
+			self.sectionName = options.buildIdSectionName
+			self.dryRun = False
+	# Only if really required by options
+	if not options.buildId:
+		return
+	if not addbuildid.isElf(filePath):
+		return
+	addbuildid.processFile(AddBuildIdOptions(), filePath)
 
 #===============================================================================
 # Get the commands to be executed for the copy.
@@ -338,6 +355,8 @@ def processDir(rootDir, options, withEmptyDir, copyType):
 				or (copyType == CopyType.NO_LINKS and not os.path.islink(srcFileName)) \
 				or (copyType == CopyType.ONLY_LINKS and os.path.islink(srcFileName)):
 				dstFileName = getRealPath(options.finalDir, relPath)
+				if not os.path.islink(srcFileName):
+					addBuildId(srcFileName, options)
 				doCopy(dstFileName, srcFileName, options)
 
 #===============================================================================
@@ -353,6 +372,8 @@ def processToolchainLibc(libcDir, options):
 			relPath = os.path.relpath(srcFileName, libcDir)
 			dstFileName = getRealPath(options.finalDir, relPath)
 			doCopy(dstFileName, srcFileName, options)
+			if not os.path.islink(dstFileName):
+				addBuildId(dstFileName, options)
 
 	# copy 'libstdc++' from 'usr/lib' directory
 	usrLibDir = os.path.join(libcDir, "usr/lib")
@@ -362,6 +383,8 @@ def processToolchainLibc(libcDir, options):
 			relPath = os.path.relpath(srcFileName, libcDir)
 			dstFileName = getRealPath(options.finalDir, relPath)
 			doCopy(dstFileName, srcFileName, options)
+			if not os.path.islink(dstFileName):
+				addBuildId(dstFileName, options)
 
 	# copy 'ldd' from 'usr/bin" directory
 	# Patch shebang from #!bin/bash to !/bin/sh
@@ -486,6 +509,19 @@ def parseArgs():
 		action="store_true",
 		default=False,
 		help="Remove write access for group and other on all copied files")
+	parser.add_option("--build-id",
+		dest="buildId",
+		action="store_true",
+		default=None,
+		help="Add a build id section in executables and shared libraries")
+	parser.add_option("--build-id-objcopy",
+		dest="buildIdObjcopy",
+		default=None,
+		help="objcopy program to use to add build id section")
+	parser.add_option("--build-id-section-name",
+		dest="buildIdSectionName",
+		default=None,
+		help="name of build id section to add")
 
 	parser.add_option("-q",
 		dest="quiet",
