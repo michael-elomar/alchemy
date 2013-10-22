@@ -37,6 +37,19 @@ LOCAL_EXPORT_LDLIBS := -lz
 include $(BUILD_PREBUILT)
 
 include $(CLEAR_VARS)
+LOCAL_MODULE := libxml2
+LOCAL_EXPORT_LDLIBS := -l$(TARGET_OUT_BUILD)/../../STATIC_LIBRARIES/libxml2_intermediates/libxml2.a -licuuc
+LOCAL_EXPORT_C_INCLUDES := $(RAPTOR_DIR)/external/libxml2/include
+LOCAL_DEPENDS_MODULES:= libicuuc
+include $(BUILD_PREBUILT)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := libicuuc
+LOCAL_EXPORT_LDLIBS := -licuuc
+LOCAL_EXPORT_C_INCLUDES := $(RAPTOR_DIR)/external/icu4c/common
+include $(BUILD_PREBUILT)
+
+include $(CLEAR_VARS)
 LOCAL_MODULE := libbinder
 LOCAL_EXPORT_LDLIBS := -lbinder
 include $(BUILD_PREBUILT)
