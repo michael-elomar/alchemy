@@ -20,7 +20,9 @@ CONFWRAPPER_ENV := \
 CONFWRAPPER := $(CONFWRAPPER_ENV) $(BUILD_SYSTEM)/scripts/confwrapper.py
 
 # File where global configuration is stored
-CONFIG_GLOBAL_FILE := $(TARGET_CONFIG_DIR)/global.config
+ifndef CONFIG_GLOBAL_FILE
+  CONFIG_GLOBAL_FILE := $(TARGET_CONFIG_DIR)/global.config
+endif
 
 # Remember if the config directory is present or not
 ifeq ("$(wildcard $(TARGET_CONFIG_DIR))","")
