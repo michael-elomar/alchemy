@@ -58,7 +58,7 @@ __generic-msg = \
 
 # Make sure all prerequisites files are generated first
 # But do NOT force recompilation (order only)
-$(configured_file): | $(all_prerequisites)
+$(configured_file): | $(all_prerequisites) $(all_depends_build_filename) $(all_link_libs_filenames)
 
 # If an autoconf file has changed, restart at the configure step
 $(configured_file): $(all_autoconf)
