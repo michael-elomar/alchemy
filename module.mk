@@ -318,23 +318,33 @@ __external-add_CXXFLAGS := $(__external-add_CFLAGS) $(LOCAL_CXXFLAGS)
 __external-add_LDFLAGS :=
 
 # Whole static libraries
+# As one unique -Wl option otherwise libtool make a terrible mess with it
+# (it splits -Wl otions from -l options making encapsulation useless)
+# With -l: to force using the given path
 ifneq ("$(strip $(all_whole_static_libs_filename))","")
-__external-add_LDFLAGS += \
-	-Wl,--whole-archive \
-	$(all_whole_static_libs_filename) \
-	-Wl,--no-whole-archive
+__external-add_LDFLAGS += -Wl,--whole-archive
+$(foreach __lib,$(all_whole_static_libs_filename), \
+	$(eval __external-add_LDFLAGS := $(__external-add_LDFLAGS),-l:$(__lib)) \
+)
+__external-add_LDFLAGS := $(__external-add_LDFLAGS),--no-whole-archive
 endif
 
-# Static and shared libraries
-__external-add_LDFLAGS += \
-	$(all_static_libs_filename) \
+# Static libraries
+# With -l: to force using the given path
+ifneq ("$(strip $(all_static_libs_filename))","")
+__external-add_LDFLAGS += $(addprefix -l:,$(all_static_libs_filename))
+endif
 
 # Shared libraries
+# As one unique -Wl option otherwise libtool make a terrible mess with it
+# (it splits -Wl otions from -l options making encapsulation useless)
+# With -l: to force using the given path
 ifneq ("$(strip $(all_shared_libs_filename))","")
-__external-add_LDFLAGS += \
-	-Wl,--as-needed \
-	$(all_shared_libs_filename) \
-	-Wl,--no-as-needed
+__external-add_LDFLAGS += -Wl,--as-needed
+$(foreach __lib,$(all_shared_libs_filename), \
+	$(eval __external-add_LDFLAGS := $(__external-add_LDFLAGS),-l:$(__lib)) \
+)
+__external-add_LDFLAGS := $(__external-add_LDFLAGS),--no-as-needed
 endif
 
 # Add local defined flags and libs
