@@ -271,7 +271,7 @@ def doCopy(dstFileName, srcFileName, options, doPatchShebang=False):
 
 	# make sure destination directory exists
 	dstDirName = os.path.split(dstFileName)[0]
-	if not os.path.exists(dstDirName):
+	if not os.path.lexists(dstDirName):
 		os.makedirs(dstDirName, 0755)
 
 	# do the copy by wanted method
@@ -334,7 +334,7 @@ def processDir(rootDir, options, withEmptyDir, copyType):
 				srcDirName = os.path.join(dirPath, dirName)
 				relPath = os.path.relpath(srcDirName, rootDir)
 				dstDirName = getRealPath(options.finalDir, relPath)
-				if not os.path.exists(dstDirName):
+				if not os.path.lexists(dstDirName):
 					logging.info("Directory : %s", relPath)
 					os.makedirs(dstDirName, 0755)
 
@@ -403,7 +403,7 @@ def processLinuxBasicSkel(options):
 	for entry in LINUX_BASIC_SKEL:
 		if entry[1] == None:
 			dstDirName = getRealPath(options.finalDir, entry[0])
-			if not os.path.exists(dstDirName):
+			if not os.path.lexists(dstDirName):
 				logging.info("Directory : %s", entry[0])
 				os.makedirs(dstDirName, 0755)
 		else:
