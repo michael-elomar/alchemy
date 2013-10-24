@@ -259,6 +259,10 @@ Mainly used by the android wrapper.
   At runtime the /data/pulsar will be mounted in /system/pulsar/data so this
   directory needs to be created as well. Finally when the target will be executed
   in its chroot environment, the final tree will be found correctly.
+* `TARGET_BUILD_PROPERTIES` : list of properties to put in file build.prop
+  loaded by boxinit at startup. The format is a list of `<key>=<value>` pair.
+  Default contains some `ro.build` keys that alchemy will put.
+  Note : each module can also specify its own properties in `LOCAL_BUILD_PROPERTIES`.
 
 * `USE_CLANG` : Use clang instead of gcc for compilation.
   Default is `0`.
@@ -566,6 +570,11 @@ build order.
 **Note**: `LOCAL_REQUIRED_MODULES` is preferred over `LOCAL_DEPENDS_MODULES`.
 Once migrated to `LOCAL_REQUIRED_MODULES`, `LOCAL_DEPENDS_MODULES` might be used
 for another purpose (like really have a build dependency).
+
+### `LOCAL_BUILD_PROPERTIES`
+
+List of properties to put in file build.prop loaded by boxinit at startup.
+The format is a list of `<key>=<value>` pair.
 
 ### `CONFIG_FILES`
 

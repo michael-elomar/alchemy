@@ -108,6 +108,9 @@ TARGET_CHROOT ?= 0
 # See documentation for format of file.
 TARGET_IMAGE_PATH_MAP_FILE ?=
 
+# List of target wise build properties to be put in build.prop file
+TARGET_BUILD_PROPERTIES ?=
+
 ###############################################################################
 ## Toolchain setup.
 ###############################################################################

@@ -584,8 +584,11 @@ include $(BUILD_SYSTEM)/image.mk
 # Gdb helpers
 include $(BUILD_SYSTEM)/gdb.mk
 
-# Gdb helpers
+# Sdk helpers
 include $(BUILD_SYSTEM)/sdk.mk
+
+# Sdk helpers
+include $(BUILD_SYSTEM)/properties.mk
 
 # Help
 include $(BUILD_SYSTEM)/help.mk

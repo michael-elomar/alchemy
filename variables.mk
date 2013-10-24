@@ -137,6 +137,10 @@ vars-LOCAL += FORCE_WHOLE_STATIC_LIBRARY
 vars-LOCAL += CLEAN_FILES
 vars-LOCAL += CLEAN_DIRS
 
+# List of properties to add in build.prop and then loaded by boxinit
+# Format : list of pair <key>=<value>
+vars-LOCAL += BUILD_PROPERTIES
+
 # Macro to be executed before installing binary in staging dir
 macros-LOCAL += CMD_PRE_INSTALL
 
@@ -263,6 +267,7 @@ vars-TARGET += PBUILD_FORCE_STATIC
 vars-TARGET += NOSTRIP_FINAL
 vars-TARGET += FORCE_EXTERNAL_CHECKS
 vars-TARGET += PBUILD_HOOK_USE_DESCRIBE
+vars-TARGET += BUILD_PROPERTIES
 
 # Tools
 vars-TARGET += CROSS

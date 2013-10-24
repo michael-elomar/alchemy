@@ -1,0 +1,51 @@
+###############################################################################
+## @file properties.mk
+## @author Y.M. Morgan
+## @date 2013/10/23
+##
+## Manage build properties for boxinit.
+###############################################################################
+
+# Path of files
+BUILD_PROP_FILE := $(TARGET_OUT_STAGING)/etc/build.prop
+BUILD_PROP_FILE_TMP := $(TARGET_OUT_BUILD)/build.prop
+
+# Add some generic properties
+TARGET_BUILD_PROPERTIES += \
+	ro.build.product=$(TARGET_PRODUCT) \
+	ro.build.variant=$(TARGET_PRODUCT_VARIANT) \
+	ro.build.hostname=$(shell hostname)
+
+# Put modules properties.
+$(foreach __mod,$(ALL_BUILD_MODULES), \
+	$(eval TARGET_BUILD_PROPERTIES += $(__modules.$(__mod).BUILD_PROPERTIES)) \
+)
+
+# Generate the file build.prop
+# Generate in build dir and copy in staging only if different
+.PHONY: gen-build-prop
+gen-build-prop:
+# Generate file
+	@rm -f $(BUILD_PROP_FILE_TMP)
+	@$(foreach __line,$(TARGET_BUILD_PROPERTIES), \
+		echo $(__line) >> $(BUILD_PROP_FILE_TMP); \
+	)
+# Copy only if needed (to keep timestamp of file)
+	@if test ! -f $(BUILD_PROP_FILE) ; then \
+		cp -af $(BUILD_PROP_FILE_TMP) $(BUILD_PROP_FILE); \
+	elif ! cmp -s $(BUILD_PROP_FILE_TMP) $(BUILD_PROP_FILE) ; then \
+		cp -af $(BUILD_PROP_FILE_TMP) $(BUILD_PROP_FILE); \
+	fi
+
+# Clean rule
+.PHONY: gen-build-prop-clean
+gen-build-prop-clean:
+	@rm -f $(BUILD_PROP_FILE_TMP)
+	@rm -f $(BUILD_PROP_FILE)
+
+# Add in common targets
+all: gen-build-prop
+clean: gen-build-prop-clean
+dirclean: gen-build-prop-clean
+clobber: gen-build-prop-clean
+
