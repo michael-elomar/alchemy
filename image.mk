@@ -113,10 +113,13 @@ clobber: image-cpio-clean
 ###############################################################################
 .PHONY: native-fix-script
 native-fix-script:
-	$(Q) cd $(TARGET_OUT_FINAL); \
-		find . ! -name '.' -printf '%P\n' | \
-		$(FIXSTAT) --generate-fix-script > \
-		$(TARGET_OUT_FINAL)/native-fixperms.sh
+	@if [ -f $(TARGET_OUT)/filelist.txt ]; then \
+		cd $(TARGET_OUT_FINAL); \
+			cat $(TARGET_OUT)/filelist.txt | \
+			$(FIXSTAT) --generate-fix-script > \
+			$(TARGET_OUT_FINAL)/native-fixperms.sh; \
+	fi
+	@chmod +x $(TARGET_OUT_FINAL)/native-fixperms.sh
 
 .PHONY: native-fix-script-clean
 native-fix-script-clean:

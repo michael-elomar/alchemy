@@ -237,6 +237,9 @@ def doCopyDirect(dstFileName, srcFileName, options, doStrip=False, doPatchSheban
 def doCopy(dstFileName, srcFileName, options, doPatchShebang=False):
 	relPath = os.path.relpath(dstFileName, options.finalDir)
 
+	if options.fileListFile != None:
+		options.fileListFile.write("%s\n" % relPath)
+
 	# do we need to strip ?
 	# FIXME: stripping kernel modules under android causes issues
 	doStrip = False
@@ -433,6 +436,15 @@ def main():
 		logging.info("makefile : %s", args[2])
 		options.makefile = open(args[2], "w")
 
+	# filelist file
+	options.fileListFile = None
+	if options.fileListPath != None:
+		try:
+			options.fileListFile = open(options.fileListPath, "w")
+		except IOError as ex:
+			logging.error("Failed to create file: '%s' [err=%d %s]",
+					options.fileListPath, ex.errno, ex.strerror)
+
 	# regex for strip filters
 	options.reStripFilters = []
 	for stripFilter in options.stripFilters:
@@ -525,6 +537,10 @@ def parseArgs():
 		dest="buildIdSectionName",
 		default=None,
 		help="name of build id section to add")
+	parser.add_option("--filelist",
+		dest="fileListPath",
+		default=None,
+		help="file where to store list of installed files")
 
 	parser.add_option("-q",
 		dest="quiet",

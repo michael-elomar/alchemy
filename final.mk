@@ -11,7 +11,7 @@
 ###############################################################################
 
 MAKEFINAL_SCRIPT := $(BUILD_SYSTEM)/scripts/makefinal.py
-MAKEFINAL_ARGS := 
+MAKEFINAL_ARGS :=
 
 ifneq ("$(TARGET_STRIP)","")
 ifeq ("$(TARGET_NOSTRIP_FINAL)","0")
@@ -62,6 +62,9 @@ endif
 # Additional files to filter
 MAKEFINAL_ARGS += \
 	$(foreach __lib,$(TARGET_STRIP_FILTER),--strip-filter="$(__lib)")
+
+MAKEFINAL_ARGS += \
+	--filelist=$(TARGET_OUT)/filelist.txt
 
 ###############################################################################
 ## Add a build-id section to all binaries in staging dir before copying them
