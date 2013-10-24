@@ -107,3 +107,29 @@ endif
 clean: image-cpio-clean
 dirclean: image-cpio-clean
 clobber: image-cpio-clean
+
+###############################################################################
+## Script for fixing permissions on-the-fly in native final tree.
+###############################################################################
+.PHONY: native-fix-script
+native-fix-script:
+	$(Q) cd $(TARGET_OUT_FINAL); \
+		find . ! -name '.' -printf '%P\n' | \
+		$(FIXSTAT) --generate-fix-script > \
+		$(TARGET_OUT_FINAL)/native-fixperms.sh
+
+.PHONY: native-fix-script-clean
+native-fix-script-clean:
+	$(Q) rm -f $(TARGET_OUT_FINAL)/native-fixperms.sh
+
+# Only add dependency if it is also given in goals to avoid unecessary checks
+ifneq ("$(call is-targets-in-make-goals,all)","")
+native-fix-script: all
+endif
+ifneq ("$(call is-targets-in-make-goals,final)","")
+native-fix-script: final
+endif
+
+clean: native-fix-script-clean
+dirclean: native-fix-script-clean
+clobber: native-fix-script-clean
