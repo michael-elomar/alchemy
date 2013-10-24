@@ -123,6 +123,9 @@ def resolveLink(finalDir, path):
 # they points to absolute path
 #
 # Taken from os.path.realpath
+#
+# Note : the last level of link is not resolved as it can be the one we want to
+# create and it already exist.
 #===============================================================================
 def getRealPath(finalDir, path):
 	# First, make it absolute
@@ -130,7 +133,7 @@ def getRealPath(finalDir, path):
 		path = os.path.join(finalDir, path)
 	bits = ["/"] + path.split("/")[1:]
 
-	for i in range(2, len(bits) + 1):
+	for i in range(2, len(bits)):
 		component = os.path.join(*bits[0:i])
 		# Resolve symbolic links.
 		if os.path.islink(component):
