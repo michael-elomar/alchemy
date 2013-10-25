@@ -232,17 +232,33 @@ def doCopyDirect(dstFileName, srcFileName, options, doStrip=False, doPatchSheban
 		os.system(cmd)
 
 #===============================================================================
+#===============================================================================
+def addPathInFileList(relPath, isDir, options):
+	# Nothing to do it option not given
+	if options.fileListFile == None:
+		return
+
+	# Make sure all path leading to this one is logged
+	parts = relPath.split("/")[:-1]
+	for i in range(0, len(parts)):
+		parentDir = "/".join(parts[0:i])
+		if parentDir != "" and parentDir not in options.fileListDirs:
+			options.fileListDirs.append(parentDir)
+			options.fileListFile.write("%s/\n" % parentDir)
+
+	if isDir:
+		if relPath not in options.fileListDirs:
+			options.fileListDirs.append(relPath)
+		relPath += "/"
+	options.fileListFile.write("%s\n" % relPath)
+
+#===============================================================================
 # Copy a file/link.
 #===============================================================================
 def doCopy(dstFileName, srcFileName, options, doPatchShebang=False):
 	relPath = os.path.relpath(dstFileName, options.finalDir)
 
-	if options.fileListFile != None:
-		relPathDir = os.path.dirname(relPath)
-		if relPathDir != "" and relPathDir not in options.fileListDirs:
-			options.fileListDirs.append(relPathDir)
-			options.fileListFile.write("%s/\n" % relPathDir)
-		options.fileListFile.write("%s\n" % relPath)
+	addPathInFileList(relPath, False, options)
 
 	# do we need to strip ?
 	# FIXME: stripping kernel modules under android causes issues
@@ -344,6 +360,7 @@ def processDir(rootDir, options, withEmptyDir, copyType):
 				srcDirName = os.path.join(dirPath, dirName)
 				relPath = os.path.relpath(srcDirName, rootDir)
 				dstDirName = getRealPath(options.finalDir, relPath)
+				addPathInFileList(relPath, True, options)
 				if not os.path.lexists(dstDirName):
 					logging.info("Directory : %s", relPath)
 					os.makedirs(dstDirName, 0755)
