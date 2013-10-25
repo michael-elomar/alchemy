@@ -238,6 +238,10 @@ def doCopy(dstFileName, srcFileName, options, doPatchShebang=False):
 	relPath = os.path.relpath(dstFileName, options.finalDir)
 
 	if options.fileListFile != None:
+		relPathDir = os.path.dirname(relPath)
+		if relPathDir != "" and relPathDir not in options.fileListDirs:
+			options.fileListDirs.append(relPathDir)
+			options.fileListFile.write("%s/\n" % relPathDir)
 		options.fileListFile.write("%s\n" % relPath)
 
 	# do we need to strip ?
@@ -438,6 +442,7 @@ def main():
 
 	# filelist file
 	options.fileListFile = None
+	options.fileListDirs = []
 	if options.fileListPath != None:
 		try:
 			options.fileListFile = open(options.fileListPath, "w")
