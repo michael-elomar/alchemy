@@ -25,6 +25,8 @@ $(foreach __mod,$(ALL_BUILD_MODULES), \
 # Generate in build dir and copy in staging only if different
 .PHONY: gen-build-prop
 gen-build-prop:
+	@mkdir -p $(dir $(BUILD_PROP_FILE_TMP))
+	@mkdir -p $(dir $(BUILD_PROP_FILE))
 # Generate file
 	@rm -f $(BUILD_PROP_FILE_TMP)
 	@$(foreach __line,$(TARGET_BUILD_PROPERTIES), \
