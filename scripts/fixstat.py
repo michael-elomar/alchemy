@@ -162,24 +162,24 @@ def fixstat(ctx, filePath, st):
 #===============================================================================
 def generateFixScript(ctx):
 	sys.stdout.write("#!/bin/sh\n")
-
+	count = 0
 	# Read file names on stdin
 	for line in sys.stdin:
 		filePath = line.rstrip("\n")
 		st = fixstat(ctx, filePath, MyStat(os.lstat(filePath)))
-		# generate fix commands only for non-root owner/perms
-		if st.uid == 0 and st.gid == 0 and (st.mode == 040755 or st.mode == 0100644):
+		# generate fix commands only for non-root owned files/dirs
+		if (st.uid == 0 and st.gid == 0) or stat.S_ISLNK(st.mode):
 			continue
-		# ignore links
-		if stat.S_ISLNK(st.mode):
-			continue
-		buf = ""
-		# assume default ownership is set to root beforehand
-		if st.uid != 0 or st.gid != 0:
-			buf += "chown %d:%d '%s';" % (st.uid, st.gid, filePath)
-		buf += "chmod 0%o '%s'" % (st.mode & 0777, filePath)
-		logging.debug("%s", buf)
-		sys.stdout.write(buf + "\n")
+		if count == 0:
+			sys.stdout.write("chmod go+rwX ")
+		buf = " \\\n'%s'" % filePath
+		logging.debug("%s", filePath)
+		sys.stdout.write(buf)
+		count += 1
+		if count >= 64:
+			sys.stdout.write("\n")
+			count = 0
+	sys.stdout.write("\n")
 
 #===============================================================================
 # Main function.
