@@ -42,9 +42,13 @@ image-plf:
 	else \
 		echo "Image plf: no kernel image found"; \
 	fi
-	$(Q) cd $(TARGET_OUT_FINAL); \
+	$(Q) if [ ! -d $(TARGET_OUT_FINAL) ]; then \
+		echo "Image plf: missing final directory"; exit 1; \
+	else \
+		cd $(TARGET_OUT_FINAL); \
 		find . ! -name '.' -printf '%P\n' | $(FIXSTAT) | \
-			plfbatch '-a u_unixfile="&"' $(IMAGE_FILE_PLF)
+			plfbatch '-a u_unixfile="&"' $(IMAGE_FILE_PLF); \
+	fi
 ifneq ("$(TARGET_IMAGE_PATH_MAP_FILE)","")
 	$(Q) PLFTOOL=$(PLFTOOL) $(BUILD_SYSTEM)/scripts/plfremap.py \
 		$(TARGET_IMAGE_PATH_MAP_FILE) \
@@ -86,8 +90,12 @@ image-cpio:
 	@echo "Image cpio: start"
 	$(Q) rm -f $(IMAGE_FILE_CPIO)
 	$(Q) rm -f $(IMAGE_FILE_CPIO_GZ)
-	$(Q) cd $(TARGET_OUT_FINAL); \
-		find . ! -name '.' | cpio --quiet -o -H newc > $(IMAGE_FILE_CPIO)
+	$(Q) if [ ! -d $(TARGET_OUT_FINAL) ]; then \
+		echo "Image cpio: missing final directory"; exit 1; \
+	else \
+		cd $(TARGET_OUT_FINAL); \
+		find . ! -name '.' | cpio --quiet -o -H newc > $(IMAGE_FILE_CPIO); \
+	fi
 	$(Q) gzip -9 $(IMAGE_FILE_CPIO)
 	@echo "Image cpio: done -> $(IMAGE_FILE_CPIO_GZ)"
 
@@ -113,7 +121,7 @@ clobber: image-cpio-clean
 ###############################################################################
 .PHONY: native-fix-script
 native-fix-script:
-	@if [ -f $(TARGET_OUT)/filelist.txt ]; then \
+	$(Q) if [ -f $(TARGET_OUT)/filelist.txt ]; then \
 		cd $(TARGET_OUT_FINAL); \
 			cat $(TARGET_OUT)/filelist.txt | \
 			$(FIXSTAT) --generate-fix-script > \
