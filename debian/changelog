@@ -1,3 +1,27 @@
+parrot-tools-alchemy (1.0.10) unstable; urgency=low
+  * Add missing libc file (libcrypt) in native chroot.
+  * Fix parallel checks when executed by Jenkins.
+  * Do not specify -march=armv5te for ecos (mcpu is enough).
+  * Avoid identical files in codecheck.
+  * Add TARGET_SDK_DIRS in PKG_CONFIG_PATH.
+  * Fix check of 'host.' prefix in LOCAL_MODULE.
+  * Add macro all-c-files-in, non-recursive version of all-c-files-under
+  * Allow autoconf-merge to work with sdk.
+  * Allow a custom macro to be integrated in a sdk.
+  * Add support for vala compilation.
+  * Allow overriding CONFIG_GLOBAL_FILE.
+  * Fix autotools dependencies.
+  * Fix LDFLAGS given to autotools when using alchemy libraries.
+  * Add TARGET_BUILD_PROPERTIES and LOCAL_BUILD_PROPERTIES variables.
+  * [BUGFIX 0123653] image-cpio produce big file if final is not done
+  * Remove some deprecated stuff.
+  * Fix build of libnl with bionic toolchain.
+  * Add support for libnativehelper android module.
+  * Add support for libxml2 Android package.
+  * Allow to disable config check.
+
+ -- Yves-Marie Morgan (Parrot) <yves-marie.morgan@parrot.com>  Thu, 31 Oct 2013 11:33:25 +0100
+
 parrot-tools-alchemy (1.0.9) unstable; urgency=low
   * Prevent parallel installation of kernel headers an check of config.
   * fix codecheck c includes filepath
