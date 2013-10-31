@@ -737,17 +737,9 @@ module-get-depends = \
 	$(__modules.$1.depends)
 
 # Get dependencies for configuration
-# Put build dependencies only if requested
-# TODO: remove completely in next version (first step is error).
-ifeq ("$(USE_BUILD_DEPS_CHECK_IN_CONFIG)","0")
-$(error Please do not set USE_BUILD_DEPS_CHECK_IN_CONFIG at 0)
-module-get-config-depends = \
-	$(__modules.$1.depends.other)
-else
 module-get-config-depends = \
 	$(__modules.$1.depends) \
 	$(__modules.$1.depends.other)
-endif
 
 ###############################################################################
 ## Get path of module main target file (in build or staging directory).
@@ -1073,20 +1065,13 @@ macro-is-empty = $(call not,$(value $1))
 ## $2 : default macro if $1 is empty.
 ##
 ## Note : if the content of the variable is empty, the default one will be used.
-##        If the content is only one word, it is assumed to be the actual macro
-##        to be called (one more level of macro call). Otherwise, macro is
-##        called directly.
 ## Note : we access macros from the module database because we can't create
 ##        PRIVATE_XXX target-specific variables for them.
-## Note : the part where we check for single word can be removed when all user
-##        makefiles have been converted to use new way of defining commands.
 ###############################################################################
 macro-exec-cmd = \
 	$(eval __var := __modules.$(PRIVATE_MODULE).$1) \
 	$(if $(value $(__var)), \
-		$(if $(call streq,$(words $(value $(__var))),1), \
-			$($($(__var))),$($(__var)) \
-		), \
+		$($(__var)), \
 		$(if $2,$($2)) \
 	)
 
@@ -1442,9 +1427,3 @@ local-get-build-dir = $(strip \
 # $1 : name of the macro to register
 local-register-custom-macro = \
 	$(eval __custom-macros += $1)
-
-# Register module (deprecated)
-# TODO: remove completely in next version (first step is error).
-local-add-module = \
-	$(error Please use include $$(BUILD_CUSTOM) instead of local-add-module) \
-	$(module-add)

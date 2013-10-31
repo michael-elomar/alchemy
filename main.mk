@@ -37,7 +37,6 @@ USE_CLANG ?= 0
 USE_CCACHE ?= 0
 USE_SCAN_CACHE ?= 0
 USE_COLORS ?= 0
-USE_BUILD_DEPS_CHECK_IN_CONFIG ?= 1
 USE_GIT_REV ?= 1
 
 # The host module feature might break temporatily some atom/mk, add a flag
@@ -66,12 +65,6 @@ MAKECMDGOALS ?= all
 ## The following 2 macros can NOT be put in defs.mk as it will be included
 ## only after.
 ###############################################################################
-
-# Get full path. Deprecated, use built-in abspath instead (and not realpath
-# that fails if path does not exists).
-# $1 : path to extend.
-#fullpath = $(strip $(shell readlink -m -n $1))
-fullpath = $(error deprecated)
 
 # Figure out where we are
 # It returns the full path without trailing '/'

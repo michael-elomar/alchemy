@@ -18,13 +18,6 @@ TARGET_GLOBAL_LDFLAGS_SHARED ?=
 TARGET_GLOBAL_LDLIBS ?=
 TARGET_GLOBAL_LDLIBS_SHARED ?=
 
-# Compatibility: use provided variable and make sure no user makefile use it.
-# TODO: remove completely in next version (first step is error).
-ifdef TARGET_GLOBAL_CPPFLAGS
-  TARGET_GLOBAL_CXXFLAGS += $(TARGET_GLOBAL_CPPFLAGS)
-  $(error Please use TARGET_GLOBAL_CXXFLAGS instead of TARGET_GLOBAL_CPPFLAGS)
-endif
-
 # Pre-compiled header generation flag
 ifneq ("$(USE_CLANG)","1")
   TARGET_GLOBAL_PCH_FLAGS ?= -c

@@ -40,12 +40,6 @@ TARGET_SKEL ?=
 TARGET_SKEL_DIRS ?=
 TARGET_NOSTRIP_FINAL ?= 0
 
-# TODO: remove completely in next version (first step is error).
-ifneq ("$(TARGET_SKEL)","")
-$(error Please use 'TARGET_SKEL_DIRS' instead of 'TARGET_SKEL')
-endif
-TARGET_SKEL_DIRS += $(TARGET_SKEL)
-
 TARGET_CONFIG_DIR ?= $(TOP_DIR)/Alchemy-config/$(TARGET_PRODUCT)-$(TARGET_PRODUCT_VARIANT)
 
 # Force usind static libraries instead of shared for module that specifies they support it

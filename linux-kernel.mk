@@ -39,13 +39,6 @@ ifeq ("$(wildcard $(LINUX_CONFIG_FILE))","")
   endif
 endif
 
-# Old name compat
-# TODO: remove completely in next version (first step is error).
-ifdef LINUX_CROSS
-  $(error Please use TARGET_LINUX_CROSS instead of LINUX_CROSS)
-  TARGET_LINUX_CROSS := $(LINUX_CROSS)
-endif
-
 # Linux Toolchain
 ifndef TARGET_LINUX_CROSS
   TARGET_LINUX_CROSS := $(TARGET_CROSS)
@@ -53,7 +46,7 @@ endif
 
 # Old name compat
 ifndef LINUX_CROSS
-  LINUX_CROSS := $(TARGET_LINUX_CROSS)
+  override LINUX_CROSS = $(error please use TARGET_LINUX_CROSS instead of LINUX_CROSS)
 endif
 
 # Make sure this variable is defined (so make --warn-undefined-variables is quiet)
