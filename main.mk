@@ -346,6 +346,8 @@ ifeq ("$(USE_SCAN_CACHE)","0")
   do-create-cache := 1
 else ifneq ("$(call is-targets-in-make-goals,scan)","")
   do-create-cache := 1
+else
+  $(warning Using scan cache, some atom.mk might be missing...)
 endif
 
 ifneq ("$(do-create-cache)","0")
