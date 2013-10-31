@@ -282,6 +282,9 @@ Mainly used by the android wrapper.
 * `USE_GIT_REV` : Retrieve git revision of modules to force compilation of
   external modules when the related project is updated.
   </br>Default is `1`.
+* `USE_CONFIG_CHECK` : Enable check of config before the build. Only need to be
+  disabled in some sdk use cases.
+  </br>Default is `1`.
 
 ## Configuration
 

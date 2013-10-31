@@ -31,8 +31,12 @@ config-check:
 # Check everything at once, in silence, stopping in case not up to date
 .PHONY: __config-check
 __config-check:
+ifneq ("$(USE_CONFIG_CHECK)","0")
 	$(eval __args := $(call __generate-config-args))
 	@$(CONFWRAPPER) --main=$(CONFIG_GLOBAL_FILE) check $(__args)
+else
+	@echo "Config check disabled : USE_CONFIG_CHECK=$(USE_CONFIG_CHECK)"
+endif
 
 # Update everything at once
 .PHONY: config-update

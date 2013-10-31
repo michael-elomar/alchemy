@@ -38,6 +38,7 @@ USE_CCACHE ?= 0
 USE_SCAN_CACHE ?= 0
 USE_COLORS ?= 0
 USE_GIT_REV ?= 1
+USE_CONFIG_CHECK ?= 1
 
 # The host module feature might break temporatily some atom/mk, add a flag
 # so it can be checked
