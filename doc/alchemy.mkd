@@ -19,9 +19,9 @@ As the build system is real close in its philosophy to the Android one, please
 take a look at the following documentation to have a overview of the system.
 This build system differs mainly in the set of `LOCAL_XXX` variables supported.
 
-[Android build system](http://jyraphe.b219.org/file.php?h=R2bada79bf459f64eee2c92147dc8dd3d)
+[Android build system](android-build-system.html)
 
-[Android ndk build system](http://jyraphe.b219.org/file.php?h=R630e0caa0faeed93d96adddc8fd404ef)
+[Android ndk build system](android-mk.html)
 
 **Note** : This documentation tries to be up to date but take a look at
 the file `variables.mk` for a complete list of `LOCAL_xxx` and `TARGET_xxx`
