@@ -68,7 +68,7 @@ remove-quotes = $(strip $(subst ",,$1))
 
 # Check that the current directory is the top directory
 check-pwd-is-top-dir = \
-	$(if $(patsubst $(TOP_DIR)%,%,$(shell pwd)), \
+	$(if $(patsubst $(TOP_DIR)%,%,$(realpath $(shell pwd))), \
 		$(error Not at the top directory))
 
 # Determine if a path is absolute.
