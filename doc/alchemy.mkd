@@ -358,7 +358,7 @@ some default behaviours.
 
 ### `product.mk`
 
-This file, if found in the folder pointer to by `TARGET_CONFIG_DIR`, is included
+This file, if found in the folder pointed to by `TARGET_CONFIG_DIR`, is included
 and allow tuning of some variables (basically all `TARGET_XXX` variables)
 
 ### `Alchemy-debug-setup.mk`
