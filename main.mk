@@ -75,9 +75,9 @@ my-dir = $(abspath $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST)))))
 ## Env system setup.
 ###############################################################################
 
-# Directories (full path)
+# Directories (full and real path)
 ALCHEMY_WORKSPACE_DIR ?= $(shell pwd)
-TOP_DIR := $(ALCHEMY_WORKSPACE_DIR)
+TOP_DIR := $(realpath $(ALCHEMY_WORKSPACE_DIR))
 
 # Import target product from env
 ifdef ALCHEMY_TARGET_PRODUCT
