@@ -323,7 +323,6 @@ create-user-makefiles-cache = \
 	rm -f $(USER_MAKEFILES_CACHE); \
 	mkdir -p $(dir $(USER_MAKEFILES_CACHE)); \
 	touch $(USER_MAKEFILES_CACHE); \
-	$(info Scanning $(TOP_DIR) for makefiles...) \
 	( \
 		files="$(addsuffix /$(USER_MAKEFILE_NAME),$(TARGET_SDK_DIRS))"; \
 		for f in $$files `$(find-cmd)`; do \

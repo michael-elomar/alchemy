@@ -10,6 +10,7 @@ def processDir(resultList, topDir, fileName, options):
 	# Check that the directory is not in the prune list
 	if topDir in options.pruneList:
 		return
+	sys.stderr.write("Scanning %s for makefiles...\n" % topDir)
 	for dirPath, dirNames, fileNames in os.walk(topDir, followlinks=options.followLinks):
 		# Remove directories to skip from list
 		i = 0
