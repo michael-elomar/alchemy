@@ -4,6 +4,28 @@
 
 LOCAL_PATH := $(call my-dir)
 
+# We don't have any atom.mk but internally the build system will add a dependency
+# ont it, make it happy
+$(LOCAL_PATH)/$(USER_MAKEFILE_NAME):
+
+###############################################################################
+## Fake module to generate autoconf-merge.h file correctly.
+## If this module is found in the dependencies of a module being built all
+## modules using a config.in file will be have their rules loaded as well.
+###############################################################################
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := autoconf-merge
+LOCAL_MODULE_FILENAME := $(LOCAL_MODULE).done
+
+# Module .done file
+$(call local-get-build-dir)/$(LOCAL_MODULE_FILENAME):
+	@mkdir -p $(dir $@)
+	@touch $@
+
+include $(BUILD_CUSTOM)
+
 ###############################################################################
 ## This part will generate message.xml from a list of known modules using this
 ## feature.
@@ -184,10 +206,6 @@ LOCAL_CLEAN_FILES := \
 	$(MSGBUILDER_OBJ) \
 	$(MSGBUILDER_OBJ:.o=.d) \
 	$(MSGBUILDER_XML_FILE)
-
-# We don't have any atom.mk but internally the build system will add a dependency
-# ont it, make it happy
-$(LOCAL_PATH)/$(USER_MAKEFILE_NAME):
 
 include $(BUILD_CUSTOM)
 

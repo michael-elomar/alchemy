@@ -474,6 +474,15 @@ $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST), \
 )
 endif
 
+# If autoconf-merge is present, force including all modules having a config .in
+ifneq ("$(filter autoconf-merge,$(__modlist))","")
+$(foreach __mod,$(ALL_BUILD_MODULES), \
+	$(eval __modlist += \
+		$(if $(__modules.$(__mod).CONFIG_FILES),$(__mod)) \
+	) \
+)
+endif
+
 # Update module list, based on filtering
 ifeq ("$(__dofilter)","0")
   __modlist := $(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST)
