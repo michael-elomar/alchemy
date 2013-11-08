@@ -393,6 +393,11 @@ include $(BUILD_SYSTEM)/pbuild-hook/pbuild-hook.mk
 # Now that all modules have been registered, sort the variable
 __modules := $(sort $(__modules))
 
+# Execute custom macros of modules
+$(foreach __mod,$(__modules), \
+	$(call exec-custom-macro,$(__mod)) \
+)
+
 # Recompute all dependencies between modules
 $(call modules-compute-depends)
 
