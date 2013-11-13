@@ -782,8 +782,8 @@ $(foreach __pair,$(LOCAL_CREATE_LINKS), \
 	$(eval $(call create-one-link,$(__name),$(__target))) \
 )
 
-# Add links to be created as a dependency
-$(LOCAL_BUILD_MODULE): $(all_create_links)
+# Add links to be created as an order-only dependency (does not force rebuild)
+$(LOCAL_BUILD_MODULE): | $(all_create_links)
 
 # Add rule to delete created links during clean
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(all_create_links)
