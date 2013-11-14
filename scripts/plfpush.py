@@ -37,7 +37,7 @@ def pushDir(ctx, section):
 	print("Dir: %s" % section.path)
 	args = ["shell", "mkdir", "-p", section.path]
 	execAdb(ctx, args)
-	args = ["shell", "chmod", "0%o" % section.mode, section.path]
+	args = ["shell", "chmod", "0%o" % stat.S_IMODE(section.mode), section.path]
 	execAdb(ctx, args)
 	args = ["shell", "chown", "%d:%d" % (section.gid, section.uid), section.path]
 	execAdb(ctx, args)
@@ -75,7 +75,7 @@ def pushFile(ctx, section):
 	# push file and update its mode
 	args = ["push", tmpFilePath, section.path]
 	execAdb(ctx, args)
-	args = ["shell", "chmod", "0%o" % section.mode, section.path]
+	args = ["shell", "chmod", "0%o" % stat.S_IMODE(section.mode), section.path]
 	execAdb(ctx, args)
 	args = ["shell", "chown", "%d:%d" % (section.gid, section.uid), section.path]
 	execAdb(ctx, args)
