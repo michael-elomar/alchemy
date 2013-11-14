@@ -157,6 +157,40 @@ endif
 endif
 endif
 
+# Shag
+ifneq ("$(call is-module-registered,shag)","")
+ifneq ("$(call is-module-in-build-config,shag)","")
+ifeq ("$(__modules.shag.SDK)","")
+MSGBUILDER_CKCM_MSG_FILES += \
+	$(__modules.shag.PATH)/Sources/Main/Appl_Msgs.ckcm.c
+MSGBUILDER_CKCM_CFLAGS += \
+	-D_APPL_ \
+	-I$(__modules.shag.PATH)/Include \
+	-I$(__modules.shag.PATH)/Sources \
+	-I$(__modules.shag.PATH)/Sources/Main
+LOCAL_PREREQUISITES += $(__modules.shag.PREREQUISITES)
+LOCAL_PREREQUISITES += $(__modules.shag.EXPORT_PREREQUISITES)
+endif
+endif
+endif
+
+# Britannia
+ifneq ("$(call is-module-registered,britannia)","")
+ifneq ("$(call is-module-in-build-config,britannia)","")
+ifeq ("$(__modules.britannia.SDK)","")
+MSGBUILDER_CKCM_MSG_FILES += \
+	$(__modules.britannia.PATH)/Sources/Main/Appl_Msgs.ckcm.c
+MSGBUILDER_CKCM_CFLAGS += \
+	-D_APPL_ \
+	-I$(__modules.britannia.PATH)/Include \
+	-I$(__modules.britannia.PATH)/Sources \
+	-I$(__modules.britannia.PATH)/Sources/Main
+LOCAL_PREREQUISITES += $(__modules.britannia.PREREQUISITES)
+LOCAL_PREREQUISITES += $(__modules.britannia.EXPORT_PREREQUISITES)
+endif
+endif
+endif
+
 # Compile one file
 # $1 : source file
 # $2 : object file
