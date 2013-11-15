@@ -29,7 +29,8 @@ EXCLUDE_DIRS = [
 	"pkgconfig", "aclocal", "locale"]
 
 # Extension to exclude
-EXCLUDE_FILTERS = [".a", ".la", ".py", ".pyc", ".pyo"]
+EXCLUDE_FILTERS = [".a", ".la"]
+EXCLUDE_FILTERS_PYTHON = [".py", ".pyc", ".pyo"]
 
 # Files to exclude
 EXCLUDE_FILES = [
@@ -457,6 +458,10 @@ def main():
 		logging.info("makefile : %s", args[2])
 		options.makefile = open(args[2], "w")
 
+	# update filter
+	if not options.keepPythonFiles:
+		EXCLUDE_FILTERS.extend(EXCLUDE_FILTERS_PYTHON)
+
 	# filelist file
 	options.fileListFile = None
 	options.fileListDirs = []
@@ -563,6 +568,11 @@ def parseArgs():
 		dest="fileListPath",
 		default=None,
 		help="file where to store list of installed files")
+	parser.add_option("--keep-python-files",
+		dest="keepPythonFiles",
+		action="store_true",
+		default=False,
+		help="keep python files (*.py, *.pyc, *.pyo)")
 
 	parser.add_option("-q",
 		dest="quiet",

@@ -51,6 +51,14 @@ MAKEFINAL_ARGS += \
 	--strip-filter="vgpreload*.so"
 endif
 
+# When python is used, keep its files, otherwise filter them (default)
+ifneq ("$(call is-module-in-build-config,python)","")
+  MAKEFINAL_ARGS += --keep-python-files
+endif
+ifneq ("$(call is-module-in-build-config,python3)","")
+  MAKEFINAL_ARGS += --keep-python-files
+endif
+
 # Remove write access to 'group' and 'other'. For native only, a fixstat tools
 # is used on other variant when geberating the image
 ifeq ("$(TARGET_OS)","linux")
