@@ -118,6 +118,27 @@ HOST_OS := linux
 HOST_OUT_BUILD ?= $(TARGET_OUT)/build-host
 HOST_OUT_STAGING ?= $(TARGET_OUT)/staging-host
 
+HOST_CC ?= gcc
+HOST_CXX ?= g++
+HOST_AS ?= as
+HOST_AR ?= ar
+HOST_LD ?= ld
+HOST_NM ?= nm
+HOST_STRIP ?= strip
+HOST_CPP ?= cpp
+HOST_RANLIB ?= ranlib
+HOST_OBJCOPY ?= objcopy
+HOST_OBJDUMP ?= objdump
+
+# Architecture
+ifndef HOST_ARCH
+  ifneq ("$(shell $(HOST_CC) -dumpmachine | grep 64)","")
+    HOST_ARCH := x64
+  else
+    HOST_ARCH := x86
+  endif
+endif
+
 # Setup flags
 HOST_GLOBAL_C_INCLUDES ?=
 HOST_GLOBAL_CFLAGS ?=
@@ -134,17 +155,9 @@ HOST_GLOBAL_CFLAGS += -pipe -O2 -g0
 HOST_GLOBAL_ARFLAGS += rcs
 HOST_GLOBAL_LDFLAGS +=
 
-HOST_CC ?= gcc
-HOST_CXX ?= g++
-HOST_AS ?= as
-HOST_AR ?= ar
-HOST_LD ?= ld
-HOST_NM ?= nm
-HOST_STRIP ?= strip
-HOST_CPP ?= cpp
-HOST_RANLIB ?= ranlib
-HOST_OBJCOPY ?= objcopy
-HOST_OBJDUMP ?= objdump
+ifeq ("$(HOST_ARCH)","x64")
+  HOST_GLOBAL_CFLAGS += -fPIC
+endif
 
 # Copy content of host staging from sdk
 $(foreach __dir,$(TARGET_SDK_DIRS), \
