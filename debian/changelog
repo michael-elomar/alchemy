@@ -1,3 +1,12 @@
+parrot-tools-alchemy (1.0.11) unstable; urgency=low
+  * [BUGFIX 0124750] Modules depending on autoconf.h can't be built on standalone
+  * Put dep on created link as order only.
+  * Add shag and britannia in msgbuilder hook.
+  * Fix plfpush chmod.
+  * Print all scanned directories.
+
+ -- Yves-Marie Morgan (Parrot) <yves-marie.morgan@parrot.com>  Mon, 18 Nov 2013 09:54:04 +0100
+
 parrot-tools-alchemy (1.0.10) unstable; urgency=low
   * Add missing libc file (libcrypt) in native chroot.
   * Fix parallel checks when executed by Jenkins.
