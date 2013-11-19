@@ -1187,7 +1187,7 @@ link-hook = $(strip \
 
 define add-depends-section
 $(eval __depsdata := $(empty))
-$(foreach __lib,$(PRIVATE_MODULE) $(__modules.$(PRIVATE_MODULE).depends.link), \
+$(foreach __lib,$(PRIVATE_MODULE) $(__modules.$(PRIVATE_MODULE).depends.all), \
 	$(eval __depsdata += $(__lib):$(__modules.$(__lib).REVISION)) \
 )
 $(eval __depsdata := $(subst $(space),\n,$(strip $(__depsdata))))
