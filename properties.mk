@@ -22,22 +22,18 @@ $(foreach __mod,$(ALL_BUILD_MODULES), \
 )
 
 # Generate the file build.prop
-# Generate in build dir and copy in staging only if different
+# Generate in build dir and copy in staging
 .PHONY: gen-build-prop
 gen-build-prop:
 	@mkdir -p $(dir $(BUILD_PROP_FILE_TMP))
 	@mkdir -p $(dir $(BUILD_PROP_FILE))
-# Generate file
 	@rm -f $(BUILD_PROP_FILE_TMP)
+	@echo "ro.build.date=`date`" >> $(BUILD_PROP_FILE_TMP)
+	@echo "ro.build.date.utc=`date +%s`" >> $(BUILD_PROP_FILE_TMP)
 	@$(foreach __line,$(TARGET_BUILD_PROPERTIES), \
 		echo $(__line) >> $(BUILD_PROP_FILE_TMP); \
 	)
-# Copy only if needed (to keep timestamp of file)
-	@if test ! -f $(BUILD_PROP_FILE) ; then \
-		cp -af $(BUILD_PROP_FILE_TMP) $(BUILD_PROP_FILE); \
-	elif ! cmp -s $(BUILD_PROP_FILE_TMP) $(BUILD_PROP_FILE) ; then \
-		cp -af $(BUILD_PROP_FILE_TMP) $(BUILD_PROP_FILE); \
-	fi
+	@cp -af $(BUILD_PROP_FILE_TMP) $(BUILD_PROP_FILE)
 
 # Clean rule
 .PHONY: gen-build-prop-clean
