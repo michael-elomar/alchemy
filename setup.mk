@@ -168,6 +168,19 @@ $(foreach __dir,$(TARGET_SDK_DIRS), \
 )
 
 ###############################################################################
+## Find some tools.
+###############################################################################
+
+# We need bison 2.5 but android force version 2.3 in the path that causes troubles
+BISON_PATH ?= $(shell which bison)
+ifneq ("$(BISON_PATH)","")
+  BISON_VERSION := $(shell $(BISON_PATH) --version | head -1 | sed "s/.*\([0-9]\.[0-9]\).*/\1/")
+  ifeq ("$(call check-version,$(BISON_VERSION),2.5)","")
+    BISON_PATH := /usr/bin/bison
+  endif
+endif
+
+###############################################################################
 ## Update host flags.
 ###############################################################################
 
