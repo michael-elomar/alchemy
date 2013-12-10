@@ -178,7 +178,7 @@ endif
 __clean-targets := clean dirclean clobber
 __query-targets := scan help help-modules dump dump-depends dump-xml build-graph
 __config-targets := config config-check config-update xconfig menuconfig nconfig
-__fs-targets := final plf image-plf image-cpio sdk
+__fs-targets := final plf image-plf image-cpio sdk symbols
 __skip_targets := \
 	$(__clean-targets) \
 	$(__query-targets) \
@@ -596,7 +596,10 @@ include $(BUILD_SYSTEM)/gdb.mk
 # Sdk helpers
 include $(BUILD_SYSTEM)/sdk.mk
 
-# Sdk helpers
+# Symbols helpers
+include $(BUILD_SYSTEM)/symbols.mk
+
+# Properies helpers
 include $(BUILD_SYSTEM)/properties.mk
 
 # Help
