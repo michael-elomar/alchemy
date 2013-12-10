@@ -230,6 +230,7 @@ endif
 # But do NOT force recompilation (order only)
 ifneq ("$(all_prerequisites)","")
 $(all_objects): | $(all_prerequisites)
+$(vala_done_file): | $(all_prerequisites)
 endif
 
 # Generated sources will depends on unpaked archive (if needed) and force
