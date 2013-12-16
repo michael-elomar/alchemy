@@ -214,7 +214,7 @@ endif
 ifneq ("$(strip $(vala_objects))","")
 $(vala_objects): $(build_dir)/obj/%.c.o: $(build_dir)/obj/%.c
 	$(transform-c-to-o)
-$(vala_c_sources) $(vala_header_file) $(vala_vapi_file): $(build_dir)/obj/vala.done
+$(vala_c_sources) $(vala_header_file) $(vala_vapi_file): $(vala_done_file)
 	$(empty)
 $(vala_done_file): $(addprefix $(LOCAL_PATH)/,$(vala_sources))
 	@mkdir -p $(dir $@)
@@ -230,7 +230,7 @@ endif
 # But do NOT force recompilation (order only)
 ifneq ("$(all_prerequisites)","")
 $(all_objects): | $(all_prerequisites)
-$(vala_done_file): | $(all_prerequisites)
+$(vala_done_file): | $(filter-out $(vala_header_file),$(all_prerequisites))
 endif
 
 # Generated sources will depends on unpaked archive (if needed) and force
