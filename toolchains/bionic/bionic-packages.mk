@@ -27,6 +27,16 @@ LOCAL_EXPORT_LDLIBS := -lcutils
 include $(BUILD_PREBUILT)
 
 include $(CLEAR_VARS)
+LOCAL_MODULE := libpng
+LOCAL_EXPORT_LDLIBS := -lpng
+include $(BUILD_PREBUILT)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := libcompiler-rt-extras
+LOCAL_EXPORT_LDLIBS := -lcompiler-rt-extras
+include $(BUILD_PREBUILT)
+
+include $(CLEAR_VARS)
 LOCAL_MODULE := libnativehelper
 LOCAL_EXPORT_LDLIBS := -lnativehelper
 include $(BUILD_PREBUILT)
