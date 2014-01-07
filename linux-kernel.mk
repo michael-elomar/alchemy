@@ -124,7 +124,11 @@ $(LINUX_BUILD_DIR)/$(LOCAL_MODULE_FILENAME): $(LINUX_BUILD_DIR)/.config $(LINUX_
 	$(Q)$(MAKE) $(LINUX_MAKE_ARGS)
 	@echo "Installing linux kernel modules"
 	$(Q)rm -rf $(TARGET_OUT_STAGING)/lib/modules
-	$(Q)$(MAKE) $(LINUX_MAKE_ARGS) modules_install
+	$(Q)if grep -q "CONFIG_MODULES=y" $(LINUX_BUILD_DIR)/.config; then \
+		$(MAKE) $(LINUX_MAKE_ARGS) modules_install ; \
+	else \
+		echo "CONFIG_MODULES not set in kernel config, ignoring"; \
+	fi
 	$(Q)rm -f  $(TARGET_OUT_STAGING)/lib/modules/*/build
 	$(Q)rm -f  $(TARGET_OUT_STAGING)/lib/modules/*/source
 	@echo "Installing linux kernel images"
