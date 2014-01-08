@@ -498,6 +498,7 @@ unpacked sources and applied patches will be kept in the build directory.</li>
 <li><code>EXECUTABLE</code></li>
 <li><code>AUTOTOOLS</code></li>
 <li><code>CMAKE</code></li>
+<li><code>QMAKE</code></li>
 <li><code>CUSTOM</code></li>
 </ul>
 
@@ -506,8 +507,9 @@ unpacked sources and applied patches will be kept in the build directory.</li>
 <ul>
 <li>Internal modules are <code>STATIC_LIBRARY</code>, <code>SHARED_LIBRARY</code> and <code>EXECUTABLE</code>
 modules because they are completely managed by the build system.</li>
-<li>External modules are <code>AUTOTOOLS</code>, <code>CMAKE</code> and <code>CUSTOM</code> modules because the
-build system has little control on the way those modules are built.</li>
+<li>External modules are <code>AUTOTOOLS</code>, <code>CMAKE</code>, <code>QMAKE</code> and <code>CUSTOM</code> modules
+because the build system has little control on the way those modules are
+built.</li>
 </ul>
 
 <p><strong>Note</strong> : there is also a <code>PREBUILT</code> class but its used is reserved for the
@@ -1041,8 +1043,8 @@ original source tree.</p>
 <h3>CMake modules</h3>
 
 <p>This class of modules if for the compilation of packages that use <code>cmake</code>.
-<code>Alchemy</code> provides internally everything need for the compilation, in particular
-a toolchain file.</p>
+<code>Alchemy</code> provides internally everything needed for the compilation, in
+particular a toolchain file.</p>
 
 <h4>Customization variables</h4>
 
@@ -1069,6 +1071,21 @@ not a <code>:=</code> definition.</p>
 <li><code>LOCAL_CMAKE_CMD_POST_CLEAN</code></li>
 </ul>
 
+<h3>QMake modules</h3>
+
+<p>This class of modules if for the compilation of packages that use <code>qt</code> and
+<code>qmake</code>. <code>Alchemy</code> provides internally everything needed for the compilation,
+in particular a <code>alchemy.pri</code> file to be included in your <code>.pro</code> to get all
+dependencies from atom.mk (include paths, libraries...).</p>
+
+<h4>Customization variables</h4>
+
+<ul>
+<li><code>LOCAL_QMAKE_PRO_FILE</code> : The name of the <code>.pro</code> file to be used. If not
+specified, the name is assumed to be <code>$(LOCAL_MODULE).pro</code>. The path is
+relative to <code>LOCAL_PATH</code></li>
+</ul>
+
 <h3>Custom rules</h3>
 
 <p>You can add custom rules in you makefile, for example to generate files. However
@@ -1086,6 +1103,10 @@ target: prerequisites
 In commands, you can only use <code>PRIVATE_PATH</code> and <code>PRIVATE_MODULE</code> variables which
 correspond to <code>LOCAL_PATH</code> and <code>LOCAL_MODULE</code>, all other variables will be empty
 at the point commands are executed.</p>
+
+<p>If you have a chain of dependencies from the <code>LOCAL_MODULE_FILENAME</code> to some
+internal targets, don't forget to add them in <code>LOCAL_CUSTOM_TARGETS</code> to make
+build prerequisites are correctly propagated.</p>
 
 <h3>Host modules</h3>
 

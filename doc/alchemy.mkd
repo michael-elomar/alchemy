@@ -456,14 +456,16 @@ Several classes of modules are managed by `alchemy` :
 * `EXECUTABLE`
 * `AUTOTOOLS`
 * `CMAKE`
+* `QMAKE`
 * `CUSTOM`
 
 Module will be referred as either `internal` or `external` :
 
 * Internal modules are `STATIC_LIBRARY`, `SHARED_LIBRARY` and `EXECUTABLE`
   modules because they are completely managed by the build system.
-* External modules are `AUTOTOOLS`, `CMAKE` and `CUSTOM` modules because the
-  build system has little control on the way those modules are built.
+* External modules are `AUTOTOOLS`, `CMAKE`, `QMAKE` and `CUSTOM` modules
+  because the build system has little control on the way those modules are
+  built.
 
 **Note** : there is also a `PREBUILT` class but its used is reserved for the
 build system and should not normally be used by user makefiles. It is present to
@@ -970,8 +972,8 @@ original source tree.
 ### CMake modules
 
 This class of modules if for the compilation of packages that use `cmake`.
-`Alchemy` provides internally everything need for the compilation, in particular
-a toolchain file.
+`Alchemy` provides internally everything needed for the compilation, in
+particular a toolchain file.
 
 #### Customization variables
 
@@ -994,6 +996,19 @@ not a `:=` definition.
 * `LOCAL_CMAKE_CMD_POST_INSTALL`
 * `LOCAL_CMAKE_CMD_POST_CLEAN`
 
+### QMake modules
+
+This class of modules if for the compilation of packages that use `qt` and
+`qmake`. `Alchemy` provides internally everything needed for the compilation,
+in particular a `alchemy.pri` file to be included in your `.pro` to get all
+dependencies from atom.mk (include paths, libraries...).
+
+#### Customization variables
+
+* `LOCAL_QMAKE_PRO_FILE` : The name of the `.pro` file to be used. If not
+  specified, the name is assumed to be `$(LOCAL_MODULE).pro`. The path is
+  relative to `LOCAL_PATH`
+
 ### Custom rules
 
 You can add custom rules in you makefile, for example to generate files. However
@@ -1010,6 +1025,10 @@ target: prerequisites
 In commands, you can only use `PRIVATE_PATH` and `PRIVATE_MODULE` variables which
 correspond to `LOCAL_PATH` and `LOCAL_MODULE`, all other variables will be empty
 at the point commands are executed.
+
+If you have a chain of dependencies from the `LOCAL_MODULE_FILENAME` to some
+internal targets, don't forget to add them in `LOCAL_CUSTOM_TARGETS` to make
+build prerequisites are correctly propagated.
 
 ### Host modules
 

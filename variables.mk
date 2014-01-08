@@ -185,6 +185,9 @@ macros-LOCAL += CMAKE_CMD_POST_BUILD
 macros-LOCAL += CMAKE_CMD_POST_INSTALL
 macros-LOCAL += CMAKE_CMD_POST_CLEAN
 
+# QMake customization
+vars-LOCAL += QMAKE_PRO_FILE
+
 # Exported stuff (will be added in modules depending on this one)
 vars-LOCAL += EXPORT_C_INCLUDES
 vars-LOCAL += EXPORT_CFLAGS
