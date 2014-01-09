@@ -143,8 +143,14 @@ class JobCtrl:
 
 		elif signo == signal.SIGCHLD:
 			# Get status of child
-			(pid, status) = os.waitpid(self.job.pid,
-					os.WNOHANG + os.WCONTINUED + os.WUNTRACED)
+			try:
+				(pid, status) = os.waitpid(self.job.pid,
+						os.WNOHANG + os.WCONTINUED + os.WUNTRACED)
+			except OSError as ex:
+				# Simulate success in case of error (very rare case...)
+				logging.debug("waitpid: %s",  str(ex))
+				pid = self.job.pid
+				status = 512
 			logging.debug("waitpid: pid=%d status=%s", pid, status)
 			self.job.updateStatus(status)
 
@@ -272,7 +278,7 @@ def setupLog():
 	logging.addLevelName(logging.DEBUG, "D")
 
 	# Setup log level
-	logging.getLogger().setLevel(logging.WARNING)
+	logging.getLogger().setLevel(logging.DEBUG)
 
 #===============================================================================
 # Entry point.
