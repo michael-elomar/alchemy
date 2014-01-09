@@ -278,7 +278,7 @@ def setupLog():
 	logging.addLevelName(logging.DEBUG, "D")
 
 	# Setup log level
-	logging.getLogger().setLevel(logging.DEBUG)
+	logging.getLogger().setLevel(logging.WARNING)
 
 #===============================================================================
 # Entry point.
