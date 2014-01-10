@@ -1,3 +1,16 @@
+parrot-tools-alchemy (1.0.12) unstable; urgency=low
+  * Put all depends in depends section, not only link depends.
+  * Add ro.build.date in build.prop
+  * [BUGFIX 0127334] Unable to build gstreamer from an android env.
+  * Fix vala dependencies.
+  * Add target to create archive with debugging symbols.
+  * Import host libraries when making a native build.
+  * [DEV] Avoid installing linux modules if they are not enabled.
+  * [CR 0130406] Integrate Qt / qmake in achemy
+  * [DEV] Handle prelinked .a in EXPORT_LDLIBS and copy them in sdk.
+
+ -- Yves-Marie Morgan (Parrot) <yves-marie.morgan@parrot.com>  Fri, 10 Jan 2014 16:54:44 +0100
+
 parrot-tools-alchemy (1.0.11) unstable; urgency=low
   * [BUGFIX 0124750] Modules depending on autoconf.h can't be built on standalone
   * Put dep on created link as order only.
