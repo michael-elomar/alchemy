@@ -9,6 +9,8 @@
 # Skip most of this if a sdk is used for the android part
 ifndef USE_ALCHEMY_ANDROID_SDK
 
+$(warning Please use new Alchemy-raptor version)
+
 LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
