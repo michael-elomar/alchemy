@@ -118,6 +118,25 @@ def copyHeaders(srcDir, dstDir):
 
 #===============================================================================
 #===============================================================================
+def copyLibs(srcDir, dstDir):
+	extensions = [".a"]
+	if not os.path.exists(srcDir):
+		logging.warning("Missing lib directory: %s", srcDir)
+	for (dirPath, dirNames, fileNames) in os.walk(srcDir):
+		for fileName in fileNames:
+			srcFilePath = os.path.join(dirPath, fileName)
+			relPath = os.path.relpath(srcFilePath, srcDir)
+			dstFilePath = os.path.join(dstDir, relPath)
+			if os.path.splitext(fileName)[1] in extensions:
+				logging.debug("Copy: %s -> %s", srcFilePath, dstFilePath)
+				if not os.path.exists(os.path.split(dstFilePath)[0]):
+					os.makedirs(os.path.split(dstFilePath)[0], mode=0755)
+				shutil.copy2(srcFilePath, dstFilePath)
+		# Only first level
+		break
+
+#===============================================================================
+#===============================================================================
 def processModuleSdk(ctx, module):
 	# Only once per sdk
 	sdkDir = module.fields["SDK"]
@@ -160,7 +179,7 @@ def processModule(ctx, module):
 	# Write verbatim some fields
 	fields = ["DESCRIPTION", "CATEGORY_PATH",
 			"REVISION", "FORCE_WHOLE_STATIC_LIBRARY",
-			"EXPORT_CFLAGS", "EXPORT_CXXFLAGS", "EXPORT_LDLIBS"]
+			"EXPORT_CFLAGS", "EXPORT_CXXFLAGS"]
 	for field in fields:
 		if field in module.fields and module.fields[field] :
 			ctx.atom.write("LOCAL_%s := %s\n" % (field, module.fields[field]))
@@ -169,6 +188,39 @@ def processModule(ctx, module):
 		ctx.atom.write("LOCAL_HOST_MODULE := %s\n" % module.name[5:])
 	else:
 		ctx.atom.write("LOCAL_MODULE := %s\n" % module.name)
+
+	# Libraries
+	# If a module contains prelinked '.a' mentionned in its EXPORT_LDLIBS, copy
+	# them and uptade the variable
+	if "EXPORT_LDLIBS" in module.fields:
+		libs = module.fields["EXPORT_LDLIBS"].split()
+		newLibs = []
+		for lib in libs:
+			if lib.startswith("-L" + modulePath):
+				libDir = lib[2:]
+				# TODO: simplify destination by remove extra 'lib' and 'module name'
+				relPath = os.path.relpath(libDir, modulePath)
+				if relPath != ".":
+					dstDir = "usr/lib/" + module.name + "/" + relPath
+				else:
+					dstDir = "usr/lib/" + module.name
+				# Copy libs and add new directory only if files have actually
+				# been copied (ie directory was created)
+				copyLibs(libDir, os.path.join(ctx.outDir, dstDir))
+				if os.path.exists(os.path.join(ctx.outDir, dstDir)):
+					newLibs.append("-L$(LOCAL_PATH)/" + dstDir)
+			elif lib.startswith(ctx.stagingDir):
+				# Some module directly reference a path in staging, simply update
+				# path, normally the file is already copied
+				relPath = os.path.relpath(lib, ctx.stagingDir)
+				newLibs.append("$(LOCAL_PATH)/" + relPath)
+			else:
+				newLibs.append(lib)
+		# Write libs in a readable way
+		ctx.atom.write("LOCAL_EXPORT_LDLIBS :=")
+		for lib in newLibs:
+			ctx.atom.write(" \\\n\t%s" % lib)
+		ctx.atom.write("\n")
 
 	# Include directories
 	if "EXPORT_C_INCLUDES" in module.fields:
