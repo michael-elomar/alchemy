@@ -34,7 +34,7 @@ $(GDB_WRAPPER_SCRIPT):
 ifneq ("$(GDB_SEARCH_PATH)","")
 	@echo "  set solib-search-path $(GDB_SEARCH_PATH)" >> $@
 endif
-ifneq ("(GDB_DEBUG_FILE_DIR)","")
+ifneq ("$(GDB_DEBUG_FILE_DIR)","")
 	@echo "  set debug-file-directory $(GDB_DEBUG_FILE_DIR)" >> $@
 endif
 	@echo "end" >> $@
