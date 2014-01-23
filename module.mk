@@ -216,8 +216,9 @@ all_prerequisites += \
 ###############################################################################
 
 # Get list of exported stuff by our dependencies
-ifeq ("$(call is-module-external,$(LOCAL_MODULE))","")
-  # Internal module
+ifeq ("$(and $(call is-module-external,$(LOCAL_MODULE)),$(call strneq,$(LOCAL_MODULE_CLASS),QMAKE))","")
+  # Internal module or QMAKE module
+  $(info $(LOCAL_MODULE): Internal module or QMAKE module)
   imported_CFLAGS        := $(call module-get-listed-export,$(all_depends),CFLAGS)
   imported_CXXFLAGS      := $(call module-get-listed-export,$(all_depends),CXXFLAGS)
   imported_C_INCLUDES    := $(call module-get-listed-export,$(all_depends),C_INCLUDES)
@@ -226,9 +227,16 @@ ifeq ("$(call is-module-external,$(LOCAL_MODULE))","")
   imported_CFLAGS += $(LOCAL_EXPORT_CFLAGS)
   imported_CXXFLAGS += $(LOCAL_EXPORT_CXXFLAGS)
   imported_C_INCLUDES += $(LOCAL_EXPORT_C_INCLUDES)
-  imported_LDLIBS += $(LOCAL_EXPORT_LDLIBS)
+
+  # Do not add exported libs for qmake, they generally refer to the module itself...
+  # (only way for alchemy to know what do to with it)
+  ifneq ("$(LOCAL_MODULE_CLASS)","QMAKE")
+    imported_LDLIBS += $(LOCAL_EXPORT_LDLIBS)
+  endif
+
 else
   # External module, we only import from internal modules
+  $(info $(LOCAL_MODULE): External module)
   imported_CFLAGS        := $(call module-get-listed-export,$(call filter-get-internal-modules,$(all_depends)),CFLAGS)
   imported_CXXFLAGS      := $(call module-get-listed-export,$(call filter-get-internal-modules,$(all_depends)),CXXFLAGS)
   imported_C_INCLUDES    := $(call module-get-listed-export,$(call filter-get-internal-modules,$(all_depends)),C_INCLUDES)
