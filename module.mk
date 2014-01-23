@@ -218,7 +218,6 @@ all_prerequisites += \
 # Get list of exported stuff by our dependencies
 ifeq ("$(and $(call is-module-external,$(LOCAL_MODULE)),$(call strneq,$(LOCAL_MODULE_CLASS),QMAKE))","")
   # Internal module or QMAKE module
-  $(info $(LOCAL_MODULE): Internal module or QMAKE module)
   imported_CFLAGS        := $(call module-get-listed-export,$(all_depends),CFLAGS)
   imported_CXXFLAGS      := $(call module-get-listed-export,$(all_depends),CXXFLAGS)
   imported_C_INCLUDES    := $(call module-get-listed-export,$(all_depends),C_INCLUDES)
@@ -236,7 +235,6 @@ ifeq ("$(and $(call is-module-external,$(LOCAL_MODULE)),$(call strneq,$(LOCAL_MO
 
 else
   # External module, we only import from internal modules
-  $(info $(LOCAL_MODULE): External module)
   imported_CFLAGS        := $(call module-get-listed-export,$(call filter-get-internal-modules,$(all_depends)),CFLAGS)
   imported_CXXFLAGS      := $(call module-get-listed-export,$(call filter-get-internal-modules,$(all_depends)),CXXFLAGS)
   imported_C_INCLUDES    := $(call module-get-listed-export,$(call filter-get-internal-modules,$(all_depends)),C_INCLUDES)
