@@ -49,6 +49,10 @@ TARGET_GLOBAL_CFLAGS += \
 #	-Wl,-z,relro \
 #	-Wl,-z,now
 
+# Remove warning about mangling changes of va_list in gcc 4.4 for arm
+TARGET_GLOBAL_CXXFLAGS += \
+	-Wno-psabi
+
 TARGET_GLOBAL_ARFLAGS += rcs
 
 ###############################################################################
