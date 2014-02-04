@@ -49,9 +49,6 @@ TARGET_GLOBAL_CFLAGS += \
 #	-Wl,-z,relro \
 #	-Wl,-z,now
 
-# Remove warning about mangling changes of va_list in gcc 4.4 for arm
-TARGET_GLOBAL_CXXFLAGS += \
-	-Wno-psabi
 
 TARGET_GLOBAL_ARFLAGS += rcs
 
@@ -173,4 +170,12 @@ ifneq ("$(USE_CLANG)","1")
 TARGET_CC_VERSION := $(shell $(TARGET_CC) --version | head -1 | sed "s/.*\([0-9]\.[0-9]\.[0-9x]\).*/\1/")
 else
 TARGET_CC_VERSION := $(shell $(TARGET_CC) --version | head -1 | sed "s/.*\([0-9]\.[0-9]\).*/\1/")
+endif
+
+# Remove warning about mangling changes of va_list in gcc 4.4 for arm
+ifeq ("$(TARGET_ARCH)","arm")
+ifneq ("$(call check-version,$(TARGET_CC_VERSION),4.4.0)","")
+TARGET_GLOBAL_CXXFLAGS += \
+	-Wno-psabi
+endif
 endif
