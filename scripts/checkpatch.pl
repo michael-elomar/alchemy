@@ -32,6 +32,7 @@ my $fix = 0;
 my $root;
 my %debug;
 my %ignore_type = ();
+my %ignore_type_line = ();
 my %camelcase = ();
 my @ignore = ();
 my $help = 0;
@@ -1387,7 +1388,7 @@ sub possible {
 my $prefix = '';
 
 sub show_type {
-       return !defined $ignore_type{$_[0]};
+       return !defined $ignore_type{$_[0]} && !defined $ignore_type_line{$_[0]}
 }
 
 sub report {
@@ -1873,6 +1874,15 @@ sub process {
 
 # ignore non-hunk lines and lines being removed
 		next if (!$hunk_line || $line =~ /^-/);
+
+# add temporary ignored error types for the current line
+		%ignore_type_line = ();
+		if ($prevrawline =~ /codecheck_ignore\[(.*)\]/) {
+			my @ignore_temp = split(/,/, $1);
+			foreach my $word (@ignore_temp) {
+				$ignore_type_line{$word}++;
+			}
+		}
 
 #trailing whitespace
 		if ($line =~ /^\+.*\015/) {
