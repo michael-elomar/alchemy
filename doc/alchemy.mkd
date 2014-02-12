@@ -446,6 +446,7 @@ For each registered modules, following `make` targets will be available :
    unpacked sources and applied patches will be kept in the build directory.
 * `make <module>-dirclean` : will remove the build directory of the module.
 * `make <module>-path` : will display the path of the module.
+* `make <module>-codecheck` : will check coding style of C source files
 
 ### Module registration
 
@@ -1128,6 +1129,25 @@ To use a `SDK`, specify the directory where the `atom.mk` is in the variable
 transparent for users, dependencies shall be specified in the same way. The only
 difference is that modules from `SDK` won't appear in global config and will not
 be built.
+
+## Codecheck false positives or intentional deviations
+
+You can ignore specific codecheck warnings in a C source code file by inserting
+a tag with the following syntax in a comment line just preceding the line with
+the error:
+
+<pre>
+	codecheck_ignore[TYPE1(,TYPE2...)]
+</pre>
+
+Where TYPE is the message type returned by `make <module>-codecheck`
+(for example `LONG_LINE`, `NEW_TYPEDEFS`, etc).
+
+Ex:
+<pre>
+	/* codecheck_ignore[NEW_TYPEDEFS,LONG_LINE] */
+	typedef struct _CustomTypedef CustomTypedef; /* custom typedef for consistency with other GObjects */
+</pre>
 
 ## How to use it
 

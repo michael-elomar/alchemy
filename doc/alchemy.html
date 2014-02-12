@@ -486,6 +486,7 @@ be done because the order of inclusion is not guaranteed or predictable.</p>
 unpacked sources and applied patches will be kept in the build directory.</li>
 <li><code>make &lt;module&gt;-dirclean</code> : will remove the build directory of the module.</li>
 <li><code>make &lt;module&gt;-path</code> : will display the path of the module.</li>
+<li><code>make &lt;module&gt;-codecheck</code> : will check coding style of C source files</li>
 </ul>
 
 <h3>Module registration</h3>
@@ -1212,6 +1213,26 @@ this folder in <code>$(TARGET_OUT)/$(TARGET_PRODUCT_FULL_NAME)</code>.</p>
 transparent for users, dependencies shall be specified in the same way. The only
 difference is that modules from <code>SDK</code> won't appear in global config and will not
 be built.</p>
+
+<h2>Codecheck false positives or intentional deviations</h2>
+
+<p>You can ignore specific codecheck warnings in a C source code file by inserting
+a tag with the following syntax in a comment line just preceding the line with
+the error:</p>
+
+<pre>
+    codecheck_ignore[TYPE1(,TYPE2...)]
+</pre>
+
+<p>Where TYPE is the message type returned by <code>make &lt;module&gt;-codecheck</code>
+(for example <code>LONG_LINE</code>, <code>NEW_TYPEDEFS</code>, etc).</p>
+
+<p>Ex:</p>
+
+<pre>
+    /* codecheck_ignore[NEW_TYPEDEFS,LONG_LINE] */
+    typedef struct _CustomTypedef CustomTypedef; /* custom typedef for consistency with other GObjects */
+</pre>
 
 <h2>How to use it</h2>
 
