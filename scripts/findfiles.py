@@ -39,8 +39,21 @@ def main():
 	fileName = args[1]
 
 	# Get real paths (because we will compare them)
-	options.pruneList = [os.path.realpath(pruneDir) \
-			for pruneDir in options.pruneList]
+	# Simple names are kept as is for prune dirs
+	newpruneList = []
+	for pruneDir in options.pruneList:
+		if "/" in pruneDir:
+			newpruneList.append(os.path.realpath(pruneDir))
+		else:
+			newpruneList.append(pruneDir)
+	options.pruneList = newpruneList
+
+	# Real paths of add dirs
+	options.addList = [os.path.realpath(addDir) \
+			for addDir in options.addList]
+
+	sys.stderr.write(str(options.addList))
+	sys.stderr.write(str(options.pruneList))
 
 	# Go
 	resultList = []
