@@ -52,9 +52,6 @@ def main():
 	options.addList = [os.path.realpath(addDir) \
 			for addDir in options.addList]
 
-	sys.stderr.write(str(options.addList))
-	sys.stderr.write(str(options.pruneList))
-
 	# Go
 	resultList = []
 	processDir(resultList, topDir, fileName, options)
