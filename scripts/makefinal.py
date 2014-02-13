@@ -256,7 +256,7 @@ def addPathInFileList(relPath, isDir, options):
 #===============================================================================
 # Copy a file/link.
 #===============================================================================
-def doCopy(dstFileName, srcFileName, options, doPatchShebang=False):
+def doCopy(dstFileName, srcFileName, options, doPatchShebang=False, forceCopy=False):
 	relPath = os.path.relpath(dstFileName, options.finalDir)
 
 	addPathInFileList(relPath, False, options)
@@ -279,7 +279,7 @@ def doCopy(dstFileName, srcFileName, options, doPatchShebang=False):
 				doStrip = False
 
 	# check if we need to do something, do not follow symlinks
-	doAction = False
+	doAction = forceCopy
 	if not os.path.lexists(dstFileName):
 		doAction = True
 	elif not os.path.islink(srcFileName):
@@ -339,7 +339,7 @@ def writeMakefileFooter(options):
 #===============================================================================
 # Process a directory and copy dirs/files to final directory.
 #===============================================================================
-def processDir(rootDir, options, withEmptyDir, copyType):
+def processDir(rootDir, options, withEmptyDir, copyType, forceCopy=False):
 	for (dirPath, dirNames, fileNames) in os.walk(rootDir):
 		# a symlink to an existing directory is put in dirNames, not fileNames
 		# fix this (use a copy in for loop because we will modify dirNames)
@@ -385,7 +385,7 @@ def processDir(rootDir, options, withEmptyDir, copyType):
 				dstFileName = getRealPath(options.finalDir, relPath)
 				if not os.path.islink(srcFileName):
 					addBuildId(srcFileName, options)
-				doCopy(dstFileName, srcFileName, options)
+				doCopy(dstFileName, srcFileName, options, forceCopy=forceCopy)
 
 #===============================================================================
 # Process toolchain libc directory.
@@ -494,8 +494,9 @@ def main():
 	processDir(options.stagingDir, options, False, CopyType.ALL)
 
 	# process skeleton directory (without empty dirs and without links)
+	# Force copy of file (always overwrite)
 	for skelDir in options.skelDirs:
-		processDir(skelDir, options, False, CopyType.NO_LINKS)
+		processDir(skelDir, options, False, CopyType.NO_LINKS, forceCopy=True)
 
 	# process libc  directory
 	if options.toolchainLibcDir != None:
