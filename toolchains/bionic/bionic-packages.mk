@@ -126,7 +126,9 @@ include $(BUILD_PREBUILT)
 
 endif # ifndef USE_ALCHEMY_ANDROID_SDK
 
+USE_ALCHEMY_ANDROID_BUSYDROID ?= 1
+ifeq ("$(USE_ALCHEMY_ANDROID_BUSYDROID)","1")
 include $(CLEAR_VARS)
 LOCAL_MODULE := busybox
 include $(BUILD_PREBUILT)
-
+endif
