@@ -17,7 +17,7 @@ ifeq ("$(LOCAL_DESTDIR)","")
   LOCAL_DESTDIR := usr/bin
 endif
 
-ifndef ("$(LOCAL_QMAKE_PRO_FILE)","")
+ifeq ("$(LOCAL_QMAKE_PRO_FILE)","")
   LOCAL_QMAKE_PRO_FILE := $(LOCAL_MODULE).pro
 endif
 
