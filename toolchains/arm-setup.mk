@@ -59,23 +59,27 @@ endif
 ifeq ("$(TARGET_CPU)","p7")
   TARGET_GLOBAL_CFLAGS += $(cflags_armv7a_neon)
   TARGET_GLOBAL_CFLAGS += -mtune=cortex-a9 -mcpu=cortex-a9
+  TARGET_CPU_ARMV7A_NEON := 1
 endif
 
 # TODO: see if interresting to put -mtune=cortex-a8 -mcpu=cortex-a8
 ifeq ("$(TARGET_CPU)","omap3")
   TARGET_GLOBAL_CFLAGS += $(cflags_armv7a_neon)
   TARGET_GLOBAL_LDFLAGS += -Wl,--fix-cortex-a8
+  TARGET_CPU_ARMV7A_NEON := 1
 endif
 
 ifeq ("$(TARGET_CPU)","omap4")
   TARGET_GLOBAL_CFLAGS += $(cflags_armv7a_neon)
   TARGET_GLOBAL_CFLAGS += -mtune=cortex-a9 -mcpu=cortex-a9
+  TARGET_CPU_ARMV7A_NEON := 1
 endif
 
 # generic armv7a-neon
 ifeq ("$(TARGET_CPU)","armv7a-neon")
   TARGET_GLOBAL_CFLAGS += $(cflags_armv7a_neon)
   TARGET_GLOBAL_LDFLAGS += -Wl,--fix-cortex-a8
+  TARGET_CPU_ARMV7A_NEON := 1
 endif
 
 ###############################################################################
