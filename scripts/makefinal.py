@@ -45,6 +45,7 @@ LINUX_BASIC_SKEL = [
 	["proc", None],
 	["sys", None],
 	["tmp", None],
+	["lib/modules", None],
 ]
 
 # Shebang patch
