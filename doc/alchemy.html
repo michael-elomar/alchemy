@@ -759,7 +759,7 @@ your custom rules.</p>
 on it. This simplifies the maintenance of the build system by forcing module to
 export everything required to use them. </p>
 
-<p>For <code>internal</code> modules, <code>LOCALS_EXPORT_LDLIBS</code> is rarely used because the build
+<p>For <code>internal</code> modules, <code>LOCAL_EXPORT_LDLIBS</code> is rarely used because the build
 system knows how to link with it and hence it is not needed to explicitly do so.</p>
 
 <p>For <code>external</code> modules it is a mean to instruct the build system how to link
@@ -884,7 +884,7 @@ a convenience.</p>
 <p>Additionally, some patches can be applied to the extracted archive :</p>
 
 <ul>
-<li><code>LOCALS_AUTOTOOLS_PATCHES</code> : list of patches to apply. Paths relative to
+<li><code>LOCAL_AUTOTOOLS_PATCHES</code> : list of patches to apply. Paths relative to
 <code>LOCAL_PATH</code>.</li>
 </ul>
 

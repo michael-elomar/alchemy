@@ -706,7 +706,7 @@ Variables to be exported by this module and then imported by modules depending
 on it. This simplifies the maintenance of the build system by forcing module to
 export everything required to use them. 
 
-For `internal` modules, `LOCALS_EXPORT_LDLIBS` is rarely used because the build
+For `internal` modules, `LOCAL_EXPORT_LDLIBS` is rarely used because the build
 system knows how to link with it and hence it is not needed to explicitly do so.
 
 For `external` modules it is a mean to instruct the build system how to link
@@ -828,7 +828,7 @@ a convenience.
 
 Additionally, some patches can be applied to the extracted archive :
 
-* `LOCALS_AUTOTOOLS_PATCHES` : list of patches to apply. Paths relative to
+* `LOCAL_AUTOTOOLS_PATCHES` : list of patches to apply. Paths relative to
   `LOCAL_PATH`.
 
 For most of such modules it is the only thing to do before registering the
