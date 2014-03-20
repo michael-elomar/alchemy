@@ -94,7 +94,8 @@ image-cpio:
 		echo "Image cpio: missing final directory"; exit 1; \
 	else \
 		cd $(TARGET_OUT_FINAL); \
-		find . ! -name '.' | cpio --quiet -o -H newc > $(IMAGE_FILE_CPIO); \
+		find . ! -name '.' -printf '%P\n' | $(FIXSTAT) | \
+			$(BUILD_SYSTEM)/scripts/cpio.py $(IMAGE_FILE_CPIO); \
 	fi
 	$(Q) gzip -9 $(IMAGE_FILE_CPIO)
 	@echo "Image cpio: done -> $(IMAGE_FILE_CPIO_GZ)"
