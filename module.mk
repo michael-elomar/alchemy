@@ -735,6 +735,28 @@ $(LOCAL_MODULE):
 endif
 
 ###############################################################################
+## Meta package.
+###############################################################################
+
+ifeq ("$(LOCAL_MODULE_CLASS)","META_PACKAGE")
+
+# Add a meta package dependency
+# $1 : module name
+# $2 : dependency name
+define __meta-package-dep
+$1: $2
+$1-clean: $2-clean
+$1-dirclean: $2-dirclean
+endef
+
+# Add deps for build, clean, dirclean
+$(foreach __mod,$(call module-get-config-depends,$(LOCAL_MODULE)), \
+	$(eval $(call __meta-package-dep,$(LOCAL_MODULE),$(__mod))) \
+)
+
+endif
+
+###############################################################################
 ## Files to copy.
 ###############################################################################
 

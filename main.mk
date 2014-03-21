@@ -277,7 +277,7 @@ BUILD_AUTOTOOLS := $(BUILD_SYSTEM)/autotools.mk
 BUILD_CMAKE := $(BUILD_SYSTEM)/cmake.mk
 BUILD_QMAKE := $(BUILD_SYSTEM)/qmake.mk
 BUILD_CUSTOM := $(BUILD_SYSTEM)/custom.mk
-BUILD_META_PACKAGE := $(BUILD_SYSTEM)/custom.mk
+BUILD_META_PACKAGE := $(BUILD_SYSTEM)/meta.mk
 BUILD_LINUX := $(BUILD_SYSTEM)/linux-kernel.mk
 BUILD_PREBUILT := $(BUILD_SYSTEM)/prebuilt.mk
 
@@ -469,6 +469,7 @@ endif
 # Determine the list of modules to really include
 # If a module is specified in goals, only include this one and its dependencies.
 # If 'all' is also given do not do the filter
+# For meta packages, also get config dependencies (for build/clean shortcuts)
 __dofilter := 0
 __modlist := $(empty)
 ifeq ("$(call is-targets-in-make-goals,all)","")
@@ -476,6 +477,9 @@ $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST), \
 	$(if $(call is-module-in-make-goals,$(__mod)), \
 		$(eval __dofilter := 1) \
 		$(eval __modlist += $(__mod) $(call module-get-all-depends,$(__mod))) \
+		$(if $(call is-module-meta-package,$(__mod)), \
+			$(eval __modlist += $(__mod) $(call module-get-config-depends,$(__mod))) \
+		) \
 	) \
 )
 endif

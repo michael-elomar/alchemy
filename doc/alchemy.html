@@ -501,6 +501,7 @@ unpacked sources and applied patches will be kept in the build directory.</li>
 <li><code>CMAKE</code></li>
 <li><code>QMAKE</code></li>
 <li><code>CUSTOM</code></li>
+<li><code>META_PACKAGE</code></li>
 </ul>
 
 <p>Module will be referred as either <code>internal</code> or <code>external</code> :</p>
@@ -508,8 +509,8 @@ unpacked sources and applied patches will be kept in the build directory.</li>
 <ul>
 <li>Internal modules are <code>STATIC_LIBRARY</code>, <code>SHARED_LIBRARY</code> and <code>EXECUTABLE</code>
 modules because they are completely managed by the build system.</li>
-<li>External modules are <code>AUTOTOOLS</code>, <code>CMAKE</code>, <code>QMAKE</code> and <code>CUSTOM</code> modules
-because the build system has little control on the way those modules are
+<li>External modules are <code>AUTOTOOLS</code>, <code>CMAKE</code>, <code>QMAKE</code>, <code>CUSTOM</code> and <code>META_PACKAGE</code>
+modules because the build system has little control on the way those modules are
 built.</li>
 </ul>
 

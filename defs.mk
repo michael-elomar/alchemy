@@ -290,7 +290,7 @@ is-module-registered = $(call is-var-defined,__modules.$1.PATH)
 ###############################################################################
 ## Check if a module is built externally (by autotools or custom rules).
 ## $1 : module to check.
-## AUTOTOOLS/CMAKE/QMAKE/GENERIC/CUSTOM class or empty class means external.
+## AUTOTOOLS/CMAKE/QMAKE/GENERIC/CUSTOM/META_PACKAGE class or empty class means external.
 ###############################################################################
 is-module-external = $(strip \
 	$(eval __class := $(__modules.$1.MODULE_CLASS)) \
@@ -299,6 +299,7 @@ is-module-external = $(strip \
 		$(call streq,$(__class),QMAKE), \
 		$(call streq,$(__class),GENERIC), \
 		$(call streq,$(__class),CUSTOM) \
+		$(call streq,$(__class),META_PACKAGE) \
 	))
 
 ###############################################################################
@@ -312,6 +313,12 @@ is-module-prebuilt = $(strip \
 		$(call streq,$(__modules.$1.MODULE_CLASS),PREBUILT), \
 		$(__modules.$1.SDK) \
 	))
+
+###############################################################################
+## Check if a module is a meta package.
+## $1 : module to check.
+###############################################################################
+is-module-meta-package = $(call streq,$(__modules.$1.MODULE_CLASS),META_PACKAGE)
 
 ###############################################################################
 ## Check if a module is for the host.
