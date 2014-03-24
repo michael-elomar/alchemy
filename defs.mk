@@ -1228,12 +1228,14 @@ endef
 
 ###############################################################################
 ## Copy license files from $1 to $2.
-## It will copy [.]MODULE_LICENSE* and [.]MODULE_NAME* files.
+## It will copy [.]MODULE_LICENSE* and [.]MODULE_NAME* files, as well as
+## NOTICE or COPYING files to help police.
 ## $1 : source directory.
 ## $2 : destination directory.
 ###############################################################################
 __license-pattern := \
-	MODULE_LICENSE* .MODULE_LICENSE* MODULE_NAME* .MODULE_NAME*
+	MODULE_LICENSE* .MODULE_LICENSE* MODULE_NAME* .MODULE_NAME* \
+	NOTICE COPYING.LIB COPYING LICENSE LICENSE.txt
 define copy-license-files
 @( \
 	files="$(wildcard $(addprefix $1/,$(__license-pattern)))"; \
