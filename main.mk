@@ -607,6 +607,9 @@ include $(BUILD_SYSTEM)/symbols.mk
 # Properies helpers
 include $(BUILD_SYSTEM)/properties.mk
 
+# Open Source Softare packages helpers
+include $(BUILD_SYSTEM)/oss-packages.mk
+
 # Help
 include $(BUILD_SYSTEM)/help.mk
 
