@@ -412,6 +412,9 @@ $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES := $(LOCAL_CLEAN_FILES) $(LOCAL_BUILD_MODU
 $(LOCAL_TARGETS): PRIVATE_CLEAN_DIRS := $(LOCAL_CLEAN_DIRS)
 $(LOCAL_TARGETS): PRIVATE_MODE := $(mode_prefix)
 
+# This is for police hooks
+$(LOCAL_TARGETS): export MODULE_NAME := $(LOCAL_MODULE)
+
 ###############################################################################
 ## General rules.
 ###############################################################################
