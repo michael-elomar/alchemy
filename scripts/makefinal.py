@@ -415,7 +415,7 @@ def processToolchainLibc(libcDir, options):
 			if not os.path.islink(dstFileName):
 				addBuildId(dstFileName, options)
 
-	# copy 'ldd' from 'usr/bin" directory
+	# copy 'ldd' from 'usr/bin' directory
 	# Patch shebang from #!bin/bash to !/bin/sh
 	usrBinDir = os.path.join(libcDir, "usr/bin")
 	for fileName in os.listdir(usrBinDir):
@@ -424,6 +424,15 @@ def processToolchainLibc(libcDir, options):
 			relPath = os.path.relpath(srcFileName, libcDir)
 			dstFileName = getRealPath(options.finalDir, relPath)
 			doCopy(dstFileName, srcFileName, options, doPatchShebang=True)
+
+	# copy time zone database from 'usr/share/zoneinfo' directory
+	usrShareZoneinfoDir = os.path.join(libcDir, "usr/share/zoneinfo")
+	for dirName, _, fileNames in os.walk(usrShareZoneinfoDir):
+		for fileName in fileNames:
+			srcFileName = os.path.join(dirName, fileName)
+			relPath = os.path.relpath(srcFileName, libcDir)
+			dstFileName = getRealPath(options.finalDir, relPath)
+			doCopy(dstFileName, srcFileName, options)
 
 #===============================================================================
 # Process linux basic skel.
