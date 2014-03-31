@@ -182,13 +182,15 @@ def main():
 	# Setup logging
 	setupLog()
 
+	makeProg = os.environ.get("MAKE", "make")
+
 	# Put in an environment variable the command line so we can find it
-	os.environ["ALCHEMAKE_CMDLINE"] = " ".join(["make"] + sys.argv[1:])
+	os.environ["ALCHEMAKE_CMDLINE"] = " ".join([makeProg] + sys.argv[1:])
 
 	# If not on a terminal, do NOT use job control, simply execute make...
 	if not os.isatty(0) or not os.isatty(1):
 		logging.warning("Not using job control")
-		process = subprocess.Popen(["make"] + sys.argv[1:], shell=False)
+		process = subprocess.Popen([makeProg] + sys.argv[1:], shell=False)
 		process.wait()
 		sys.exit(process.returncode)
 		return
@@ -212,7 +214,7 @@ def main():
 	# Force locale to have english messages that we will try to detect
 	env = os.environ
 	env["LANG"] = "C"
-	cmdline = "make"
+	cmdline = makeProg
 	for arg in sys.argv[1:]:
 		cmdline += " " + arg
 	jobCtrl.job.launch(cmdline, stderr=subprocess.PIPE, env=env)
