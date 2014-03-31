@@ -269,6 +269,10 @@ Mainly used by the android wrapper.
   loaded by boxinit at startup. The format is a list of `<key>=<value>` pair.
   Default contains some `ro.build` keys that alchemy will put.
   Note : each module can also specify its own properties in `LOCAL_BUILD_PROPERTIES`.
+* `TARGET_INCLUDE_GDBSERVER` : include gdbserver binary in target. This binary
+  is GPLv3 and is needed only in development phase and shall not be present in
+  final release packages.
+  </br>Default is `0`.
 
 * `USE_CLANG` : Use clang instead of gcc for compilation.
   </br>Default is `0`.
