@@ -60,11 +60,13 @@ endif
 
 .PHONY: oss-packages
 oss-packages:
+	@echo "Packages: start"
 	@rm -rf $(OSS_PACKAGES_DIR)
 	@mkdir -p $(OSS_PACKAGES_DIR)
 	@mkdir -p $(OSS_PACKAGES_DIR)/git
 	$(foreach __mod,$(sort $(OSS_PACKAGES)), \
 		@$(call oss-gen-package,$(__mod))$(endl) \
 	)
+	@echo "Packages: done -> $(OSS_PACKAGES_DIR)"
 
 endif
