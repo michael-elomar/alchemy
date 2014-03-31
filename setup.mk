@@ -105,6 +105,9 @@ TARGET_IMAGE_PATH_MAP_FILE ?=
 # List of target wise build properties to be put in build.prop file
 TARGET_BUILD_PROPERTIES ?=
 
+# Include gdbserver (GPLv3) or not in target
+TARGET_INCLUDE_GDBSERVER ?= 1
+
 ###############################################################################
 ## Toolchain setup.
 ###############################################################################
