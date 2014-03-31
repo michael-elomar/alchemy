@@ -25,6 +25,14 @@ sdk-clean:
 	$(Q) rm -rf $(SDK_DIR)
 	$(Q) rm -f $(SDK_TGZ)
 
+# Only add dependency if it is also given in goals to avoid unecessary checks
+ifneq ("$(call is-targets-in-make-goals,all)","")
+sdk: all
+endif
+ifneq ("$(call is-targets-in-make-goals,final)","")
+sdk: final
+endif
+
 clean: sdk-clean
 dirclean: sdk-clean
 clobber: sdk-clean

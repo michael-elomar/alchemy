@@ -21,6 +21,14 @@ symbols:
 symbols-clean:
 	$(Q) rm -rf $(SYMBOLS_TGZ)
 
+# Only add dependency if it is also given in goals to avoid unecessary checks
+ifneq ("$(call is-targets-in-make-goals,all)","")
+symbols: all
+endif
+ifneq ("$(call is-targets-in-make-goals,final)","")
+symbols: final
+endif
+
 clean: symbols-clean
 dirclean: symbols-clean
 clobber: symbols-clean
