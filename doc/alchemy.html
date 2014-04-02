@@ -306,7 +306,7 @@ Note : each module can also specify its own properties in <code>LOCAL_BUILD_PROP
 <li><p><code>TARGET_INCLUDE_GDBSERVER</code> : include gdbserver binary in target. This binary
 is GPLv3 and is needed only in development phase and shall not be present in
 final release packages.
-</br>Default is <code>0</code>.</p></li>
+</br>Default is <code>1</code>.</p></li>
 <li><p><code>USE_CLANG</code> : Use clang instead of gcc for compilation.
 </br>Default is <code>0</code>.</p></li>
 <li><code>USE_CCACHE</code> : Use ccache to speed up compilation.
@@ -771,6 +771,35 @@ system knows how to link with it and hence it is not needed to explicitly do so.
 with them. It is however not needed to specify include directories that are
 globally available like <code>$(TARGET_OUT_STAGING)/usr/include</code>.</p>
 
+<h4><code>LOCAL_ARCHIVE</code> <code>LOCAL_ARCHIVE_VERSION</code> <code>LOCAL_ARCHIVE_SUBDIR</code> <code>LOCAL_ARCHIVE_PATCHES</code> <code>LOCAL_ARCHIVE_CMD_UNPACK</code> <code>LOCAL_ARCHIVE_CMD_POST_UNPACK</code></h4>
+
+<p><code>Alchemy</code> offer the possibility to have the source code in an archive. This is
+mainly used for external modules but can be used for internal modules as well.</p>
+
+<ul>
+<li><code>LOCAL_ARCHIVE</code> : name of the archive to be extracted. It is a path relative to
+<code>LOCAL_PATH</code>.</li>
+<li><p><code>LOCAL_ARCHIVE_SUBDIR</code> : directory that the extraction process will automatically
+creates. This is a path, relative to the extraction root where the configure
+script will be found. It is in general defined as
+<code>$(LOCAL_MODULE)-$(LOCAL_AUTOTOOLS_VERSION)</code></p></li>
+<li><p><code>LOCAL_ARCHIVE_VERSION</code> being a variable with the version of the package. This
+information is currently not used by the build system, and is only there as a
+convenience.</p></li>
+</ul>
+
+<p>Additionally, some patches can be applied to the extracted archive :</p>
+
+<ul>
+<li><p><code>LOCAL_ARCHIVE_PATCHES</code> : list of patches to apply. Paths relative to <code>LOCAL_PATH</code>.</p></li>
+<li><p><code>LOCAL_ARCHIVE_CMD_UNPACK</code> : Custom commands to be used instead of default
+ones. Please note that it shall be a macro defined using the <code>define/endef</code>
+keywords, not a <code>:=</code> definition.</p></li>
+<li><code>LOCAL_ARCHIVE_CMD_POST_UNPACK</code> : Custom commands to be executed after the
+given step. Please note that it shall be a macro defined using the
+<code>define/endef</code> keywords, not a <code>:=</code> definition.</li>
+</ul>
+
 <h3>Internal modules</h3>
 
 <p>Defining an <code>internal</code> module is the preferred way of registering a module. It
@@ -892,6 +921,9 @@ a convenience.</p>
 <li><code>LOCAL_AUTOTOOLS_PATCHES</code> : list of patches to apply. Paths relative to
 <code>LOCAL_PATH</code>.</li>
 </ul>
+
+<p><strong>Note</strong> : Internally, alchemy transforms <code>LOCAL_AUTOTOOLS_ARCHIVE_XXX</code> variables
+in generic <code>LOCAL_ARCHIVE_XXX</code> variables.</p>
 
 <p>For most of such modules it is the only thing to do before registering the
 module with :</p>

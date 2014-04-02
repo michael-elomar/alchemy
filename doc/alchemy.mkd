@@ -718,6 +718,33 @@ For `external` modules it is a mean to instruct the build system how to link
 with them. It is however not needed to specify include directories that are
 globally available like `$(TARGET_OUT_STAGING)/usr/include`.
 
+#### `LOCAL_ARCHIVE` `LOCAL_ARCHIVE_VERSION` `LOCAL_ARCHIVE_SUBDIR` `LOCAL_ARCHIVE_PATCHES` `LOCAL_ARCHIVE_CMD_UNPACK` `LOCAL_ARCHIVE_CMD_POST_UNPACK`
+
+`Alchemy` offer the possibility to have the source code in an archive. This is
+mainly used for external modules but can be used for internal modules as well.
+
+* `LOCAL_ARCHIVE` : name of the archive to be extracted. It is a path relative to
+  `LOCAL_PATH`.
+* `LOCAL_ARCHIVE_SUBDIR` : directory that the extraction process will automatically
+  creates. This is a path, relative to the extraction root where the configure
+  script will be found. It is in general defined as
+  `$(LOCAL_MODULE)-$(LOCAL_AUTOTOOLS_VERSION)`
+
+* `LOCAL_ARCHIVE_VERSION` being a variable with the version of the package. This
+information is currently not used by the build system, and is only there as a
+convenience.
+
+Additionally, some patches can be applied to the extracted archive :
+
+* `LOCAL_ARCHIVE_PATCHES` : list of patches to apply. Paths relative to `LOCAL_PATH`.
+
+* `LOCAL_ARCHIVE_CMD_UNPACK` : Custom commands to be used instead of default
+  ones. Please note that it shall be a macro defined using the `define/endef`
+  keywords, not a `:=` definition.
+* `LOCAL_ARCHIVE_CMD_POST_UNPACK` : Custom commands to be executed after the
+  given step. Please note that it shall be a macro defined using the
+  `define/endef` keywords, not a `:=` definition.
+
 ### Internal modules
 
 Defining an `internal` module is the preferred way of registering a module. It
@@ -835,6 +862,9 @@ Additionally, some patches can be applied to the extracted archive :
 
 * `LOCAL_AUTOTOOLS_PATCHES` : list of patches to apply. Paths relative to
   `LOCAL_PATH`.
+
+**Note** : Internally, alchemy transforms `LOCAL_AUTOTOOLS_ARCHIVE_XXX` variables
+in generic `LOCAL_ARCHIVE_XXX` variables.
 
 For most of such modules it is the only thing to do before registering the
 module with :
