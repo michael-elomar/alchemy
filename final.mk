@@ -30,7 +30,7 @@ ifneq ("$(TOOLCHAIN_LIBC)","")
   MAKEFINAL_ARGS += --toolchain-libc="$(TOOLCHAIN_LIBC)"
 endif
 
-ifneq ("$(TARGET_INCLUDE_GDBSERVER)",0")
+ifneq ("$(TARGET_INCLUDE_GDBSERVER)","0")
 ifneq ("$(TOOLCHAIN_GDBSERVER)","")
   MAKEFINAL_ARGS += --toolchain-gdbserver="$(TOOLCHAIN_GDBSERVER)"
 endif
