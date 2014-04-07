@@ -16,10 +16,10 @@ __autotools-install-bin := $(shell which install)
 __autotools-pkg-config-bin := $(shell which pkg-config)
 
 # Update host compilation path
-__autotool-host-path := $(HOST_OUT_STAGING)/bin:$(HOST_OUT_STAGING)/usr/bin:$(PATH)
+__autotools-host-path := $(HOST_OUT_STAGING)/bin:$(HOST_OUT_STAGING)/usr/bin:$(PATH)
 
 # Update target compilation path
-__autotool-target-path := $(HOST_OUT_STAGING)/bin:$(HOST_OUT_STAGING)/usr/bin:$(PATH)
+__autotools-target-path := $(HOST_OUT_STAGING)/bin:$(HOST_OUT_STAGING)/usr/bin:$(PATH)
 
 # Common arguments to configure
 # * Avoid triggering regeneration of configure/Makefile.in. The regeneration
@@ -28,7 +28,7 @@ __autotool-target-path := $(HOST_OUT_STAGING)/bin:$(HOST_OUT_STAGING)/usr/bin:$(
 # * Disable documentation.
 # * Don't display warning for unrecognized options (other disabled options may
 #   not be actually supported).
-__autotool-configure-args := \
+__autotools-configure-args := \
 	--disable-maintainer-mode \
 	--disable-nls \
 	--disable-gtk-doc \
@@ -57,7 +57,7 @@ HOST_PKG_CONFIG_ENV := \
 
 # Environment to use when executing configure script
 HOST_AUTOTOOLS_CONFIGURE_ENV := \
-	PATH="$(__autotool-host-path)" \
+	PATH="$(__autotools-host-path)" \
 	AR="$(HOST_AR)" \
 	AS="$(HOST_AS)" \
 	LD="$(HOST_LD)" \
@@ -95,12 +95,12 @@ HOST_AUTOTOOLS_CONFIGURE_ARGS += \
 
 # Finally, add common arguments
 HOST_AUTOTOOLS_CONFIGURE_ARGS += \
-	$(__autotool-configure-args)
+	$(__autotools-configure-args)
 
 # Environment to use when executing make
 # Use PKG_CONFIG_ENV in case a package needs automatic reconfiguration
 HOST_AUTOTOOLS_MAKE_ENV := \
-	PATH="$(__autotool-host-path)" \
+	PATH="$(__autotools-host-path)" \
 	$(HOST_PKG_CONFIG_ENV)
 
 # Arguments to give to make
@@ -144,7 +144,7 @@ endif
 
 # Environment to use when executing configure script
 TARGET_AUTOTOOLS_CONFIGURE_ENV := \
-	PATH="$(__autotool-target-path)" \
+	PATH="$(__autotools-target-path)" \
 	AR="$(TARGET_AR)" \
 	AS="$(TARGET_AS)" \
 	LD="$(TARGET_LD)" \
@@ -199,12 +199,12 @@ TARGET_AUTOTOOLS_CONFIGURE_ARGS += \
 
 # Finally, add common arguments
 TARGET_AUTOTOOLS_CONFIGURE_ARGS += \
-	$(__autotool-configure-args)
+	$(__autotools-configure-args)
 
 # Environment to use when executing make
 # Use PKG_CONFIG_ENV in case a package needs automatic reconfiguration
 TARGET_AUTOTOOLS_MAKE_ENV := \
-	PATH="$(__autotool-host-path)" \
+	PATH="$(__autotools-host-path)" \
 	$(TARGET_PKG_CONFIG_ENV)
 
 # Arguments to give to make
