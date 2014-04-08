@@ -478,7 +478,9 @@ $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST), \
 		$(eval __dofilter := 1) \
 		$(eval __modlist += $(__mod) $(call module-get-all-depends,$(__mod))) \
 		$(if $(call is-module-meta-package,$(__mod)), \
-			$(eval __modlist += $(__mod) $(call module-get-config-depends,$(__mod))) \
+			$(foreach __mod2,$(call module-get-config-depends,$(__mod)), \
+				$(eval __modlist += $(__mod2) $(call module-get-all-depends,$(__mod2))) \
+			) \
 		) \
 	) \
 )
