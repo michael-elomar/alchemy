@@ -7,9 +7,6 @@ import optparse
 # Process a directory.
 #===============================================================================
 def processDir(resultList, topDir, fileName, options):
-	# Check that the directory is not in the prune list
-	if topDir in options.pruneList:
-		return
 	sys.stderr.write("Scanning %s for makefiles...\n" % topDir)
 	for dirPath, dirNames, fileNames in os.walk(topDir, followlinks=options.followLinks):
 		# Remove directories to skip from list
@@ -54,7 +51,9 @@ def main():
 
 	# Go
 	resultList = []
-	processDir(resultList, topDir, fileName, options)
+	# Check that the directory is not in the prune list
+	if topDir not in options.pruneList:
+		processDir(resultList, topDir, fileName, options)
 	for topDir in options.addList:
 		processDir(resultList, topDir, fileName, options)
 
