@@ -1,3 +1,17 @@
+parrot-tools-alchemy (1.0.14) unstable; urgency=low
+  * Create lib/modules so that modprobe works even chrooted
+  * [BUGFIX 0127328] cpio images don't have files with correct mode
+  * [CR 0109677] Consider adding a BUILD_METAPACKAGE build type.
+  * Export MODULE_NAME so police can give it back for source package generation.
+  * [CR 0134080][STEP1] Add the open source package generation in Alchemy build system.
+  * [BUGFIX 135547] Add a variable to prevent inclusion of gdbserver.
+  * Copy time zone database from toolchain libc directory.
+  * Add dependency between sdk/symbols and all/final targets if needed.
+  * Support archives in zip format.
+  * if a directory is both in ad and prune, add it (unless it is the real top dir).
+
+ -- Yves-Marie Morgan (Parrot) <yves-marie.morgan@parrot.com>  Fri, 11 Apr 2014 10:55:37 +0200
+
 parrot-tools-alchemy (1.0.13) unstable; urgency=low
   * Fix gdb file for native chroot.
   * [BUGFIX 0133241] TARGET_SCAN_ADD/PRUNE_DIRS does not work as expected in tricky cases (missing real_path before adding dir in findfiles/py)
