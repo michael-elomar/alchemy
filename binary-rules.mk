@@ -60,17 +60,20 @@ gen_S_objects := $(addprefix $(build_dir)/obj/,$(gen_S_sources:.S=.S.o))
 vala_sources := $(filter %.vala,$(LOCAL_SRC_FILES))
 vala_c_sources := $(addprefix $(build_dir)/obj/,$(vala_sources:.vala=.c))
 vala_objects := $(addprefix $(build_dir)/obj/,$(vala_sources:.vala=.c.o))
+
+ifneq ("$(vala_objects)","")
 vala_done_file := $(build_dir)/obj/vala.done
 vala_header_file := $(build_dir)/include/$(LOCAL_MODULE).vala.h
 vala_vapi_file := $(build_dir)/include/$(LOCAL_MODULE).vapi
-
-ifneq ("$(vala_objects)","")
-all_prerequisites += $(vala_header_file)
 LOCAL_VALAFLAGS += \
 	--header=$(vala_header_file) \
 	--vapi=$(vala_vapi_file)
 LOCAL_C_INCLUDES += \
 	$(build_dir)/include
+else
+vala_done_file :=
+vala_header_file :=
+vala_vapi_file :=
 endif
 
 all_gen_sources := \
@@ -229,7 +232,7 @@ endif
 # Make sure all prerequisites files are generated first
 # But do NOT force recompilation (order only)
 ifneq ("$(all_prerequisites)","")
-$(all_objects): | $(all_prerequisites)
+$(all_objects): | $(all_prerequisites) $(vala_header_file)
 $(vala_done_file): | $(filter-out $(vala_header_file),$(all_prerequisites))
 endif
 
