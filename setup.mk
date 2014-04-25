@@ -263,7 +263,7 @@ endif
 TARGET_GLOBAL_VALAFLAGS += \
 	--vapidir=$(HOST_OUT_STAGING)/usr/share/vala-0.20/vapi \
 	--vapidir=$(TARGET_OUT_STAGING)/usr/share/vala/vapi \
-	--target-glib=2.32
+	--target-glib=2.36
 
 ###############################################################################
 ## ccache setup.
