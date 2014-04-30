@@ -6,7 +6,11 @@
 ## Build a module using qmake.
 ###############################################################################
 
-ifeq ("$(QT4_QMAKE)","")
+ifneq ("$(QT4_QMAKE)","")
+  QMAKE := $(QT4_QMAKE)
+else ifneq ("$(QT5_QMAKE)","")
+  QMAKE := $(QT5_QMAKE)
+else
   $(error $(LOCAL_MODULE): qmake not found)
 endif
 
@@ -65,7 +69,7 @@ $(built_file):
 	$(call print-banner2,QMake,$(PRIVATE_MODULE),Building)
 	@mkdir -p $(dir $@)
 	$(Q) cd $(PRIVATE_BUILD_DIR) \
-		&& $(QT4_QMAKE) $(PRIVATE_PATH)/$(PRIVATE_QMAKE_PRO_FILE) \
+		&& $(QMAKE) $(PRIVATE_PATH)/$(PRIVATE_QMAKE_PRO_FILE) \
 		&& $(MAKE) $(qmake_make_arg)
 	@touch $@
 
@@ -77,7 +81,7 @@ $(installed_file): $(built_file)
 	@mkdir -p $(dir $@)
 	$(Q) cd $(PRIVATE_BUILD_DIR) \
 		&& $(MAKE) $(qmake_make_arg) \
-			INSTALL_ROOT=$(TARGET_OUT_STAGING) \
+			$(if $(QT4_QMAKE),INSTALL_ROOT=$(TARGET_OUT_STAGING)) \
 			STRIP="true || ls" \
 			install
 	@touch $@
@@ -92,11 +96,11 @@ $(build_dir)/$(LOCAL_MODULE_FILENAME): $(installed_file)
 $(LOCAL_MODULE)-clean:
 	$(Q) if [ -f $(PRIVATE_BUILD_DIR)/Makefile ]; then \
 		cd $(PRIVATE_BUILD_DIR); \
-		$(MAKE) $(qmake_make_arg) \
+		$(MAKE) --keep-going --ignore-errors $(qmake_make_arg) \
 			INSTALL_ROOT=$(TARGET_OUT_STAGING) \
-			uninstall; \
-		$(MAKE) $(qmake_make_arg) \
-			clean; \
+			uninstall || echo "Ignoring uninstall errors"; \
+		$(MAKE) --keep-going --ignore-errors $(qmake_make_arg) \
+			clean || echo "Ignoring clean errors"; \
 	fi
 
 ###############################################################################
