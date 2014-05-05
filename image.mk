@@ -39,7 +39,7 @@ image-plf:
 			$(TARGET_OUT_BUILD)/linux/.config \
 			$(TARGET_OUT)/kernel.plf; \
 		$(PLFTOOL) -a u_data=$(TARGET_OUT)/kernel.plf $(IMAGE_FILE_PLF); \
-	else \
+	elif [ "$(TARGET_CHROOT)" = "0" ]; then \
 		echo "Image plf: no kernel image found"; \
 	fi
 	$(Q) if [ ! -d $(TARGET_OUT_FINAL) ]; then \
