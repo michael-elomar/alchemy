@@ -275,9 +275,10 @@ def processModule(ctx, module):
 		ctx.atom.write("LOCAL_CONFIG_FILES := 1\n")
 		if not os.path.exists(os.path.join(ctx.outDir, "usr/include", module.name)):
 			os.makedirs(os.path.join(ctx.outDir, "usr/include", module.name), mode=0755)
-		shutil.copy2(
-				os.path.join(ctx.buildDir, module.name, autoconfFileName),
-				os.path.join(ctx.outDir, "usr/include", module.name, autoconfFileName))
+		if os.path.exists(os.path.join(ctx.buildDir, module.name, autoconfFileName)):
+			shutil.copy2(
+					os.path.join(ctx.buildDir, module.name, autoconfFileName),
+					os.path.join(ctx.outDir, "usr/include", module.name, autoconfFileName))
 
 	# Set LOCAL_LIBRARIES with the content of 'depends'
 	if "depends" in module.fields:
