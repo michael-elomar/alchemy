@@ -152,11 +152,6 @@ ifndef TARGET_LINUX_CROSS
   TARGET_LINUX_CROSS := $(TARGET_CROSS)
 endif
 
-# Old name compat
-ifndef LINUX_CROSS
-  override LINUX_CROSS = $(error please use TARGET_LINUX_CROSS instead of LINUX_CROSS)
-endif
-
 # No libc or gdbserver by default
 TOOLCHAIN_LIBC ?=
 TOOLCHAIN_GDBSERVER ?=
