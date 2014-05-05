@@ -6,123 +6,12 @@
 ## This file contains package definition specific to bionic (android).
 ###############################################################################
 
+LOCAL_PATH := $(call my-dir)
+
 # Skip most of this if a sdk is used for the android part
 ifndef USE_ALCHEMY_ANDROID_SDK
 
-$(warning Please use new Alchemy-raptor version)
-
-LOCAL_PATH := $(call my-dir)
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := liblog
-LOCAL_EXPORT_LDLIBS := -llog
-include $(BUILD_PREBUILT)
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := libutils
-LOCAL_EXPORT_LDLIBS := -lutils
-include $(BUILD_PREBUILT)
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := libcutils
-LOCAL_EXPORT_LDLIBS := -lcutils
-include $(BUILD_PREBUILT)
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := libpng
-LOCAL_EXPORT_LDLIBS := -lpng
-include $(BUILD_PREBUILT)
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := libcompiler-rt-extras
-LOCAL_EXPORT_LDLIBS := -lcompiler-rt-extras
-include $(BUILD_PREBUILT)
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := libnativehelper
-LOCAL_EXPORT_LDLIBS := -lnativehelper
-include $(BUILD_PREBUILT)
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := zlib
-LOCAL_EXPORT_LDLIBS := -lz
-include $(BUILD_PREBUILT)
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := libxml2
-LOCAL_EXPORT_LDLIBS := -l$(TARGET_OUT_BUILD)/../../STATIC_LIBRARIES/libxml2_intermediates/libxml2.a -licuuc
-LOCAL_EXPORT_C_INCLUDES := $(RAPTOR_DIR)/external/libxml2/include
-LOCAL_DEPENDS_MODULES:= libicuuc
-include $(BUILD_PREBUILT)
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := libicuuc
-LOCAL_EXPORT_LDLIBS := -licuuc
-LOCAL_EXPORT_C_INCLUDES := $(RAPTOR_DIR)/external/icu4c/common
-include $(BUILD_PREBUILT)
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := libbinder
-LOCAL_EXPORT_LDLIBS := -lbinder
-include $(BUILD_PREBUILT)
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := libaudio
-LOCAL_EXPORT_LDLIBS := -laudio
-LOCAL_EXPORT_C_INCLUDES := \
-	$(RAPTOR_DIR)/hardware/parrot/libaudio/include \
-	$(RAPTOR_DIR)/hardware/libhardware_legacy/include
-include $(BUILD_PREBUILT)
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := alsa-lib
-LOCAL_MODULE_CLASS := PREBUILT
-LOCAL_EXPORT_LDLIBS := -lasound
-LOCAL_EXPORT_C_INCLUDES := $(RAPTOR_DIR)/external/alsa-lib/include
-include $(BUILD_PREBUILT)
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := libcrypto
-LOCAL_EXPORT_LDLIBS := -lcrypto
-LOCAL_EXPORT_C_INCLUDES := $(RAPTOR_DIR)/external/openssl/include
-include $(BUILD_PREBUILT)
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := libssl
-LOCAL_EXPORT_LDLIBS := -lssl
-LOCAL_EXPORT_C_INCLUDES := $(RAPTOR_DIR)/external/openssl/include
-include $(BUILD_PREBUILT)
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := wpa_supplicant
-LOCAL_EXPORT_LDLIBS := -lwpa_client
-include $(BUILD_PREBUILT)
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := libdl
-LOCAL_EXPORT_LDLIBS := -ldl
-include $(BUILD_PREBUILT)
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := libandroid_runtime
-LOCAL_EXPORT_LDLIBS := -landroid_runtime
-include $(BUILD_PREBUILT)
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := libui
-LOCAL_EXPORT_LDLIBS := -lui
-include $(BUILD_PREBUILT)
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := libhardware
-LOCAL_EXPORT_LDLIBS := -lhardware
-LOCAL_EXPORT_C_INCLUDES := $(RAPTOR_DIR)/hardware/libhardware/include
-include $(BUILD_PREBUILT)
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := libGLESv1_CM
-LOCAL_EXPORT_LDLIBS := -lGLESv1_CM
-include $(BUILD_PREBUILT)
+$(error Please use new Alchemy-raptor version)
 
 endif # ifndef USE_ALCHEMY_ANDROID_SDK
 
