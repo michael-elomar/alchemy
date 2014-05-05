@@ -63,6 +63,7 @@ vala_objects := $(addprefix $(build_dir)/obj/,$(vala_sources:.vala=.c.o))
 
 ifneq ("$(vala_objects)","")
 vala_done_file := $(build_dir)/obj/vala.done
+vala_deps_file := $(build_dir)/obj/vala.d
 vala_header_file := $(build_dir)/include/$(LOCAL_MODULE).vala.h
 vala_vapi_file := $(build_dir)/include/$(LOCAL_MODULE).vapi
 LOCAL_VALAFLAGS += \
@@ -224,8 +225,13 @@ $(vala_done_file): $(addprefix $(LOCAL_PATH)/,$(vala_sources))
 	@touch $@.tmp
 	$(transform-vala-to-c)
 	@mv -f $@.tmp $@
+	@[ ! -f $(PRIVATE_VALA_DEPS_FILE) ] || sed \
+		-e 's|$(PRIVATE_VALA_DEPS_FILE)|$@|g' \
+		-i $(PRIVATE_VALA_DEPS_FILE) \
+
 ifneq ("$(skip_include_deps)","1")
 -include $(vala_objects:%.o=%.d)
+-include $(vala_deps_file)
 endif
 endif
 
@@ -308,6 +314,7 @@ $(LOCAL_TARGETS): PRIVATE_CXXFLAGS := $(LOCAL_CXXFLAGS)
 $(LOCAL_TARGETS): PRIVATE_VALAFLAGS := $(LOCAL_VALAFLAGS)
 $(LOCAL_TARGETS): PRIVATE_VALA_SOURCES := $(addprefix $(LOCAL_PATH)/,$(vala_sources))
 $(LOCAL_TARGETS): PRIVATE_VALA_OUT_DIR := $(build_dir)/obj
+$(LOCAL_TARGETS): PRIVATE_VALA_DEPS_FILE := $(vala_deps_file)
 $(LOCAL_TARGETS): PRIVATE_ARFLAGS := $(LOCAL_ARFLAGS)
 $(LOCAL_TARGETS): PRIVATE_LDFLAGS := $(LOCAL_LDFLAGS)
 $(LOCAL_TARGETS): PRIVATE_LDLIBS := $(LOCAL_LDLIBS)

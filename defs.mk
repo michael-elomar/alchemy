@@ -1245,7 +1245,7 @@ endef
 
 ###############################################################################
 ## Fix a .d file with compilation dependencies.
-## It will ensurze that full paths are specified.
+## It will ensure that full paths are specified.
 ## $1 : file to fix.
 ###############################################################################
 define fix-deps-file
@@ -1342,6 +1342,7 @@ $(Q) $(HOST_OUT_STAGING)/usr/bin/valac \
 	$(TARGET_GLOBAL_VALAFLAGS) \
 	$(PRIVATE_VALAFLAGS) \
 	-C -d $(PRIVATE_VALA_OUT_DIR) -b $(PRIVATE_PATH) \
+	--deps $(PRIVATE_VALA_DEPS_FILE) \
 	$(PRIVATE_VALA_SOURCES)
 endef
 
