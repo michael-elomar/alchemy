@@ -553,15 +553,19 @@ all: $(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST)
 	@echo "Done building all"
 
 .PHONY: clean
-clean: $(foreach __mod,$(ALL_BUILD_MODULES),$(__mod)-clean)
+clean: $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST),$(__mod)-clean)
 	$(Q)rm -f $(AUTOCONF_MERGE_FILE)
 	$(Q)rm -f $(USER_MAKEFILES_CACHE)
+	$(Q)[ ! -d $(TARGET_OUT_STAGING) ] || find $(TARGET_OUT_STAGING) -depth -type d -empty -delete
+	$(Q)[ ! -d $(HOST_OUT_STAGING) ] || find $(HOST_OUT_STAGING) -depth -type d -empty -delete
 	@echo "Done cleaning"
 
 .PHONY: dirclean
-dirclean: $(foreach __mod,$(ALL_BUILD_MODULES),$(__mod)-dirclean)
+dirclean: $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST),$(__mod)-dirclean)
 	$(Q)rm -f $(AUTOCONF_MERGE_FILE)
 	$(Q)rm -f $(USER_MAKEFILES_CACHE)
+	$(Q)[ ! -d $(TARGET_OUT_STAGING) ] || find $(TARGET_OUT_STAGING) -depth -type d -empty -delete
+	$(Q)[ ! -d $(HOST_OUT_STAGING) ] || find $(HOST_OUT_STAGING) -depth -type d -empty -delete
 	@echo "Done cleaning directories"
 
 .PHONY: clobber
@@ -579,6 +583,7 @@ ifneq ("$(TARGET_OS_FLAVOUR)","native")
 	@echo "Deleting final directory..."
 	$(Q)rm -rf $(TARGET_OUT_FINAL)
 	$(Q)rm -f $(TARGET_OUT)/filelist.txt
+	$(Q)rm -f $(TARGET_OUT)/final.mk
 endif
 endif
 	@echo "Done deleting directories..."
