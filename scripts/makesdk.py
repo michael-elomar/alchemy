@@ -55,7 +55,8 @@ def copyStaging(srcDir, dstDir):
 			# When combining several sdk the same file could be found several times
 			if not os.path.exists(dstFilePath) \
 					and (os.path.splitext(fileName)[1] in extensions \
-							or ".so." in fileName):
+							or ".so." in fileName \
+							or "include" in dirPath):
 				if not os.path.exists(os.path.split(dstFilePath)[0]):
 					os.makedirs(os.path.split(dstFilePath)[0], mode=0755)
 				if os.path.islink(srcFilePath):
