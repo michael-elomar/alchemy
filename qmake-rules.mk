@@ -6,11 +6,17 @@
 ## Build a module using qmake.
 ###############################################################################
 
-ifneq ("$(QT4_QMAKE)","")
-  QMAKE := $(QT4_QMAKE)
-else ifneq ("$(QT5_QMAKE)","")
+ifdef QT5_QMAKE
   QMAKE := $(QT5_QMAKE)
+  __qmake_use_qt5 := $(true)
+else ifdef QT4_QMAKE
+  QMAKE := $(QT4_QMAKE)
+  __qmake_use_qt5 := $(false)
 else
+  QMAKE :=
+endif
+
+ifeq ("$(QMAKE)","")
   $(error $(LOCAL_MODULE): qmake not found)
 endif
 
@@ -20,8 +26,8 @@ alchemy_pri_file := $(build_dir)/alchemy.pri
 
 # Delete some additionnal 'done' files if a skip of external checks is not done
 ifeq ("$(skip_ext_checks)","0")
-$(call delete-one-done-file,$(built_file))
-$(call delete-one-done-file,$(installed_file))
+  $(call delete-one-done-file,$(built_file))
+  $(call delete-one-done-file,$(installed_file))
 endif
 
 # Silence...
@@ -35,7 +41,7 @@ define qmake_gen_deps
 	@rm -f $(PRIVATE_ALCHEMY_PRI_FILE)
 	@mkdir -p $(dir $(PRIVATE_ALCHEMY_PRI_FILE))
 	@( \
-		echo "target.path = /$(PRIVATE_DESTDIR)"; \
+		echo "target.path = $(if $(__qmake_use_qt5),$(TARGET_OUT_STAGING))/$(PRIVATE_DESTDIR)"; \
 		echo "INSTALLS += target"; \
 		echo "INCLUDEPATH += $(PRIVATE_C_INCLUDES)"; \
 		echo "QMAKE_CFLAGS += $(PRIVATE_CFLAGS)"; \
@@ -73,17 +79,20 @@ $(built_file):
 		&& $(MAKE) $(qmake_make_arg)
 	@touch $@
 
-# Install in staging directory by specifing INSTALL_ROOT
+# Install in staging directory by specifing INSTALL_ROOT (only for qt4, qt5 already
+# knows QT_SYSROOT)
 # Force STRIP at dummy to install unstripped binaries (alchemy will do it in
 # final stage only)
+# macro qt5_la_prl_files_fixup is actually defined in qt5/qtbase/atom.mk
 $(installed_file): $(built_file)
 	$(call print-banner2,QMake,$(PRIVATE_MODULE),Installing)
 	@mkdir -p $(dir $@)
 	$(Q) cd $(PRIVATE_BUILD_DIR) \
 		&& $(MAKE) $(qmake_make_arg) \
-			$(if $(QT4_QMAKE),INSTALL_ROOT=$(TARGET_OUT_STAGING)) \
 			STRIP="true || ls" \
+			$(if $(__qmake_use_qt5),$(empty),INSTALL_ROOT=$(TARGET_OUT_STAGING)) \
 			install
+	$(qt5_la_prl_files_fixup)
 	@touch $@
 
 # Done
@@ -97,7 +106,7 @@ $(LOCAL_MODULE)-clean:
 	$(Q) if [ -f $(PRIVATE_BUILD_DIR)/Makefile ]; then \
 		cd $(PRIVATE_BUILD_DIR); \
 		$(MAKE) --keep-going --ignore-errors $(qmake_make_arg) \
-			INSTALL_ROOT=$(TARGET_OUT_STAGING) \
+			$(if $(__qmake_use_qt5),$(empty),INSTALL_ROOT=$(TARGET_OUT_STAGING)) \
 			uninstall || echo "Ignoring uninstall errors"; \
 		$(MAKE) --keep-going --ignore-errors $(qmake_make_arg) \
 			clean || echo "Ignoring clean errors"; \
