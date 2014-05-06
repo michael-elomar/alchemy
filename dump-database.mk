@@ -82,6 +82,7 @@ __dump-database-xml = \
 	$(call __write-xml,<?xml version='1.0' encoding='UTF-8'?>) \
 	$(call __write-xml,<alchemy>) \
 	$(call __write-xml,<target>) \
+	$(call __dump-database-var-xml,ALCHEMY_WORKSPACE_DIR,$(ALCHEMY_WORKSPACE_DIR)) \
 	$(foreach __var,$(vars-TARGET), \
 		$(call __dump-database-var-xml,$(__var),$(strip $(TARGET_$(__var)))) \
 	) \
