@@ -59,6 +59,9 @@ class ModuleDb(object):
 	def __iter__(self):
 		return iter([self._modules[key] for key in sorted(self._modules.keys())])
 
+	def __contains__(self, key):
+		return key in self._modules
+
 #===============================================================================
 #===============================================================================
 def loadXml(xmlPath):
