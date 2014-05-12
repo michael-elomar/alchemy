@@ -12,8 +12,8 @@ BUILD_PROP_FILE_TMP := $(TARGET_OUT_BUILD)/build.prop
 
 # Add some generic properties
 TARGET_BUILD_PROPERTIES += \
-	ro.build.product=$(TARGET_PRODUCT) \
-	ro.build.variant=$(TARGET_PRODUCT_VARIANT) \
+	ro.build.alchemy.product=$(TARGET_PRODUCT) \
+	ro.build.alchemy.variant=$(TARGET_PRODUCT_VARIANT) \
 	ro.build.hostname=$(shell hostname)
 
 # Put modules properties.
