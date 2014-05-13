@@ -16,10 +16,6 @@ ifeq ("$(TARGET_CHROOT)","1")
   endif
 endif
 
-# Mapping for the chroot environment
-TARGET_IMAGE_PATH_MAP_FILE := $(PULSAR_FC7100_COMMON_CONFIG_DIR)/pathmap.txt
-
-
 .PHONY: symbols
 symbols:
 	@echo "Symbols: start"
