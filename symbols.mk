@@ -8,13 +8,25 @@
 
 SYMBOLS_TGZ := $(TARGET_OUT)/symbols-$(TARGET_PRODUCT_FULL_NAME).tar.gz
 
+# Determine chroot path of the target
+SYMBOLS_ROOT :=
+ifeq ("$(TARGET_CHROOT)","1")
+  ifneq ("$(TARGET_IMAGE_PATH_MAP_FILE)","")
+    SYMBOLS_ROOT := $(shell grep '^/ ' $(TARGET_IMAGE_PATH_MAP_FILE) | awk '{ printf $$3 }')
+  endif
+endif
+
+# Mapping for the chroot environment
+TARGET_IMAGE_PATH_MAP_FILE := $(PULSAR_FC7100_COMMON_CONFIG_DIR)/pathmap.txt
+
+
 .PHONY: symbols
 symbols:
 	@echo "Symbols: start"
 	@rm -f $(SYMBOLS_TGZ)
 	$(Q) cd $(TARGET_OUT_STAGING) && find | file -f- | \
 		grep 'not stripped' | cut -d: -f1 | \
-		tar -T- -czf $(SYMBOLS_TGZ) --transform "s|^\./|symbols/|"
+		tar -T- -czf $(SYMBOLS_TGZ) --transform "s|^\./|symbols$(SYMBOLS_ROOT)/|"
 	@echo "Symbols: done -> $(SYMBOLS_TGZ)"
 
 .PHONY: symbols-clean
