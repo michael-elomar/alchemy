@@ -310,7 +310,7 @@ __external-add_LDFLAGS :=
 ifneq ("$(strip $(all_whole_static_libs_filename))","")
 __external-add_LDFLAGS += -Wl,--whole-archive
 $(foreach __lib,$(all_whole_static_libs_filename), \
-	$(eval __external-add_LDFLAGS := $(__external-add_LDFLAGS),-l:$(__lib)) \
+	$(eval __external-add_LDFLAGS := $(__external-add_LDFLAGS),-l:$(notdir $(__lib))) \
 )
 __external-add_LDFLAGS := $(__external-add_LDFLAGS),--no-whole-archive
 endif
@@ -318,7 +318,9 @@ endif
 # Static libraries
 # With -l: to force using the given path
 ifneq ("$(strip $(all_static_libs_filename))","")
-__external-add_LDFLAGS += $(addprefix -l:,$(all_static_libs_filename))
+$(foreach __lib,$(all_static_libs_filename), \
+	$(eval __external-add_LDFLAGS := $(__external-add_LDFLAGS),-l:$(notdir $(__lib))) \
+)
 endif
 
 # Shared libraries
@@ -328,7 +330,7 @@ endif
 ifneq ("$(strip $(all_shared_libs_filename))","")
 __external-add_LDFLAGS += -Wl,--as-needed
 $(foreach __lib,$(all_shared_libs_filename), \
-	$(eval __external-add_LDFLAGS := $(__external-add_LDFLAGS),-l:$(__lib)) \
+	$(eval __external-add_LDFLAGS := $(__external-add_LDFLAGS),-l:$(notdir $(__lib))) \
 )
 __external-add_LDFLAGS := $(__external-add_LDFLAGS),--no-as-needed
 endif
