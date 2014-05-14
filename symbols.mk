@@ -12,7 +12,7 @@ SYMBOLS_TGZ := $(TARGET_OUT)/symbols-$(TARGET_PRODUCT_FULL_NAME).tar.gz
 SYMBOLS_ROOT :=
 ifeq ("$(TARGET_CHROOT)","1")
   ifneq ("$(TARGET_IMAGE_PATH_MAP_FILE)","")
-    SYMBOLS_ROOT := $(shell grep '^/ ' $(TARGET_IMAGE_PATH_MAP_FILE) | awk '{ printf $$3 }')
+    SYMBOLS_ROOT := $(shell awk '{ if ($$1 ~ /^\/$$/ ){print $$3;}}' $(TARGET_IMAGE_PATH_MAP_FILE))
   endif
 endif
 
