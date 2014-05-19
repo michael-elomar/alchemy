@@ -239,7 +239,6 @@ endif
 # But do NOT force recompilation (order only)
 ifneq ("$(all_prerequisites)","")
 $(all_objects): | $(all_prerequisites) $(vala_header_file)
-$(vala_done_file): | $(filter-out $(vala_header_file),$(all_prerequisites))
 endif
 
 # Generated sources will depends on unpaked archive (if needed) and force
@@ -252,15 +251,20 @@ endif
 
 # Force recompilation if internal dependencies are changed
 $(all_objects): $(all_internal_depends)
-$(vala_done_file): $(all_internal_depends)
 
 # Clean objects
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(build_dir)/$(LOCAL_MODULE).map
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(all_objects)
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(all_objects:%.o=%.d)
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(vala_c_sources)
+
+# Vala stuff
+ifneq ("$(vala_objects)","")
+$(vala_done_file): | $(filter-out $(vala_header_file),$(all_prerequisites))
+$(vala_done_file): $(all_internal_depends)
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(vala_done_file)
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(vala_done_file).tmp
+endif
 
 ###############################################################################
 ## Precompiled headers.
