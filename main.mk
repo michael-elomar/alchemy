@@ -386,7 +386,7 @@ scan:
 ## pbuild-hook management.
 ###############################################################################
 
-include $(BUILD_SYSTEM)/pbuild-hook/pbuild-hook.mk
+include $(BUILD_SYSTEM)/pbuild-hook/atom.mk
 
 ###############################################################################
 ## Module dependencies generation.
@@ -528,6 +528,8 @@ $(foreach __var,$(vars-LOCAL) $(macros-LOCAL), \
 
 ###############################################################################
 ## Rule to merge autoconf.h files.
+## Can NOT be in pbuild-hook/atom.mk because we need complete database for
+## the rules below.
 ###############################################################################
 
 # List of all available autoconf.h files
