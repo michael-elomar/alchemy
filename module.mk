@@ -44,8 +44,12 @@ LOCAL_TARGETS := \
 	$(LOCAL_BUILD_MODULE) \
 	$(LOCAL_MODULE)-clean \
 	$(LOCAL_MODULE)-dirclean \
-	$(LOCAL_MODULE)-path \
-	$(LOCAL_MODULE)-pre-install
+	$(LOCAL_MODULE)-path
+
+ifneq ("$(value LOCAL_CMD_PRE_INSTALL)","")
+preinstall_file := $(build_dir)/$(LOCAL_MODULE).preinstall
+LOCAL_TARGETS += $(preinstall_file)
+endif
 
 ###############################################################################
 ## ARM specific checks.
@@ -903,17 +907,20 @@ endif # ifeq ("$(copy_to_staging)","1")
 
 ifneq ("$(value LOCAL_CMD_PRE_INSTALL)","")
 
-.PHONY: $(LOCAL_MODULE)-pre-install
-$(LOCAL_MODULE)-pre-install:
+$(preinstall_file):
 	+$(call macro-exec-cmd,CMD_PRE_INSTALL,empty)
+	@mkdir -p $(dir $@)
+	@touch $@
+
+$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(preinstall_file)
 
 # If a copy in staging is done do it before. Otherwise we can only hook before
 # build module is done...
 # Order only prerequiqites to avoid recompilation...
 ifeq ("$(copy_to_staging)","1")
-$(LOCAL_STAGING_MODULE): | $(LOCAL_MODULE)-pre-install
+$(LOCAL_STAGING_MODULE): | $(preinstall_file)
 else
-$(LOCAL_BUILD_MODULE): | $(LOCAL_MODULE)-pre-install
+$(LOCAL_BUILD_MODULE): | $(preinstall_file)
 endif
 
 endif
