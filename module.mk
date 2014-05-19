@@ -294,6 +294,15 @@ endif
 # Add debug flags at the end
 $(call add-debug-flags)
 
+# Code coverage flags (for internal modules only)
+ifeq ("$(call is-module-external,$(LOCAL_MODULE))","")
+ifeq ("$(USE_COVERAGE)","1")
+  LOCAL_CFLAGS  += -fprofile-arcs -ftest-coverage -O0
+  LOCAL_LDFLAGS += -fprofile-arcs -ftest-coverage
+  LOCAL_LDFLAGS_SHARED += -fprofile-arcs -ftest-coverage
+endif
+endif
+
 ###############################################################################
 ## Determine flags that external modules will need to add manually.
 ## External modules (AUTOTOOLS, CMAKE) only have CFLAGS CXXFLAGS and LDFLAGS.

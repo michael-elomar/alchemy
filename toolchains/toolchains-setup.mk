@@ -33,15 +33,8 @@ endif
 # -fdata-sections causes issues with some packages
 TARGET_GLOBAL_CFLAGS += \
 	-pipe \
-	-g \
+	-g -O2 \
 	-ffunction-sections
-
-ifeq ("$(USE_COVERAGE)","1")
-  TARGET_GLOBAL_CFLAGS  += -fprofile-arcs -ftest-coverage -O0
-  TARGET_GLOBAL_LDFLAGS += -fprofile-arcs -ftest-coverage
-else
-  TARGET_GLOBAL_CFLAGS += -O2
-endif
 
 # TODO: check for these flags
 #TARGET_GLOBAL_CFLAGS += \

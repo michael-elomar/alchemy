@@ -621,6 +621,9 @@ include $(BUILD_SYSTEM)/properties.mk
 # Open Source Software packages helpers
 include $(BUILD_SYSTEM)/oss-packages.mk
 
+# Code coverage helpers
+include $(BUILD_SYSTEM)/coverage.mk
+
 # Help
 include $(BUILD_SYSTEM)/help.mk
 
