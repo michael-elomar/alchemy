@@ -56,5 +56,10 @@ clean: coverage-copy-gcno-clean
 dirclean: coverage-copy-gcno-clean
 clobber: coverage-copy-gcno-clean
 
+# Only add dependency if it is also given in goals to avoid unecessary checks
+ifneq ("$(call is-targets-in-make-goals,all)","")
+coverage-copy-gcno: all
+endif
+
 endif # ifeq ("$(USE_COVERAGE)","1")
 
