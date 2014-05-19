@@ -418,14 +418,15 @@ def processToolchainLibc(libcDir, options):
 			dstFileName = getRealPath(options.finalDir, relPath)
 			doCopy(dstFileName, srcFileName, options, doPatchShebang=True)
 
-	# copy time zone database from 'usr/share/zoneinfo' directory
-	usrShareZoneinfoDir = os.path.join(libcDir, "usr/share/zoneinfo")
-	for dirName, _, fileNames in os.walk(usrShareZoneinfoDir):
-		for fileName in fileNames:
-			srcFileName = os.path.join(dirName, fileName)
-			relPath = os.path.relpath(srcFileName, libcDir)
-			dstFileName = getRealPath(options.finalDir, relPath)
-			doCopy(dstFileName, srcFileName, options)
+	if options.copytzdata:
+		# copy time zone database from 'usr/share/zoneinfo' directory
+		usrShareZoneinfoDir = os.path.join(libcDir, "usr/share/zoneinfo")
+		for dirName, _, fileNames in os.walk(usrShareZoneinfoDir):
+			for fileName in fileNames:
+				srcFileName = os.path.join(dirName, fileName)
+				relPath = os.path.relpath(srcFileName, libcDir)
+				dstFileName = getRealPath(options.finalDir, relPath)
+				doCopy(dstFileName, srcFileName, options)
 
 #===============================================================================
 # Process linux basic skel.
@@ -536,6 +537,11 @@ def parseArgs():
 		dest="toolchainLibcDir",
 		default=None,
 		help="path to toolchain libc directory to merge in final tree")
+	parser.add_option("--copy-tzdata",
+		dest="copytzdata",
+		action="store_true",
+		default=False,
+		help="include time zone data in the final tree")
 	parser.add_option("--toolchain-gdbserver",
 		dest="toolchainGdbserverName",
 		default=None,

@@ -108,6 +108,9 @@ TARGET_BUILD_PROPERTIES ?=
 # Include gdbserver (GPLv3) or not in target
 TARGET_INCLUDE_GDBSERVER ?= 1
 
+# Include TZData or not in the target
+TARGET_INCLUDE_TZDATA ?= 0
+
 ###############################################################################
 ## Toolchain setup.
 ###############################################################################

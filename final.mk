@@ -30,6 +30,10 @@ ifneq ("$(TOOLCHAIN_LIBC)","")
   MAKEFINAL_ARGS += --toolchain-libc="$(TOOLCHAIN_LIBC)"
 endif
 
+ifneq ("$(TARGET_INCLUDE_TZDATA)","0")
+  MAKEFINAL_ARGS += --copy-tzdata
+endif
+
 ifneq ("$(TARGET_INCLUDE_GDBSERVER)","0")
 ifneq ("$(TOOLCHAIN_GDBSERVER)","")
   MAKEFINAL_ARGS += --toolchain-gdbserver="$(TOOLCHAIN_GDBSERVER)"
