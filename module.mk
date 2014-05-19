@@ -734,7 +734,9 @@ $(LOCAL_MODULE):
 	@( \
 		done_file=$(call module-get-build-filename,$@); \
 		if [ ! -f "$${done_file}" ]; then \
-			echo "warning: custom module '$@' did not create $${done_file}"; \
+			if [ "$(__modules.$@.check-done-file-created)" != "" ]; then \
+				echo "warning: custom module '$@' did not create $${done_file}"; \
+			fi; \
 			mkdir -p $$(dirname $${done_file}); \
 			touch $${done_file}; \
 		fi; \

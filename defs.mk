@@ -247,6 +247,14 @@ module-add = \
 		$(foreach __local,$(macros-LOCAL), \
 			$(call macro-copy,__modules.$(__mod).$(__local),LOCAL_$(__local)) \
 		) \
+		$(if $(call streq,$(LOCAL_MODULE_CLASS),CUSTOM), \
+			$(if $(LOCAL_MODULE_FILENAME), \
+				$(eval __modules.$(__mod).check-done-file-created := $(true)) \
+				, \
+				$(eval __modules.$(__mod).check-done-file-created := $(false)) \
+				$(eval __modules.$(__mod).MODULE_FILENAME := $(__mod).done) \
+			) \
+		) \
 		$(check-cppflags-compat) \
 		$(call install-headers-setup,$(LOCAL_MODULE)) \
 	)

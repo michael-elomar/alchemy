@@ -13,8 +13,8 @@ endif
 
 LOCAL_MODULE_CLASS := CUSTOM
 
-ifeq ("$(LOCAL_MODULE_FILENAME)","")
-LOCAL_MODULE_FILENAME := $(LOCAL_MODULE).done
-endif
+# LOCAL_MODULE_FILENAME will be checked if empty in module-add
+# A flag will then be set to indicate that the module will probably not
+# create a .done file
 
 $(module-add)

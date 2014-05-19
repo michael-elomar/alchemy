@@ -22,6 +22,6 @@ ifeq ("$(LOCAL_QMAKE_PRO_FILE)","")
 endif
 
 LOCAL_MODULE_FILENAME := $(LOCAL_MODULE).done
-LOCAL_DONE_FILES := $(LOCAL_MODULE).done
+LOCAL_DONE_FILES += $(LOCAL_MODULE).done
 
 $(module-add)
