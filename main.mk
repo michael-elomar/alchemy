@@ -618,7 +618,7 @@ include $(BUILD_SYSTEM)/symbols.mk
 # Properies helpers
 include $(BUILD_SYSTEM)/properties.mk
 
-# Open Source Softare packages helpers
+# Open Source Software packages helpers
 include $(BUILD_SYSTEM)/oss-packages.mk
 
 # Help
@@ -659,6 +659,13 @@ $(eval $(call copy-one-file, \
 	$(TARGET_OUT_STAGING)/$(NATIVE_CHROOT_WRAPPER_SCRIPT)))
 
 $(ALL_BUILD_MODULES): $(TARGET_OUT_STAGING)/$(NATIVE_CHROOT_WRAPPER_SCRIPT)
+
+# Add a dummy file to warn user that the staging directory is not the one to
+# use for native chroot, it shall be the final directory.
+$(ALL_BUILD_MODULES): $(TARGET_OUT_STAGING)/THIS_IS_NOT_THE_DIRECTORY_FOR_NATIVE_CHROOT
+$(TARGET_OUT_STAGING)/THIS_IS_NOT_THE_DIRECTORY_FOR_NATIVE_CHROOT:
+	@mkdir -p $(dir $@)
+	@echo "Please use the 'final' directory to launch native chroot" > $@
 
 endif
 

@@ -35,7 +35,8 @@ EXCLUDE_FILTERS_PYTHON = [".py", ".pyc", ".pyo"]
 # Files to exclude
 EXCLUDE_FILES = [
 	".gitignore",
-	"Image", "zImage", "bzImage", "uImage", "kernel.plf"]
+	"Image", "zImage", "bzImage", "uImage", "kernel.plf",
+	"THIS_IS_NOT_THE_DIRECTORY_FOR_NATIVE_CHROOT"]
 
 # Linux folders/links
 LINUX_BASIC_SKEL = [
