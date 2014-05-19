@@ -149,7 +149,6 @@ def getRealPath(finalDir, path):
 
 	return os.path.abspath(path)
 
-
 #===============================================================================
 #===============================================================================
 def addBuildId(filePath, options):
@@ -192,37 +191,21 @@ def getCopyCmds(dstFileName, srcFileName, options, doStrip=False, doPatchShebang
 #===============================================================================
 # Copy a file using a makefile (to do strip in parallel).
 #===============================================================================
+_MAKEFILE_FILE_IDX = 0
 def doCopyByMakefile(dstFileName, srcFileName, options, doStrip=False, doPatchShebang=False):
-	srcFileNameEsc = srcFileName
-	dstFileNameEsc = dstFileName
-	# if source file contains ' ', ':' or '=' it doesn't work great
-	# prerequisite shall be escaped
-	# target can not contain at all any ' ', ':' or '=' so replace with '_'
-	# in command do not use target name as it will be wrong
-	# consequence is that target will never actually exists and commands
-	# will always be executed
-	if srcFileNameEsc.find(" ") >= 0:
-		srcFileNameEsc = srcFileNameEsc.replace(" ", "\\ ")
-		dstFileNameEsc = dstFileNameEsc.replace(" ", "_")
-	if srcFileNameEsc.find(":") >= 0:
-		srcFileNameEsc = srcFileNameEsc.replace(":", "\\:")
-		dstFileNameEsc = dstFileNameEsc.replace(":", "_")
-	if srcFileNameEsc.find("=") >= 0:
-		srcFileNameEsc = srcFileNameEsc.replace("=", "\\=")
-		dstFileNameEsc = dstFileNameEsc.replace("=", "_")
-
-	# register destination in ALL variable
-	options.makefile.write("ALL += %s\n" % dstFileNameEsc)
-
-	# rule
-	options.makefile.write("%s: %s\n" % (dstFileNameEsc, srcFileNameEsc))
+	global _MAKEFILE_FILE_IDX
+	# use a generic target name to avoid issue with file names containing
+	# special characters
+	options.makefile.write("ALL += file%d\n" % _MAKEFILE_FILE_IDX)
+	options.makefile.write(".PHONY: file%d\n" % _MAKEFILE_FILE_IDX)
+	options.makefile.write("file%d:\n" % _MAKEFILE_FILE_IDX)
+	_MAKEFILE_FILE_IDX += 1
 
 	# commands, see doCopy for more info
 	cmds = getCopyCmds(dstFileName, srcFileName, options, doStrip, doPatchShebang)
-	options.makefile.write("\t@mkdir -p \"%s\"\n" % os.path.dirname(dstFileName))
-	options.makefile.write("\t@echo Alchemy install: %s\n" % os.path.relpath(dstFileName))
+	options.makefile.write("\t$(call PRINT,\"Alchemy install: %s\")\n" % os.path.relpath(dstFileName))
 	for cmd in cmds:
-		options.makefile.write("\t$(Q)%s\n" % cmd.replace("$", "$$"))
+		options.makefile.write("\t@%s\n" % cmd.replace("$", "$$"))
 	options.makefile.write("\n")
 
 #===============================================================================
@@ -303,7 +286,7 @@ def doCopy(dstFileName, srcFileName, options, doPatchShebang=False, forceCopy=Fa
 	if not os.path.lexists(dstDirName):
 		os.makedirs(dstDirName, 0755)
 
-	# do the copy by wanted method
+	# do the copy by wanted method (always process links directly)
 	if options.makefile != None and not os.path.islink(srcFileName):
 		doCopyByMakefile(dstFileName, srcFileName, options, doStrip, doPatchShebang)
 	else:
@@ -319,14 +302,21 @@ def doCopy(dstFileName, srcFileName, options, doPatchShebang=False, forceCopy=Fa
 #===============================================================================
 def writeMakefileHeader(options):
 	options.makefile.write("# GENERATED FILE, DO NOT MODIFY\n\n")
-	options.makefile.write(".SUFFIXES:\n\n")
-	if options.strip != None:
-		options.makefile.write("STRIP := %s\n" % options.strip)
-	options.makefile.write("PWD := $(shell pwd)\n")
+	# turns off suffix rules built into make
+	options.makefile.write(".SUFFIXES:\n")
+	# turns off the RCS / SCCS implicit rules of GNU Make
+	options.makefile.write("%: RCS/%,v\n")
+	options.makefile.write("%: RCS/%\n")
+	options.makefile.write("%: %,v\n")
+	options.makefile.write("%: s.%\n")
+	options.makefile.write("%: SCCS/s.%\n")
+	# other devines
 	options.makefile.write("ALL :=\n")
 	options.makefile.write("V ?= 0\n")
 	options.makefile.write("ifeq (\"$(V)\",\"0\")\n")
-	options.makefile.write("  Q := @\n")
+	options.makefile.write("  PRINT =\n")
+	options.makefile.write("else\n")
+	options.makefile.write("  PRINT = @echo $1\n")
 	options.makefile.write("endif\n")
 	options.makefile.write(".PHONY: all\n")
 	options.makefile.write("all: do-all\n\n")
@@ -402,7 +392,8 @@ def processToolchainLibc(libcDir, options):
 			relPath = os.path.relpath(srcFileName, libcDir)
 			dstFileName = getRealPath(options.finalDir, relPath)
 			doCopy(dstFileName, srcFileName, options)
-			if not os.path.islink(dstFileName):
+			# FIXME : in makefile mode we don't add buildid
+			if not os.path.islink(dstFileName) and not options.makefile:
 				addBuildId(dstFileName, options)
 
 	# copy 'libstdc++' from 'usr/lib' directory
@@ -413,7 +404,8 @@ def processToolchainLibc(libcDir, options):
 			relPath = os.path.relpath(srcFileName, libcDir)
 			dstFileName = getRealPath(options.finalDir, relPath)
 			doCopy(dstFileName, srcFileName, options)
-			if not os.path.islink(dstFileName):
+			# FIXME : in makefile mode we don't add buildid
+			if not os.path.islink(dstFileName) and not options.makefile:
 				addBuildId(dstFileName, options)
 
 	# copy 'ldd' from 'usr/bin' directory
