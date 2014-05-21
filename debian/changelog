@@ -1,3 +1,19 @@
+parrot-tools-alchemy (1.0.15) unstable; urgency=low
+  * [REDMINE #5363] Add coverage option in Alchemy (USE_COVERAGE)
+  * Update vala dependencies.
+  * Add qt5 support.
+  * Not using sdk for android is no more supported.
+  * LINUX_CROSS is no more supported, use TARGET_LINUX_CROSS.
+  * Put all include files in sdk (some qt includes don't have any extensions)
+  * Rename ro.build.product and ro.build.variant.
+  * remove library path from '-l:libraryspec' linker argument (not supported on gcc 4.8)
+  * Write Parrot specific properties.
+  * Add chroot prefix in symbols.tar
+  * Use temp makefile for final tree generation to speed up parallel builds.
+  * [BUGFIX 140375] Add an option to include or not time zone data in the final tree
+
+ -- Yves-Marie Morgan (Parrot) <yves-marie.morgan@parrot.com>  Wed, 21 May 2014 11:17:59 +0200
+
 parrot-tools-alchemy (1.0.14) unstable; urgency=low
   * Create lib/modules so that modprobe works even chrooted
   * [BUGFIX 0127328] cpio images don't have files with correct mode
