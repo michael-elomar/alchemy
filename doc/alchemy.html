@@ -303,10 +303,12 @@ in its chroot environment, the final tree will be found correctly.</li>
 loaded by boxinit at startup. The format is a list of <code>&lt;key&gt;=&lt;value&gt;</code> pair.
 Default contains some <code>ro.build</code> keys that alchemy will put.
 Note : each module can also specify its own properties in <code>LOCAL_BUILD_PROPERTIES</code>.</li>
-<li><p><code>TARGET_INCLUDE_GDBSERVER</code> : include gdbserver binary in target. This binary
+<li><code>TARGET_INCLUDE_GDBSERVER</code> : include gdbserver binary in target. This binary
 is GPLv3 and is needed only in development phase and shall not be present in
 final release packages.
-</br>Default is <code>1</code>.</p></li>
+</br>Default is <code>1</code>.</li>
+<li><p><code>TARGET_INCLUDE_TZDATA</code> : include time zone data from libc.
+</br>Default is <code>0</code>.</p></li>
 <li><p><code>USE_CLANG</code> : Use clang instead of gcc for compilation.
 </br>Default is <code>0</code>.</p></li>
 <li><code>USE_CCACHE</code> : Use ccache to speed up compilation.
@@ -322,6 +324,8 @@ external modules when the related project is updated.
 <li><code>USE_CONFIG_CHECK</code> : Enable check of config before the build. Only need to be
 disabled in some sdk use cases.
 </br>Default is <code>1</code>.</li>
+<li><code>USE_COVERAGE</code> : Enable options for coverage (and disable compiler optimisations).
+</br>Default is <code>0</code>.</li>
 </ul>
 
 <h2>Configuration</h2>
