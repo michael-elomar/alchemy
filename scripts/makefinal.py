@@ -428,6 +428,16 @@ def processToolchainLibc(libcDir, options):
 				dstFileName = getRealPath(options.finalDir, relPath)
 				doCopy(dstFileName, srcFileName, options)
 
+	if options.copygconv:
+		# copy gconv libraries from 'usr/lib/gconv' directory
+		usrShareGconvDir = os.path.join(libcDir, "usr/lib/gconv")
+		for dirName, _, fileNames in os.walk(usrShareGconvDir):
+			for fileName in fileNames:
+				srcFileName = os.path.join(dirName, fileName)
+				relPath = os.path.relpath(srcFileName, libcDir)
+				dstFileName = getRealPath(options.finalDir, relPath)
+				doCopy(dstFileName, srcFileName, options)
+
 #===============================================================================
 # Process linux basic skel.
 #===============================================================================
@@ -542,6 +552,11 @@ def parseArgs():
 		action="store_true",
 		default=False,
 		help="include time zone data in the final tree")
+	parser.add_option("--copy-gconv",
+		dest="copygconv",
+		action="store_true",
+		default=False,
+		help="include gconv libraries in the final tree")
 	parser.add_option("--toolchain-gdbserver",
 		dest="toolchainGdbserverName",
 		default=None,

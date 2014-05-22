@@ -111,6 +111,9 @@ TARGET_INCLUDE_GDBSERVER ?= 1
 # Include TZData or not in the target
 TARGET_INCLUDE_TZDATA ?= 0
 
+# Include Gconv or not on the target
+TARGET_INCLUDE_GCONV ?= 0
+
 ###############################################################################
 ## Toolchain setup.
 ###############################################################################
