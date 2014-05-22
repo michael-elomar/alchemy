@@ -81,7 +81,6 @@ LINUX_EXPORTED_HEADERS_OVER := \
 # $1 image file to copy from arch/boot directory
 linux-copy-image = \
 	if [ -f $(LINUX_BUILD_DIR)/arch/$(LINUX_ARCH)/boot/$1 ]; then \
-		mkdir -p $(TARGET_OUT_STAGING)/boot; \
 		cp -af $(LINUX_BUILD_DIR)/arch/$(LINUX_ARCH)/boot/$1 $(TARGET_OUT_STAGING)/boot; \
 	fi;
 
@@ -133,6 +132,7 @@ $(LINUX_BUILD_DIR)/$(LOCAL_MODULE_FILENAME): $(LINUX_BUILD_DIR)/.config $(LINUX_
 	$(Q)rm -f  $(TARGET_OUT_STAGING)/lib/modules/*/build
 	$(Q)rm -f  $(TARGET_OUT_STAGING)/lib/modules/*/source
 	@echo "Installing linux kernel images"
+	@mkdir -p $(TARGET_OUT_STAGING)/boot
 ifeq ("$(LINUX_ARCH)","arm")
 	$(Q)$(MAKE) $(LINUX_MAKE_ARGS) uImage
 	$(Q)$(call linux-copy-image,uImage)
@@ -140,6 +140,7 @@ endif
 	$(Q)$(call linux-copy-image,Image)
 	$(Q)$(call linux-copy-image,zImage)
 	$(Q)$(call linux-copy-image,bzImage)
+	$(Q)cp -af $(LINUX_BUILD_DIR)/vmlinux $(TARGET_OUT_STAGING)/boot
 	@echo "Linux kernel built"
 	@touch $@
 
