@@ -179,7 +179,7 @@ endif
 __clean-targets := clean dirclean clobber
 __query-targets := scan help help-modules dump dump-depends dump-xml build-graph
 __config-targets := config config-check config-update xconfig menuconfig nconfig
-__fs-targets := final plf image-plf image-cpio sdk symbols
+__fs-targets := final plf image-plf image-cpio sdk symbols symbols-tar symbols-tar-gz
 __skip_targets := \
 	$(__clean-targets) \
 	$(__query-targets) \

@@ -6,7 +6,8 @@
 ## Generate an archive with debugging symbols from staging directory.
 ###############################################################################
 
-SYMBOLS_TGZ := $(TARGET_OUT)/symbols-$(TARGET_PRODUCT_FULL_NAME).tar.gz
+SYMBOLS_TAR := $(TARGET_OUT)/symbols-$(TARGET_PRODUCT_FULL_NAME).tar
+SYMBOLS_TAR_GZ := $(TARGET_OUT)/symbols-$(TARGET_PRODUCT_FULL_NAME).tar.gz
 
 # Determine chroot path of the target
 SYMBOLS_ROOT :=
@@ -16,18 +17,30 @@ ifeq ("$(TARGET_CHROOT)","1")
   endif
 endif
 
-.PHONY: symbols
-symbols:
+# Tar archive, no compression
+.PHONY: symbols-tar
+symbols-tar:
 	@echo "Symbols: start"
-	@rm -f $(SYMBOLS_TGZ)
+	@rm -f $(SYMBOLS_TAR)
 	$(Q) cd $(TARGET_OUT_STAGING) && find | file -f- | \
 		grep 'not stripped' | cut -d: -f1 | \
-		tar -T- -czf $(SYMBOLS_TGZ) --transform "s|^\./|symbols$(SYMBOLS_ROOT)/|"
-	@echo "Symbols: done -> $(SYMBOLS_TGZ)"
+		tar -T- -cf $(SYMBOLS_TAR) --transform "s|^\./|symbols$(SYMBOLS_ROOT)/|"
+	@echo "Symbols: done -> $(SYMBOLS_TAR)"
+
+# Tar archive gzip compressed
+.PHONY: symbols-tar-gz
+symbols-tar-gz:
+	@echo "Symbols: start"
+	@rm -f $(SYMBOLS_TAR_GZ)
+	$(Q) cd $(TARGET_OUT_STAGING) && find | file -f- | \
+		grep 'not stripped' | cut -d: -f1 | \
+		tar -T- -czf $(SYMBOLS_TAR_GZ) --transform "s|^\./|symbols$(SYMBOLS_ROOT)/|"
+	@echo "Symbols: done -> $(SYMBOLS_TAR_GZ)"
 
 .PHONY: symbols-clean
 symbols-clean:
-	$(Q) rm -rf $(SYMBOLS_TGZ)
+	$(Q) rm -rf $(SYMBOLS_TAR)
+	$(Q) rm -rf $(SYMBOLS_TAR_GZ)
 
 # Only add dependency if it is also given in goals to avoid unecessary checks
 # symbols target never depends on final
@@ -38,4 +51,8 @@ endif
 clean: symbols-clean
 dirclean: symbols-clean
 clobber: symbols-clean
+
+# Compatiblility
+.PHONY: symbols
+symbols: symbols-tar-gz
 
