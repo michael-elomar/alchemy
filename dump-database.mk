@@ -181,7 +181,7 @@ ifdef __dump-xml-with-info
 	@# FIXME: backslashes seems lost in the process...
 	+@( \
 		tmpfile=$$(mktemp); \
-		$(ALCHEMAKE_CMDLINE) TARGET_ARCH=$(TARGET_ARCH) __dumping-xml=1 &> $${tmpfile}; \
+		$(filter-out $(MAKECMDGOALS),$(ALCHEMAKE_CMDLINE)) TARGET_ARCH=$(TARGET_ARCH) __dumping-xml=1 dump-xml &> $${tmpfile}; \
 		inxml=0; \
 		while read; do \
 			line=$${REPLY}; \
