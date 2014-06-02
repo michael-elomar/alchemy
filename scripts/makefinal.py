@@ -24,9 +24,10 @@ import addbuildid
 # Directories to exclude
 EXCLUDE_DIRS = [
 	".git", ".repo",
-	"linux-headers", "include",
+	"linux-headers", "include", "vapi",
 	"man", "doc", "html", "info",
-	"pkgconfig", "aclocal", "locale"]
+	"pkgconfig", "cmake",
+	"aclocal", "locale"]
 
 # Extension to exclude
 EXCLUDE_FILTERS = [".a", ".la"]
