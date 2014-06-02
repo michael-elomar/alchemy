@@ -39,6 +39,11 @@ ifeq ("$(wildcard $(LINUX_CONFIG_FILE))","")
   endif
 endif
 
+# Linux Toolchain
+ifndef TARGET_LINUX_CROSS
+  TARGET_LINUX_CROSS := $(TARGET_CROSS)
+endif
+
 # Make sure this variable is defined (so make --warn-undefined-variables is quiet)
 # It can be defined by the user makefile to specify a list of headers to be
 # copied from linux source tree (list of absolute path)

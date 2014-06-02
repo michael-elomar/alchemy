@@ -25,6 +25,7 @@ else
   TARGET_GLOBAL_PCH_FLAGS ?= -x c++-header
 endif
 
+
 ###############################################################################
 ## Generic setup.
 ###############################################################################
@@ -138,11 +139,6 @@ TARGET_RANLIB ?= llvm-ranlib
 TARGET_OBJCOPY ?= objcopy
 TARGET_OBJDUMP ?= llvm-objdump
 
-endif
-
-# Linux Toolchain
-ifndef TARGET_LINUX_CROSS
-  TARGET_LINUX_CROSS := $(TARGET_CROSS)
 endif
 
 # No libc or gdbserver by default
