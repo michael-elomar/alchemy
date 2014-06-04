@@ -10,10 +10,10 @@
 # TODO: is it necessary/usefull/wise ?
 TARGET_DEFAULT_ARM_MODE ?= thumb
 
-# Allow mix thumb/arm mode
+# Allow mix thumb/arm mode (XXX not supported by clang ?)
 ifneq ("$(TARGET_OS)","ecos")
 ifneq ("$(TARGET_DEFAULT_ARM_MODE)","arm")
-  TARGET_GLOBAL_CFLAGS += -mthumb-interwork
+  TARGET_GLOBAL_CFLAGS_gcc += -mthumb-interwork
 endif
 endif
 
@@ -93,8 +93,10 @@ TARGET_GLOBAL_CFLAGS_arm ?= \
 	-O2 \
 	-fomit-frame-pointer \
 	-fstrict-aliasing \
-	-funswitch-loops \
-	-finline-limit=300
+	-funswitch-loops
+
+TARGET_GLOBAL_CFLAGS_arm_gcc ?= -finline-limit=300
+
 
 # Thumb mode specific flags
 ifneq ("$(TARGET_DEFAULT_ARM_MODE)","arm")
@@ -102,9 +104,12 @@ TARGET_GLOBAL_CFLAGS_thumb ?= \
 	-mthumb \
 	-Os \
 	-fomit-frame-pointer \
-	-fno-strict-aliasing \
-	-finline-limit=64
+	-fno-strict-aliasing
+
+TARGET_GLOBAL_CFLAGS_thumb_gcc ?= -finline-limit=64
+
 else
 # Make sure that if in arm mode, the thumb flags will not be used
 override TARGET_GLOBAL_CFLAGS_thumb :=
+override TARGET_GLOBAL_CFLAGS_thumb_gcc :=
 endif

@@ -249,6 +249,9 @@ vars-LOCAL += TARGETS
 vars-LOCAL += REVISION
 vars-LOCAL += SDK
 
+vars-LOCAL += USE_CLANG
+vars-LOCAL += CLANG_PATH
+
 ###############################################################################
 ## List of TARGET_XXX variables that can be used by makefiles.
 ## They shall NOT be modified by makefiles

@@ -133,16 +133,27 @@ else
 # llvm-ar causes issues, so use ar
 TARGET_CC ?= clang
 TARGET_CXX ?= clang++
-TARGET_AS ?= llvm-as
-TARGET_AR ?= ar
-TARGET_LD ?= llvm-ld
-TARGET_NM ?= llvm-nm
-TARGET_STRIP ?= strip
-TARGET_CPP ?= cpp
-TARGET_RANLIB ?= llvm-ranlib
-TARGET_OBJCOPY ?= objcopy
-TARGET_OBJDUMP ?= llvm-objdump
-
+ifneq ("$(TARGET_ARCH)","arm")
+  TARGET_AS ?= llvm-as
+  TARGET_AR ?= ar
+  TARGET_LD ?= llvm-ld
+  TARGET_NM ?= llvm-nm
+  TARGET_STRIP ?= strip
+  TARGET_CPP ?= cpp
+  TARGET_RANLIB ?= llvm-ranlib
+  TARGET_OBJCOPY ?= objcopy
+  TARGET_OBJDUMP ?= llvm-objdump
+else
+  TARGET_AS ?= $(TARGET_CROSS)as
+  TARGET_AR ?= $(TARGET_CROSS)ar
+  TARGET_LD ?= $(TARGET_CROSS)ld
+  TARGET_NM ?= $(TARGET_CROSS)nm
+  TARGET_STRIP ?= $(TARGET_CROSS)strip
+  TARGET_CPP ?= $(TARGET_CROSS)cpp
+  TARGET_RANLIB ?= $(TARGET_CROSS)ranlib
+  TARGET_OBJCOPY ?= $(TARGET_CROSS)objcopy
+  TARGET_OBJDUMP ?= $(TARGET_CROSS)objdump
+endif
 endif
 
 # No libc or gdbserver by default
