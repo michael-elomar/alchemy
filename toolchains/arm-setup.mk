@@ -10,10 +10,12 @@
 # TODO: is it necessary/usefull/wise ?
 TARGET_DEFAULT_ARM_MODE ?= thumb
 
-# Allow mix thumb/arm mode (XXX not supported by clang ?)
+# Allow mix thumb/arm mode
 ifneq ("$(TARGET_OS)","ecos")
 ifneq ("$(TARGET_DEFAULT_ARM_MODE)","arm")
   TARGET_GLOBAL_CFLAGS_gcc += -mthumb-interwork
+# This flag seems unnecessary for post v5 arch and eabi (aapcs)
+# Clang does not support it, and, yet, produces interworkable code.
 endif
 endif
 
