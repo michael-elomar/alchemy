@@ -226,6 +226,9 @@ vars-LOCAL += CREATE_LINKS
 #       usr/include directory of staging directory
 vars-LOCAL += INSTALL_HEADERS
 
+# Name of the doxyfile used for documentation generation
+vars-LOCAL += DOXYFILE
+
 # Arguments to pass to code checker (linux checkpatch by default)
 vars-LOCAL += CODECHECK_ARGS
 

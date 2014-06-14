@@ -590,6 +590,65 @@ $(LOCAL_TARGETS): PRIVATE_ARCHIVE_PATCHES := $(patches)
 endif
 
 ###############################################################################
+## Documentation generation rules.
+###############################################################################
+
+doc_out_dir := $(TARGET_OUT_DOC)/$(LOCAL_MODULE)
+
+.PHONY: $(LOCAL_MODULE)-doc
+$(LOCAL_MODULE)-doc: $(TARGET_OUT_DOC)/$(LOCAL_MODULE)
+
+$(TARGET_OUT_DOC)/$(LOCAL_MODULE): PRIVATE_MODULE := $(LOCAL_MODULE)
+$(TARGET_OUT_DOC)/$(LOCAL_MODULE): PRIVATE_DESCRIPTION := $(LOCAL_DESCRIPTION)
+
+ifneq ("$(LOCAL_DOXYFILE)","")
+# If a doxyfile has been defined by the user, we use it
+# Check if the input paths are absolute and if not, correct them
+doc_input := $(shell egrep '^INPUT *=' $(LOCAL_DOXYFILE) | sed 's/^INPUT *=//g')
+doc_input := $(foreach path,$(doc_input),$(strip \
+	$(if $(call is-path-absolute,$(path)), \
+		$(path),$(addprefix $(LOCAL_PATH)/,$(path)) \
+	)))
+
+# Use the doxyfile, but override output to out/doc and input with absolute paths
+$(TARGET_OUT_DOC)/$(LOCAL_MODULE): PRIVATE_INPUT := $(doc_input)
+$(TARGET_OUT_DOC)/$(LOCAL_MODULE): $(LOCAL_DOXYFILE)
+	@echo "$(PRIVATE_MODULE): Generating doxygen documentation from $^"
+	@rm -rf $@
+	@mkdir -p $@
+	@( \
+		cat $^; \
+		echo 'PROJECT_NAME=$(PRIVATE_MODULE)'; \
+		echo 'PROJECT_BRIEF="$(PRIVATE_DESCRIPTION)"'; \
+		echo 'INPUT=$(PRIVATE_INPUT)'; \
+		echo 'OUTPUT_DIRECTORY=$@'; \
+	) | doxygen - > /dev/null
+else
+# If no doxyfile has been defined by the user, we generate one on the fly from
+# a template created by doxygen which tries to document all and for all
+# languages
+# We disable warnings because they are plenty in this case
+$(TARGET_OUT_DOC)/$(LOCAL_MODULE): PRIVATE_PATH := $(LOCAL_PATH)
+$(TARGET_OUT_DOC)/$(LOCAL_MODULE):
+	@echo "$(PRIVATE_MODULE): Generating doxygen documentation from a \
+doxyfile generated on the fly"
+	@rm -rf $@
+	@mkdir -p $@
+	@( \
+		doxygen -g -; \
+		echo 'PROJECT_NAME=$(PRIVATE_MODULE)'; \
+		echo 'PROJECT_BRIEF="$(PRIVATE_DESCRIPTION)"'; \
+		echo 'EXTRACT_ALL=YES'; \
+		echo 'GENERATE_LATEX=NO'; \
+		echo 'WARNINGS=NO'; \
+		echo 'WARN_IF_DOC_ERROR=NO'; \
+		echo 'RECURSIVE=YES'; \
+		echo 'INPUT=$(PRIVATE_PATH)'; \
+		echo 'OUTPUT_DIRECTORY=$@'; \
+	) | doxygen - > /dev/null
+endif
+
+###############################################################################
 ## Code check rules.
 ###############################################################################
 

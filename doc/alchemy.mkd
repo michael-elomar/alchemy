@@ -455,6 +455,7 @@ For each registered modules, following `make` targets will be available :
 * `make <module>-clean` : will clean the module. For autotools modules, the
    unpacked sources and applied patches will be kept in the build directory.
 * `make <module>-dirclean` : will remove the build directory of the module.
+* `make <module>-doc` : will generate the documentation for the module.
 * `make <module>-path` : will display the path of the module.
 * `make <module>-codecheck` : will check coding style of C source files
 
@@ -750,6 +751,14 @@ Additionally, some patches can be applied to the extracted archive :
 * `LOCAL_ARCHIVE_CMD_POST_UNPACK` : Custom commands to be executed after the
   given step. Please note that it shall be a macro defined using the
   `define/endef` keywords, not a `:=` definition.
+
+#### `LOCAL_DOXYFILE`
+
+Absolute path to a doxygen configuration file for documentation generation. If
+defined, the <module>-doc target will use it to generate the documentation. If
+not, a doxyfile will be generated on the fly, which will generate a
+documentation for all the source files found recursively under `LOCAL_PATH`, for
+all the languages supported by doxygen and for all the symbols.
 
 ### Internal modules
 

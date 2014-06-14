@@ -22,6 +22,7 @@ help:
 	@echo "Module targets:"
 	@echo "  <module>         : build specified module."
 	@echo "  <module>-clean   : clean specified module."
+	@echo "  <module>-doc     : generate a documentation for the specified module."
 	@echo "  <module>-dirclean: clean specified module and delete its build directory."
 	@echo "  <module>-path    : print location of module."
 	@echo ""
