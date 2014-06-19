@@ -25,6 +25,8 @@ config-check:
 	@( \
 		if $(CONFWRAPPER) --main=$(CONFIG_GLOBAL_FILE) --diff check $(__args); then \
 			echo "All configs are up to date"; \
+		else \
+			exit 1; \
 		fi; \
 	)
 
