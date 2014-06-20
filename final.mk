@@ -26,23 +26,23 @@ endif
 # If a sdk is used, we assume that basic components shall not be put in final dir
 ifeq ("$(TARGET_SDK_DIRS)","")
 
-ifneq ("$(TOOLCHAIN_LIBC)","")
-  MAKEFINAL_ARGS += --toolchain-libc="$(TOOLCHAIN_LIBC)"
-endif
+#ifneq ("$(TOOLCHAIN_LIBC)","")
+#  MAKEFINAL_ARGS += --toolchain-libc="$(TOOLCHAIN_LIBC)"
+#endif
 
-ifneq ("$(TARGET_INCLUDE_TZDATA)","0")
-  MAKEFINAL_ARGS += --copy-tzdata
-endif
+#ifneq ("$(TARGET_INCLUDE_TZDATA)","0")
+#  MAKEFINAL_ARGS += --copy-tzdata
+#endif
 
-ifneq ("$(TARGET_INCLUDE_GCONV)","0")
-  MAKEFINAL_ARGS += --copy-gconv
-endif
+#ifneq ("$(TARGET_INCLUDE_GCONV)","0")
+#  MAKEFINAL_ARGS += --copy-gconv
+#endif
 
-ifneq ("$(TARGET_INCLUDE_GDBSERVER)","0")
-ifneq ("$(TOOLCHAIN_GDBSERVER)","")
-  MAKEFINAL_ARGS += --toolchain-gdbserver="$(TOOLCHAIN_GDBSERVER)"
-endif
-endif
+#ifneq ("$(TARGET_INCLUDE_GDBSERVER)","0")
+#ifneq ("$(TOOLCHAIN_GDBSERVER)","")
+#  MAKEFINAL_ARGS += --toolchain-gdbserver="$(TOOLCHAIN_GDBSERVER)"
+#endif
+#endif
 
 # Create very minimal skeleton for linux (some absolute required directories)
 ifeq ("$(TARGET_OS)","linux")
