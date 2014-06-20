@@ -156,12 +156,8 @@ endif
 # Machine targetted by toolchain to be used by autotools
 TOOLCHAIN_TARGET_NAME ?= $(shell $(TARGET_CC) -dumpmachine)
 
-# Determine compiler version (accept x for 3rd digit)
-ifneq ("$(USE_CLANG)","1")
-TARGET_CC_VERSION := $(shell $(TARGET_CC) --version | head -1 | sed "s/.*\([0-9]\.[0-9]\.[0-9x]\).*/\1/")
-else
-TARGET_CC_VERSION := $(shell $(TARGET_CC) --version | head -1 | sed "s/.*\([0-9]\.[0-9]\).*/\1/")
-endif
+# Determine compiler version
+TARGET_CC_VERSION := $(shell $(TARGET_CC) -dumpversion)
 
 # Remove warning about mangling changes of va_list in gcc 4.4 for arm
 ifeq ("$(TARGET_ARCH)","arm")
