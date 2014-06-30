@@ -19,6 +19,20 @@ ifndef TARGET_CROSS
   endif
 endif
 
+# Update flags based on architecture
+# 64-bit requires -fPIC to build shared libraries
+ifeq ("$(TARGET_ARCH)","x64")
+  TARGET_GLOBAL_CFLAGS += -m64 -fPIC
+  TARGET_GLOBAL_LDFLAGS += -m64
+  TARGET_GLOBAL_LDFLAGS_SHARED += -m64
+endif
+
+ifeq ("$(TARGET_ARCH)","x86")
+  TARGET_GLOBAL_CFLAGS += -m32
+  TARGET_GLOBAL_LDFLAGS += -m32
+  TARGET_GLOBAL_LDFLAGS_SHARED += -m32
+endif
+
 # Assume everybody will wants this
 TARGET_GLOBAL_LDLIBS += -pthread -lrt
 TARGET_GLOBAL_LDLIBS_SHARED += -pthread -lrt
