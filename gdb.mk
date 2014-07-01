@@ -38,6 +38,7 @@ ifneq ("$(GDB_DEBUG_FILE_DIR)","")
 	@echo "  set debug-file-directory $(GDB_DEBUG_FILE_DIR)" >> $@
 endif
 	@echo "end" >> $@
+	@echo "set-lib-path" >> $@
 
 .PHONY: gdb-wrapper
 gdb-wrapper: $(GDB_WRAPPER_SCRIPT)
