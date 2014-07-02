@@ -35,11 +35,7 @@ endif
 TARGET_GLOBAL_CFLAGS += \
 	-pipe \
 	-g -O2 \
-	-ffunction-sections \
-	-fno-short-enums
-
-TARGET_GLOBAL_CXXFLAGS += \
-	-fno-exceptions
+	-ffunction-sections
 
 # TODO: check for these flags
 #TARGET_GLOBAL_CFLAGS += \
