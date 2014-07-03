@@ -227,7 +227,12 @@ vars-LOCAL += CREATE_LINKS
 vars-LOCAL += INSTALL_HEADERS
 
 # Name of the doxyfile used for documentation generation
+# If none specified, LOCAL_PATH will be added to DOXYGEN_INPUT
 vars-LOCAL += DOXYFILE
+
+# List of files or directory to add to doxygen generation. If no DOXYFILE
+# is given, LOCAL_PATH will be added automatically
+vars-LOCAL += DOXYGEN_INPUT
 
 # Arguments to pass to code checker (linux checkpatch by default)
 vars-LOCAL += CODECHECK_ARGS

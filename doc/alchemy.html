@@ -307,8 +307,8 @@ Note : each module can also specify its own properties in <code>LOCAL_BUILD_PROP
 is GPLv3 and is needed only in development phase and shall not be present in
 final release packages.
 </br>Default is <code>1</code>.</li>
-<li><p><code>TARGET_INCLUDE_TZDATA</code> : include time zone data from libc.
-</br>Default is <code>0</code>.</p></li>
+<li><code>TARGET_INCLUDE_TZDATA</code> : include time zone data from libc.
+</br>Default is <code>0</code>.</li>
 <li><p><code>TARGET_INCLUDE_GCONV</code> : include gconv libraries from libc.
 </br>Default is <code>0</code>.</p></li>
 <li><p><code>USE_CLANG</code> : Use clang instead of gcc for compilation.
@@ -495,6 +495,7 @@ be done because the order of inclusion is not guaranteed or predictable.</p>
 <li><code>make &lt;module&gt;-clean</code> : will clean the module. For autotools modules, the
 unpacked sources and applied patches will be kept in the build directory.</li>
 <li><code>make &lt;module&gt;-dirclean</code> : will remove the build directory of the module.</li>
+<li><code>make &lt;module&gt;-doc</code> : will generate the documentation for the module.</li>
 <li><code>make &lt;module&gt;-path</code> : will display the path of the module.</li>
 <li><code>make &lt;module&gt;-codecheck</code> : will check coding style of C source files</li>
 </ul>
@@ -805,6 +806,19 @@ keywords, not a <code>:=</code> definition.</p></li>
 given step. Please note that it shall be a macro defined using the
 <code>define/endef</code> keywords, not a <code>:=</code> definition.</li>
 </ul>
+
+<h4><code>LOCAL_DOXYFILE</code></h4>
+
+<p>Absolute path to a doxygen configuration file for documentation generation. If
+defined, the <module>-doc target will use it to generate the documentation. If
+not, a doxyfile will be generated on the fly, which will generate a
+documentation for all the source files found recursively under <code>LOCAL_PATH</code>, for
+all the languages supported by doxygen and for all the symbols.</p>
+
+<h4><code>LOCAL_DOXYGEN_INPUT</code></h4>
+
+<p>Additional path to files or directories to add to doxygen generation. It
+accepts either full path or relative path to LOCAL_PATH.</p>
 
 <h3>Internal modules</h3>
 

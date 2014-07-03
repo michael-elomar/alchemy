@@ -605,11 +605,12 @@ ifneq ("$(LOCAL_DOXYFILE)","")
 
 # If a doxyfile has been defined by the user, we use it
 # Check if the input paths are absolute and if not, correct them
-doc_input := $(shell egrep '^INPUT *=' $(LOCAL_DOXYFILE) | sed 's/^INPUT *=//g')
-doc_input := $(foreach path,$(doc_input), $(strip \
+doc_input := \$(shell egrep '^INPUT *=' $(LOCAL_DOXYFILE) | sed 's/^INPUT *=//g')
+doc_input += $(LOCAL_DOXYGEN_INPUT)
+doc_input := $(foreach __path,$(doc_input), \
 	$(if $(call is-path-absolute,$(path)), \
-		$(path),$(addprefix $(LOCAL_PATH)/,$(path)) \
-	)))
+		$(__path),$(addprefix $(LOCAL_PATH)/,$(__path)) \
+	))
 
 # Use the doxyfile, but override output to out/doc and input with absolute paths
 $(LOCAL_MODULE)-doc: PRIVATE_INPUT := $(doc_input)
@@ -626,10 +627,18 @@ $(LOCAL_MODULE)-doc:
 	) | doxygen - > /dev/null
 else
 
+# Use LOCAL_PATH and other input
+doc_input := $(LOCAL_PATH) $(LOCAL_DOXYGEN_INPUT)
+doc_input := $(foreach __path,$(doc_input), \
+	$(if $(call is-path-absolute,$(path)), \
+		$(__path),$(addprefix $(LOCAL_PATH)/,$(__path)) \
+	))
+
 # If no doxyfile has been defined by the user, we generate one on the fly from
 # a template created by doxygen which tries to document all and for all
 # languages
 # We disable warnings because they are plenty in this case
+$(LOCAL_MODULE)-doc: PRIVATE_INPUT := $(doc_input)
 $(LOCAL_MODULE)-doc:
 	@echo "$(PRIVATE_MODULE): Generating doxygen documentation from generated doxyfile"
 	@rm -rf $(PRIVATE_DOC_DIR)
@@ -643,7 +652,7 @@ $(LOCAL_MODULE)-doc:
 		echo 'WARNINGS=NO'; \
 		echo 'WARN_IF_DOC_ERROR=NO'; \
 		echo 'RECURSIVE=YES'; \
-		echo 'INPUT=$(PRIVATE_PATH)'; \
+		echo 'INPUT=$(PRIVATE_INPUT)'; \
 		echo 'OUTPUT_DIRECTORY=$(PRIVATE_DOC_DIR)'; \
 	) | doxygen - > /dev/null
 

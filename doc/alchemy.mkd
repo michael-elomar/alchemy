@@ -760,6 +760,11 @@ not, a doxyfile will be generated on the fly, which will generate a
 documentation for all the source files found recursively under `LOCAL_PATH`, for
 all the languages supported by doxygen and for all the symbols.
 
+#### `LOCAL_DOXYGEN_INPUT`
+
+Additional path to files or directories to add to doxygen generation. It
+accepts either full path or relative path to LOCAL_PATH.
+
 ### Internal modules
 
 Defining an `internal` module is the preferred way of registering a module. It
