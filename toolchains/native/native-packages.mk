@@ -16,6 +16,11 @@ LOCAL_EXPORT_LDLIBS := -lusb
 include $(BUILD_PREBUILT)
 
 include $(CLEAR_VARS)
+LOCAL_MODULE := libusb_1_0
+LOCAL_EXPORT_LDLIBS := -lusb-1.0
+include $(BUILD_PREBUILT)
+
+include $(CLEAR_VARS)
 LOCAL_MODULE := alsa-lib
 LOCAL_EXPORT_LDLIBS := -lasound
 include $(BUILD_PREBUILT)
