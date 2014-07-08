@@ -624,7 +624,7 @@ $(LOCAL_MODULE)-doc:
 		echo 'PROJECT_BRIEF="$(PRIVATE_DESCRIPTION)"'; \
 		echo 'INPUT=$(PRIVATE_INPUT)'; \
 		echo 'OUTPUT_DIRECTORY=$(PRIVATE_DOC_DIR)'; \
-	) | doxygen - > /dev/null
+	) | doxygen - > $(PRIVATE_DOC_DIR)/doxygen.log
 else
 
 # Use LOCAL_PATH and other input
@@ -653,8 +653,9 @@ $(LOCAL_MODULE)-doc:
 		echo 'WARN_IF_DOC_ERROR=NO'; \
 		echo 'RECURSIVE=YES'; \
 		echo 'INPUT=$(PRIVATE_INPUT)'; \
+		echo 'EXCLUDE_PATTERNS=.git'; \
 		echo 'OUTPUT_DIRECTORY=$(PRIVATE_DOC_DIR)'; \
-	) | doxygen - > /dev/null
+	) | doxygen - > $(PRIVATE_DOC_DIR)/doxygen.log
 
 endif
 
