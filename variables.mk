@@ -260,6 +260,7 @@ vars-TARGET += ARCH
 vars-TARGET += CPU
 vars-TARGET += LIBC
 vars-TARGET += DEFAULT_ARM_MODE
+vars-TARGET += USE_CXX_EXCEPTIONS
 
 # Folders
 vars-TARGET += OUT

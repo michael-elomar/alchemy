@@ -52,6 +52,10 @@ TARGET_GLOBAL_CFLAGS += \
 #	-Wl,-z,now
 
 
+ifeq ("$(TARGET_USE_CXX_EXCEPTIONS)","0")
+  TARGET_GLOBAL_CXXFLAGS += -fno-exceptions
+endif
+
 TARGET_GLOBAL_ARFLAGS += rcs
 
 ###############################################################################
