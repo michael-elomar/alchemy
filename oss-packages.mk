@@ -67,6 +67,7 @@ oss-packages:
 	$(foreach __mod,$(sort $(OSS_PACKAGES)), \
 		@$(call oss-gen-package,$(__mod))$(endl) \
 	)
+	@rm -rf $(OSS_PACKAGES_DIR)/git
 	@echo "Packages: done -> $(OSS_PACKAGES_DIR)"
 
 endif
