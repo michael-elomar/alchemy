@@ -422,7 +422,9 @@ __module-check-depends-direct = \
 	$(foreach __lib,$(__modules.$1.depends), \
 		$(if $(call is-module-registered,$(__lib)), \
 			$(if $(call is-module-in-build-config,$(__lib)),$(empty), \
-				$(error $(__path): module '$1' depends on disabled module '$(__lib)') \
+				$(if $(call is-var-defined,TARGET_TEST),$(empty), \
+					$(error $(__path): module '$1' depends on disabled module '$(__lib)') \
+				) \
 			), \
 			$(error $(__path): module '$1' depends on unknown module '$(__lib)') \
 		) \
@@ -539,6 +541,31 @@ __module-check-c-includes = \
 			$(if $(wildcard $(__inc)),$(empty), \
 				$(warning $(__path): module '$1' $3 missing include '$(__inc)') \
 			) \
+		) \
+	)
+
+###############################################################################
+## Enable automatically all dependencies when under TARGET_TEST
+###############################################################################
+
+# Enable dependencies of enabled modules or modules given in goals
+modules-enable-test-depends = \
+	$(foreach __mod,$(__modules), \
+		$(if $(or $(call is-module-in-make-goals,$(__mod)), \
+				$(call is-module-in-build-config,$(__mod))), \
+			$(call __module-enable-test-depends,$(__mod)), \
+		) \
+	)
+
+# Enable dependencies of a module, this is recursive. As loop should have been
+# checked already, it is safe
+# $1 : module name
+__module-enable-test-depends = \
+	$(foreach __lib,$(__modules.$1.depends), \
+		$(if $(call is-module-in-build-config,$(__lib)),$(empty), \
+			$(info module '$1' forces activation of module '$(__lib)' under test) \
+			$(eval CONFIG_ALCHEMY_BUILD_$(call module-get-define,$(__lib)) := y) \
+			$(call __module-enable-test-depends,$(__lib)) \
 		) \
 	)
 

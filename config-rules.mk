@@ -33,7 +33,9 @@ config-check:
 # Check everything at once, in silence, stopping in case not up to date
 .PHONY: __config-check
 __config-check:
-ifneq ("$(USE_CONFIG_CHECK)","0")
+ifdef TARGET_TEST
+	@echo "Config check disabled under test : TARGET_TEST=$(TARGET_TEST)"
+else ifneq ("$(USE_CONFIG_CHECK)","0")
 	$(eval __args := $(call __generate-config-args))
 	@$(CONFWRAPPER) --main=$(CONFIG_GLOBAL_FILE) check $(__args)
 else

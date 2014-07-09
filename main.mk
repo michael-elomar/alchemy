@@ -401,6 +401,10 @@ $(foreach __mod,$(__modules), \
 # Recompute all dependencies between modules
 $(call modules-compute-depends)
 
+ifdef TARGET_TEST
+  $(call modules-enable-test-depends)
+endif
+
 # Check dependencies and variables of modules
 ifeq ("$(SKIP_DEPS_AND_CHECKS)","0")
   $(call modules-check-depends)
