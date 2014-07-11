@@ -629,7 +629,7 @@ $(LOCAL_MODULE)-doc:
 	@( \
 		cat $(PRIVATE_DOXYFILE); \
 		echo "PROJECT_NAME=$(PRIVATE_MODULE)"; \
-		echo "PROJECT_BRIEF=$(PRIVATE_DESCRIPTION)"; \
+		echo "PROJECT_BRIEF=\"$(PRIVATE_DESCRIPTION)\""; \
 		echo "INPUT=$(PRIVATE_INPUT)"; \
 		echo "EXCLUDE_PATTERNS+=.git out sdk"; \
 		echo "OUTPUT_DIRECTORY=$(PRIVATE_DOC_DIR)"; \
@@ -655,7 +655,7 @@ $(LOCAL_MODULE)-doc:
 	@( \
 		doxygen -g -; \
 		echo "PROJECT_NAME=$(PRIVATE_MODULE)"; \
-		echo "PROJECT_BRIEF=$(PRIVATE_DESCRIPTION)"; \
+		echo "PROJECT_BRIEF=\"$(PRIVATE_DESCRIPTION)\""; \
 		echo "EXTRACT_ALL=YES"; \
 		echo "GENERATE_LATEX=NO"; \
 		echo "WARNINGS=NO"; \
