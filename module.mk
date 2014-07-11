@@ -603,23 +603,31 @@ $(LOCAL_MODULE)-doc: PRIVATE_DOC_DIR := $(TARGET_OUT_DOC)/$(LOCAL_MODULE)
 
 ifneq ("$(LOCAL_DOXYFILE)","")
 
+LOCAL_DOXYFILE := \
+	$(if $(call is-path-absolute,$(LOCAL_DOXYFILE)), \
+		$(LOCAL_DOXYFILE), \
+		$(addprefix $(LOCAL_PATH)/,$(LOCAL_DOXYFILE)) \
+	)
+
 # If a doxyfile has been defined by the user, we use it
 # Check if the input paths are absolute and if not, correct them
-doc_input := \$(shell egrep '^INPUT *=' $(LOCAL_DOXYFILE) | sed 's/^INPUT *=//g')
+doc_input := $(shell egrep '^INPUT *=' $(LOCAL_DOXYFILE) | sed 's/^INPUT *=//g')
+$(info doc_input=$(doc_input))
 doc_input += $(LOCAL_DOXYGEN_INPUT)
 doc_input := $(foreach __path,$(doc_input), \
-	$(if $(call is-path-absolute,$(path)), \
+	$(if $(call is-path-absolute,$(__path)), \
 		$(__path),$(addprefix $(LOCAL_PATH)/,$(__path)) \
 	))
 
 # Use the doxyfile, but override output to out/doc and input with absolute paths
 $(LOCAL_MODULE)-doc: PRIVATE_INPUT := $(doc_input)
+$(LOCAL_MODULE)-doc: PRIVATE_DOXYFILE := $(LOCAL_DOXYFILE)
 $(LOCAL_MODULE)-doc:
-	@echo "$(PRIVATE_MODULE): Generating doxygen documentation from $^"
+	@echo "$(PRIVATE_MODULE): Generating doxygen documentation from $(PRIVATE_DOXYFILE)"
 	@rm -rf $(PRIVATE_DOC_DIR)
 	@mkdir -p $(PRIVATE_DOC_DIR)
 	@( \
-		cat $^; \
+		cat $(PRIVATE_DOXYFILE); \
 		echo "PROJECT_NAME=$(PRIVATE_MODULE)"; \
 		echo "PROJECT_BRIEF=$(PRIVATE_DESCRIPTION)"; \
 		echo "INPUT=$(PRIVATE_INPUT)"; \
