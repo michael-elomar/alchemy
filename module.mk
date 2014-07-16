@@ -625,14 +625,14 @@ $(LOCAL_MODULE)-doc:
 	@echo "$(PRIVATE_MODULE): Generating doxygen documentation from $(PRIVATE_DOXYFILE)"
 	@rm -rf $(PRIVATE_DOC_DIR)
 	@mkdir -p $(PRIVATE_DOC_DIR)
-	@( \
+	@cd $(PRIVATE_PATH) && ( \
 		cat $(PRIVATE_DOXYFILE); \
 		echo "PROJECT_NAME=$(PRIVATE_MODULE)"; \
 		echo "PROJECT_BRIEF=\"$(PRIVATE_DESCRIPTION)\""; \
 		echo "INPUT=$(PRIVATE_INPUT)"; \
 		echo "EXCLUDE_PATTERNS+=.git out sdk"; \
 		echo "OUTPUT_DIRECTORY=$(PRIVATE_DOC_DIR)"; \
-	) | doxygen - > $(PRIVATE_DOC_DIR)/doxygen.log
+	) | doxygen - &> $(PRIVATE_DOC_DIR)/doxygen.log
 else
 
 # Use LOCAL_PATH and other input
@@ -651,7 +651,7 @@ $(LOCAL_MODULE)-doc:
 	@echo "$(PRIVATE_MODULE): Generating doxygen documentation from generated doxyfile"
 	@rm -rf $(PRIVATE_DOC_DIR)
 	@mkdir -p $(PRIVATE_DOC_DIR)
-	@( \
+	@cd $(PRIVATE_PATH) && ( \
 		doxygen -g -; \
 		echo "PROJECT_NAME=$(PRIVATE_MODULE)"; \
 		echo "PROJECT_BRIEF=\"$(PRIVATE_DESCRIPTION)\""; \
@@ -663,7 +663,7 @@ $(LOCAL_MODULE)-doc:
 		echo "INPUT=$(PRIVATE_INPUT)"; \
 		echo "EXCLUDE_PATTERNS+=.git out sdk"; \
 		echo "OUTPUT_DIRECTORY=$(PRIVATE_DOC_DIR)"; \
-	) | doxygen - > $(PRIVATE_DOC_DIR)/doxygen.log
+	) | doxygen - &> $(PRIVATE_DOC_DIR)/doxygen.log
 
 endif
 
