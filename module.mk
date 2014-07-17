@@ -704,6 +704,81 @@ $(LOCAL_MODULE)-codecheck: PRIVATE_CODECHECK_FILES := $(codecheck_files)
 $(LOCAL_MODULE)-codecheck: PRIVATE_CODECHECK_ARGS := $(LOCAL_CODECHECK_ARGS)
 
 ###############################################################################
+## Files to copy.
+###############################################################################
+
+ifneq ("$(LOCAL_COPY_FILES)","")
+
+# List of all source/destination files
+all_copy_files_src :=
+all_copy_files_dst :=
+
+# Generate a rule to copy all files
+# Handle relative/absolute paths
+# Handle directory only for destination
+$(foreach __pair,$(LOCAL_COPY_FILES), \
+	$(eval __pair2 := $(subst :,$(space),$(__pair))) \
+	$(eval __w1 := $(word 1,$(__pair2))) \
+	$(eval __w2 := $(word 2,$(__pair2))) \
+	$(eval __src := $(call copy-get-src-path,$(__w1))) \
+	$(eval __dst := $(call copy-get-dst-path$(mode_suffix),$(__w2))) \
+	$(if $(call is-path-dir,$(__dst)), \
+		$(eval __dst := $(__dst)$(notdir $(__src))) \
+	) \
+	$(eval all_copy_files_src += $(__src)) \
+	$(eval all_copy_files_dst += $(__dst)) \
+	$(eval $(call copy-one-file,$(__src),$(__dst))) \
+)
+
+# Add an order-only dependency between sources and prerequisites
+all_copy_files_prerequisites := \
+	$(filter-out $(all_copy_files_src) $(all_copy_files_dst),$(all_prerequisites))
+$(foreach __src,$(all_copy_files_src), \
+	$(if $(filter $(__src),$(all_prerequisites)),$(empty), \
+		$(eval $(__src): | $(all_copy_files_prerequisites)) \
+	) \
+)
+
+# Add files to be copied as an order-only dependency (does not force rebuild)
+$(LOCAL_BUILD_MODULE): | $(all_copy_files_dst)
+
+# Add rule to delete copied files during clean
+$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(all_copy_files_dst)
+
+endif
+
+# Remove destination of files to copy from prerequiqites
+all_prerequisites := $(filter-out $(all_copy_files_dst),$(all_prerequisites))
+
+###############################################################################
+## Links to create.
+###############################################################################
+
+ifneq ("$(LOCAL_CREATE_LINKS)","")
+
+# List of all links
+all_create_links :=
+
+# Generate a rule to create links
+$(foreach __pair,$(LOCAL_CREATE_LINKS), \
+	$(eval __pair2 := $(subst :,$(space),$(__pair))) \
+	$(eval __w1 := $(word 1,$(__pair2))) \
+	$(eval __w2 := $(word 2,$(__pair2))) \
+	$(eval __name := $($(mode_prefix)OUT_STAGING)/$(__w1)) \
+	$(eval __target := $(__w2)) \
+	$(eval all_create_links += $(__name)) \
+	$(eval $(call create-one-link,$(__name),$(__target))) \
+)
+
+# Add links to be created as an order-only dependency (does not force rebuild)
+$(LOCAL_BUILD_MODULE): | $(all_create_links)
+
+# Add rule to delete created links during clean
+$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(all_create_links)
+
+endif
+
+###############################################################################
 ## Static library.
 ###############################################################################
 
@@ -856,97 +931,6 @@ $(foreach __mod,$(call module-get-config-depends,$(LOCAL_MODULE)), \
 )
 
 endif
-
-###############################################################################
-## Files to copy.
-###############################################################################
-
-ifneq ("$(LOCAL_COPY_FILES)","")
-
-# List of all source/destination files
-all_copy_files_src :=
-all_copy_files_dst :=
-
-# Generate a rule to copy all files
-# Handle relative/absolute paths
-# Handle directory only for destination
-$(foreach __pair,$(LOCAL_COPY_FILES), \
-	$(eval __pair2 := $(subst :,$(space),$(__pair))) \
-	$(eval __w1 := $(word 1,$(__pair2))) \
-	$(eval __w2 := $(word 2,$(__pair2))) \
-	$(eval __src := $(call copy-get-src-path,$(__w1))) \
-	$(eval __dst := $(call copy-get-dst-path$(mode_suffix),$(__w2))) \
-	$(if $(call is-path-dir,$(__dst)), \
-		$(eval __dst := $(__dst)$(notdir $(__src))) \
-	) \
-	$(eval all_copy_files_src += $(__src)) \
-	$(eval all_copy_files_dst += $(__dst)) \
-	$(eval $(call copy-one-file,$(__src),$(__dst))) \
-)
-
-# Add an order-only dependency between sources and prerequisites
-all_copy_files_prerequisites := \
-	$(filter-out $(all_copy_files_src) $(all_copy_files_dst),$(all_prerequisites))
-$(foreach __src,$(all_copy_files_src), \
-	$(if $(filter $(__src),$(all_prerequisites)),$(empty), \
-		$(eval $(__src): | $(all_copy_files_prerequisites)) \
-	) \
-)
-
-# Add files to be copied as an order-only dependency (does not force rebuild)
-$(LOCAL_BUILD_MODULE): | $(all_copy_files_dst)
-
-# Add rule to delete copied files during clean
-$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(all_copy_files_dst)
-
-endif
-
-###############################################################################
-## Links to create.
-###############################################################################
-
-ifneq ("$(LOCAL_CREATE_LINKS)","")
-
-# List of all links
-all_create_links :=
-
-# Generate a rule to create links
-$(foreach __pair,$(LOCAL_CREATE_LINKS), \
-	$(eval __pair2 := $(subst :,$(space),$(__pair))) \
-	$(eval __w1 := $(word 1,$(__pair2))) \
-	$(eval __w2 := $(word 2,$(__pair2))) \
-	$(eval __name := $($(mode_prefix)OUT_STAGING)/$(__w1)) \
-	$(eval __target := $(__w2)) \
-	$(eval all_create_links += $(__name)) \
-	$(eval $(call create-one-link,$(__name),$(__target))) \
-)
-
-# Add links to be created as an order-only dependency (does not force rebuild)
-$(LOCAL_BUILD_MODULE): | $(all_create_links)
-
-# Add rule to delete created links during clean
-$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(all_create_links)
-
-endif
-
-###############################################################################
-## Prerequisites.
-###############################################################################
-
-# Make sure all prerequisites files are generated first
-# But do NOT force recompilation (order only)
-$(LOCAL_BUILD_MODULE): | $(all_prerequisites)
-
-# Prerequisites that are not ours
-all_external_prerequisites := $(filter-out \
-	$(LOCAL_CUSTOM_TARGETS) \
-	$(LOCAL_PREREQUISITES) \
-	$(LOCAL_EXPORT_PREREQUISITES), $(all_prerequisites))
-
-# Same thing for custom targets of the module (but excludes the ones of the module)
-$(LOCAL_CUSTOM_TARGETS): | $(all_external_prerequisites)
-$(LOCAL_PREREQUISITES): | $(all_external_prerequisites)
-$(LOCAL_EXPORT_PREREQUISITES): | $(all_external_prerequisites)
 
 ###############################################################################
 ## Copy to staging/final dir

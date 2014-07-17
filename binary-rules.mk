@@ -260,7 +260,7 @@ $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(vala_c_sources)
 
 # Vala stuff
 ifneq ("$(vala_objects)","")
-$(vala_done_file): | $(filter-out $(vala_header_file),$(all_prerequisites))
+$(vala_done_file): | $(filter-out $(vala_header_file) $(vala_vapi_file),$(all_prerequisites))
 $(vala_done_file): $(all_internal_depends)
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(vala_done_file)
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(vala_done_file).tmp
