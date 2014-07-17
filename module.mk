@@ -745,10 +745,10 @@ $(LOCAL_BUILD_MODULE): | $(all_copy_files_dst)
 # Add rule to delete copied files during clean
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(all_copy_files_dst)
 
-endif
-
-# Remove destination of files to copy from prerequiqites
+# Remove destination of files to copy from prerequisites
 all_prerequisites := $(filter-out $(all_copy_files_dst),$(all_prerequisites))
+
+endif
 
 ###############################################################################
 ## Links to create.
