@@ -1,3 +1,23 @@
+parrot-tools-alchemy (1.0.16) unstable; urgency=low
+  * Copy vmlinux in staging/boot.
+  * Adds an option for copying the gconv libraries from the toolchain's libc directory
+  * Allow to get symbols.tar without compression.
+  * Fix dump xml with sub-make.
+  * Do not copy vapi and cmake files to final directory.
+  * added new target <module>-doc for building a documentation
+  * Exit with error the config check if not up to date.
+  * Copy libc in staging directory.
+  * add eclipseprojet.py script that generate eclipse project files
+  * eglibc toolchain, add support for x64 architecture
+  * Call set-lib-path macro when loading alchemy.gdb file.
+  * Add -fno-short-enums (compat with android flags.)
+  * Add TARGET_USE_CXX_EXCEPTIONS to enable/disable exceptions
+  * Better handling of TARGET_TEST
+  * Fix vala dependencies.
+  * [CR 0142145] Allow access to git revision from source code.
+
+ -- Yves-Marie Morgan (Parrot) <yves-marie.morgan@parrot.com>  Wed, 30 Jul 2014 16:25:36 +0200
+
 parrot-tools-alchemy (1.0.15) unstable; urgency=low
   * [REDMINE #5363] Add coverage option in Alchemy (USE_COVERAGE)
   * Update vala dependencies.
