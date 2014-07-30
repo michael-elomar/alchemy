@@ -875,7 +875,7 @@ module-check-revision-changed = $(strip \
 # 'module-check-revision-changed' to update the file only when needed.
 # $1 : module name.
 # $2 : output file.
-# Note: shall be call as a command in side a rule.
+# Note: shall be call as a command inside a rule.
 generate-last-revision-file = \
 	$(eval __current := $(call module-get-revision,$1)) \
 	$(eval __last := $(call module-get-last-revision,$1)) \

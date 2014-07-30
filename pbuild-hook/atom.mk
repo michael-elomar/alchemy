@@ -14,6 +14,7 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := autoconf-merge
 LOCAL_MODULE_FILENAME := $(LOCAL_MODULE).done
+LOCAL_CATEGORY_PATH := alchemy/pbuild-hook
 
 # Module .done file
 # FIXME : unable to put $(AUTOCONF_MERGE_FILE) as dependency, it causes
@@ -50,6 +51,7 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := msgbuilder
 LOCAL_MODULE_FILENAME := $(LOCAL_MODULE).done
+LOCAL_CATEGORY_PATH := alchemy/pbuild-hook
 
 # Build directory
 MSGBUILDER_BUILD_DIR := $(call local-get-build-dir)
