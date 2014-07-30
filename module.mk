@@ -1004,13 +1004,13 @@ $(preinstall_file):
 
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(preinstall_file)
 
-# If a copy in staging is done do it before. Otherwise we can only hook before
-# build module is done...
-# Order only prerequiqites to avoid recompilation...
+# Do the pre-install hook after module is built
+$(LOCAL_MODULE): $(preinstall_file)
+$(preinstall_file): $(LOCAL_BUILD_MODULE)
+
+# If a copy in staging is done do it before.
 ifeq ("$(copy_to_staging)","1")
 $(LOCAL_STAGING_MODULE): | $(preinstall_file)
-else
-$(LOCAL_BUILD_MODULE): | $(preinstall_file)
 endif
 
 endif
