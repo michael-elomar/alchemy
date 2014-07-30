@@ -845,6 +845,10 @@ ifneq ("$(USE_GIT_REV)","0")
 # $1 : module name.
 module-get-revision = $(__modules.$1.REVISION)
 
+# Get revision (with git describe) of one module
+# $1 : module name.
+module-get-revision-describe = $(__modules.$1.REVISION_DESCRIBE)
+
 # Get last revision of one module. It is found in a generated file that may
 # not exist so the result can be empty.
 # $1 : module name.
@@ -859,7 +863,9 @@ module-compute-revisions = \
 		$(if $(__modules.$(__mod).REVISION),$(empty), \
 			$(eval __path := $(__modules.$(__mod).PATH)) \
 			$(eval __rev := $(shell cd $(__path) && git rev-parse HEAD 2>/dev/null)) \
+			$(eval __rev-desc := $(shell cd $(__path) && git describe --tags --always 2>/dev/null)) \
 			$(eval __modules.$(__mod).REVISION := $(__rev)) \
+			$(eval __modules.$(__mod).REVISION_DESCRIBE := $(__rev-desc)) \
 		) \
 	)
 

@@ -486,6 +486,40 @@ $(LOCAL_MODULE)-gen-last-rev: PRIVATE_REV_FILE := $(revision_file)
 $(LOCAL_MODULE)-gen-last-rev: $(LOCAL_BUILD_MODULE)
 	@$(call generate-last-revision-file,$(PRIVATE_MODULE),$(PRIVATE_REV_FILE))
 
+
+# Header to also generate, but as it can be included by source files, it shall
+# be in prerquiqites
+revision_file_h := $(build_dir)/$(LOCAL_MODULE)-revision.h
+all_prerequisites += $(revision_file_h)
+
+# To be able to always have the correct value, use an order only dep to a
+# generation rule that will create a temp file and update the real one only
+# when needed. This way the header file is not updated unnecessarily and thus do
+# not trigger unnecessary compilation rules.
+# Empty command is to avoid a pattern matching rule to be used.
+$(revision_file_h): | $(LOCAL_MODULE)-gen-rev-h
+	$(empty)
+
+.PHONY: $(LOCAL_MODULE)-gen-rev-h
+$(LOCAL_MODULE)-gen-rev-h: PRIVATE_MODULE := $(LOCAL_MODULE)
+$(LOCAL_MODULE)-gen-rev-h: PRIVATE_REV_FILE_H := $(revision_file_h)
+$(LOCAL_MODULE)-gen-rev-h:
+	@mkdir -p $(dir $(PRIVATE_REV_FILE_H))
+	@( \
+		var="$(call module-get-define,$(PRIVATE_MODULE))"; \
+		val="$(call module-get-revision,$(PRIVATE_MODULE))"; \
+		val2="$(call module-get-revision-describe,$(PRIVATE_MODULE))"; \
+		echo "#define ALCHEMY_REVISION_$${var} \"$${val}\""; \
+		echo "#define ALCHEMY_REVISION_DESCRIBE_$${var} \"$${val2}\""; \
+	) > $(PRIVATE_REV_FILE_H).tmp
+	@if [ ! -f $(PRIVATE_REV_FILE_H) ]; then \
+		mv -f $(PRIVATE_REV_FILE_H).tmp $(PRIVATE_REV_FILE_H); \
+	elif ! diff -q $(PRIVATE_REV_FILE_H).tmp $(PRIVATE_REV_FILE_H) &>/dev/null; then \
+		mv -f $(PRIVATE_REV_FILE_H).tmp $(PRIVATE_REV_FILE_H); \
+	else \
+		rm -f $(PRIVATE_REV_FILE_H).tmp; \
+	fi
+
 endif
 
 # This will force to recheck this module if one of its dependencies is changed.
