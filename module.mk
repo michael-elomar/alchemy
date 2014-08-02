@@ -488,7 +488,7 @@ $(LOCAL_MODULE)-gen-last-rev: $(LOCAL_BUILD_MODULE)
 
 
 # Header to also generate, but as it can be included by source files, it shall
-# be in prerquiqites
+# be in prerequisites
 revision_file_h := $(build_dir)/$(LOCAL_MODULE)-revision.h
 all_prerequisites += $(revision_file_h)
 

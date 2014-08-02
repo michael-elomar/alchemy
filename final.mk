@@ -70,7 +70,7 @@ ifneq ("$(call is-module-in-build-config,python3)","")
 endif
 
 # Remove write access to 'group' and 'other'. For native only, a fixstat tools
-# is used on other variant when geberating the image
+# is used on other variant when generating the image
 ifeq ("$(TARGET_OS)","linux")
 ifeq ("$(TARGET_OS_FLAVOUR)","native-chroot")
   MAKEFINAL_ARGS += --remove-wgo
