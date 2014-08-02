@@ -188,6 +188,10 @@ macros-LOCAL += CMAKE_CMD_POST_CLEAN
 # QMake customization
 vars-LOCAL += QMAKE_PRO_FILE
 
+# Python extension customization
+vars-LOCAL += PYTHONEXT_SETUP_PY_ENV
+vars-LOCAL += PYTHONEXT_SETUP_PY_ARGS
+
 # Exported stuff (will be added in modules depending on this one)
 vars-LOCAL += EXPORT_C_INCLUDES
 vars-LOCAL += EXPORT_CFLAGS

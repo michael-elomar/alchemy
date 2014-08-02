@@ -298,13 +298,15 @@ is-module-registered = $(call is-var-defined,__modules.$1.PATH)
 ###############################################################################
 ## Check if a module is built externally (by autotools or custom rules).
 ## $1 : module to check.
-## AUTOTOOLS/CMAKE/QMAKE/GENERIC/CUSTOM/META_PACKAGE class or empty class means external.
+## AUTOTOOLS/CMAKE/QMAKE/PYTHON_EXTENSION/GENERIC/CUSTOM/META_PACKAGE class or empty
+## class means external.
 ###############################################################################
 is-module-external = $(strip \
 	$(eval __class := $(__modules.$1.MODULE_CLASS)) \
 	$(or $(call streq,$(__class),AUTOTOOLS), \
 		$(call streq,$(__class),CMAKE), \
 		$(call streq,$(__class),QMAKE), \
+		$(call streq,$(__class),PYTHON_EXTENSION), \
 		$(call streq,$(__class),GENERIC), \
 		$(call streq,$(__class),CUSTOM) \
 		$(call streq,$(__class),META_PACKAGE) \
