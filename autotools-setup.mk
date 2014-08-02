@@ -39,6 +39,9 @@ __autotools-configure-args := \
 	--disable-documentation \
 	--disable-option-checking
 
+# Cache file for target
+__autotools-target-cache-file := $(TARGET_OUT_BUILD)/autotools.cache
+
 ###############################################################################
 ## Variable used for autotools on host modules.
 ###############################################################################
@@ -216,6 +219,30 @@ ifeq ("$(V)","0")
   TARGET_AUTOTOOLS_MAKE_ENV += LIBTOOLFLAGS="--quiet"
   TARGET_AUTOTOOLS_MAKE_ARGS += -s --no-print-directory
 endif
+
+###############################################################################
+## Cache generation.
+###############################################################################
+
+$(__autotools-target-cache-file): $(BUILD_SYSTEM)/autotools-cache/configure
+	@echo "Generating $(call path-from-top,$@)..."
+	@mkdir -p $(TARGET_OUT_BUILD)/autotools-cache
+	@rm -f $(TARGET_OUT_BUILD)/autotools-cache/config.cache
+	$(Q) cd $(TARGET_OUT_BUILD)/autotools-cache && \
+		$(TARGET_AUTOTOOLS_CONFIGURE_ENV) \
+		$(BUILD_SYSTEM)/autotools-cache/configure \
+		$(TARGET_AUTOTOOLS_CONFIGURE_ARGS) \
+		--config-cache
+	$(Q) sed -e "s/ac_cv_env_.*//g" \
+		$(TARGET_OUT_BUILD)/autotools-cache/config.cache \
+		> $@
+
+autotools-target-cache-file-clean:
+	@rm -f $(__autotools-target-cache-file)
+
+clean: autotools-target-cache-file-clean
+dirclean: autotools-target-cache-file-clean
+clobber: autotools-target-cache-file-clean
 
 ###############################################################################
 ## For compatibility.

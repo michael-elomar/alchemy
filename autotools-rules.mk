@@ -59,6 +59,12 @@ ifneq ("$(strip $(__external-add_LDFLAGS))","")
   LOCAL_AUTOTOOLS_CONFIGURE_ENV += DYN_LDFLAGS="$$DYN_LDFLAGS $(__external-add_LDFLAGS)"
 endif
 
+ifneq ("$(USE_AUTOTOOLS_CACHE)","0")
+ifeq ("$(mode_host)","")
+  LOCAL_AUTOTOOLS_CONFIGURE_ARGS += --config-cache
+endif
+endif
+
 ###############################################################################
 ## Default commands
 ###############################################################################
@@ -67,7 +73,14 @@ endif
 # (mainly to improve perf)
 ifndef __autotools-macros
 
+ifneq ("$(USE_AUTOTOOLS_CACHE)","0")
+  __autotools-target-copy-cache = @cp -af $(__autotools-target-cache-file) $(PRIVATE_OBJ_DIR)/config.cache
+else
+  __autotools-target-copy-cache =
+endif
+
 define __autotools-default-cmd-configure
+	$(if $(call streq,$(PRIVATE_MODE),TARGET_),$(__autotools-target-copy-cache))
 	$(Q) cd $(PRIVATE_OBJ_DIR) && \
 		$($(PRIVATE_MODE)AUTOTOOLS_CONFIGURE_ENV) $(PRIVATE_CONFIGURE_ENV) \
 		$(PRIVATE_SRC_DIR)/configure \
@@ -144,6 +157,13 @@ include $(BUILD_SYSTEM)/generic-rules.mk
 # ourself that the configure file is newer.
 ifneq ("$(wildcard $(src_dir)/configure)","")
 $(configured_file): $(src_dir)/configure
+endif
+
+# Restart configuration step if configure cache file has changed
+ifneq ("$(USE_AUTOTOOLS_CACHE)","0")
+ifeq ("$(mode_host)","")
+$(configured_file): $(__autotools-target-cache-file)
+endif
 endif
 
 # Setup commands
