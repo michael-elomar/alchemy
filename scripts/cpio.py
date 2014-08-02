@@ -14,6 +14,8 @@ class CpioHeader(object):
 		self.mode = mode
 		self.uid = uid
 		self.gid = gid
+		self.major = 0
+		self.minor = 0
 
 #===============================================================================
 #===============================================================================
@@ -41,11 +43,12 @@ class Cpio(object):
 		buf = ("%s%08x%08x%08x%08x%08x%08x%08x%08x%08x%08x%08x%08x%08x" % (
 				"070701", self.inode,
 				hdr.mode, hdr.uid, hdr.gid, 1, 0,
-				hdr.fileSize, 0, 0, 0, 0,
+				hdr.fileSize, 0, 0, hdr.major, hdr.minor,
 				len(hdr.filePath) + 1, 0))
 		self.write(buf)
 		self.write(hdr.filePath + "\0")
 		self.align4()
+		self.inode += 1
 
 #===============================================================================
 # Main function.
@@ -108,6 +111,26 @@ def main():
 			cpio.write(linkTarget)
 			cpio.align4()
 
+	# Device nodes
+	for devNode in options.devNodes:
+		fields = devNode.split(":")
+		filePath = fields[0]
+		mode = int(fields[1], 8)
+		uid = int(fields[2], 10)
+		gid = int(fields[3], 10)
+		devtype = fields[4]
+		major = int(fields[5], 10)
+		minor = int(fields[6], 10)
+		if devtype == "b":
+			mode |= stat.S_IFBLK
+		else:
+			mode |= stat.S_IFCHR
+		# No data, only header
+		cpioHeader = CpioHeader(filePath, 0, mode, uid, gid)
+		cpioHeader.major = major
+		cpioHeader.minor = minor
+		cpio.writeHeader(cpioHeader)
+
 	# Trailer
 	cpioHeader = CpioHeader("TRAILER!!!", 0, 0, 0, 0)
 	cpio.writeHeader(cpioHeader)
@@ -122,6 +145,12 @@ def main():
 def parseArgs():
 	usage = "usage: %prog [options] <cpiofile>"
 	parser = optparse.OptionParser(usage = usage)
+
+	parser.add_option("--devnode",
+		dest="devNodes",
+		action="append",
+		default=[],
+		help="add a device node (format is name:mode:uid:gid:c|b:maj:min")
 
 	parser.add_option("-q",
 		dest="quiet",

@@ -95,7 +95,9 @@ image-cpio:
 	else \
 		cd $(TARGET_OUT_FINAL); \
 		find . ! -name '.' -printf '%P\n' | $(FIXSTAT) | \
-			$(BUILD_SYSTEM)/scripts/cpio.py $(IMAGE_FILE_CPIO); \
+			$(BUILD_SYSTEM)/scripts/cpio.py \
+			--devnode "dev/console:622:0:0:c:5:1" \
+			$(IMAGE_FILE_CPIO); \
 	fi
 	$(Q) gzip -9 $(IMAGE_FILE_CPIO)
 	@echo "Image cpio: done -> $(IMAGE_FILE_CPIO_GZ)"
