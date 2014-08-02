@@ -1090,6 +1090,24 @@ filter-get-external-modules = $(strip \
 	))
 
 ###############################################################################
+# Manipulation of .config files based on the Kconfig infrastructure.
+###############################################################################
+define kconfig-enable-opt
+	@sed -i -e "/\\<$1\\>/d" $2
+	@echo "$1=y" >> $2
+endef
+
+define kconfig-set-opt
+	@sed -i -e "/\\<$1\\>/d" $3
+	@echo "$1=$2" >> $3
+endef
+
+define kconfig-disable-opt
+	@sed -i -e "/\\<$1\\>/d" $2
+	@echo "# $1 is not set" >> $2
+endef
+
+###############################################################################
 ## Copy a macro.
 ## $1 : destination variable.
 ## $1 : source variable.

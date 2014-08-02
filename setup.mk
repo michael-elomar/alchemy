@@ -118,6 +118,9 @@ TARGET_INCLUDE_GCONV ?= 0
 # Enable c++ exceptions
 TARGET_USE_CXX_EXCEPTIONS ?= 1
 
+# Link cpio image inside the kernel.
+TARGET_LINUX_LINK_CPIO_IMAGE ?= 0
+
 ###############################################################################
 ## Toolchain setup.
 ###############################################################################

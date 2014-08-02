@@ -90,36 +90,67 @@ linux-copy-image = \
 		cp -af $(LINUX_BUILD_DIR)/arch/$(LINUX_ARCH)/boot/$1 $(TARGET_OUT_STAGING)/boot; \
 	fi;
 
+define linux-copy-images
+	$(Q) $(call linux-copy-image,Image)
+	$(Q) $(call linux-copy-image,zImage)
+	$(Q) $(call linux-copy-image,bzImage)
+endef
+
+ifneq ("$(TARGET_LINUX_LINK_CPIO_IMAGE)","0")
+
+define linux-setup-cpio-config
+	@ : > $(LINUX_BUILD_DIR)/rootfs.cpio.gz
+	$(call kconfig-enable-opt,CONFIG_BLK_DEV_INITRD,$(LINUX_BUILD_DIR)/.config)
+	$(call kconfig-set-opt,CONFIG_INITRAMFS_SOURCE,\"rootfs.cpio.gz\",$(LINUX_BUILD_DIR)/.config)
+	$(call kconfig-set-opt,CONFIG_INITRAMFS_ROOT_UID,0,$(LINUX_BUILD_DIR)/.config)
+	$(call kconfig-set-opt,CONFIG_INITRAMFS_ROOT_GID,0,$(LINUX_BUILD_DIR)/.config)
+	$(call kconfig-disable-opt,CONFIG_INITRAMFS_COMPRESSION_NONE,$(LINUX_BUILD_DIR)/.config)
+	$(call kconfig-enable-opt,CONFIG_INITRAMFS_COMPRESSION_GZIP,$(LINUX_BUILD_DIR)/.config)
+endef
+
+else
+
+define linux-setup-cpio-config
+endef
+
+endif
+
 # Setup config in build dir
 ifneq ("$(LINUX_CONFIG_FILE_IS_TARGET)","")
 
 # Use linux target
-linux-setup-config = \
-	mkdir -p $(LINUX_BUILD_DIR); \
-	$(MAKE) $(LINUX_MAKE_ARGS) $(LINUX_CONFIG_FILE)
+define linux-setup-config
+	@mkdir -p $(LINUX_BUILD_DIR)
+	$(Q) $(MAKE) $(LINUX_MAKE_ARGS) $(LINUX_CONFIG_FILE)
+endef
 
 # Nothing to do
-linux-save-config =
+define linux-save-config
+endef
 
 # Rule to create .config
 $(LINUX_BUILD_DIR)/.config:
-	+$(Q)$(linux-setup-config)
+	+$(linux-setup-config)
+	+$(linux-setup-cpio-config)
 
-else
+else # ifneq ("$(LINUX_CONFIG_FILE_IS_TARGET)","")
 
 # Use a file
-linux-setup-config = \
-	mkdir -p $(LINUX_BUILD_DIR); \
-	cp -af $(LINUX_CONFIG_FILE) $(LINUX_BUILD_DIR)/.config
+define linux-setup-config
+	@mkdir -p $(LINUX_BUILD_DIR)
+	$(Q) cp -af $(LINUX_CONFIG_FILE) $(LINUX_BUILD_DIR)/.config
+endef
 
-linux-save-config = \
-	cp -af $(LINUX_BUILD_DIR)/.config $(LINUX_CONFIG_FILE)
+define linux-save-config
+	$(Q) cp -af $(LINUX_BUILD_DIR)/.config $(LINUX_CONFIG_FILE)
+endef
 
 # Rule to create .config
 $(LINUX_BUILD_DIR)/.config: $(LINUX_CONFIG_FILE)
-	+$(Q)$(linux-setup-config)
+	+$(linux-setup-config)
+	+$(linux-setup-cpio-config)
 
-endif
+endif # ifneq ("$(LINUX_CONFIG_FILE_IS_TARGET)","")
 
 # Avoid compiling kernel at same time than header installation by adding a prerequisite
 $(LINUX_BUILD_DIR)/$(LOCAL_MODULE_FILENAME): $(LINUX_BUILD_DIR)/.config $(LINUX_HEADERS_DONE_FILE)
@@ -127,6 +158,9 @@ $(LINUX_BUILD_DIR)/$(LOCAL_MODULE_FILENAME): $(LINUX_BUILD_DIR)/.config $(LINUX_
 	@echo "Checking linux kernel config: $(LINUX_CONFIG_FILE)"
 	$(Q)yes "" 2>/dev/null | $(MAKE) $(LINUX_MAKE_ARGS) oldconfig
 	@echo "Building linux kernel"
+ifneq ("$(TARGET_LINUX_LINK_CPIO_IMAGE)","0")
+	@ : > $(LINUX_BUILD_DIR)/rootfs.cpio.gz
+endif
 	$(Q)$(MAKE) $(LINUX_MAKE_ARGS)
 	@echo "Installing linux kernel modules"
 	$(Q)rm -rf $(TARGET_OUT_STAGING)/lib/modules
@@ -138,13 +172,7 @@ $(LINUX_BUILD_DIR)/$(LOCAL_MODULE_FILENAME): $(LINUX_BUILD_DIR)/.config $(LINUX_
 	$(Q)rm -f  $(TARGET_OUT_STAGING)/lib/modules/*/build
 	$(Q)rm -f  $(TARGET_OUT_STAGING)/lib/modules/*/source
 	@echo "Installing linux kernel images"
-ifeq ("$(LINUX_ARCH)","arm")
-	$(Q)$(MAKE) $(LINUX_MAKE_ARGS) uImage
-	$(Q)$(call linux-copy-image,uImage)
-endif
-	$(Q)$(call linux-copy-image,Image)
-	$(Q)$(call linux-copy-image,zImage)
-	$(Q)$(call linux-copy-image,bzImage)
+	$(call linux-copy-images)
 	$(Q)cp -af $(LINUX_BUILD_DIR)/vmlinux $(TARGET_OUT_STAGING)/boot
 	@echo "Linux kernel built"
 	@touch $@
@@ -216,6 +244,9 @@ linux-clean:
 	$(Q)$(foreach header,$(LINUX_EXPORTED_HEADERS_OVER),\
 		rm -f $(TARGET_OUT_STAGING)/usr/$(header); \
 	)
+ifneq ("$(TARGET_LINUX_LINK_CPIO_IMAGE)","0")
+	$(Q)rm -f $(LINUX_BUILD_DIR)/rootfs.cpio.gz
+endif
 
 # Default rule to invoke kernel specific targets (like cscope, tags, help ...)
 # Do NOT put a dependency for this pattern rule to avoid subtle troubles.

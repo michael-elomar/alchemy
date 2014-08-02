@@ -134,6 +134,11 @@ conflict with other build systems (android for example).</p>
   toolchain for the compilation of the linux kernel (and drivers).</li>
 <li><code>TARGET_LINUX_DIR</code> : path to linux kernel source tree. Used by some tools for
   dome drivers that need access to internal linux headers.</li>
+<li><code>TARGET_LINUX_LINK_CPIO_IMAGE</code> : set to <code>1</code> to link the cpio image inside the
+  kernel. During cpio image generation, the kernel will be re-linked to add it
+  inside. Also, required options are internally set in linux config. Although
+  only the copy in build directory is modified, the original one is not touched.
+  </br>Default is <code>r0</code></li>
 </ul>
 <h3>Global flags for tools.</h3>
 <p>Normally not needed, default values are determined based on target setting.

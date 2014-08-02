@@ -101,6 +101,12 @@ image-cpio:
 	fi
 	$(Q) gzip -9 $(IMAGE_FILE_CPIO)
 	@echo "Image cpio: done -> $(IMAGE_FILE_CPIO_GZ)"
+ifneq ("$(TARGET_LINUX_LINK_CPIO_IMAGE)","0")
+	@echo "Rebuilding linux kernel with initramfs"
+	$(Q) cp -af $(IMAGE_FILE_CPIO_GZ) $(LINUX_BUILD_DIR)/rootfs.cpio.gz
+	$(Q) $(MAKE) $(LINUX_MAKE_ARGS)
+	$(call linux-copy-images)
+endif
 
 .PHONY: image-cpio-clean
 image-cpio-clean:
