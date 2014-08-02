@@ -100,6 +100,19 @@ else
 __final-finish =
 endif
 
+# Create /etc/ld.so.conf and create cache with ldconfig
+# We use the ldconfig from the host to generate. Hopefully it will be compatible
+# with the target. This is what buildroot do if there is no ldconfig in the
+# cross toolchain.
+ifeq ("$(TARGET_LIBC)","eglibc")
+__final-ldconfig = \
+	mkdir -p $(TARGET_OUT_FINAL)/etc; \
+	touch $(TARGET_OUT_FINAL)/etc/ld.so.conf; \
+	ldconfig -r $(TARGET_OUT_FINAL);
+else
+__final-ldconfig =
+endif
+
 ###############################################################################
 ## Rules.
 ###############################################################################
@@ -113,6 +126,7 @@ final:
 		$(TARGET_OUT_STAGING) $(TARGET_OUT_FINAL) $(TARGET_OUT)/final.mk
 	$(Q) $(MAKE) -f $(TARGET_OUT)/final.mk
 	$(Q)$(__final-finish)
+	$(Q)$(__final-ldconfig)
 	@echo "Done generating final tree"
 
 # Only add dependency if it is also given in goals to avoid unecessary checks
