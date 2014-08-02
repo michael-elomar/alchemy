@@ -6,7 +6,7 @@
 #
 # Generate the final directory by copying files from staging directory
 #
-# It also incorporate skeletons and toolchain libraries.
+# It also incorporate skeletons.
 #
 # It takes care of resolving links relative to final dir when copying files
 # to avoid surprises...
@@ -49,9 +49,6 @@ LINUX_BASIC_SKEL = [
 	["tmp", None],
 	["lib/modules", None],
 ]
-
-# Shebang patch
-PATCH_SHEBANG = "sed -e 's|^\#! */bin/bash$|\#!/bin/sh|'"
 
 class CopyType:
 	(ONLY_LINKS, NO_LINKS, ALL) = range(0, 3)
@@ -168,18 +165,15 @@ def addBuildId(filePath, options):
 #===============================================================================
 # Get the commands to be executed for the copy.
 #===============================================================================
-def getCopyCmds(dstFileName, srcFileName, options, doStrip=False, doPatchShebang=False):
+def getCopyCmds(dstFileName, srcFileName, options, doStrip=False):
 	cmds = []
-	if not doStrip and not doPatchShebang:
+	if not doStrip:
 		# Simple copy
 		cmds.append("cp -af \"%s\" \"%s\"" % (srcFileName, dstFileName))
 	else:
 		if doStrip:
 			cmds.append("%s -o \"%s\" \"%s\"" % \
 				(options.strip, dstFileName, srcFileName))
-		elif doPatchShebang:
-			cmds.append("%s \"%s\" > \"%s\"" %
-				(PATCH_SHEBANG, srcFileName, dstFileName))
 		# Restore mode and timestamp
 		cmds.append("chmod $(stat --printf '%%a' \"%s\") \"%s\"" % \
 			(srcFileName, dstFileName))
@@ -193,7 +187,7 @@ def getCopyCmds(dstFileName, srcFileName, options, doStrip=False, doPatchShebang
 # Copy a file using a makefile (to do strip in parallel).
 #===============================================================================
 _MAKEFILE_FILE_IDX = 0
-def doCopyByMakefile(dstFileName, srcFileName, options, doStrip=False, doPatchShebang=False):
+def doCopyByMakefile(dstFileName, srcFileName, options, doStrip=False):
 	global _MAKEFILE_FILE_IDX
 	# use a generic target name to avoid issue with file names containing
 	# special characters
@@ -203,7 +197,7 @@ def doCopyByMakefile(dstFileName, srcFileName, options, doStrip=False, doPatchSh
 	_MAKEFILE_FILE_IDX += 1
 
 	# commands, see doCopy for more info
-	cmds = getCopyCmds(dstFileName, srcFileName, options, doStrip, doPatchShebang)
+	cmds = getCopyCmds(dstFileName, srcFileName, options, doStrip)
 	options.makefile.write("\t$(call PRINT,\"Alchemy install: %s\")\n" % os.path.relpath(dstFileName))
 	for cmd in cmds:
 		options.makefile.write("\t@%s\n" % cmd.replace("$", "$$"))
@@ -212,8 +206,8 @@ def doCopyByMakefile(dstFileName, srcFileName, options, doStrip=False, doPatchSh
 #===============================================================================
 # Copy a file by directly making a copy.
 #===============================================================================
-def doCopyDirect(dstFileName, srcFileName, options, doStrip=False, doPatchShebang=False):
-	cmds = getCopyCmds(dstFileName, srcFileName, options, doStrip, doPatchShebang)
+def doCopyDirect(dstFileName, srcFileName, options, doStrip=False):
+	cmds = getCopyCmds(dstFileName, srcFileName, options, doStrip)
 	for cmd in cmds:
 		logging.debug("  %s", cmd)
 		os.system(cmd)
@@ -242,7 +236,7 @@ def addPathInFileList(relPath, isDir, options):
 #===============================================================================
 # Copy a file/link.
 #===============================================================================
-def doCopy(dstFileName, srcFileName, options, doPatchShebang=False, forceCopy=False):
+def doCopy(dstFileName, srcFileName, options, forceCopy=False):
 	relPath = os.path.relpath(dstFileName, options.finalDir)
 
 	addPathInFileList(relPath, False, options)
@@ -289,9 +283,9 @@ def doCopy(dstFileName, srcFileName, options, doPatchShebang=False, forceCopy=Fa
 
 	# do the copy by wanted method (always process links directly)
 	if options.makefile != None and not os.path.islink(srcFileName):
-		doCopyByMakefile(dstFileName, srcFileName, options, doStrip, doPatchShebang)
+		doCopyByMakefile(dstFileName, srcFileName, options, doStrip)
 	else:
-		doCopyDirect(dstFileName, srcFileName, options, doStrip, doPatchShebang)
+		doCopyDirect(dstFileName, srcFileName, options, doStrip)
 
 #===============================================================================
 # Makefile banner
@@ -381,65 +375,6 @@ def processDir(rootDir, options, withEmptyDir, copyType, forceCopy=False):
 				doCopy(dstFileName, srcFileName, options, forceCopy=forceCopy)
 
 #===============================================================================
-# Process toolchain libc directory.
-#===============================================================================
-def processToolchainLibc(libcDir, options):
-
-	# copy name with .so from 'lib' directory
-	libDir = os.path.join(libcDir, "lib")
-	for fileName in os.listdir(libDir):
-		if re.match(r".*\.so.*", fileName):
-			srcFileName = os.path.join(libDir, fileName)
-			relPath = os.path.relpath(srcFileName, libcDir)
-			dstFileName = getRealPath(options.finalDir, relPath)
-			doCopy(dstFileName, srcFileName, options)
-			# FIXME : in makefile mode we don't add buildid
-			if not os.path.islink(dstFileName) and not options.makefile:
-				addBuildId(dstFileName, options)
-
-	# copy 'libstdc++' from 'usr/lib' directory
-	usrLibDir = os.path.join(libcDir, "usr/lib")
-	for fileName in os.listdir(usrLibDir):
-		if re.match(r"libstdc\+\+.*\.so.*", fileName):
-			srcFileName = os.path.join(usrLibDir, fileName)
-			relPath = os.path.relpath(srcFileName, libcDir)
-			dstFileName = getRealPath(options.finalDir, relPath)
-			doCopy(dstFileName, srcFileName, options)
-			# FIXME : in makefile mode we don't add buildid
-			if not os.path.islink(dstFileName) and not options.makefile:
-				addBuildId(dstFileName, options)
-
-	# copy 'ldd' from 'usr/bin' directory
-	# Patch shebang from #!bin/bash to !/bin/sh
-	usrBinDir = os.path.join(libcDir, "usr/bin")
-	for fileName in os.listdir(usrBinDir):
-		if re.match(r"ldd", fileName):
-			srcFileName = os.path.join(usrBinDir, fileName)
-			relPath = os.path.relpath(srcFileName, libcDir)
-			dstFileName = getRealPath(options.finalDir, relPath)
-			doCopy(dstFileName, srcFileName, options, doPatchShebang=True)
-
-	if options.copytzdata:
-		# copy time zone database from 'usr/share/zoneinfo' directory
-		usrShareZoneinfoDir = os.path.join(libcDir, "usr/share/zoneinfo")
-		for dirName, _, fileNames in os.walk(usrShareZoneinfoDir):
-			for fileName in fileNames:
-				srcFileName = os.path.join(dirName, fileName)
-				relPath = os.path.relpath(srcFileName, libcDir)
-				dstFileName = getRealPath(options.finalDir, relPath)
-				doCopy(dstFileName, srcFileName, options)
-
-	if options.copygconv:
-		# copy gconv libraries from 'usr/lib/gconv' directory
-		usrShareGconvDir = os.path.join(libcDir, "usr/lib/gconv")
-		for dirName, _, fileNames in os.walk(usrShareGconvDir):
-			for fileName in fileNames:
-				srcFileName = os.path.join(dirName, fileName)
-				relPath = os.path.relpath(srcFileName, libcDir)
-				dstFileName = getRealPath(options.finalDir, relPath)
-				doCopy(dstFileName, srcFileName, options)
-
-#===============================================================================
 # Process linux basic skel.
 #===============================================================================
 def processLinuxBasicSkel(options):
@@ -513,15 +448,6 @@ def main():
 	for skelDir in options.skelDirs:
 		processDir(skelDir, options, False, CopyType.NO_LINKS, forceCopy=True)
 
-	# process libc  directory
-	if options.toolchainLibcDir != None:
-		processToolchainLibc(options.toolchainLibcDir, options)
-
-	# process gdbserver binary
-	if options.toolchainGdbserverName:
-		doCopy(getRealPath(options.finalDir, "usr/bin/gdbserver"),
-			options.toolchainGdbserverName, options)
-
 	# process linux basic skel
 	if options.linuxBasicSkel:
 		processLinuxBasicSkel(options)
@@ -544,24 +470,6 @@ def parseArgs():
 		default=[],
 		action="append",
 		help="path to skeleton tree to merge in final tree")
-	parser.add_option("--toolchain-libc",
-		dest="toolchainLibcDir",
-		default=None,
-		help="path to toolchain libc directory to merge in final tree")
-	parser.add_option("--copy-tzdata",
-		dest="copytzdata",
-		action="store_true",
-		default=False,
-		help="include time zone data in the final tree")
-	parser.add_option("--copy-gconv",
-		dest="copygconv",
-		action="store_true",
-		default=False,
-		help="include gconv libraries in the final tree")
-	parser.add_option("--toolchain-gdbserver",
-		dest="toolchainGdbserverName",
-		default=None,
-		help="path to toolchain gdbserver binary to merge in final tree")
 	parser.add_option("--linux-basic-skel",
 		dest="linuxBasicSkel",
 		action="store_true",
