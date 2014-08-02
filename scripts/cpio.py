@@ -56,6 +56,7 @@ class Cpio(object):
 def main():
 	(options, args) = parseArgs()
 	setupLog(options)
+	initFound = False
 
 	# Open output cpio file
 	outCpioPath = args[0]
@@ -76,6 +77,8 @@ def main():
 		mode = int(match.group(2), 8)
 		uid = int(match.group(3))
 		gid = int(match.group(4))
+		if filePath == "/init" or filePath == "init":
+			initFound = True
 
 		if stat.S_IFMT(mode) == stat.S_IFREG:
 			# Try to open file
@@ -138,6 +141,9 @@ def main():
 
 	# Free resources
 	fdout.close()
+
+	if not initFound:
+		logging.warning("cpio: warning: no 'init' found at the root")
 
 #===============================================================================
 # Setup option parser and parse command line.
