@@ -64,10 +64,11 @@ endif
 
 # Clang uses eglibc toochain(libc&binutils) to cross-compile
 ifeq ("$(TARGET_ARCH)","arm")
-  TARGET_GLOBAL_CFLAGS_clang += --sysroot=$(gcc-sysroot) \
+# Clang needs the raw sysroot, so remove the binary specific version.
+  TARGET_GLOBAL_CFLAGS_clang += --sysroot=$(subst thumb2,,$(gcc-sysroot)) \
 				-target $(TARGET_TRIPLET) \
 				-B $(TARGET_COMPILER_PATH)
-  TARGET_GLOBAL_LDFLAGS_clang += --sysroot=$(gcc-sysroot) \
+  TARGET_GLOBAL_LDFLAGS_clang += --sysroot=$(subst thumb2,,$(gcc-sysroot)) \
 				-target $(TARGET_TRIPLET) \
 				-B $(TARGET_COMPILER_PATH)
 endif
