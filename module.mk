@@ -357,9 +357,7 @@ endif
 ###############################################################################
 
 # Compilation flags
-__external-add_CFLAGS := $(LOCAL_CFLAGS) \
-			 $(call normalize-c-includes,$(LOCAL_C_INCLUDES)) \
-			 $(TARGET_GLOBAL_CFLAGS_$(module_compiler_flavour))
+__external-add_CFLAGS := $(LOCAL_CFLAGS) $(call normalize-c-includes,$(LOCAL_C_INCLUDES))
 __external-add_CXXFLAGS := $(__external-add_CFLAGS) $(LOCAL_CXXFLAGS)
 
 # Linker flags
