@@ -394,6 +394,7 @@ include $(BUILD_SYSTEM)/pbuild-hook/atom.mk
 
 # Now that all modules have been registered, sort the variable
 __modules := $(sort $(__modules))
+$(info Found $(words $(__modules)) modules)
 
 # Execute custom macros of modules
 $(foreach __mod,$(__modules), \
