@@ -79,6 +79,22 @@ plf: image-plf
 plf-clean: image-plf-clean
 
 ###############################################################################
+## Generic image generation
+###############################################################################
+# $1 : file system type
+# $2 : output filename
+# $3 : extra arguments
+define genimage
+	$(Q) if [ ! -d $(TARGET_OUT_FINAL) ]; then \
+		echo "Image $1: missing final directory"; exit 1; \
+	else \
+		cd $(TARGET_OUT_FINAL); \
+		find . ! -name '.' -printf '%P\n' | $(FIXSTAT) | \
+			$(BUILD_SYSTEM)/scripts/mkfs.py --fstype $1 $3 $2; \
+	fi
+endef
+
+###############################################################################
 ## Image in cpio format.
 ###############################################################################
 
@@ -90,15 +106,7 @@ image-cpio:
 	@echo "Image cpio: start"
 	$(Q) rm -f $(IMAGE_FILE_CPIO)
 	$(Q) rm -f $(IMAGE_FILE_CPIO_GZ)
-	$(Q) if [ ! -d $(TARGET_OUT_FINAL) ]; then \
-		echo "Image cpio: missing final directory"; exit 1; \
-	else \
-		cd $(TARGET_OUT_FINAL); \
-		find . ! -name '.' -printf '%P\n' | $(FIXSTAT) | \
-			$(BUILD_SYSTEM)/scripts/cpio.py \
-			--devnode "dev/console:622:0:0:c:5:1" \
-			$(IMAGE_FILE_CPIO); \
-	fi
+	$(call genimage,cpio,$(IMAGE_FILE_CPIO) --devnode "dev/console:622:0:0:c:5:1")
 	$(Q) gzip -9 $(IMAGE_FILE_CPIO)
 	@echo "Image cpio: done -> $(IMAGE_FILE_CPIO_GZ)"
 ifneq ("$(TARGET_LINUX_LINK_CPIO_IMAGE)","0")
@@ -124,6 +132,37 @@ endif
 clean: image-cpio-clean
 dirclean: image-cpio-clean
 clobber: image-cpio-clean
+
+###############################################################################
+## Image in ext2 format.
+###############################################################################
+
+IMAGE_FILE_EXT2 := $(TARGET_OUT)/$(TARGET_PRODUCT_FULL_NAME).ext2
+
+.PHONY: image-ext2
+image-ext2:
+	@echo "Image ext2: start"
+	$(Q) rm -f $(IMAGE_FILE_EXT2)
+	$(Q) rm -f $(IMAGE_FILE_EXT2_GZ)
+	$(call genimage,ext2,$(IMAGE_FILE_EXT2),$(empty))
+	@echo "Image ext2: done -> $(IMAGE_FILE_EXT2)"
+
+.PHONY: image-ext2-clean
+image-ext2-clean:
+	$(Q) rm -f $(IMAGE_FILE_EXT2)
+	$(Q) rm -f $(IMAGE_FILE_EXT2_GZ)
+
+# Only add dependency if it is also given in goals to avoid unecessary checks
+ifneq ("$(call is-targets-in-make-goals,all)","")
+image-ext2: all
+endif
+ifneq ("$(call is-targets-in-make-goals,final)","")
+image-ext2: final
+endif
+
+clean: image-ext2-clean
+dirclean: image-ext2-clean
+clobber: image-ext2-clean
 
 ###############################################################################
 ## Script for fixing permissions on-the-fly in native final tree.
