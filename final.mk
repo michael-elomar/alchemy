@@ -108,7 +108,7 @@ ifeq ("$(TARGET_LIBC)","eglibc")
 __final-ldconfig = \
 	mkdir -p $(TARGET_OUT_FINAL)/etc; \
 	touch $(TARGET_OUT_FINAL)/etc/ld.so.conf; \
-	ldconfig -r $(TARGET_OUT_FINAL);
+	/sbin/ldconfig -r $(TARGET_OUT_FINAL);
 else
 __final-ldconfig =
 endif
