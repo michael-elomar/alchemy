@@ -351,7 +351,7 @@ module-normalize-host = $(patsubst host.%,%,$1)
 ###############################################################################
 modules-get-required-host = $(strip $(sort \
 	$(foreach __mod,$(call __modules-get-required-host-direct,$1), \
-		$(__mod) $(__modules.$(__mod).depends) \
+		$(__mod) $(__modules.$(__mod).depends.all) \
 	)))
 
 # Get direct required list
@@ -361,12 +361,12 @@ __modules-get-required-host-direct = $(strip $(sort \
 ###############################################################################
 ## Check if a module will be built.
 ## $1 : module to check.
-## Prebuild and host modules are considered as in the config (even if they are
+## Prebuild modules are considered as in the config (even if they are
 ## not actually in it).
 ## If no configuration directory present, always return true.
 ###############################################################################
 is-module-in-build-config = $(strip \
-	$(if $(or $(call is-module-prebuilt,$1),$(call is-module-host,$1)),$(true), \
+	$(if $(call is-module-prebuilt,$1),$(true), \
 		$(eval __var := CONFIG_ALCHEMY_BUILD_$(call module-get-define,$1)) \
 		$(if $(call streq,$(CONFIG_DIR_AVAILABLE),0),$(true), \
 			$(if $(call is-var-defined,$(__var)), \

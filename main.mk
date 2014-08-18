@@ -409,12 +409,6 @@ ifdef TARGET_TEST
   $(call modules-enable-test-depends)
 endif
 
-# Check dependencies and variables of modules
-ifeq ("$(SKIP_DEPS_AND_CHECKS)","0")
-  $(call modules-check-depends)
-  $(call modules-check-variables)
-endif
-
 # Compute revision of all modules
 ifneq ("$(USE_GIT_REV)","0")
   $(call module-compute-revisions)
@@ -432,7 +426,18 @@ ALL_BUILD_MODULES := $(strip \
 	))
 
 # All host modules to actually build (based on built modules)
+# Force defining the CONFIG_ALCHEMY_BUILD_xxx variable to 'y' so the module is
+# now considered as being part of the config
 ALL_BUILD_MODULES_HOST := $(call modules-get-required-host,$(ALL_BUILD_MODULES))
+$(foreach __mod,$(ALL_BUILD_MODULES_HOST), \
+	$(eval CONFIG_ALCHEMY_BUILD_$(call module-get-define,$(__mod)) := y) \
+)
+
+# Check dependencies and variables of modules
+ifeq ("$(SKIP_DEPS_AND_CHECKS)","0")
+  $(call modules-check-depends)
+  $(call modules-check-variables)
+endif
 
 # Generate files with module list
 $(shell mkdir -p $(TARGET_OUT_BUILD))
