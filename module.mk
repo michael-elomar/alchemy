@@ -130,14 +130,21 @@ all_depends_build_filename := \
 		$(call module-get-build-filename,$(__lib)))
 
 # We use staging dir for linking static/shared libs
+# For generic library, force retrieving static version if needed
 
 all_static_libs_filename := \
 	$(foreach __lib,$(all_static_libs), \
-		$(call module-get-staging-filename,$(__lib)))
+		$(eval __class := $(__modules.$(__lib).MODULE_CLASS)) \
+		$(eval __fn := $(call module-get-staging-filename,$(__lib))) \
+		$(if $(call streq,$(__class),LIBRARY),$(__fn:.so=.a),$(__fn)) \
+	)
 
 all_whole_static_libs_filename := \
 	$(foreach __lib,$(all_whole_static_libs), \
-		$(call module-get-staging-filename,$(__lib)))
+		$(eval __class := $(__modules.$(__lib).MODULE_CLASS)) \
+		$(eval __fn := $(call module-get-staging-filename,$(__lib))) \
+		$(if $(call streq,$(__class),LIBRARY),$(__fn:.so=.a),$(__fn)) \
+	)
 
 all_shared_libs_filename := \
 	$(foreach __lib,$(all_shared_libs), \
@@ -465,6 +472,14 @@ $(LOCAL_MODULE)-dirclean: $(LOCAL_MODULE)-clean
 .PHONY: $(LOCAL_MODULE)-path
 $(LOCAL_MODULE)-path:
 	@echo "$(PRIVATE_MODULE): $(PRIVATE_PATH)"
+
+# Generic library needs static version as well
+ifeq ("$(LOCAL_MODULE_CLASS)","LIBRARY")
+ifeq ("$(LOCAL_SDK)","")
+$(LOCAL_MODULE): $(LOCAL_BUILD_MODULE:.so=.a)
+LOCAL_TARGETS += $(LOCAL_BUILD_MODULE:.so=.a)
+endif
+endif
 
 # If the user makefile is modified, this will trigger a check of the module
 # Prebuilt modules migth not be defined in an user makefile so skip this for them
@@ -875,6 +890,36 @@ endif
 endif
 
 ###############################################################################
+## Generic library, both shared and static version is built.
+###############################################################################
+
+ifeq ("$(LOCAL_MODULE_CLASS)","LIBRARY")
+ifeq ("$(LOCAL_SDK)","")
+
+include $(BUILD_SYSTEM)/binary-rules.mk
+
+# Static version
+$(LOCAL_BUILD_MODULE:.so=.a): $(all_objects) $(all_link_libs_filenames)
+	$(transform-o-to-static-lib)
+
+# Shared version
+$(LOCAL_BUILD_MODULE): $(all_objects) $(all_link_libs_filenames)
+	$(transform-o-to-shared-lib)
+ifneq ("$(TARGET_ADD_DEPENDS_SECTION)","0")
+	$(add-depends-section)
+endif
+ifneq ("$(TARGET_ADD_BUILDID_SECTION)","0")
+	$(add-buildid-section)
+endif
+	$(call copy-license-files,$(PRIVATE_PATH),$(PRIVATE_BUILD_DIR))
+
+copy_to_staging := 1
+copy_to_final := 1
+
+endif
+endif
+
+###############################################################################
 ## Executable.
 ###############################################################################
 
@@ -1004,6 +1049,12 @@ ifeq ("$(copy_to_staging)","1")
 $(LOCAL_MODULE): $(LOCAL_STAGING_MODULE)
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(LOCAL_STAGING_MODULE)
 $(eval $(call copy-one-file,$(LOCAL_BUILD_MODULE),$(LOCAL_STAGING_MODULE)))
+
+ifeq ("$(LOCAL_MODULE_CLASS)","LIBRARY")
+$(LOCAL_MODULE): $(LOCAL_STAGING_MODULE:.so=.a)
+$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(LOCAL_STAGING_MODULE:.so=.a)
+$(eval $(call copy-one-file,$(LOCAL_BUILD_MODULE:.so=.a),$(LOCAL_STAGING_MODULE:.so=.a)))
+endif
 
 # If final directory exists, also copy file in it
 # TODO: maybe add a setting to disable this feature ?

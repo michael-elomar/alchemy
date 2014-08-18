@@ -466,7 +466,8 @@ __module-check-libs-class = \
 # $2 : library to check.
 # $3 : class to check (STATIC_LIBRARY,SHARED_LIBRARY)
 __module-check-lib-class = \
-	$(if $(call strneq,$(__modules.$2.MODULE_CLASS),$3), \
+	$(eval __class := $(__modules.$2.MODULE_CLASS)) \
+	$(if $(and $(call strneq,$(__class),$3),$(call strneq,$(__class),LIBRARY)), \
 		$(eval __path := $(__modules.$1.PATH)) \
 		$(error $(__path): module '$1' depends on module '$2' which is not of class '$3') \
 	)
@@ -624,10 +625,16 @@ __module-update-depends-direct = \
 			$(if $(call streq,$(__modules.$(__lib).FORCE_WHOLE_STATIC_LIBRARY),1), \
 				$(eval __modules.$1.WHOLE_STATIC_LIBRARIES += $(__lib)), \
 				$(eval __modules.$1.STATIC_LIBRARIES += $(__lib)) \
-			), \
+			) \
+		, \
 			$(if $(call streq,$(__class),SHARED_LIBRARY), \
-				$(eval __modules.$1.SHARED_LIBRARIES += $(__lib)), \
-				$(eval __modules.$1.EXTERNAL_LIBRARIES += $(__lib)) \
+				$(eval __modules.$1.SHARED_LIBRARIES += $(__lib)) \
+			, \
+				$(if $(call streq,$(__class),LIBRARY), \
+					$(eval __modules.$1.SHARED_LIBRARIES += $(__lib)) \
+					, \
+					$(eval __modules.$1.EXTERNAL_LIBRARIES += $(__lib)) \
+				) \
 			) \
 		) \
 	)

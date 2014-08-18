@@ -472,6 +472,7 @@ Several classes of modules are managed by `alchemy` :
 
 * `STATIC_LIBRARY`
 * `SHARED_LIBRARY`
+* `LIBRARY`
 * `EXECUTABLE`
 * `AUTOTOOLS`
 * `CMAKE`
@@ -482,11 +483,17 @@ Several classes of modules are managed by `alchemy` :
 
 Module will be referred as either `internal` or `external` :
 
-* Internal modules are `STATIC_LIBRARY`, `SHARED_LIBRARY` and `EXECUTABLE`
-  modules because they are completely managed by the build system.
+* Internal modules are `STATIC_LIBRARY`, `SHARED_LIBRARY`, `LIBRARY` and
+  `EXECUTABLE` modules because they are completely managed by the build system.
 * External modules are `AUTOTOOLS`, `CMAKE`, `QMAKE`, `PYTHON_EXTENSION`,
   `CUSTOM` and `META_PACKAGE` modules because the build system has little
   control on the way those modules are built.
+
+**Note** : `LIBRARY` can be used to compile both static and shared version of a
+module. The given `LOCAL_FILENAME`, if any, shall be the name of the sahred
+version. Internally, the static name will be deduced by replacing the shared
+suffix (`.so`) by the static suffix (`.a`). See chapter about `LOCAL_LIBRARIES`
+for more information.
 
 **Note** : there is also a `PREBUILT` class but its used is reserved for the
 build system and should not normally be used by user makefiles. It is present to
@@ -540,7 +547,9 @@ it is not needed to explicitly specify the class of the module in variables like
 `LOCAL_STATIC_LIBRARIES` or `LOCAL_SHARED_LIBRARIES`. The class of the module is
 inferred from its own registration. This way a module can changes its class
 between `STATIC` and `SHARED` without the need of changing the chain of
-dependency.
+dependency. However, if a module is registered as `LIBRARY`, both static and
+shared versions will be available. By default, the shared version is used
+unless the dependency is explicitely listed in `LOCAL_STATIC_LIBRARIES`.
 
 For all modules listed in the definition of an `internal` module :
 `C_INCLUDES`, `CFLAGS`, `CXXFLAGS`, `LDLIBS`, `PREREQUISITES`, exported by
@@ -604,7 +613,7 @@ for another purpose (like really have a build dependency).
 List of properties to put in file build.prop loaded by boxinit at startup.
 The format is a list of `<key>=<value>` pair.
 
-#### `CONFIG_FILES`
+#### `LOCAL_CONFIG_FILES`
 
 List of `Config.in` files relative to `LOCAL_PATH` to be used to configure the
 module. See `kconfig` language specification for more information about its
