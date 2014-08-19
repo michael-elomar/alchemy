@@ -280,7 +280,7 @@ BUILD_QMAKE := $(BUILD_SYSTEM)/qmake.mk
 BUILD_PYTHON_EXTENSION := $(BUILD_SYSTEM)/python-ext.mk
 BUILD_CUSTOM := $(BUILD_SYSTEM)/custom.mk
 BUILD_META_PACKAGE := $(BUILD_SYSTEM)/meta.mk
-BUILD_LINUX := $(BUILD_SYSTEM)/linux-kernel.mk
+BUILD_LINUX := $(BUILD_SYSTEM)/linuxkernel.mk
 BUILD_PREBUILT := $(BUILD_SYSTEM)/prebuilt.mk
 
 # Shall be defined before including user makefiles

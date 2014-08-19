@@ -1,5 +1,5 @@
 ###############################################################################
-## @file linux-kernel.mk
+## @file linuxkernel.mk
 ## @author Y.M. Morgan
 ## @date 2013/05/08
 ##
@@ -27,8 +27,12 @@ LOCAL_DONE_FILES += linux-headers.done
 LINUX_CONFIG_FILE := $(call module-get-config,$(LOCAL_MODULE))
 LINUX_CONFIG_FILE_IS_TARGET := $(false)
 ifeq ("$(wildcard $(LINUX_CONFIG_FILE))","")
-  ifdef LINUX_DEFAULT_CONFIG_TARGET
-    LINUX_CONFIG_FILE := $(LINUX_DEFAULT_CONFIG_TARGET)
+  ifdef LINUX_CONFIG_TARGET
+    LINUX_CONFIG_FILE := $(LINUX_DIR)/arch/$(LINUX_ARCH)/configs/$(LINUX_CONFIG_TARGET)
+    LINUX_CONFIG_FILE_IS_TARGET := $(true)
+  else ifdef LINUX_DEFAULT_CONFIG_TARGET
+    LINUX_CONFIG_FILE := $(LINUX_DIR)/arch/$(LINUX_ARCH)/configs/$(LINUX_DEFAULT_CONFIG_TARGET)
+    LINUX_CONFIG_TARGET := $(LINUX_DEFAULT_CONFIG_TARGET)
     LINUX_CONFIG_FILE_IS_TARGET := $(true)
   else
     ifeq ("$(wildcard $(LINUX_DEFAULT_CONFIG_FILE))","")
@@ -121,11 +125,15 @@ ifneq ("$(LINUX_CONFIG_FILE_IS_TARGET)","")
 # Use linux target
 define linux-setup-config
 	@mkdir -p $(LINUX_BUILD_DIR)
-	$(Q) $(MAKE) $(LINUX_MAKE_ARGS) $(LINUX_CONFIG_FILE)
+	$(Q) $(MAKE) $(LINUX_MAKE_ARGS) $(LINUX_CONFIG_TARGET)
 endef
 
-# Nothing to do
+# Copy it somewhere so after a dirclean it is not completely lost...
 define linux-save-config
+	$(Q) cp -af $(LINUX_BUILD_DIR)/.config $(TARGET_CONFIG_DIR)/$(LINUX_CONFIG_TARGET).config
+	@echo "The linux config file has been saved in $(TARGET_CONFIG_DIR)/$(LINUX_CONFIG_TARGET).config"
+	@echo "If you do a 'linux-dirclean' you will need to do a 'linux-restore-config' to restore it"
+	@echo "Otherwise the default target '$(LINUX_CONFIG_TARGET)' will be used again."
 endef
 
 # Rule to create .config
@@ -248,14 +256,30 @@ ifneq ("$(TARGET_LINUX_LINK_CPIO_IMAGE)","0")
 	$(Q)rm -f $(LINUX_BUILD_DIR)/rootfs.cpio.gz
 endif
 
+# Restore linux config file when using a config target
+.PHONY: linux-restore-config
+linux-restore-config:
+ifneq ("$(LINUX_CONFIG_FILE_IS_TARGET)","")
+	@mkdir -p $(LINUX_BUILD_DIR)
+	@echo "Restoring linux config: $(TARGET_CONFIG_DIR)/$(LINUX_CONFIG_TARGET).config"
+	$(Q) cp -af $(TARGET_CONFIG_DIR)/$(LINUX_CONFIG_TARGET).config $(LINUX_BUILD_DIR)/.config
+endif
+
+.PHONY: linux-check-config
+linux-check-config: $(LINUX_BUILD_DIR)/.config
+	@echo "Checking linux config: $(LINUX_CONFIG_FILE)"
+	$(Q)yes "" 2>/dev/null | $(MAKE) $(LINUX_MAKE_ARGS) oldconfig
+	$(Q)diff -u $(LINUX_CONFIG_FILE) $(LINUX_BUILD_DIR)/.config || true
+
+.PHONY: linux-reset-config
+linux-reset-config:
+	@echo "Reseting linux config: $(LINUX_CONFIG_FILE)"
+	$(Q)rm -f $(LINUX_BUILD_DIR)/.config
+	+$(Q)$(linux-setup-config)
+
 # Default rule to invoke kernel specific targets (like cscope, tags, help ...)
-# Do NOT put a dependency for this pattern rule to avoid subtle troubles.
-# For example, depending on linux config file will trigger this rule for this
-# makefile (named linux-kernel.mk) that matches the pattern.
-# The macro linux-setup-config is called to make sure it is really there...
 .PHONY: linux-%
-linux-%:
-	@$(linux-setup-config)
+linux-%: $(LINUX_BUILD_DIR)/.config
 	@echo "Building linux kernel $* target with $(LINUX_CONFIG_FILE)"
 	$(Q)$(MAKE) $(LINUX_MAKE_ARGS) $*
 	$(Q)$(linux-save-config)
