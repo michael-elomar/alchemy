@@ -28,11 +28,7 @@ setup_py_env := \
 	PYTHONDONTWRITEBYTECODE=y \
 	_python_sysroot="$(TARGET_OUT_STAGING)" \
 	_python_prefix="/usr" \
-	_python_exec_prefix="/usr" \
-	$(PYTHONEXT_SETUP_PY_ENV)
-
-vars-LOCAL += PYTHONEXT_SETUP_PY_ENV
-vars-LOCAL += PYTHONEXT_SETUP_PY_ARGS
+	_python_exec_prefix="/usr"
 
 # File recording list of installed files
 install_record_file := $(build_dir)/installed-files.txt
