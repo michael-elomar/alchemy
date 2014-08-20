@@ -9,18 +9,22 @@
 # Internal use
 WARNINGS_COMMON_FLAGS :=
 WARNINGS_CFLAGS :=
+WARNINGS_CFLAGS_gcc :=
+WARNINGS_CFLAGS_clang :=
 WARNINGS_CXXFLAGS :=
+WARNINGS_CXXFLAGS_gcc :=
+WARNINGS_CXXFLAGS_clang :=
 
 # Externally overridable
 WARNINGS_EXTRA_CFLAGS ?=
 WARNINGS_EXTRA_CXXFLAGS ?=
 
 # show option associated with warning (clang or gcc >= 4.0.0)
-ifeq ("$(USE_CLANG)","1")
-  WARNINGS_COMMON_FLAGS += -fdiagnostics-show-option
-else ifneq ("$(call check-version,$(TARGET_CC_VERSION),4.0.0)","")
-  WARNINGS_COMMON_FLAGS += -fdiagnostics-show-option
+ifneq ("$(call check-version,$(TARGET_CC_VERSION),4.0.0)","")
+  WARNINGS_COMMON_FLAGS_gcc += -fdiagnostics-show-option
 endif
+
+WARNINGS_COMMON_FLAGS_clang += -fdiagnostics-show-option
 
 ###############################################################################
 ## Common flags.
@@ -41,27 +45,20 @@ endif
 
 # android specifies -Wstrict-aliasing=2
 # it generates too many false positive, use level 3 (default with -Wall or -Wstrict-aliasing)
-ifneq ("$(USE_CLANG)","1")
-  WARNINGS_COMMON_FLAGS += -Wstrict-aliasing=3
-endif
+ WARNINGS_COMMON_FLAGS_gcc += -Wstrict-aliasing=3
 
 # Too many false positives with clang compiler
-ifneq ("$(USE_CLANG)","1")
-#  WARNINGS_COMMON_FLAGS += -Wcast-align
-endif
+#  WARNINGS_COMMON_FLAGS_gcc += -Wcast-align
 
 # clang or gcc >= 4.5.0 (too many false positives with previous versions)
-ifeq ("$(USE_CLANG)","1")
-  WARNINGS_COMMON_FLAGS += -Wunreachable-code
-else ifneq ("$(call check-version,$(TARGET_CC_VERSION),4.5.0)","")
-  WARNINGS_COMMON_FLAGS += -Wunreachable-code
+  WARNINGS_COMMON_FLAGS_clang += -Wunreachable-code
+ifneq ("$(call check-version,$(TARGET_CC_VERSION),4.5.0)","")
+  WARNINGS_COMMON_FLAGS_gcc+= -Wunreachable-code
 endif
 
 # gcc >= 4.5.2
-ifneq ("$(USE_CLANG)","1")
 ifneq ("$(call check-version,$(TARGET_CC_VERSION),4.5.2)","")
-  WARNINGS_COMMON_FLAGS += -Wlogical-op
-endif
+  WARNINGS_COMMON_FLAGS_gcc += -Wlogical-op
 endif
 
 ###############################################################################
@@ -78,10 +75,8 @@ WARNINGS_CFLAGS += -Wmissing-prototypes
 WARNINGS_CFLAGS += -Wno-strict-prototypes
 
 # gcc >= 4.5.0
-ifneq ("$(USE_CLANG)","1")
 ifneq ("$(call check-version,$(TARGET_CC_VERSION),4.5.0)","")
-  WARNINGS_CFLAGS += -Wjump-misses-init
-endif
+  WARNINGS_CFLAGS_gcc += -Wjump-misses-init
 endif
 
 # c++ specific
@@ -116,10 +111,8 @@ WARNINGS_COMMON_FLAGS += -Wswitch-enum
 WARNINGS_COMMON_FLAGS += -Wcast-qual
 
 # gcc >= 4.4.0
-ifneq ("$(USE_CLANG)","1")
 ifneq ("$(call check-version,$(TARGET_CC_VERSION),4.4.0)","")
-  WARNINGS_COMMON_FLAGS += -Wframe-larger-than=1024
-endif
+  WARNINGS_COMMON_FLAGS_gcc += -Wframe-larger-than=1024
 endif
 
 endif
@@ -130,3 +123,9 @@ endif
 
 WARNINGS_CFLAGS += $(WARNINGS_COMMON_FLAGS) $(WARNINGS_EXTRA_CFLAGS)
 WARNINGS_CXXFLAGS += $(WARNINGS_COMMON_FLAGS) $(WARNINGS_EXTRA_CXXFLAGS)
+
+WARNINGS_CFLAGS_gcc += $(WARNINGS_COMMON_FLAGS_gcc)
+WARNINGS_CXXFLAGS_gcc += $(WARNINGS_COMMON_FLAGS_gcc)
+
+WARNINGS_CFLAGS_clang += $(WARNINGS_COMMON_FLAGS_clang)
+WARNINGS_CXXFLAGS_clang += $(WARNINGS_COMMON_FLAGS_clang)

@@ -1249,7 +1249,7 @@ link-hook = $(strip \
 			)\
 		) \
 		$(shell $(BUILD_SYSTEM)/pbuild-hook/pbuild-link-hook.sh \
-			"$(TARGET_NM)" "$(TARGET_CC) $(TARGET_GLOBAL_CFLAGS)" \
+			"$(PRIVATE_NM)" "$(PRIVATE_CC) $(TARGET_GLOBAL_CFLAGS)" \
 			$1 $2 "$(__depsdata)" $3 \
 		) \
 	))
@@ -1270,7 +1270,7 @@ $(eval __depsdata := $(subst $(space),\n,$(strip $(__depsdata))))
 @( \
 	__tmpfile=$$(mktemp); \
 	/bin/echo -e "$(__depsdata)" > $${__tmpfile}; \
-	$(TARGET_CROSS)objcopy --add-section \
+	$(PRIVATE_OBJCOPY) --add-section \
 		$(TARGET_DEPENDS_SECTION_NAME)=$${__tmpfile} $@; \
 	rm -f $${__tmpfile}; \
 )
@@ -1289,7 +1289,7 @@ endef
 define add-buildid-section
 @( \
 	$(BUILD_SYSTEM)/scripts/addbuildid.py \
-	--objcopy=$(TARGET_CROSS)objcopy \
+	--objcopy=$(PRIVATE_OBJCOPY) \
 	--section-name=$(TARGET_BUILDID_SECTION_NAME) $@ \
 )
 endef
@@ -1333,10 +1333,13 @@ define transform-h-to-gch
 @mkdir -p $(dir $@)
 $(call print-banner1,"Precompile",$(PRIVATE_MODULE),$(call path-from-top,$<))
 $(call check-pwd-is-top-dir)
-$(Q)$(CCACHE) $(TARGET_CXX) \
+$(Q)$(CCACHE) $(PRIVATE_CXX) \
 	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
 	$(call normalize-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CXXFLAGS) $(WARNINGS_CXXFLAGS) \
+	$(TARGET_GLOBAL_CXXFLAGS_$(PRIVATE_COMPILER_FLAVOUR)) \
+	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_COMPILER_FLAVOUR)) \
+	$(WARNINGS_CXXFLAGS_$(PRIVATE_COMPILER_FLAVOUR)) \
 	$(PRIVATE_CFLAGS) $(PRIVATE_CXXFLAGS) \
 	$(TARGET_GLOBAL_PCH_FLAGS) -MMD -MP -MF $(@:.o=.d) -MT $@ -o $@ \
 	$(call path-from-top,$<)
@@ -1351,11 +1354,15 @@ define transform-cpp-to-o
 @mkdir -p $(dir $@)
 $(call print-banner1,"$(PRIVATE_ARCH) C++",$(PRIVATE_MODULE),$(call path-from-top,$<))
 $(call check-pwd-is-top-dir)
-$(Q)$(CCACHE) $(TARGET_CXX) \
+$(Q)$(CCACHE) $(PRIVATE_CXX) \
 	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
 	$(call normalize-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CXXFLAGS) $(WARNINGS_CXXFLAGS) \
+	$(TARGET_GLOBAL_CXXFLAGS_$(PRIVATE_COMPILER_FLAVOUR)) \
+	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_COMPILER_FLAVOUR)) \
+	$(WARNINGS_CXXFLAGS_$(PRIVATE_COMPILER_FLAVOUR)) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARCH)) \
+	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARCH)_$(PRIVATE_COMPILER_FLAVOUR)) \
 	$(PRIVATE_CFLAGS) $(PRIVATE_CXXFLAGS) \
 	-c -MMD -MP -MF $(@:.o=.d) -MT $@ -o $@ \
 	$(call path-from-top,$<)
@@ -1370,11 +1377,14 @@ define transform-c-to-o
 $(call print-banner1,"$(PRIVATE_ARCH) C",$(PRIVATE_MODULE),$(call path-from-top,$<))
 $(call check-pwd-is-top-dir)
 @mkdir -p $(dir $@)
-$(Q)$(CCACHE) $(TARGET_CC) \
+$(Q)$(CCACHE) $(PRIVATE_CC) \
 	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
 	$(call normalize-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(TARGET_GLOBAL_CFLAGS) $(WARNINGS_CFLAGS) \
+	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_COMPILER_FLAVOUR)) \
+	$(WARNINGS_CFLAGS_$(PRIVATE_COMPILER_FLAVOUR)) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARCH)) \
+	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARCH)_$(PRIVATE_COMPILER_FLAVOUR)) \
 	$(PRIVATE_CFLAGS) \
 	-c -MMD -MP -MF $(@:.o=.d) -MT $@ -o $@ \
 	$(call path-from-top,$<)
@@ -1389,11 +1399,14 @@ define transform-s-to-o
 $(call print-banner1,"Asm",$(PRIVATE_MODULE),$(call path-from-top,$<))
 $(call check-pwd-is-top-dir)
 @mkdir -p $(dir $@)
-$(Q)$(CCACHE) $(TARGET_CC) \
+$(Q)$(CCACHE) $(PRIVATE_CC) \
 	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
 	$(call normalize-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(TARGET_GLOBAL_CFLAGS) $(WARNINGS_CFLAGS) \
+	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_COMPILER_FLAVOUR)) \
+	$(WARNINGS_CFLAGS_$(PRIVATE_COMPILER_FLAVOUR)) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARCH)) \
+	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARCH)_$(PRIVATE_COMPILER_FLAVOUR)) \
 	$(PRIVATE_CFLAGS) \
 	-c -MMD -MP -MF $(@:.o=.d) -MT $@ -o $@ \
 	$(call path-from-top,$<)
@@ -1425,7 +1438,7 @@ define transform-o-to-static-lib
 $(call print-banner2,"StaticLib",$(PRIVATE_MODULE),$(call path-from-top,$@))
 $(call check-pwd-is-top-dir)
 @rm -f $@
-$(Q)$(TARGET_AR) $(TARGET_GLOBAL_ARFLAGS) $(PRIVATE_ARFLAGS) $@ $(PRIVATE_ALL_OBJECTS)
+$(Q)$(PRIVATE_AR) $(TARGET_GLOBAL_ARFLAGS) $(PRIVATE_ARFLAGS) $@ $(PRIVATE_ALL_OBJECTS)
 endef
 
 ###############################################################################
@@ -1436,8 +1449,9 @@ define transform-o-to-shared-lib
 @mkdir -p $(dir $@)
 $(call print-banner2,"SharedLib",$(PRIVATE_MODULE),$(call path-from-top,$@))
 $(call check-pwd-is-top-dir)
-$(Q)$(TARGET_CXX) \
+$(Q)$(PRIVATE_CXX) \
 	$(TARGET_GLOBAL_LDFLAGS_SHARED) \
+	$(TARGET_GLOBAL_LDFLAGS_$(PRIVATE_COMPILER_FLAVOUR)) \
 	-Wl,-Map -Wl,$(basename $@).map \
 	-shared \
 	-Wl,-soname -Wl,$(notdir $@) \
@@ -1468,8 +1482,9 @@ define transform-o-to-executable
 @mkdir -p $(dir $@)
 $(call print-banner2,"Executable",$(PRIVATE_MODULE),$(call path-from-top,$@))
 $(call check-pwd-is-top-dir)
-$(Q)$(TARGET_CXX) \
+$(Q)$(PRIVATE_CXX) \
 	$(TARGET_GLOBAL_LDFLAGS) \
+	$(TARGET_GLOBAL_LDFLAGS_$(PRIVATE_COMPILER_FLAVOUR)) \
 	-Wl,-Map -Wl,$(basename $@).map \
 	-Wl,--gc-sections \
 	-Wl,--as-needed \

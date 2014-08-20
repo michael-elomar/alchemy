@@ -100,6 +100,49 @@ $(call check-flags,LOCAL_EXPORT_CFLAGS,$(check-flags-debug),$(check-flags-debug-
 $(call check-flags,LOCAL_EXPORT_CXXFLAGS,$(check-flags-debug),$(check-flags-debug-message))
 
 ###############################################################################
+## Local Toolchain.
+###############################################################################
+
+module_cc := $(TARGET_CC)
+module_cxx := $(TARGET_CXX)
+module_as := $(TARGET_AS)
+module_ar := $(TARGET_AR)
+module_ld := $(TARGET_LD)
+module_nm := $(TARGET_NM)
+module_strip := $(TARGET_STRIP)
+module_cpp := $(TARGET_CPP)
+module_ranlib := $(TARGET_RANLIB)
+module_objcopy := $(TARGET_OBJCOPY)
+module_objdump := $(TARGET_OBJDUMP)
+
+ifeq ("$(or $(LOCAL_USE_CLANG), $(USE_CLANG))","1")
+module_compiler_flavour := clang
+else
+module_compiler_flavour := gcc
+endif
+
+ifeq ("$(LOCAL_USE_CLANG)","1")
+ifneq ("$(USE_CLANG)","1")
+  ifeq ("$(LOCAL_CLANG_PATH)","")
+    LOCAL_CLANG_PATH := $(HOST_OUT_STAGING)/usr/bin
+  endif
+  module_cc := $(LOCAL_CLANG_PATH)/clang
+  module_cxx := $(LOCAL_CLANG_PATH)/clang++
+  ifneq ("$(TARGET_ARCH)","arm")
+    module_as := $(LOCAL_CLANG_PATH)/llvm-as
+    module_ar := ar
+    module_ld := $(LOCAL_CLANG_PATH)/llvm-ld
+    module_nm := $(LOCAL_CLANG_PATH)/llvm-nm
+    module_strip := strip
+    module_cpp := cpp
+    module_ranlib := $(LOCAL_CLANG_PATH)/llvm-ranlib
+    module_objcopy := objcopy
+    module_objdump := $(LOCAL_CLANG_PATH)/llvm-objdump
+  endif
+endif
+endif
+
+###############################################################################
 ## Dependencies.
 ###############################################################################
 
@@ -427,6 +470,18 @@ endif
 ## Rule-specific variable definitions.
 ###############################################################################
 
+$(LOCAL_TARGETS): PRIVATE_COMPILER_FLAVOUR := $(module_compiler_flavour)
+$(LOCAL_TARGETS): PRIVATE_CC := $(module_cc)
+$(LOCAL_TARGETS): PRIVATE_CXX := $(module_cxx)
+$(LOCAL_TARGETS): PRIVATE_AS := $(module_as)
+$(LOCAL_TARGETS): PRIVATE_AR := $(module_ar)
+$(LOCAL_TARGETS): PRIVATE_LD := $(module_ld)
+$(LOCAL_TARGETS): PRIVATE_NM := $(module_nm)
+$(LOCAL_TARGETS): PRIVATE_STRIP := $(module_strip)
+$(LOCAL_TARGETS): PRIVATE_CPP := $(module_cpp)
+$(LOCAL_TARGETS): PRIVATE_RANLIB := $(module_ranlib)
+$(LOCAL_TARGETS): PRIVATE_OBJCOPY := $(module_objcopy)
+$(LOCAL_TARGETS): PRIVATE_OBJDUMP := $(module_objdump)
 $(LOCAL_TARGETS): PRIVATE_PATH := $(LOCAL_PATH)
 $(LOCAL_TARGETS): PRIVATE_MODULE := $(LOCAL_MODULE)
 $(LOCAL_TARGETS): PRIVATE_BUILD_DIR := $(build_dir)

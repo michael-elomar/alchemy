@@ -9,14 +9,20 @@
 # Select a default toolchain
 ifndef TARGET_CROSS
   ifeq ("$(TARGET_ARCH)","arm")
+    TARGET_TRIPLET := arm-none-linux-gnueabi
     ifeq ("$(TARGET_CPU)","p6")
-      TARGET_CROSS := /opt/arm-2009q1/bin/arm-none-linux-gnueabi-
+      TARGET_COMPILER_PATH := /opt/arm-2009q1
     else ifeq ("$(TARGET_CPU)","p6i")
-      TARGET_CROSS := /opt/arm-2009q1/bin/arm-none-linux-gnueabi-
+      TARGET_COMPILER_PATH := /opt/arm-2009q1
     else
-      TARGET_CROSS := /opt/arm-2012.03/bin/arm-none-linux-gnueabi-
+      TARGET_COMPILER_PATH := /opt/arm-2012.03
     endif
+    TARGET_CROSS := $(TARGET_COMPILER_PATH)/bin/$(TARGET_TRIPLET)-
   endif
+else
+  # Try to extract info from TARGET_CROSS
+  TARGET_TRIPLET := $(shell PARAM=$(notdir $(TARGET_CROSS));($${PARAM%-})
+  TARGET_COMPILER_PATH := $(shell PARAM=$(TARGET_CROSS);($${PARAM%/bin*})
 endif
 
 # Update flags based on architecture
@@ -54,4 +60,15 @@ ifneq ("$(gcc-sysroot)","")
       TOOLCHAIN_GDBSERVER := $(gcc-sysroot)/usr/bin/gdbserver
     endif
   endif
+endif
+
+# Clang uses eglibc toochain(libc&binutils) to cross-compile
+ifeq ("$(TARGET_ARCH)","arm")
+# Clang needs the raw sysroot, so remove the binary specific version.
+  TARGET_GLOBAL_CFLAGS_clang += --sysroot=$(subst thumb2,,$(gcc-sysroot)) \
+				-target $(TARGET_TRIPLET) \
+				-B $(TARGET_COMPILER_PATH)
+  TARGET_GLOBAL_LDFLAGS_clang += --sysroot=$(subst thumb2,,$(gcc-sysroot)) \
+				-target $(TARGET_TRIPLET) \
+				-B $(TARGET_COMPILER_PATH)
 endif

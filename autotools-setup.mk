@@ -120,11 +120,17 @@ endif
 ## Variable used for autotools on target modules.
 ###############################################################################
 
+ifeq ("$(or $(LOCAL_USE_CLANG), $(USE_CLANG))","1")
+module_compiler_flavour := clang
+else
+module_compiler_flavour := gcc
+endif
+
 # Setup compilations flags
 TARGET_AUTOTOOLS_CPPFLAGS := $(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES))
-TARGET_AUTOTOOLS_CFLAGS := $(TARGET_AUTOTOOLS_CPPFLAGS) $(TARGET_GLOBAL_CFLAGS)
+TARGET_AUTOTOOLS_CFLAGS := $(TARGET_AUTOTOOLS_CPPFLAGS) $(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CFLAGS_$(module_compiler_flavour))
 TARGET_AUTOTOOLS_CXXFLAGS := $(TARGET_AUTOTOOLS_CFLAGS) $(TARGET_GLOBAL_CXXFLAGS)
-TARGET_AUTOTOOLS_LDFLAGS := $(TARGET_GLOBAL_LDFLAGS) $(TARGET_GLOBAL_LDLIBS)
+TARGET_AUTOTOOLS_LDFLAGS := $(TARGET_GLOBAL_LDFLAGS) $(TARGET_GLOBAL_LDLIBS) $(TARGET_GLOBAL_LDFLAGS_$(module_compiler_flavour))
 TARGET_AUTOTOOLS_DYN_LDFLAGS := $(TARGET_GLOBAL_LDFLAGS_SHARED) $(TARGET_GLOBAL_LDLIBS_SHARED)
 
 __target_pkg_config_path :=
