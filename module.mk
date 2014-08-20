@@ -123,18 +123,21 @@ endif
 
 ifeq ("$(LOCAL_USE_CLANG)","1")
 ifneq ("$(USE_CLANG)","1")
-  module_cc := $(LOCAL_CLANG_PATH)clang
-  module_cxx := $(LOCAL_CLANG_PATH)clang++
+  ifeq ("$(LOCAL_CLANG_PATH)","")
+    LOCAL_CLANG_PATH := $(HOST_OUT_STAGING)/usr/bin
+  endif
+  module_cc := $(LOCAL_CLANG_PATH)/clang
+  module_cxx := $(LOCAL_CLANG_PATH)/clang++
   ifneq ("$(TARGET_ARCH)","arm")
-    module_as := $(LOCAL_CLANG_PATH)llvm-as
+    module_as := $(LOCAL_CLANG_PATH)/llvm-as
     module_ar := ar
-    module_ld := $(LOCAL_CLANG_PATH)llvm-ld
-    module_nm := $(LOCAL_CLANG_PATH)llvm-nm
+    module_ld := $(LOCAL_CLANG_PATH)/llvm-ld
+    module_nm := $(LOCAL_CLANG_PATH)/llvm-nm
     module_strip := strip
     module_cpp := cpp
-    module_ranlib := $(LOCAL_CLANG_PATH)llvm-ranlib
+    module_ranlib := $(LOCAL_CLANG_PATH)/llvm-ranlib
     module_objcopy := objcopy
-    module_objdump := $(LOCAL_CLANG_PATH)llvm-objdump
+    module_objdump := $(LOCAL_CLANG_PATH)/llvm-objdump
   endif
 endif
 endif
@@ -467,7 +470,7 @@ endif
 ## Rule-specific variable definitions.
 ###############################################################################
 
-$(LOCAL_TARGETS): PRIVATE_COMPIL_FLAVOUR := $(module_compiler_flavour)
+$(LOCAL_TARGETS): PRIVATE_COMPILER_FLAVOUR := $(module_compiler_flavour)
 $(LOCAL_TARGETS): PRIVATE_CC := $(module_cc)
 $(LOCAL_TARGETS): PRIVATE_CXX := $(module_cxx)
 $(LOCAL_TARGETS): PRIVATE_AS := $(module_as)
