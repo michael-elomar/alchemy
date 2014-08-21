@@ -21,8 +21,8 @@ ifndef TARGET_CROSS
   endif
 else
   # Try to extract info from TARGET_CROSS
-  TARGET_TRIPLET := $(shell PARAM=$(notdir $(TARGET_CROSS));($${PARAM%-})
-  TARGET_COMPILER_PATH := $(shell PARAM=$(TARGET_CROSS);($${PARAM%/bin*})
+  TARGET_TRIPLET :=$(notdir $(TARGET_CROSS:-=))
+  TARGET_COMPILER_PATH := $(shell PARAM=$(TARGET_CROSS);echo $${PARAM%/bin*})
 endif
 
 # Update flags based on architecture
