@@ -54,7 +54,7 @@ endif
 ###############################################################################
 ## ARM specific checks.
 ###############################################################################
-ifneq ("$(mode_host)","1")
+ifeq ("$(mode_host)","")
 ifeq ("$(TARGET_ARCH)","arm")
 
 # Make sure LOCAL_ARM_MODE is valid
@@ -85,7 +85,7 @@ $(call check-flags,LOCAL_EXPORT_CFLAGS,$(check-flags-arm-mode),$(check-flags-arm
 $(call check-flags,LOCAL_EXPORT_CXXFLAGS,$(check-flags-arm-mode),$(check-flags-arm-mode-message))
 
 endif # ifeq ("$(TARGET_ARCH)","arm")
-endif # ifneq ("$(mode_host)","1")
+endif # ifeq ("$(mode_host)","")
 
 ###############################################################################
 ## Generic checks.
@@ -1116,7 +1116,7 @@ endif
 # TODO: add to clean list ?
 ifeq ("$(copy_to_final)","1")
 
-ifneq ("$(mode_host)","1")
+ifeq ("$(mode_host)","")
 ifneq ("$(wildcard $(TARGET_OUT_FINAL))","")
 
 LOCAL_FINAL_MODULE := $(LOCAL_STAGING_MODULE:$(TARGET_OUT_STAGING)/%=$(TARGET_OUT_FINAL)/%)
@@ -1135,7 +1135,7 @@ $(LOCAL_FINAL_MODULE): $(LOCAL_STAGING_MODULE)
 endif
 
 endif # ifneq ("$(wildcard $(TARGET_OUT_FINAL))","")
-endif # ifneq ("$(mode_host)","1")
+endif # ifeq ("$(mode_host)","")
 
 endif # ifeq ("$(copy_to_final)","1")
 
