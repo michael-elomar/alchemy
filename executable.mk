@@ -21,4 +21,12 @@ ifeq ("$(LOCAL_MODULE_FILENAME)","")
 LOCAL_MODULE_FILENAME := $(LOCAL_MODULE)$(TARGET_EXE_SUFFIX)
 endif
 
+# on toolchain arm-2012.03 for static binaries
+# force link with libc-arm-2012-03-fix.a to override libc symbols
+ifeq ("$(TARGET_COMPILER_PATH)","/opt/arm-2012.03")
+ifneq ("$(findstring -static,$(LOCAL_LDFLAGS))","")
+  LOCAL_STATIC_LIBRARIES += libc-arm-2012-03-fix
+endif
+endif
+
 $(module-add)
