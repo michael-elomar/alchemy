@@ -467,32 +467,6 @@ $(delete-all-done-files)
 endif
 
 ###############################################################################
-## Rule-specific variable definitions.
-###############################################################################
-
-$(LOCAL_TARGETS): PRIVATE_COMPILER_FLAVOUR := $(module_compiler_flavour)
-$(LOCAL_TARGETS): PRIVATE_CC := $(module_cc)
-$(LOCAL_TARGETS): PRIVATE_CXX := $(module_cxx)
-$(LOCAL_TARGETS): PRIVATE_AS := $(module_as)
-$(LOCAL_TARGETS): PRIVATE_AR := $(module_ar)
-$(LOCAL_TARGETS): PRIVATE_LD := $(module_ld)
-$(LOCAL_TARGETS): PRIVATE_NM := $(module_nm)
-$(LOCAL_TARGETS): PRIVATE_STRIP := $(module_strip)
-$(LOCAL_TARGETS): PRIVATE_CPP := $(module_cpp)
-$(LOCAL_TARGETS): PRIVATE_RANLIB := $(module_ranlib)
-$(LOCAL_TARGETS): PRIVATE_OBJCOPY := $(module_objcopy)
-$(LOCAL_TARGETS): PRIVATE_OBJDUMP := $(module_objdump)
-$(LOCAL_TARGETS): PRIVATE_PATH := $(LOCAL_PATH)
-$(LOCAL_TARGETS): PRIVATE_MODULE := $(LOCAL_MODULE)
-$(LOCAL_TARGETS): PRIVATE_BUILD_DIR := $(build_dir)
-$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES := $(LOCAL_CLEAN_FILES) $(LOCAL_BUILD_MODULE)
-$(LOCAL_TARGETS): PRIVATE_CLEAN_DIRS := $(LOCAL_CLEAN_DIRS)
-$(LOCAL_TARGETS): PRIVATE_MODE := $(mode_prefix)
-
-# This is for police hooks
-$(LOCAL_TARGETS): export MODULE_NAME := $(LOCAL_MODULE)
-
-###############################################################################
 ## General rules.
 ###############################################################################
 
@@ -598,6 +572,32 @@ $(LOCAL_BUILD_MODULE): $(all_depends_build_filename)
 # This explicit rule avoids dependency error when the module has nothing to build
 # (prebuilt, sdk, custom...)
 $(LOCAL_BUILD_MODULE):
+
+###############################################################################
+## Rule-specific variable definitions.
+###############################################################################
+
+$(LOCAL_TARGETS): PRIVATE_COMPILER_FLAVOUR := $(module_compiler_flavour)
+$(LOCAL_TARGETS): PRIVATE_CC := $(module_cc)
+$(LOCAL_TARGETS): PRIVATE_CXX := $(module_cxx)
+$(LOCAL_TARGETS): PRIVATE_AS := $(module_as)
+$(LOCAL_TARGETS): PRIVATE_AR := $(module_ar)
+$(LOCAL_TARGETS): PRIVATE_LD := $(module_ld)
+$(LOCAL_TARGETS): PRIVATE_NM := $(module_nm)
+$(LOCAL_TARGETS): PRIVATE_STRIP := $(module_strip)
+$(LOCAL_TARGETS): PRIVATE_CPP := $(module_cpp)
+$(LOCAL_TARGETS): PRIVATE_RANLIB := $(module_ranlib)
+$(LOCAL_TARGETS): PRIVATE_OBJCOPY := $(module_objcopy)
+$(LOCAL_TARGETS): PRIVATE_OBJDUMP := $(module_objdump)
+$(LOCAL_TARGETS): PRIVATE_PATH := $(LOCAL_PATH)
+$(LOCAL_TARGETS): PRIVATE_MODULE := $(LOCAL_MODULE)
+$(LOCAL_TARGETS): PRIVATE_BUILD_DIR := $(build_dir)
+$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES := $(LOCAL_CLEAN_FILES) $(LOCAL_BUILD_MODULE)
+$(LOCAL_TARGETS): PRIVATE_CLEAN_DIRS := $(LOCAL_CLEAN_DIRS)
+$(LOCAL_TARGETS): PRIVATE_MODE := $(mode_prefix)
+
+# This is for police hooks
+$(LOCAL_TARGETS): export MODULE_NAME := $(LOCAL_MODULE)
 
 ###############################################################################
 ## Configuration file management.
