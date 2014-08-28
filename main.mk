@@ -290,9 +290,6 @@ AUTOCONF_MERGE_FILE := $(TARGET_OUT_BUILD)/autoconf-merge.h
 ## Makefile scan and includes.
 ###############################################################################
 
-# Target/os specific packages
-include $(BUILD_SYSTEM)/toolchains/toolchains-packages.mk
-
 # Makefile with the list of all makefiles available and include them
 USER_MAKEFILE_NAME := atom.mk
 USER_MAKEFILES_CACHE := $(TARGET_OUT_BUILD)/makefiles.mk
@@ -322,12 +319,15 @@ display-user-makefiles-summary = \
 
 # Create a file that will contain all user makefiles available
 # Make sure that atom.mk from sdk are included first so they can be overriden
+# Put target/os specific packages AFTER sdk for same reason
 create-user-makefiles-cache = \
 	rm -f $(USER_MAKEFILES_CACHE); \
 	mkdir -p $(dir $(USER_MAKEFILES_CACHE)); \
 	touch $(USER_MAKEFILES_CACHE); \
 	( \
-		files="$(addsuffix /$(USER_MAKEFILE_NAME),$(TARGET_SDK_DIRS))"; \
+		files="$(addsuffix /$(USER_MAKEFILE_NAME),$(TARGET_SDK_DIRS)) \
+			$(BUILD_SYSTEM)/toolchains/toolchains-packages.mk \
+		"; \
 		for f in $$files `$(find-cmd)`; do \
 			echo "USER_MAKEFILES += $$f"; \
 			echo "\$$(call user-makefile-before-include,$$f)"; \
