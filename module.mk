@@ -380,9 +380,10 @@ endif
 
 # Static libraries
 # With -l: to force using the given path
+# No comma separated list (like above or below !)
 ifneq ("$(strip $(all_static_libs_filename))","")
 $(foreach __lib,$(all_static_libs_filename), \
-	$(eval __external-add_LDFLAGS := $(__external-add_LDFLAGS),-l:$(notdir $(__lib))) \
+	$(eval __external-add_LDFLAGS := $(__external-add_LDFLAGS) -l:$(notdir $(__lib))) \
 )
 endif
 
