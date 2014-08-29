@@ -105,7 +105,6 @@ class PlfSectionInfo(object):
 		self.address = 0
 		self.size = 0
 		self.deflated = 0
-		self.path = ""
 		self.mode = 0
 		self.uid = 0
 		self.gid = 0
