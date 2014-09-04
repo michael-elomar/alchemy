@@ -662,6 +662,7 @@ patches := $(strip $(LOCAL_ARCHIVE_PATCHES))
 all_prerequisites += $(unpacked_file)
 
 define __archive-default-unpack
+	$(Q) rm -rf $(PRIVATE_ARCHIVE_UNPACK_DIR)/$(PRIVATE_ARCHIVE_SUBDIR)
 	$(Q) $(if $(patsubst %.zip,,$(PRIVATE_ARCHIVE)), \
 		tar -C $(PRIVATE_ARCHIVE_UNPACK_DIR) -xf $(PRIVATE_ARCHIVE), \
 		unzip -oq -d $(PRIVATE_ARCHIVE_UNPACK_DIR) $(PRIVATE_ARCHIVE) \
