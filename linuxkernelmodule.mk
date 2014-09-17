@@ -15,8 +15,7 @@ LINUX_MODULE_OBJ_DIR := $(call local-get-build-dir)/obj
 LINUX_MODULE_KBUILD := $(LINUX_MODULE_OBJ_DIR)/Kbuild
 LINUX_MODULE_SRC_FILES := $(addprefix $(LINUX_MODULE_OBJ_DIR)/, $(LOCAL_SRC_FILES))
 
-# TODO: TARGET_OS_FLAVOUR could be "native"
-ifeq ("$(TARGET_OS_FLAVOUR)","native-chroot")
+ifeq ("$(TARGET_OS_FLAVOUR:-chroot=)","native")
 $(LINUX_MODULE): PRIVATE_LINUX_BUILD_DIR := /lib/modules/$(shell uname -r)/build
 $(LINUX_MODULE): PRIVATE_KBUILD_FLAGS := \
 	INSTALL_MOD_PATH=$(TARGET_OUT_STAGING)
