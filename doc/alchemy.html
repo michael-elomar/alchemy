@@ -522,6 +522,7 @@ unpacked sources and applied patches will be kept in the build directory.</li>
 <li><code>PYTHON_EXTENSION</code></li>
 <li><code>CUSTOM</code></li>
 <li><code>META_PACKAGE</code></li>
+<li><code>LINUX_MODULE</code></li>
 </ul>
 
 <p>Module will be referred as either <code>internal</code> or <code>external</code> :</p>
@@ -530,12 +531,12 @@ unpacked sources and applied patches will be kept in the build directory.</li>
 <li>Internal modules are <code>STATIC_LIBRARY</code>, <code>SHARED_LIBRARY</code>, <code>LIBRARY</code> and
 <code>EXECUTABLE</code> modules because they are completely managed by the build system.</li>
 <li>External modules are <code>AUTOTOOLS</code>, <code>CMAKE</code>, <code>QMAKE</code>, <code>PYTHON_EXTENSION</code>,
-<code>CUSTOM</code> and <code>META_PACKAGE</code> modules because the build system has little
+<code>CUSTOM</code>, <code>META_PACKAGE</code> and <code>LINUX_MODULE</code> modules because the build system has little
 control on the way those modules are built.</li>
 </ul>
 
 <p><strong>Note</strong> : <code>LIBRARY</code> can be used to compile both static and shared version of a
-module. The given <code>LOCAL_FILENAME</code>, if any, shall be the name of the sahred
+module. The given <code>LOCAL_FILENAME</code>, if any, shall be the name of the shared
 version. Internally, the static name will be deduced by replacing the shared
 suffix (<code>.so</code>) by the static suffix (<code>.a</code>). See chapter about <code>LOCAL_LIBRARIES</code>
 for more information.</p>
