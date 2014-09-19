@@ -171,8 +171,16 @@ HOST_GLOBAL_CFLAGS += -pipe -O2 -g0
 HOST_GLOBAL_ARFLAGS += rcs
 HOST_GLOBAL_LDFLAGS +=
 
+# Update flags based on architecture
+# 64-bit requires -fPIC to build shared libraries
 ifeq ("$(HOST_ARCH)","x64")
-  HOST_GLOBAL_CFLAGS += -fPIC
+  HOST_GLOBAL_CFLAGS += -m64 -fPIC
+  HOST_GLOBAL_LDFLAGS += -m64
+  HOST_GLOBAL_LDFLAGS_SHARED += -m64
+else
+  HOST_GLOBAL_CFLAGS += -m32
+  HOST_GLOBAL_LDFLAGS += -m32
+  HOST_GLOBAL_LDFLAGS_SHARED += -m32
 endif
 
 # Copy content of host staging from sdk
