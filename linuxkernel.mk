@@ -94,11 +94,21 @@ linux-copy-image = \
 		cp -af $(LINUX_BUILD_DIR)/arch/$(LINUX_ARCH)/boot/$1 $(TARGET_OUT_STAGING)/boot; \
 	fi;
 
+ifeq ("$(LINUX_ARCH)","arm")
+define linux-copy-images
+	$(Q) $(MAKE) $(LINUX_MAKE_ARGS) uImage
+	$(Q) $(call linux-copy-image,uImage)
+	$(Q) $(call linux-copy-image,Image)
+	$(Q) $(call linux-copy-image,zImage)
+	$(Q) $(call linux-copy-image,bzImage)
+endef
+else
 define linux-copy-images
 	$(Q) $(call linux-copy-image,Image)
 	$(Q) $(call linux-copy-image,zImage)
 	$(Q) $(call linux-copy-image,bzImage)
 endef
+endif
 
 ifneq ("$(TARGET_LINUX_LINK_CPIO_IMAGE)","0")
 
