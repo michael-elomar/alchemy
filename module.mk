@@ -816,7 +816,7 @@ $(LOCAL_MODULE)-codecheck:
 .PHONY: $(LOCAL_MODULE)-cloc
 $(LOCAL_MODULE)-cloc:
 	@mkdir -p $(PRIVATE_BUILD_DIR)
-	@rm -f $(PRIVATE_BUILD_DIR)/cloc-list.txt
+	@:> $(PRIVATE_BUILD_DIR)/cloc-list.txt
 	@for f in $(PRIVATE_CLOC_FILES); do \
 		echo $${f} >> $(PRIVATE_BUILD_DIR)/cloc-list.txt; \
 	done
