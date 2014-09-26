@@ -775,24 +775,32 @@ $(LOCAL_MODULE)-doc:
 endif
 
 ###############################################################################
-## Code check rules.
+## Code check / cloc (count line of code) rules.
 ###############################################################################
 
 # Original data before import
-codecheck_src_files := $(addprefix $(LOCAL_PATH)/,$(__modules.$(LOCAL_MODULE).SRC_FILES))
-codecheck_c_includes := $(__modules.$(LOCAL_MODULE).C_INCLUDES)
-codecheck_c_includes += $(__modules.$(LOCAL_MODULE).EXPORT_C_INCLUDES)
-codecheck_c_includes += $(LOCAL_PATH)
+data_src_files := $(addprefix $(LOCAL_PATH)/,$(__modules.$(LOCAL_MODULE).SRC_FILES))
+data_c_includes := $(__modules.$(LOCAL_MODULE).C_INCLUDES)
+data_c_includes += $(__modules.$(LOCAL_MODULE).EXPORT_C_INCLUDES)
+data_c_includes += $(LOCAL_PATH)
 
 # Search for include files in directories with source files
-codecheck_c_includes += $(sort $(foreach __src,$(codecheck_src_files),$(dir $(__src))))
-codecheck_c_includes := $(sort $(abspath $(codecheck_c_includes)))
+data_c_includes += $(sort $(foreach __src,$(data_src_files),$(dir $(__src))))
+data_c_includes := $(sort $(abspath $(data_c_includes)))
 
 # Checkpatch is only for c files
-codecheck_files := $(filter %.c,$(codecheck_src_files))
-codecheck_files += $(foreach __inc,$(codecheck_c_includes),$(wildcard $(__inc)/*.h))
+codecheck_files := $(filter %.c,$(data_src_files))
+codecheck_files += $(foreach __inc,$(data_c_includes),$(wildcard $(__inc)/*.h))
 
+# Cloc
+cloc_files := $(data_src_files)
+cloc_files += $(foreach __inc,$(data_c_includes),$(wildcard $(__inc)/*.h))
+cloc_files += $(foreach __inc,$(data_c_includes),$(wildcard $(__inc)/*.hpp))
+cloc_files += $(foreach __inc,$(data_c_includes),$(wildcard $(__inc)/*.hxx))
+
+# Sort to have unique names
 codecheck_files := $(sort $(codecheck_files))
+cloc_files := $(sort $(cloc_files))
 
 .PHONY: $(LOCAL_MODULE)-codecheck
 $(LOCAL_MODULE)-codecheck:
@@ -805,10 +813,26 @@ $(LOCAL_MODULE)-codecheck:
 		|| true; \
 	done
 
+.PHONY: $(LOCAL_MODULE)-cloc
+$(LOCAL_MODULE)-cloc:
+	@mkdir -p $(PRIVATE_BUILD_DIR)
+	@rm -f $(PRIVATE_BUILD_DIR)/cloc-list.txt
+	@for f in $(PRIVATE_CLOC_FILES); do \
+		echo $${f} >> $(PRIVATE_BUILD_DIR)/cloc-list.txt; \
+	done
+	$(Q) cloc --list-file=$(PRIVATE_BUILD_DIR)/cloc-list.txt \
+		--by-file --xml \
+		--out $(PRIVATE_BUILD_DIR)/cloc.xml
+
 # Define target variables because we don't inherit from 'standard' targets
 $(LOCAL_MODULE)-codecheck: PRIVATE_MODULE := $(LOCAL_MODULE)
+$(LOCAL_MODULE)-codecheck: PRIVATE_BUILD_DIR := $(build_dir)
 $(LOCAL_MODULE)-codecheck: PRIVATE_CODECHECK_FILES := $(codecheck_files)
 $(LOCAL_MODULE)-codecheck: PRIVATE_CODECHECK_ARGS := $(LOCAL_CODECHECK_ARGS)
+
+$(LOCAL_MODULE)-cloc: PRIVATE_MODULE := $(LOCAL_MODULE)
+$(LOCAL_MODULE)-cloc: PRIVATE_BUILD_DIR := $(build_dir)
+$(LOCAL_MODULE)-cloc: PRIVATE_CLOC_FILES := $(cloc_files)
 
 ###############################################################################
 ## Files to copy.

@@ -464,7 +464,8 @@ For each registered modules, following `make` targets will be available :
 * `make <module>-dirclean` : will remove the build directory of the module.
 * `make <module>-doc` : will generate the documentation for the module.
 * `make <module>-path` : will display the path of the module.
-* `make <module>-codecheck` : will check coding style of C source files
+* `make <module>-codecheck` : will check coding style of C source files.
+* `make <module>-cloc` : will count the number of lines of code.
 
 ### Module registration
 
