@@ -98,23 +98,6 @@ for d in ${MOUNT_POINTS}; do
 	fi
 done
 
-cleanup() {
-	echo
-	for module in $(find ${SYSROOT}/lib/modules/`uname -r` -name "*.ko")
-	do
-		echo "Unloading kernel module $(basename $module)"
-		sudo rmmod $(basename $module)
-	done
-}
-trap cleanup EXIT
-
-# Need to be root to load kernel modules
-for module in $(find ${SYSROOT}/lib/modules/`uname -r` -name "*.ko")
-do
-	echo "Loading kernel module $(basename $module)"
-	sudo insmod $module
-done
-
 # Need to be root to chroot, but then go back to initial user
 if [ "${OPT_ROOT}" = "0" ]; then
 	sudo chroot --userspec=${UID}:${UID} ${SYSROOT} ${OPT_PROG}

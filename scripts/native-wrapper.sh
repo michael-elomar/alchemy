@@ -22,23 +22,6 @@ if [ "${OLD_LD_LIBRARY_PATH}" != "" ]; then
 	export LD_LIBRARY_PATH=${OLD_LD_LIBRARY_PATH}
 fi
 
-cleanup() {
-	echo
-	for module in $(find ${SYSROOT}/lib/modules/`uname -r` -name "*.ko")
-	do
-		echo "Unloading kernel module $(basename $module)"
-		sudo rmmod $(basename $module)
-	done
-}
-trap cleanup EXIT
-
-# Need to be root to load kernel modules
-for module in $(find ${SYSROOT}/lib/modules/`uname -r` -name "*.ko")
-do
-	echo "Loading kernel module $(basename $module)"
-	sudo insmod $module
-done
-
 # Save previous variables
 OLD_PATH=${PATH}
 OLD_LD_LIBRARY_PATH=${LD_LIBRARY_PATH}
