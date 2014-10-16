@@ -45,6 +45,27 @@ class Cpio(object):
         self.align4()
         self.inode += 1
 
+    def writeTrailer(self):
+        filePath = "TRAILER!!!"
+        buf = ("%s%08x%08x%08x%08x%08x%08x%08x%08x%08x%08x%08x%08x%08x" % (
+                "070701",
+                self.inode,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                len(filePath) + 1, 0))
+        self.write(buf)
+        self.write(filePath + "\0")
+        self.align4()
+        self.inode += 1
+
 #===============================================================================
 #===============================================================================
 def processTree(cpio, tree):
@@ -63,10 +84,17 @@ def processTree(cpio, tree):
             cpio.writeHeader(child)
             cpio.write(child.getData())
             cpio.align4()
+        elif stat.S_IFMT(child.st.st_mode) == stat.S_IFBLK:
+            # No data, only header
+            cpio.writeHeader(child)
+        elif stat.S_IFMT(child.st.st_mode) == stat.S_IFCHR:
+            # No data, only header
+            cpio.writeHeader(child)
 
 #===============================================================================
 #===============================================================================
 def genImage(image, root):
     cpio = Cpio(image.fout)
     processTree(cpio, root)
+    cpio.writeTrailer()
 
