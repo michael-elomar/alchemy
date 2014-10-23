@@ -64,6 +64,11 @@ ifeq ("$(TARGET_CPU)","p7")
   TARGET_CPU_ARMV7A_NEON := 1
 endif
 
+ifeq ("$(TARGET_CPU)","o3")
+  TARGET_GLOBAL_CFLAGS += -march=armv7-a
+  TARGET_GLOBAL_CFLAGS += -mtune=cortex-a5 -mcpu=cortex-a5
+endif
+
 # TODO: see if interresting to put -mtune=cortex-a8 -mcpu=cortex-a8
 ifeq ("$(TARGET_CPU)","omap3")
   TARGET_GLOBAL_CFLAGS += $(cflags_armv7a_neon)
