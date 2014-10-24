@@ -65,7 +65,7 @@ ifeq ("$(TARGET_CPU)","p7")
 endif
 
 ifeq ("$(TARGET_CPU)","o3")
-  TARGET_GLOBAL_CFLAGS += -march=armv7-a
+  TARGET_GLOBAL_CFLAGS += -march=armv7-a -mfloat-abi=soft
   TARGET_GLOBAL_CFLAGS += -mtune=cortex-a5 -mcpu=cortex-a5
 endif
 
