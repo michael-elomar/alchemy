@@ -32,7 +32,7 @@ def copyHostStaging(srcDir, dstDir):
 			relPath = os.path.relpath(srcFilePath, srcDir)
 			dstFilePath = os.path.join(dstDir, relPath)
 			# When combining several sdk the same file could be found several times
-			if not os.path.exists(dstFilePath):
+			if not os.path.lexists(dstFilePath):
 				if not os.path.exists(os.path.split(dstFilePath)[0]):
 					os.makedirs(os.path.split(dstFilePath)[0], mode=0755)
 				if os.path.islink(srcFilePath):
@@ -53,7 +53,7 @@ def copyStaging(srcDir, dstDir):
 			relPath = os.path.relpath(srcFilePath, srcDir)
 			dstFilePath = os.path.join(dstDir, relPath)
 			# When combining several sdk the same file could be found several times
-			if not os.path.exists(dstFilePath) \
+			if not os.path.lexists(dstFilePath) \
 					and (os.path.splitext(fileName)[1] in extensions \
 							or ".so." in fileName \
 							or "include" in dirPath):
@@ -76,7 +76,7 @@ def copySdk(srcDir, dstDir):
 			relPath = os.path.relpath(srcFilePath, srcDir)
 			dstFilePath = os.path.join(dstDir, relPath)
 			# When combining several sdk the same file could be found several times
-			if not os.path.exists(dstFilePath):
+			if not os.path.lexists(dstFilePath):
 				if not os.path.exists(os.path.split(dstFilePath)[0]):
 					os.makedirs(os.path.split(dstFilePath)[0], mode=0755)
 				if os.path.islink(srcFilePath):
@@ -92,7 +92,7 @@ def copySdk(srcDir, dstDir):
 			relPath = os.path.relpath(srcDirPath, srcDir)
 			dstDirPath = os.path.join(dstDir, relPath)
 			# When combining several sdk the same file could be found several times
-			if not os.path.exists(dstDirPath):
+			if not os.path.lexists(dstDirPath):
 				if not os.path.exists(os.path.split(dstDirPath)[0]):
 					os.makedirs(os.path.split(dstDirPath)[0], mode=0755)
 				if os.path.islink(srcDirPath):
