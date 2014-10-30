@@ -1,3 +1,17 @@
+parrot-tools-alchemy (1.0.18) unstable; urgency=low
+  * Use lexists instead of exists to test existence in makesdk.
+  * Fix compression of OSS package as bzip2 archive
+  * Fix cpio image generation.
+  * Force make final in j1
+  * Use realpath for archive subdirs check
+  * Add cloc support to count number of lines.
+  * Re-enable generation of uImage on ARM
+  * Add flags to HOST_GLOBAL_CFLAGS according to architecture.
+  * Add support for Linux kernel modules (BUILD_LINUX_MODULE)
+  * Force suppression of previous archive dest dir
+
+ -- Yves-Marie Morgan (Parrot) <yves-marie.morgan@parrot.com>  Thu, 30 Oct 2014 17:53:11 +0100
+
 parrot-tools-alchemy (1.0.17) unstable; urgency=low
   * Add support for python extension compilation.
   * Add support for autotools cache. Still experimental, can lead to non functional binaries.
