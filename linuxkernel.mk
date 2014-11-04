@@ -85,6 +85,7 @@ LINUX_EXPORTED_HEADERS_OVER := \
 	include/linux/watchdog.h \
 	include/linux/spi/spidev.h \
 	include/linux/uhid.h \
+	include/linux/ion.h \
 
 # Macro to copy a kernel image from boot directory to staging directory
 # $1 image file to copy from arch/boot directory
