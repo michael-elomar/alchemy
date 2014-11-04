@@ -15,6 +15,8 @@ import sys, os, logging
 import subprocess
 import optparse
 import re
+import fnmatch
+
 import addbuildid
 
 #===============================================================================
@@ -36,7 +38,7 @@ EXCLUDE_FILTERS_PYTHON = [".py", ".pyc", ".pyo"]
 # Files to exclude
 EXCLUDE_FILES = [
 	".gitignore",
-	"Image", "zImage", "bzImage", "uImage", "kernel.plf", "vmlinux",
+	"Image", "zImage*", "bzImage", "uImage", "kernel.plf", "vmlinux",
 	"THIS_IS_NOT_THE_DIRECTORY_FOR_NATIVE_CHROOT"]
 
 # Linux folders/links
@@ -336,8 +338,9 @@ def processDir(rootDir, options, withEmptyDir, copyType, forceCopy=False):
 				fileNames.append(dirName)
 
 		# exclude some directories
-		for dirName in EXCLUDE_DIRS:
-			if dirName in dirNames:
+		# (use a copy in for loop because we will modify dirNames)
+		for dirName in dirNames[:]:
+			if any([fnmatch.fnmatch(dirName, pattern) for pattern in EXCLUDE_DIRS]):
 				logging.debug("Exclude directory : %s",
 					os.path.relpath(os.path.join(dirPath, dirName), rootDir))
 				dirNames.remove(dirName)
@@ -355,7 +358,7 @@ def processDir(rootDir, options, withEmptyDir, copyType, forceCopy=False):
 
 		# copy files
 		for fileName in fileNames:
-			if fileName in EXCLUDE_FILES:
+			if any([fnmatch.fnmatch(fileName, pattern) for pattern in EXCLUDE_FILES]):
 				logging.debug("Exclude file : %s",
 					os.path.relpath(os.path.join(dirPath, fileName), rootDir))
 				continue
