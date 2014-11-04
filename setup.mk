@@ -121,6 +121,10 @@ TARGET_USE_CXX_EXCEPTIONS ?= 1
 # Link cpio image inside the kernel.
 TARGET_LINUX_LINK_CPIO_IMAGE ?= 0
 
+# Generate a Uboot image of linux
+TARGET_LINUX_GENERATE_UIMAGE ?= 0
+
+
 ###############################################################################
 ## Toolchain setup.
 ###############################################################################

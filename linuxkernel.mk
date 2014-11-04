@@ -95,21 +95,12 @@ linux-copy-image = \
 		cp -af $(LINUX_BUILD_DIR)/arch/$(LINUX_ARCH)/boot/$1 $(TARGET_OUT_STAGING)/boot; \
 	fi;
 
-ifeq ("$(LINUX_ARCH)","arm")
 define linux-copy-images
-	$(Q) $(MAKE) $(LINUX_MAKE_ARGS) uImage
 	$(Q) $(call linux-copy-image,uImage)
 	$(Q) $(call linux-copy-image,Image)
 	$(Q) $(call linux-copy-image,zImage)
 	$(Q) $(call linux-copy-image,bzImage)
 endef
-else
-define linux-copy-images
-	$(Q) $(call linux-copy-image,Image)
-	$(Q) $(call linux-copy-image,zImage)
-	$(Q) $(call linux-copy-image,bzImage)
-endef
-endif
 
 ifneq ("$(TARGET_LINUX_LINK_CPIO_IMAGE)","0")
 
@@ -191,6 +182,9 @@ endif
 	$(Q)rm -f  $(TARGET_OUT_STAGING)/lib/modules/*/build
 	$(Q)rm -f  $(TARGET_OUT_STAGING)/lib/modules/*/source
 	@echo "Installing linux kernel images"
+ifneq ("$(TARGET_LINUX_GENERATE_UIMAGE)","0")
+	$(Q) $(MAKE) $(LINUX_MAKE_ARGS) uImage
+endif
 	$(call linux-copy-images)
 	$(Q)cp -af $(LINUX_BUILD_DIR)/vmlinux $(TARGET_OUT_STAGING)/boot
 	@echo "Linux kernel built"
