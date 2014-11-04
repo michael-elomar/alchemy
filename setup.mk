@@ -124,6 +124,8 @@ TARGET_LINUX_LINK_CPIO_IMAGE ?= 0
 # Generate a Uboot image of linux
 TARGET_LINUX_GENERATE_UIMAGE ?= 0
 
+# Append a device tree to the linux image
+TARGET_LINUX_DEVICE_TREE ?=
 
 ###############################################################################
 ## Toolchain setup.

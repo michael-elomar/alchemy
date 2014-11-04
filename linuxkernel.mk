@@ -186,6 +186,11 @@ ifneq ("$(TARGET_LINUX_GENERATE_UIMAGE)","0")
 	$(Q) $(MAKE) $(LINUX_MAKE_ARGS) uImage
 endif
 	$(call linux-copy-images)
+ifneq ("$(TARGET_LINUX_DEVICE_TREE)","")
+	$(Q)cat $(TARGET_OUT_STAGING)/boot/zImage \
+		$(LINUX_BUILD_DIR)/arch/$(LINUX_ARCH)/boot/dts/$(TARGET_LINUX_DEVICE_TREE) \
+		> $(TARGET_OUT_STAGING)/boot/zImage_$(TARGET_LINUX_DEVICE_TREE)
+endif
 	$(Q)cp -af $(LINUX_BUILD_DIR)/vmlinux $(TARGET_OUT_STAGING)/boot
 	@echo "Linux kernel built"
 	@touch $@
