@@ -44,6 +44,7 @@ define qmake_gen_deps
 		echo "target.path = $(if $(__qmake_use_qt5),$(TARGET_OUT_STAGING))/$(PRIVATE_DESTDIR)"; \
 		echo "INSTALLS += target"; \
 		echo "INCLUDEPATH += $(PRIVATE_C_INCLUDES)"; \
+		echo "DEPENDPATH += $(PRIVATE_C_INCLUDES)"; \
 		echo "QMAKE_CFLAGS += $(PRIVATE_CFLAGS)"; \
 		echo "QMAKE_CXXFLAGS += $(PRIVATE_CFLAGS) $(PRIVATE_CXXFLAGS)"; \
 		echo "LIBS += $(PRIVATE_LDFLAGS)"; \
