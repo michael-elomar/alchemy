@@ -569,6 +569,7 @@ endif
 
 # This will force to recheck this module if one of its dependencies is changed.
 $(LOCAL_BUILD_MODULE): $(all_depends_build_filename)
+$(LOCAL_CUSTOM_TARGETS): $(all_depends_build_filename)
 
 # This explicit rule avoids dependency error when the module has nothing to build
 # (prebuilt, sdk, custom...)
