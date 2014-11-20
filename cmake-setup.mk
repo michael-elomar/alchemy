@@ -47,7 +47,7 @@ define cmake-gen-toolchain-file
 	echo "set(CMAKE_SYSTEM_NAME Linux)"; \
 	echo "set(CMAKE_C_COMPILER \"$(TARGET_CC)\")"; \
 	echo "set(CMAKE_CXX_COMPILER \"$(TARGET_CXX)\")"; \
-	echo "set(CMAKE_AR \"$(TARGET_AR)\")"; \
+	echo "set(CMAKE_AR \"$(TARGET_AR)\" CACHE FILEPATH "Archiver")"; \
 	echo "set(CMAKE_LINKER \"$(TARGET_LD)\")"; \
 	echo "set(CMAKE_C_FLAGS \
 		\"$(CMAKE_C_FLAGS) \$${ALCHEMY_EXTRA_C_FLAGS}\" \
