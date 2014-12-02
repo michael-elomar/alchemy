@@ -875,6 +875,7 @@ module-compute-revisions = \
 			$(eval __rev-desc := $(shell cd $(__path) && git describe --tags --always 2>/dev/null)) \
 			$(eval __modules.$(__mod).REVISION := $(__rev)) \
 			$(eval __modules.$(__mod).REVISION_DESCRIBE := $(__rev-desc)) \
+			$(if $(call strneq,$(V),0),$(info Revision of $(__mod): $(__rev) / $(__rev-desc))) \
 		) \
 	)
 
