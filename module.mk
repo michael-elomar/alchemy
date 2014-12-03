@@ -336,6 +336,8 @@ LOCAL_CFLAGS += $(addprefix -include ,$(all_autoconf))
 ifeq ("$(call is-module-external,$(LOCAL_MODULE))","")
 LOCAL_CFLAGS += $(foreach __mod,$(all_depends), \
 	-DBUILD_$(call module-get-define,$(__mod)))
+LOCAL_VALAFLAGS += $(foreach __mod,$(call filter-get-internal-modules,$(all_depends)), \
+	--define BUILD_$(call module-get-define,$(__mod)))
 else
 LOCAL_CFLAGS += $(foreach __mod,$(call filter-get-internal-modules,$(all_depends)), \
 	-DBUILD_$(call module-get-define,$(__mod)))
