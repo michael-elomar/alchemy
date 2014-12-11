@@ -30,59 +30,106 @@ toolchain_libc_installed_file := $(call local-get-build-dir)/$(LOCAL_MODULE).ins
 toolchain_libc_get_staging_path = \
 	$(subst $(TOOLCHAIN_LIBC),$(TARGET_OUT_STAGING),$1)
 
-# List of source files
-toolchain_libc_src_files := \
-	$(wildcard $(TOOLCHAIN_LIBC)/lib/*.so*) \
-	$(wildcard $(TOOLCHAIN_LIBC)/usr/lib/libstdc++*.so*) \
-	$(wildcard $(TOOLCHAIN_LIBC)/usr/bin/ldd)
+# List of files to be put in /lib
+toolchain_libc_lib_files :=
+ifneq ("$(wildcard $(TOOLCHAIN_LIBC)/lib/$(TOOLCHAIN_TARGET_NAME))","")
+  toolchain_libc_lib_files += $(wildcard $(TOOLCHAIN_LIBC)/lib/$(TOOLCHAIN_TARGET_NAME)/*.so*)
+else
+  toolchain_libc_lib_files += $(wildcard $(TOOLCHAIN_LIBC)/lib/*.so*)
+endif
 
-# List of source directories
-toolchain_libc_src_dirs :=
+# List of files to be put in /usr/lib
+toolchain_libc_usrlib_files :=
+ifneq ("$(wildcard $(TOOLCHAIN_LIBC)/usr/lib/$(TOOLCHAIN_TARGET_NAME))","")
+  toolchain_libc_usrlib_files += $(wildcard $(TOOLCHAIN_LIBC)/usr/lib/$(TOOLCHAIN_TARGET_NAME)/libstdc++*.so*)
+else
+  toolchain_libc_usrlib_files += $(wildcard $(TOOLCHAIN_LIBC)/usr/lib/libstdc++*.so*)
+endif
+
+# Some toolchains, such as recent Linaro toolchains, store GCC support libraries
+# (libstdc++, libgcc_s, etc.) outside of the sysroot
+ifeq ("$(strip $(toolchain_libc_usrlib_files))","")
+  toolchain_libc_support_dir_cmd := $(TARGET_CC) $(TARGET_GLOBAL_CFLAGS)
+  ifeq ("$(TARGET_ARCH)","arm")
+    toolchain_libc_support_dir_cmd += $(TARGET_GLOBAL_CFLAGS_$(TARGET_DEFAULT_ARM_MODE))
+  endif
+  toolchain_libc_support_dir_cmd += -print-file-name=libstdc++.a
+  toolchain_libc_support_dir := $(wildcard $(dir $(shell $(toolchain_libc_support_dir_cmd))))
+  toolchain_libc_lib_files += $(wildcard $(toolchain_libc_support_dir)/libgcc_s*.so*)
+  toolchain_libc_usrlib_files += $(wildcard $(toolchain_libc_support_dir)/libstdc++*.so*)
+endif
+
+# ldd
+toolchain_libc_ldd :=
+ifneq ("$(wildcard $(TOOLCHAIN_LIBC)/usr/bin/ldd)","")
+  toolchain_libc_ldd := $(wildcard $(TOOLCHAIN_LIBC)/usr/bin/ldd)
+endif
 
 # Timezone data
+toolchain_libc_tzdata :=
 ifneq ("$(TARGET_INCLUDE_TZDATA)","0")
-  toolchain_libc_src_dirs += $(TOOLCHAIN_LIBC)/usr/share/zoneinfo
+  ifneq ("$(wildcard $(TOOLCHAIN_LIBC)/usr/share/zoneinfo)","")
+    toolchain_libc_tzdata := $(wildcard $(TOOLCHAIN_LIBC)/usr/share/zoneinfo)
+  endif
 endif
 
 # Locale data
+toolchain_libc_gconv :=
 ifneq ("$(TARGET_INCLUDE_GCONV)","0")
-  toolchain_libc_src_dirs += $(TOOLCHAIN_LIBC)/usr/lib/gconv
-endif
-
-# Include gdbserver only if requested (GPLv3)
-ifneq ("$(TARGET_INCLUDE_GDBSERVER)","0")
-ifneq ("$(TOOLCHAIN_GDBSERVER)","")
-  toolchain_libc_src_files += $(TOOLCHAIN_GDBSERVER)
-endif
+  ifneq ("$(wildcard $(TOOLCHAIN_LIBC)/usr/lib/gconv)","")
+    toolchain_libc_gconv := $(wildcard $(TOOLCHAIN_LIBC)/usr/lib/gconv)
+  else ifneq ("$(wildcard $(TOOLCHAIN_LIBC)/usr/lib/$(TOOLCHAIN_TARGET_NAME)/gconv)","")
+    toolchain_libc_gconv := $(wildcard $(TOOLCHAIN_LIBC)/usr/lib/$(TOOLCHAIN_TARGET_NAME)/gconv)
+  endif
 endif
 
 # Install rule
 # use $(endl) to separate commands on separate lines
 $(toolchain_libc_installed_file):
 	@mkdir -p $(dir $@)
-	$(foreach __f,$(toolchain_libc_src_files), \
-		@mkdir -p $(dir $(call toolchain_libc_get_staging_path,$(__f)))$(endl) \
-		$(Q) cp -af $(__f) $(call toolchain_libc_get_staging_path,$(__f))$(endl) \
+	@mkdir -p $(TARGET_OUT_STAGING)/lib
+	$(foreach __f,$(toolchain_libc_lib_files), \
+		$(Q) cp -af $(__f) $(TARGET_OUT_STAGING)/lib/$(notdir $(__f))$(endl) \
 	)
-	$(foreach __d,$(toolchain_libc_src_dirs), \
-		@mkdir -p $(call toolchain_libc_get_staging_path,$(__d))$(endl) \
-		$(Q) cp -Raf $(__d)/* $(call toolchain_libc_get_staging_path,$(__d))$(endl) \
+	@mkdir -p $(TARGET_OUT_STAGING)/usr/lib
+	$(foreach __f,$(toolchain_libc_usrlib_files), \
+		$(Q) cp -af $(__f) $(TARGET_OUT_STAGING)/usr/lib/$(notdir $(__f))$(endl) \
 	)
-	$(Q) if [ -f $(TARGET_OUT_STAGING)/usr/bin/ldd ]; then \
-		sed -i -e 's|^\#! */bin/bash$$|\#!/bin/sh|' $(TARGET_OUT_STAGING)/usr/bin/ldd; \
-	fi
+	$(if $(toolchain_libc_ldd), \
+		@mkdir -p $(TARGET_OUT_STAGING)/usr/bin$(endl) \
+		$(Q) cp -af $(toolchain_libc_ldd) $(TARGET_OUT_STAGING)/usr/bin$(endl) \
+		$(Q) sed -i -e 's|^\#! */bin/bash$$|\#!/bin/sh|' $(TARGET_OUT_STAGING)/usr/bin/ldd$(endl) \
+	)
+	$(if $(toolchain_libc_tzdata), \
+		@mkdir -p $(TARGET_OUT_STAGING)/usr/share/zoneinfo$(endl) \
+		$(Q) cp -Raf $(toolchain_libc_tzdata)/* $(TARGET_OUT_STAGING)/usr/share/zoneinfo$(endl) \
+	)
+	$(if $(toolchain_libc_gconv), \
+		@mkdir -p $(TARGET_OUT_STAGING)/usr/usr/lib/gconv$(endl) \
+		$(Q) cp -Raf $(toolchain_libc_gconv)/* $(TARGET_OUT_STAGING)/usr/usr/lib/gconv$(endl) \
+	)
+# Include gdbserver only if requested (GPLv3)
+ifneq ("$(TARGET_INCLUDE_GDBSERVER)","0")
+ifneq ("$(TOOLCHAIN_GDBSERVER)","")
+	@mkdir -p $(TARGET_OUT_STAGING)/usr/bin
+	$(Q) cp -af $(TOOLCHAIN_GDBSERVER) $(TARGET_OUT_STAGING)/usr/bin/gdbserver
+endif
+endif
 	@touch $@
 
 # Clean rule
 # use $(endl) to separate commands on separate lines
 .PHONY: toolchain-libc-clean
 toolchain-libc-clean:
-	$(foreach __f,$(toolchain_libc_src_files), \
-		$(Q) rm -f $(call toolchain_libc_get_staging_path,$(__f))$(endl) \
+	$(foreach __f,$(toolchain_libc_lib_files), \
+		$(Q) rm -f $(TARGET_OUT_STAGING)/lib/$(notdir $(__f))$(endl) \
 	)
-	$(foreach __d,$(toolchain_libc_src_dirs), \
-		$(Q) rm -rf $(call toolchain_libc_get_staging_path,$(__d))$(endl) \
+	$(foreach __f,$(toolchain_libc_usrlib_files), \
+		$(Q) rm -f $(TARGET_OUT_STAGING)/usr/lib/$(notdir $(__f))$(endl) \
 	)
+	$(Q) rm -rf $(TARGET_OUT_STAGING)/usr/share/zoneinfo
+	$(Q) rm -rf $(TARGET_OUT_STAGING)/usr/usr/lib/gconv
+	$(Q) rm -f $(TARGET_OUT_STAGING)/usr/bin/gdbserver
 	@rm -f $(toolchain_libc_installed_file)
 
 # Register 'installed' file in build system
