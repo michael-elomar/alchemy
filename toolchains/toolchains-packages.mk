@@ -106,7 +106,7 @@ $(toolchain_libc_installed_file):
 	)
 	$(if $(toolchain_libc_gconv), \
 		@mkdir -p $(TARGET_OUT_STAGING)/usr/usr/lib/gconv$(endl) \
-		$(Q) cp -Raf $(toolchain_libc_gconv)/* $(TARGET_OUT_STAGING)/usr/usr/lib/gconv$(endl) \
+		$(Q) cp -Raf $(toolchain_libc_gconv)/* $(TARGET_OUT_STAGING)/usr/lib/gconv$(endl) \
 	)
 # Include gdbserver only if requested (GPLv3)
 ifneq ("$(TARGET_INCLUDE_GDBSERVER)","0")
@@ -128,7 +128,7 @@ toolchain-libc-clean:
 		$(Q) rm -f $(TARGET_OUT_STAGING)/usr/lib/$(notdir $(__f))$(endl) \
 	)
 	$(Q) rm -rf $(TARGET_OUT_STAGING)/usr/share/zoneinfo
-	$(Q) rm -rf $(TARGET_OUT_STAGING)/usr/usr/lib/gconv
+	$(Q) rm -rf $(TARGET_OUT_STAGING)/usr/lib/gconv
 	$(Q) rm -f $(TARGET_OUT_STAGING)/usr/bin/gdbserver
 	@rm -f $(toolchain_libc_installed_file)
 
