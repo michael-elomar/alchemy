@@ -105,7 +105,7 @@ $(toolchain_libc_installed_file):
 		$(Q) cp -Raf $(toolchain_libc_tzdata)/* $(TARGET_OUT_STAGING)/usr/share/zoneinfo$(endl) \
 	)
 	$(if $(toolchain_libc_gconv), \
-		@mkdir -p $(TARGET_OUT_STAGING)/usr/usr/lib/gconv$(endl) \
+		@mkdir -p $(TARGET_OUT_STAGING)/usr/lib/gconv$(endl) \
 		$(Q) cp -Raf $(toolchain_libc_gconv)/* $(TARGET_OUT_STAGING)/usr/lib/gconv$(endl) \
 	)
 # Include gdbserver only if requested (GPLv3)
