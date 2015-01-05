@@ -371,7 +371,7 @@ def writeModuleConfigIn(outFile, module):
 	outFile.write("menu '%s'\n" % module.name)
 	if len(module.configInPathList) > 0:
 		for configInPath in module.configInPathList:
-			outFile.write("source %s\n" % configInPath)
+			outFile.write("source \"%s\"\n" % configInPath)
 	outFile.write("endmenu\n")
 
 #===============================================================================
@@ -425,7 +425,7 @@ def writeFullConfigIn(outFile, menu):
 				outFile.write("  default '%s'\n" % module.configPath)
 				outFile.write("\n")
 				for configInPath in module.configInPathList:
-					outFile.write("source %s\n" % configInPath)
+					outFile.write("source \"%s\"\n" % configInPath)
 				outFile.write("\n")
 				outFile.write("config ALCHEMY_ENDFILE_%s\n" % moduleDefine)
 				outFile.write("  string\n")
