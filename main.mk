@@ -566,6 +566,18 @@ $(AUTOCONF_MERGE_FILE): $(__autoconf-list)
 all: $(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST)
 	@echo "Done building all"
 
+.PHONY: all-doc
+all-doc: $(foreach __mod,$(ALL_BUILD_MODULES),$(if $(call is-module-prebuilt,$(__mod)),$(empty),$(__mod)-doc))
+	@echo "Done all-doc"
+
+.PHONY: all-codecheck
+all-codecheck: $(foreach __mod,$(ALL_BUILD_MODULES),$(if $(call is-module-prebuilt,$(__mod)),$(empty),$(__mod)-codecheck))
+	@echo "Done all-codecheck"
+
+.PHONY: all-cloc
+all-cloc: $(foreach __mod,$(ALL_BUILD_MODULES),$(if $(call is-module-prebuilt,$(__mod)),$(empty),$(__mod)-cloc))
+	@echo "Done all-cloc"
+
 .PHONY: clean
 clean: $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST),$(__mod)-clean)
 	$(Q)rm -f $(AUTOCONF_MERGE_FILE)
