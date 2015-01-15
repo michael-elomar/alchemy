@@ -46,7 +46,7 @@ def copyHostStaging(srcDir, dstDir):
 #===============================================================================
 #===============================================================================
 def copyStaging(srcDir, dstDir):
-	extensions = [".h", ".hpp", ".hxx", ".so", ".a", ".pc", ".tcc", ".doxygen", ".inl"]
+	extensions = [".h", ".hpp", ".hxx", ".so", ".a", ".pc", ".tcc", ".doxygen", ".inl", ".vapi", ".deps"]
 	for (dirPath, dirNames, fileNames) in os.walk(srcDir):
 		for fileName in fileNames:
 			srcFilePath = os.path.join(dirPath, fileName)
