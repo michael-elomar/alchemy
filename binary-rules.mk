@@ -328,3 +328,10 @@ $(LOCAL_TARGETS): PRIVATE_ALL_SHARED_LIBRARIES := $(all_shared_libs_filename)
 $(LOCAL_TARGETS): PRIVATE_ALL_STATIC_LIBRARIES := $(all_static_libs_filename)
 $(LOCAL_TARGETS): PRIVATE_ALL_WHOLE_STATIC_LIBRARIES := $(all_whole_static_libs_filename)
 $(LOCAL_TARGETS): PRIVATE_ALL_OBJECTS := $(all_objects)
+
+ifeq ("$(W)","0")
+ifneq ("$(strip $(vala_objects))","")
+$(vala_objects): PRIVATE_CFLAGS += -Wno-missing-field-initializers
+$(vala_objects): PRIVATE_CFLAGS += -Wno-missing-braces
+endif
+endif
