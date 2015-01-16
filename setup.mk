@@ -291,7 +291,7 @@ TARGET_GLOBAL_VALAFLAGS += \
 	--vapidir=$(HOST_OUT_STAGING)/usr/share/vala-0.20/vapi \
 	$(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
 		--vapidir=$(__dir)/usr/share/vala/vapi \
-	)
+	) \
 	--target-glib=2.36
 
 ###############################################################################
