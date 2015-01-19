@@ -19,7 +19,7 @@ oss-gen-package-prepare = \
 		version=$$($(BUILD_SYSTEM)/scripts/getversion.sh $(__modules.$1.ARCHIVE_VERSION)); \
 	fi; \
 	atom=$(wildcard $(__modules.$1.PATH)/$(USER_MAKEFILE_NAME)); \
-	config=$(wildcard $(call module-get-config,$1)); \
+	config=$(wildcard $(abspath $(call module-get-config,$1))); \
 	outpkg=$(OSS_PACKAGES_DIR)/$1-$${version}.tar.bz2; \
 	echo "Packaging $1 version $${version}";
 
