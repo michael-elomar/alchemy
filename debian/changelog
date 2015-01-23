@@ -1,3 +1,23 @@
+parrot-tools-alchemy (1.0.19) unstable; urgency=low
+  * Add support for octopus 3 cpu
+  * Install kernel header linux/ion.h
+  * Add option to generate linux u-boot images.
+  * Add option to specify a linux device tree.
+  * [QMAKE] Set DEPENDPATH in alchemy.pri
+  * [CMAKE] Update CMAKE_AR setup.
+  * Fix custom targets dependencies. (fixes some issue with kernel modules not recompiled correctly)
+  * be verbose when rev-parsing and V=1
+  * Give vala defines of module built.
+  * Add support for linaro toolchain.
+  * [BUGFIX 159836] protect config files path
+  * Add all-doc all-codecheck and all-cloc
+  * Copy vapi/deps files in sdk.
+  * Update TARGET_GLOBAL_VALAFLAGS to use sdk.
+  * Disable some warnings of vala generated code.
+  * Make sure config file path is absolute when doing oss packages.
+
+ -- Yves-Marie Morgan (Parrot) <yves-marie.morgan@parrot.com>  Fri, 23 Jan 2015 13:15:05 +0100
+
 parrot-tools-alchemy (1.0.18) unstable; urgency=low
   * Use lexists instead of exists to test existence in makesdk.
   * Fix compression of OSS package as bzip2 archive
