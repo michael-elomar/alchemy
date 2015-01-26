@@ -614,9 +614,13 @@ modules-compute-depends = \
 		$(eval __depends-loop := $(empty)) \
 		$(eval __dummy := $(call __module-compute-depends-static,$(__mod),SHARED_LIBRARIES)) \
 		$(eval __depends-loop := $(empty)) \
-		$(eval __dummy := $(call __module-compute-depends-link,$(__mod))) \
-		$(eval __depends-loop := $(empty)) \
 		$(eval __dummy := $(call __module-compute-depends-all,$(__mod))) \
+		$(if $(call streq,$(__modules.$(__mod).MODULE_CLASS),EXECUTABLE), \
+			$(if $(findstring -static,$(__modules.$(__mod).LDFLAGS)), \
+				$(call __module-update-static-executable,$(__mod)) \
+			) \
+		) \
+		$(call __module-compute-depends-link,$(__mod)) \
 	)
 
 # Update direct dependencies of a single module.
@@ -697,8 +701,7 @@ __module-compute-depends-static-internal = \
 		$(call __module-compute-depends-static,$(__mod),$2) \
 	)
 
-# Compute dependencies for link. It simply aggregate (and sort) static
-# dependencies
+# Compute dependencies for link. It simply aggregate (and sort) dependencies
 # $1 : module name.
 __module-compute-depends-link = \
 	$(eval __modules.$1.depends.link := $(strip $(sort \
@@ -712,6 +715,7 @@ __module-compute-depends-link = \
 # $1 : module name.
 # Note : it recursively descends into modules to get their dependencies.
 # See above the way we use 'local' variable.
+# Order is kept compatible with a static link.
 __module-compute-depends-all = \
 	$(if $(call __is-in-depends-loop,$1), \
 		$(error cyclic dependency detected: $(__depends-loop) $1) \
@@ -733,6 +737,22 @@ __module-compute-depends-all-internal = \
 	$(__modules.$1.depends) \
 	$(foreach __mod,$(__modules.$1.depends), \
 		$(call __module-compute-depends-all,$(__mod)) \
+	)
+
+# Update dependencies for static executables.
+# $1 : module name.
+# Note : for each generic library in depends.all, it will transform shared
+# version to static version.
+__module-update-static-executable = \
+	$(foreach __lib,$(__modules.$1.depends.all), \
+		$(if $(call streq,$(__modules.$(__lib).MODULE_CLASS),LIBRARY), \
+			$(eval __modules.$1.depends.STATIC_LIBRARIES := $(strip \
+				$(call uniq2,$(__modules.$1.depends.STATIC_LIBRARIES) $(__lib))) \
+			) \
+			$(eval __modules.$1.depends.SHARED_LIBRARIES := $(strip \
+				$(filter-out $(__lib),$(__modules.$1.depends.SHARED_LIBRARIES))) \
+			) \
+		) \
 	)
 
 ###############################################################################
