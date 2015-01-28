@@ -12,8 +12,8 @@
 help:
 	@echo "Main targets:"
 	@echo "  all     : build everything."
-	@echo "  clean   : clean all modules."
-	@echo "  dirclean: clean all modules and delete build directories".
+	@echo "  clean   : same as clobber."
+	@echo "  dirclean: same as clobber."
 	@echo "  clobber : delete output directory (build, staging, final)."
 	@echo "  scan    : force a rescan of workspace in case the makefile cache is used."
 	@echo "  final   : generate the final tree from the staging directory."

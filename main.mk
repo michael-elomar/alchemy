@@ -177,7 +177,7 @@ ifeq ("$(TARGET_FORCE_EXTERNAL_CHECKS)","0")
 endif
 
 # Skip some steps for some make goals
-__clean-targets := clean dirclean clobber
+__clean-targets := clean dirclean clobber _clean _dirclean
 __query-targets := scan help help-modules dump dump-depends dump-xml build-graph
 __config-targets := config config-check config-update xconfig menuconfig nconfig
 __fs-targets := final plf image-plf image-cpio sdk symbols symbols-tar symbols-tar-gz
@@ -578,21 +578,31 @@ all-codecheck: $(foreach __mod,$(ALL_BUILD_MODULES),$(if $(call is-module-prebui
 all-cloc: $(foreach __mod,$(ALL_BUILD_MODULES),$(if $(call is-module-prebuilt,$(__mod)),$(empty),$(__mod)-cloc))
 	@echo "Done all-cloc"
 
-.PHONY: clean
-clean: $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST),$(__mod)-clean)
+# Just to test clean target of all modules
+.PHONY: _clean
+_clean: $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST),$(__mod)-clean)
 	$(Q)rm -f $(AUTOCONF_MERGE_FILE)
 	$(Q)rm -f $(USER_MAKEFILES_CACHE)
 	$(Q)[ ! -d $(TARGET_OUT_STAGING) ] || find $(TARGET_OUT_STAGING) -depth -type d -empty -delete
 	$(Q)[ ! -d $(HOST_OUT_STAGING) ] || find $(HOST_OUT_STAGING) -depth -type d -empty -delete
 	@echo "Done cleaning"
 
-.PHONY: dirclean
-dirclean: $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST),$(__mod)-dirclean)
+# Just to test dirclean target of all modules
+.PHONY: _dirclean
+_dirclean: $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST),$(__mod)-dirclean)
 	$(Q)rm -f $(AUTOCONF_MERGE_FILE)
 	$(Q)rm -f $(USER_MAKEFILES_CACHE)
 	$(Q)[ ! -d $(TARGET_OUT_STAGING) ] || find $(TARGET_OUT_STAGING) -depth -type d -empty -delete
 	$(Q)[ ! -d $(HOST_OUT_STAGING) ] || find $(HOST_OUT_STAGING) -depth -type d -empty -delete
 	@echo "Done cleaning directories"
+
+# Most users want a clobber when they ask for clean or dirclean
+# To really do clean or dirclean for EACH module (takes some time)
+# see _clean and -dirclean
+.PHONY: clean
+.PHONY: dirclean
+clean: clobber
+dirclean: clobber
 
 .PHONY: clobber
 clobber:
