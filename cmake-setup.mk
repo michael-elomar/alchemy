@@ -13,7 +13,7 @@ CMAKE := $(shell which cmake)
 CMAKE_TOOLCHAIN_FILE := $(TARGET_OUT_BUILD)/toolchainfile.cmake
 
 CMAKE_C_FLAGS := \
-	$(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES)) \
+	$(call normalize-system-c-includes,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(TARGET_GLOBAL_CFLAGS)
 
 CMAKE_CXX_FLAGS := \

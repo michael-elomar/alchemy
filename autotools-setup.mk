@@ -47,7 +47,7 @@ __autotools-target-cache-file := $(TARGET_OUT_BUILD)/autotools.cache
 ###############################################################################
 
 # Setup flags
-HOST_AUTOTOOLS_CPPFLAGS := $(call normalize-c-includes,$(HOST_GLOBAL_C_INCLUDES))
+HOST_AUTOTOOLS_CPPFLAGS := $(call normalize-system-c-includes,$(HOST_GLOBAL_C_INCLUDES))
 HOST_AUTOTOOLS_CFLAGS := $(HOST_AUTOTOOLS_CPPFLAGS) $(HOST_GLOBAL_CFLAGS)
 HOST_AUTOTOOLS_CXXFLAGS := $(HOST_AUTOTOOLS_CFLAGS) $(HOST_GLOBAL_CXXFLAGS)
 
@@ -127,7 +127,7 @@ module_compiler_flavour := gcc
 endif
 
 # Setup compilations flags
-TARGET_AUTOTOOLS_CPPFLAGS := $(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES))
+TARGET_AUTOTOOLS_CPPFLAGS := $(call normalize-system-c-includes,$(TARGET_GLOBAL_C_INCLUDES))
 TARGET_AUTOTOOLS_CFLAGS := $(TARGET_AUTOTOOLS_CPPFLAGS) $(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CFLAGS_$(module_compiler_flavour))
 TARGET_AUTOTOOLS_CXXFLAGS := $(TARGET_AUTOTOOLS_CFLAGS) $(TARGET_GLOBAL_CXXFLAGS)
 TARGET_AUTOTOOLS_LDFLAGS := $(TARGET_GLOBAL_LDFLAGS) $(TARGET_GLOBAL_LDLIBS) $(TARGET_GLOBAL_LDFLAGS_$(module_compiler_flavour))

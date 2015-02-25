@@ -1037,6 +1037,18 @@ normalize-c-includes-rel = $(strip \
 		$(addprefix -I,$(call path-from-top,$(patsubst -I%,%,$(__inc)))) \
 	))
 
+# Same as normalize-c-includes but uses the -isystem instead of -I flag
+normalize-system-c-includes = $(strip \
+	$(foreach __inc,$1, \
+		$(addprefix -isystem,$(patsubst -I%,%,$(__inc))) \
+	))
+
+# Same as normalize-c-includes-rel but uses the -isystem instead of -I flag
+normalize-system-c-includes-rel = $(strip \
+	$(foreach __inc,$1, \
+		$(addprefix -isystem ,$(call path-from-top,$(patsubst -I%,%,$(__inc)))) \
+	))
+
 ###############################################################################
 ## Copy files helpers.
 ###############################################################################
@@ -1360,7 +1372,7 @@ $(call print-banner1,"Precompile",$(PRIVATE_MODULE),$(call path-from-top,$<))
 $(call check-pwd-is-top-dir)
 $(Q)$(CCACHE) $(PRIVATE_CXX) \
 	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
-	$(call normalize-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
+	$(call normalize-system-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CXXFLAGS) $(WARNINGS_CXXFLAGS) \
 	$(TARGET_GLOBAL_CXXFLAGS_$(PRIVATE_COMPILER_FLAVOUR)) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_COMPILER_FLAVOUR)) \
@@ -1381,7 +1393,7 @@ $(call print-banner1,"$(PRIVATE_ARCH) C++",$(PRIVATE_MODULE),$(call path-from-to
 $(call check-pwd-is-top-dir)
 $(Q)$(CCACHE) $(PRIVATE_CXX) \
 	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
-	$(call normalize-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
+	$(call normalize-system-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CXXFLAGS) $(WARNINGS_CXXFLAGS) \
 	$(TARGET_GLOBAL_CXXFLAGS_$(PRIVATE_COMPILER_FLAVOUR)) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_COMPILER_FLAVOUR)) \
@@ -1404,7 +1416,7 @@ $(call check-pwd-is-top-dir)
 @mkdir -p $(dir $@)
 $(Q)$(CCACHE) $(PRIVATE_CC) \
 	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
-	$(call normalize-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
+	$(call normalize-system-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(TARGET_GLOBAL_CFLAGS) $(WARNINGS_CFLAGS) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_COMPILER_FLAVOUR)) \
 	$(WARNINGS_CFLAGS_$(PRIVATE_COMPILER_FLAVOUR)) \
@@ -1426,7 +1438,7 @@ $(call check-pwd-is-top-dir)
 @mkdir -p $(dir $@)
 $(Q)$(CCACHE) $(PRIVATE_CC) \
 	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
-	$(call normalize-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
+	$(call normalize-system-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(TARGET_GLOBAL_CFLAGS) $(WARNINGS_CFLAGS) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_COMPILER_FLAVOUR)) \
 	$(WARNINGS_CFLAGS_$(PRIVATE_COMPILER_FLAVOUR)) \
