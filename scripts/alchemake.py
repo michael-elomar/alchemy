@@ -188,7 +188,7 @@ def main():
 	os.environ["ALCHEMAKE_CMDLINE"] = " ".join([makeProg] + sys.argv[1:])
 
 	# If not on a terminal, do NOT use job control, simply execute make...
-	if not os.isatty(0) or not os.isatty(1):
+	if not os.isatty(0):
 		logging.warning("Not using job control")
 		process = subprocess.Popen([makeProg] + sys.argv[1:], shell=False)
 		process.wait()
