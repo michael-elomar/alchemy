@@ -1038,16 +1038,26 @@ normalize-c-includes-rel = $(strip \
 	))
 
 # Same as normalize-c-includes but uses the -isystem instead of -I flag
+# Note gcc 4.4.3 of android seems to mess things up when this flag is uses in C++
 normalize-system-c-includes = $(strip \
-	$(foreach __inc,$1, \
-		$(addprefix -isystem,$(patsubst -I%,%,$(__inc))) \
-	))
+	$(if $(call streq,$(TARGET_CC_VERSION),4.4.3), \
+		$(call normalize-c-includes,$1), \
+		\
+		$(foreach __inc,$1, \
+			$(addprefix -isystem,$(patsubst -I%,%,$(__inc))) \
+		)) \
+	)
 
 # Same as normalize-c-includes-rel but uses the -isystem instead of -I flag
+# Note gcc 4.4.3 of android seems to mess things up when this flag is uses in C++
 normalize-system-c-includes-rel = $(strip \
-	$(foreach __inc,$1, \
-		$(addprefix -isystem ,$(call path-from-top,$(patsubst -I%,%,$(__inc)))) \
-	))
+	$(if $(call streq,$(TARGET_CC_VERSION),4.4.3), \
+		$(call normalize-c-includes-rel,$1), \
+		\
+		$(foreach __inc,$1, \
+			$(addprefix -isystem ,$(call path-from-top,$(patsubst -I%,%,$(__inc)))) \
+		)) \
+	)
 
 ###############################################################################
 ## Copy files helpers.
