@@ -18,6 +18,7 @@ TARGET_BUILD_PROPERTIES += \
 
 # Parrot build properties
 TARGET_BUILD_PROPERTIES += \
+	ro.parrot.build.group=$(PARROT_BUILD_PROP_GROUP) \
 	ro.parrot.build.project=$(PARROT_BUILD_PROP_PROJECT) \
 	ro.parrot.build.product=$(PARROT_BUILD_PROP_PRODUCT) \
 	ro.parrot.build.variant=$(PARROT_BUILD_PROP_VARIANT) \
