@@ -5,6 +5,7 @@ import os
 import optparse
 import xml.parsers
 import moduledb
+from xml.sax.saxutils import escape
 
 #===============================================================================
 # Get Module sources directories including generated files
@@ -110,7 +111,7 @@ class Project(object):
 					continue
 				if "=" in flag:
 					(name, value) = flag[2:].split("=", 1)
-					fd.write("\t\t\t\t\t\t\t\t\t<listOptionValue builtIn=\"false\" value=\"%s=%s\"/>\n" % (name, value))
+					fd.write("\t\t\t\t\t\t\t\t\t<listOptionValue builtIn=\"false\" value=\"%s=%s\"/>\n" % (name, escape(value, {"\"": "&quot;"})))
 				else:
 					(name, value) = (flag[2:], "")
 					fd.write("\t\t\t\t\t\t\t\t\t<listOptionValue builtIn=\"false\" value=\"%s\"/>\n" % name)
