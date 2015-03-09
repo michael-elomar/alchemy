@@ -56,7 +56,7 @@ class Project(object):
 			if addDepend:
 				self.link_depends[src_dir] = dep
 
-	def __genProjectFile(self, with_links):
+	def __genProjectFile(self, options):
 		filename = self.module.fields["PATH"] + "/.project"
 		sys.stderr.write("[%s]: generating '%s'\n" % (self.module.name, filename))
 		fd = open(filename, "w")
@@ -86,7 +86,7 @@ class Project(object):
 		fd.write("\t\t<nature>org.eclipse.cdt.core.ccnature</nature>\n")
 		fd.write("\t</natures>\n")
 
-		if with_links and self.link_depends:
+		if options.linkdeps and self.link_depends:
 			fd.write("\t<linkedResources>\n")
 			for src_dir, dep in self.link_depends.iteritems():
 				fd.write("\t\t<link>\n")
@@ -179,7 +179,7 @@ class Project(object):
 		for incDir in incDirs:
 			fd.write("\t\t\t\t\t\t\t\t\t<listOptionValue builtIn=\"false\" value=\"%s\"/>\n" % (incDir))
 
-	def __genBuildConfig(self, fd, product, variant, with_links):
+	def __genBuildConfig(self, fd, options, product, variant):
 		# Get toolchain build path ex:'/opt/arm-2012.03/bin'
 		# Get toolchain cross prefix ex:'arm-none-linux-gnueabi-' or '' for native
 		crossPath = os.path.dirname(self.modules.targetVars["CC"])
@@ -209,7 +209,7 @@ class Project(object):
 		fd.write("\t\t\t\t\t\t\t<option id=\"cdt.managedbuild.option.gnu.cross.prefix.1532971020\" name=\"Prefix\" superClass=\"cdt.managedbuild.option.gnu.cross.prefix\" value=\"%s\" valueType=\"string\"/>\n" % crossPrefix)
 		fd.write("\t\t\t\t\t\t\t<option id=\"cdt.managedbuild.option.gnu.cross.path.1371778372\" name=\"Path\" superClass=\"cdt.managedbuild.option.gnu.cross.path\" value=\"%s\" valueType=\"string\"/>\n" % crossPath)
 		fd.write("\t\t\t\t\t\t\t<targetPlatform archList=\"all\" binaryParser=\"\" id=\"cdt.managedbuild.targetPlatform.gnu.cross.1850660649\" isAbstract=\"false\" osList=\"all\" superClass=\"cdt.managedbuild.targetPlatform.gnu.cross\"/>\n")
-		fd.write("\t\t\t\t\t\t\t<builder arguments=\"${TARGET_PRODUCT} ${TARGET_PRODUCT_VARIANT}\" autoBuildTarget=\"${ProjName}\" buildPath=\"%s\" cleanBuildTarget=\"${ProjName}-clean\" command=\"${CWD}/build.sh\" enableAutoBuild=\"false\" id=\"cdt.managedbuild.builder.gnu.cross.60154042\" incrementalBuildTarget=\"${ProjName}\" keepEnvironmentInBuildfile=\"false\" managedBuildOn=\"false\" name=\"Gnu Make Builder\" superClass=\"cdt.managedbuild.builder.gnu.cross\"/>\n" % (self.modules.targetVars["ALCHEMY_WORKSPACE_DIR"]))
+		fd.write("\t\t\t\t\t\t\t<builder arguments=\"%s\" autoBuildTarget=\"${ProjName}\" buildPath=\"%s\" cleanBuildTarget=\"${ProjName}-clean\" command=\"${CWD}/build.sh\" enableAutoBuild=\"false\" id=\"cdt.managedbuild.builder.gnu.cross.60154042\" incrementalBuildTarget=\"${ProjName}\" keepEnvironmentInBuildfile=\"false\" managedBuildOn=\"false\" name=\"Gnu Make Builder\" superClass=\"cdt.managedbuild.builder.gnu.cross\"/>\n" % (options.custom_build_args, self.modules.targetVars["ALCHEMY_WORKSPACE_DIR"]))
 		# Generate C compiler
 		fd.write("\t\t\t\t\t\t\t<tool id=\"cdt.managedbuild.tool.gnu.cross.c.compiler.1213173184\" name=\"Cross GCC Compiler\" superClass=\"cdt.managedbuild.tool.gnu.cross.c.compiler\">\n")
 		fd.write("\t\t\t\t\t\t\t\t<option id=\"gnu.c.compiler.option.include.paths.1976964143\" name=\"Include paths (-I)\" superClass=\"gnu.c.compiler.option.include.paths\" useByScannerDiscovery=\"false\" valueType=\"includePath\">\n")
@@ -256,7 +256,7 @@ class Project(object):
 		fd.write("\t\t\t\t\t\t</toolChain>\n")
 		fd.write("\t\t\t\t\t</folderInfo>\n")
 
-		if with_links and self.link_depends:
+		if options.linkdeps and self.link_depends:
 			fd.write("\t\t\t\t\t<sourceEntries>\n")
 			excluding = "|".join([dep.name for dep in self.link_depends.values()])
 			fd.write("\t\t\t\t\t\t<entry excluding=\"%s\" flags=\"VALUE_WORKSPACE_PATH|RESOLVED\" kind=\"sourcePath\" name=\"\"/>\n" % excluding)
@@ -269,7 +269,7 @@ class Project(object):
 		fd.write("\t\t\t<storageModule moduleId=\"org.eclipse.cdt.core.externalSettings\"/>\n")
 		fd.write("\t\t</cconfiguration>\n")
 
-	def __genCProjectFile(self, with_links):
+	def __genCProjectFile(self, options):
 		# get build product & variant
 		product = self.modules.targetVars["PRODUCT"]
 		variant = self.modules.targetVars["PRODUCT_VARIANT"]
@@ -282,7 +282,7 @@ class Project(object):
 		fd.write("<?fileVersion 4.0.0?><cproject storage_type_id=\"org.eclipse.cdt.core.XmlProjectDescriptionStorage\">\n")
 		fd.write("\t<storageModule moduleId=\"org.eclipse.cdt.core.settings\">\n")
 		# generate build configuration
-		self.__genBuildConfig(fd, product, variant, with_links)
+		self.__genBuildConfig(fd, options, product, variant)
 		fd.write("\t</storageModule>\n")
 		fd.write("\t<storageModule moduleId=\"cdtBuildSystem\" version=\"4.0.0\">\n")
 		fd.write("\t\t<project id=\"%s.null.1434616597\" name=\"%s\"/>\n" % (self.module.name, self.module.name))
@@ -300,9 +300,9 @@ class Project(object):
 		fd.write("</cproject>\n")
 		fd.close()
 
-	def generate(self, with_links):
-		self.__genProjectFile(with_links)
-		self.__genCProjectFile(with_links)
+	def generate(self, options):
+		self.__genProjectFile(options)
+		self.__genCProjectFile(options)
 
 #===============================================================================
 #===============================================================================
@@ -321,7 +321,7 @@ def main():
 		if name not in modules:
 			sys.stderr.write("Error module '%s' not found:\n" % name)
 		else:
-			Project(name, modules).generate(options.linkdeps)
+			Project(name, modules).generate(options)
 
 #===============================================================================
 # Setup option parser and parse command line.
@@ -332,11 +332,18 @@ def parseArgs():
 	parser = optparse.OptionParser(usage=usage)
 
 	# Main option
-	parser.add_option("--link-dependencies",
+	parser.add_option("-d",
+		"--link-dependencies",
 		dest="linkdeps",
 		action="store_true",
 		default=False,
 		help="Link direct dependencies sources in project.")
+
+	parser.add_option("-b",
+		"--custom-build-args",
+		dest="custom_build_args",
+		default="${TARGET_PRODUCT} ${TARGET_PRODUCT_VARIANT}",
+		help="Custom build arguments.")
 
 	# Parse arguments and check validity
 	(options, args) = parser.parse_args()
