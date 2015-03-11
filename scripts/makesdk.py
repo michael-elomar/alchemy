@@ -108,13 +108,13 @@ def copyHeaders(srcDir, dstDir):
 		logging.warning("Missing include directory: %s", srcDir)
 	for (dirPath, dirNames, fileNames) in os.walk(srcDir):
 		for fileName in fileNames:
-			srcFilePath = os.path.join(dirPath, fileName)
+			srcFilePath = os.path.normpath(os.path.join(dirPath, fileName))
 			relPath = os.path.relpath(srcFilePath, srcDir)
-			dstFilePath = os.path.join(dstDir, relPath)
+			dstFilePath = os.path.normpath(os.path.join(dstDir, relPath))
 			if os.path.splitext(fileName)[1] in extensions:
 				logging.debug("Copy: %s -> %s", srcFilePath, dstFilePath)
-				if not os.path.exists(os.path.split(dstFilePath)[0]):
-					os.makedirs(os.path.split(dstFilePath)[0], mode=0755)
+				if not os.path.exists(os.path.dirname(dstFilePath)):
+					os.makedirs(os.path.dirname(dstFilePath), mode=0755)
 				shutil.copy2(srcFilePath, dstFilePath)
 
 #===============================================================================
