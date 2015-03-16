@@ -807,14 +807,11 @@ cloc_files := $(sort $(cloc_files))
 
 .PHONY: $(LOCAL_MODULE)-codecheck
 $(LOCAL_MODULE)-codecheck:
-	@for f in $(PRIVATE_CODECHECK_FILES); do \
-		echo "$(PRIVATE_MODULE): Checking file $${f#$(TOP_DIR)/}"; \
-		$(BUILD_SYSTEM)/scripts/checkpatch.pl \
-			--no-tree --no-summary --terse --show-types -f \
-			--ignore SPLIT_STRING \
-			$(PRIVATE_CODECHECK_ARGS) $$f \
-		|| true; \
-	done
+	@$(BUILD_SYSTEM)/scripts/checkpatch.pl \
+		--no-tree --no-summary --terse --show-types -f \
+		--ignore SPLIT_STRING \
+		$(PRIVATE_CODECHECK_ARGS) $(PRIVATE_CODECHECK_FILES) \
+	|| true;
 
 .PHONY: $(LOCAL_MODULE)-cloc
 $(LOCAL_MODULE)-cloc:
