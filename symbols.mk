@@ -8,6 +8,7 @@
 
 SYMBOLS_TAR := $(TARGET_OUT)/symbols-$(TARGET_PRODUCT_FULL_NAME).tar
 SYMBOLS_TAR_GZ := $(TARGET_OUT)/symbols-$(TARGET_PRODUCT_FULL_NAME).tar.gz
+MAKESYMBOLS_SCRIPT := $(BUILD_SYSTEM)/scripts/makesymbols.py
 
 # Determine chroot path of the target
 SYMBOLS_ROOT :=
@@ -22,19 +23,20 @@ endif
 symbols-tar:
 	@echo "Symbols: start"
 	@rm -f $(SYMBOLS_TAR)
-	$(Q) cd $(TARGET_OUT_STAGING) && find | file -f- | \
-		grep 'not stripped' | cut -d: -f1 | \
-		tar -T- -cf $(SYMBOLS_TAR) --transform "s|^\./|symbols$(SYMBOLS_ROOT)/|"
+	$(Q) $(MAKESYMBOLS_SCRIPT) $(TARGET_OUT_STAGING) $(SYMBOLS_TAR) \
+		--symbols-root=$(SYMBOLS_ROOT)
 	@echo "Symbols: done -> $(SYMBOLS_TAR)"
 
 # Tar archive gzip compressed
 .PHONY: symbols-tar-gz
 symbols-tar-gz:
 	@echo "Symbols: start"
+	@rm -f $(SYMBOLS_TAR)
 	@rm -f $(SYMBOLS_TAR_GZ)
-	$(Q) cd $(TARGET_OUT_STAGING) && find | file -f- | \
-		grep 'not stripped' | cut -d: -f1 | \
-		tar -T- -czf $(SYMBOLS_TAR_GZ) --transform "s|^\./|symbols$(SYMBOLS_ROOT)/|"
+	$(Q) $(MAKESYMBOLS_SCRIPT) $(TARGET_OUT_STAGING) $(SYMBOLS_TAR) \
+		--symbols-root=$(SYMBOLS_ROOT)
+	@echo "Symbols: compressing"
+	$(Q) gzip $(SYMBOLS_TAR)
 	@echo "Symbols: done -> $(SYMBOLS_TAR_GZ)"
 
 .PHONY: symbols-clean
@@ -45,7 +47,8 @@ symbols-clean:
 # Only add dependency if it is also given in goals to avoid unecessary checks
 # symbols target never depends on final
 ifneq ("$(call is-targets-in-make-goals,all)","")
-symbols: all
+symbols-tar: all
+symbols-tar-gz: all
 endif
 
 clean: symbols-clean
