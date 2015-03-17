@@ -189,14 +189,6 @@ else
   HOST_GLOBAL_LDFLAGS_SHARED += -m32
 endif
 
-# Copy content of host staging from sdk
-$(foreach __dir,$(TARGET_SDK_DIRS), \
-	$(if $(wildcard $(__dir)/host), \
-		$(shell mkdir -p $(HOST_OUT_STAGING)) \
-		$(shell cp -Raf $(__dir)/host/* $(HOST_OUT_STAGING)) \
-	) \
-)
-
 ###############################################################################
 ## Find some tools.
 ###############################################################################
@@ -215,11 +207,10 @@ endif
 ###############################################################################
 
 # Make sure that staging dir are found first in case we want to override something
-# TODO add SDK dirs
 __extra-host-c-includes := $(strip \
-	$(foreach __dir,$(HOST_OUT_STAGING), \
-		$(__dir)/usr/include \
-	))
+	$(foreach __dir,$(HOST_OUT_STAGING),$(__dir)/usr/include) \
+	$(foreach __dir,$(TARGET_SDK_DIRS),$(__dir)/host/usr/include) \
+	)
 HOST_GLOBAL_C_INCLUDES := $(__extra-host-c-includes) $(HOST_GLOBAL_C_INCLUDES)
 
 # Notify that build is performed by alchemy
@@ -227,7 +218,6 @@ HOST_GLOBAL_CFLAGS += -DALCHEMY_BUILD
 
 # Add staging/sdk dirs to linker
 # To make sure linker does not hardcode path to libs, set rpath-link.
-# TODO add SDK dirs
 # TODO should not be needed because we don't support dynamic linking in host.
 __extra-host-ldflags := $(strip \
 	$(foreach __dir,$(HOST_OUT_STAGING), \
@@ -235,6 +225,12 @@ __extra-host-ldflags := $(strip \
 		-L$(__dir)/usr/lib \
 		-Wl,-rpath-link=$(__dir)/lib \
 		-Wl,-rpath-link=$(__dir)/usr/lib \
+	) \
+	$(foreach __dir,$(TARGET_SDK_DIR), \
+		-L$(__dir)/host/lib \
+		-L$(__dir)/host/usr/lib \
+		-Wl,-rpath-link=$(__dir)/host/lib \
+		-Wl,-rpath-link=$(__dir)/host/usr/lib \
 	))
 
 HOST_GLOBAL_LDFLAGS += $(__extra-host-ldflags)

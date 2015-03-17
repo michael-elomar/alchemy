@@ -16,10 +16,16 @@ __autotools-install-bin := $(shell which install)
 __autotools-pkg-config-bin := $(shell which pkg-config)
 
 # Update host compilation path
-__autotools-host-path := $(HOST_OUT_STAGING)/bin:$(HOST_OUT_STAGING)/usr/bin:$(PATH)
+__autotools-host-path := $(subst $(space),$(colon),$(strip \
+	$(foreach __dir,$(HOST_OUT_STAGING),$(__dir)/bin $(__dir)/usr/bin) \
+	$(foreach __dir,$(TARGET_SDK_DIRS),$(__dir)/host/bin $(__dir)/host/usr/bin) \
+	)):$(PATH)
 
 # Update target compilation path
-__autotools-target-path := $(HOST_OUT_STAGING)/bin:$(HOST_OUT_STAGING)/usr/bin:$(PATH)
+__autotools-target-path := $(subst $(space),$(colon),$(strip \
+	$(foreach __dir,$(HOST_OUT_STAGING),$(__dir)/bin $(__dir)/usr/bin) \
+	$(foreach __dir,$(TARGET_SDK_DIRS),$(__dir)/host/bin $(__dir)/host/usr/bin) \
+	)):$(PATH)
 
 # Common arguments to configure
 # * Avoid triggering regeneration of configure/Makefile.in. The regeneration
