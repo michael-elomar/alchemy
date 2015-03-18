@@ -816,6 +816,7 @@ cloc_files := $(sort $(cloc_files))
 
 .PHONY: $(LOCAL_MODULE)-codecheck
 $(LOCAL_MODULE)-codecheck:
+	@echo "$(PRIVATE_MODULE): Checking files...";
 	@$(BUILD_SYSTEM)/scripts/checkpatch.pl \
 		--no-tree --no-summary --terse --show-types -f \
 		--ignore SPLIT_STRING \
@@ -824,6 +825,7 @@ $(LOCAL_MODULE)-codecheck:
 
 .PHONY: $(LOCAL_MODULE)-cppcheck
 $(LOCAL_MODULE)-cppcheck:
+	@echo "$(PRIVATE_MODULE): Checking files...";
 	@for f in $(PRIVATE_CPPCHECK_FILES); do \
 		echo "$(PRIVATE_MODULE): Checking file $${f#$(TOP_DIR)/}"; \
 		$(BUILD_SYSTEM)/scripts/cpplint.py \
