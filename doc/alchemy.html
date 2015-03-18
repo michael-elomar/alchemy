@@ -505,6 +505,7 @@ unpacked sources and applied patches will be kept in the build directory.</li>
 <li><code>make &lt;module&gt;-doc</code> : will generate the documentation for the module.</li>
 <li><code>make &lt;module&gt;-path</code> : will display the path of the module.</li>
 <li><code>make &lt;module&gt;-codecheck</code> : will check coding style of C source files</li>
+<li><code>make &lt;module&gt;-cppcheck</code> : will check coding style of C++ source files</li>
 </ul>
 
 <h3>Module registration</h3>
@@ -1322,6 +1323,26 @@ the error:</p>
 <pre>
     /* codecheck_ignore[NEW_TYPEDEFS,LONG_LINE] */
     typedef struct _CustomTypedef CustomTypedef; /* custom typedef for consistency with other GObjects */
+</pre>
+
+<h2>Cppcheck false positives or intentional deviations</h2>
+
+<p>You can ignore specific cppcheck warnings in a C++ source code file by inserting
+a tag with the following syntax in a comment line to the line with
+the error:</p>
+
+<pre>
+    NOLINT(category)
+</pre>
+
+<p>Where category is the message type returned by <code>make &lt;module&gt;-cppcheck</code>
+(for example <code>whitespace/braces</code>, etc).</p>
+
+<p>Ex:</p>
+
+<pre>
+    static int my_function()
+    {  // NOLINT(whitespace/braces)
 </pre>
 
 <h2>How to use it</h2>

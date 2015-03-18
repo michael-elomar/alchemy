@@ -795,6 +795,14 @@ data_c_includes := $(sort $(abspath $(data_c_includes)))
 codecheck_files := $(filter %.c,$(data_src_files))
 codecheck_files += $(foreach __inc,$(data_c_includes),$(wildcard $(__inc)/*.h))
 
+# Cpplint is only for cpp files
+cppcheck_files := $(filter %.cpp,$(data_src_files))
+cppcheck_files += $(filter %.cc,$(data_src_files))
+cppcheck_files += $(filter %.cxx,$(data_src_files))
+cppcheck_files += $(foreach __inc,$(data_c_includes),$(wildcard $(__inc)/*.hpp))
+cppcheck_files += $(foreach __inc,$(data_c_includes),$(wildcard $(__inc)/*.hh))
+cppcheck_files += $(foreach __inc,$(data_c_includes),$(wildcard $(__inc)/*.hxx))
+
 # Cloc
 cloc_files := $(data_src_files)
 cloc_files += $(foreach __inc,$(data_c_includes),$(wildcard $(__inc)/*.h))
@@ -803,6 +811,7 @@ cloc_files += $(foreach __inc,$(data_c_includes),$(wildcard $(__inc)/*.hxx))
 
 # Sort to have unique names
 codecheck_files := $(sort $(codecheck_files))
+cppcheck_files := $(sort $(cppcheck_files))
 cloc_files := $(sort $(cloc_files))
 
 .PHONY: $(LOCAL_MODULE)-codecheck
@@ -812,6 +821,17 @@ $(LOCAL_MODULE)-codecheck:
 		--ignore SPLIT_STRING \
 		$(PRIVATE_CODECHECK_ARGS) $(PRIVATE_CODECHECK_FILES) \
 	|| true;
+
+.PHONY: $(LOCAL_MODULE)-cppcheck
+$(LOCAL_MODULE)-cppcheck:
+	@for f in $(PRIVATE_CPPCHECK_FILES); do \
+		echo "$(PRIVATE_MODULE): Checking file $${f#$(TOP_DIR)/}"; \
+		$(BUILD_SYSTEM)/scripts/cpplint.py \
+			--extension hpp,cpp,cxx,hxx,cc,hh \
+			--counting detailed --verbose 0 \
+			$(PRIVATE_CPPCHECK_ARGS) $$f \
+		|| true; \
+	done
 
 .PHONY: $(LOCAL_MODULE)-cloc
 $(LOCAL_MODULE)-cloc:
@@ -829,6 +849,11 @@ $(LOCAL_MODULE)-codecheck: PRIVATE_MODULE := $(LOCAL_MODULE)
 $(LOCAL_MODULE)-codecheck: PRIVATE_BUILD_DIR := $(build_dir)
 $(LOCAL_MODULE)-codecheck: PRIVATE_CODECHECK_FILES := $(codecheck_files)
 $(LOCAL_MODULE)-codecheck: PRIVATE_CODECHECK_ARGS := $(LOCAL_CODECHECK_ARGS)
+
+$(LOCAL_MODULE)-cppcheck: PRIVATE_MODULE := $(LOCAL_MODULE)
+$(LOCAL_MODULE)-cppcheck: PRIVATE_BUILD_DIR := $(build_dir)
+$(LOCAL_MODULE)-cppcheck: PRIVATE_CPPCHECK_FILES := $(cppcheck_files)
+$(LOCAL_MODULE)-cppcheck: PRIVATE_CPPCHECK_ARGS := $(LOCAL_CPPCHECK_ARGS)
 
 $(LOCAL_MODULE)-cloc: PRIVATE_MODULE := $(LOCAL_MODULE)
 $(LOCAL_MODULE)-cloc: PRIVATE_BUILD_DIR := $(build_dir)

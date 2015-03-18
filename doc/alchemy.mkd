@@ -471,6 +471,7 @@ For each registered modules, following `make` targets will be available :
 * `make <module>-doc` : will generate the documentation for the module.
 * `make <module>-path` : will display the path of the module.
 * `make <module>-codecheck` : will check coding style of C source files.
+* `make <module>-cppcheck` : will check coding style of C++ source files.
 * `make <module>-cloc` : will count the number of lines of code.
 
 ### Module registration
@@ -741,7 +742,7 @@ your custom rules.
 
 Variables to be exported by this module and then imported by modules depending
 on it. This simplifies the maintenance of the build system by forcing module to
-export everything required to use them. 
+export everything required to use them.
 
 For `internal` modules, `LOCAL_EXPORT_LDLIBS` is rarely used because the build
 system knows how to link with it and hence it is not needed to explicitly do so.
@@ -1191,7 +1192,7 @@ The order of link of static libraries is also automatically done so that the
 order given in an atom.mk is not a problem.
 
 For example, if `A` is an executable and `B`, `C`, `D`, and `E` are static libraries.
-If dependencies are as below: 
+If dependencies are as below:
 <pre>
 A->E,B
 B->C,D
@@ -1240,6 +1241,26 @@ Ex:
 <pre>
 	/* codecheck_ignore[NEW_TYPEDEFS,LONG_LINE] */
 	typedef struct _CustomTypedef CustomTypedef; /* custom typedef for consistency with other GObjects */
+</pre>
+
+## Cppcheck false positives or intentional deviations
+
+You can ignore specific cppcheck warnings in a C++ source code file by inserting
+a tag with the following syntax in a comment line to the line with
+the error:
+
+<pre>
+	NOLINT(category)
+</pre>
+
+Where category is the message returned by `make <module>-cppcheck`
+(for example `whitespace/braces`, etc).  NOLINT or NOLINT(*)
+suppresses errors of all categories on that line.
+
+Ex:
+<pre>
+	static int my_function()
+	{  // NOLINT(whitespace/braces)
 </pre>
 
 ## How to use it
