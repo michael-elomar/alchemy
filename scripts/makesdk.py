@@ -266,7 +266,7 @@ def processModule(ctx, module):
 	# Register shared/static libraries as normal so we can manage dependencies
 	# Other are simply put as prebuilt
 	ctx.atom.write("LOCAL_SDK := $(LOCAL_PATH)\n")
-	if moduleClass == "SHARED_LIBRARY" or moduleClass == "STATIC_LIBRARY" or moduleClass == "LIBRARY":
+	if moduleClass in ["SHARED_LIBRARY", "STATIC_LIBRARY", "LIBRARY"]:
 		ctx.atom.write("LOCAL_DESTDIR := %s\n" % module.fields["DESTDIR"])
 		ctx.atom.write("LOCAL_MODULE_FILENAME := %s\n" % module.fields["MODULE_FILENAME"])
 		ctx.atom.write("include $(BUILD_%s)\n" % moduleClass)
