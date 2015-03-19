@@ -3,6 +3,7 @@
 import sys, os, logging
 import optparse
 import shutil
+import fnmatch
 import xml.parsers
 
 from cStringIO import StringIO
@@ -27,115 +28,87 @@ class Context(object):
 #===============================================================================
 #===============================================================================
 def copyHostStaging(srcDir, dstDir):
-	for (dirPath, dirNames, fileNames) in os.walk(srcDir):
-		for fileName in fileNames:
-			srcFilePath = os.path.join(dirPath, fileName)
-			relPath = os.path.relpath(srcFilePath, srcDir)
-			dstFilePath = os.path.join(dstDir, relPath)
-			# When combining several sdk the same file could be found several times
-			if not os.path.lexists(dstFilePath):
-				if not os.path.exists(os.path.split(dstFilePath)[0]):
-					os.makedirs(os.path.split(dstFilePath)[0], mode=0755)
-				if os.path.islink(srcFilePath):
-					logging.debug("Link: %s -> %s", srcFilePath, dstFilePath)
-					linkTarget = os.readlink(srcFilePath)
-					os.symlink(linkTarget, dstFilePath)
-				else:
-					logging.debug("Copy: %s -> %s", srcFilePath, dstFilePath)
-					shutil.copy2(srcFilePath, dstFilePath)
+	copyElements(srcDir, dstDir, keepLinks=True)
 
 #===============================================================================
 #===============================================================================
 def copyStaging(srcDir, dstDir):
-	extensions = [".h", ".hpp", ".hxx", ".so", ".a", ".pc", ".tcc", ".doxygen", ".inl", ".vapi", ".deps"]
-	for (dirPath, dirNames, fileNames) in os.walk(srcDir):
-		for fileName in fileNames:
-			srcFilePath = os.path.join(dirPath, fileName)
-			relPath = os.path.relpath(srcFilePath, srcDir)
-			dstFilePath = os.path.join(dstDir, relPath)
-			# When combining several sdk the same file could be found several times
-			if not os.path.lexists(dstFilePath) \
-					and (os.path.splitext(fileName)[1] in extensions \
-							or ".so." in fileName \
-							or "include" in dirPath):
-				if not os.path.exists(os.path.split(dstFilePath)[0]):
-					os.makedirs(os.path.split(dstFilePath)[0], mode=0755)
-				if os.path.islink(srcFilePath):
-					logging.debug("Link: %s -> %s", srcFilePath, dstFilePath)
-					linkTarget = os.readlink(srcFilePath)
-					os.symlink(linkTarget, dstFilePath)
-				else:
-					logging.debug("Copy: %s -> %s", srcFilePath, dstFilePath)
-					shutil.copy2(srcFilePath, dstFilePath)
+	extensions = [
+		"*.h", "*.hpp", "*.hxx", "*.so",
+		"*.so.*", "*.a", "*.pc", "*.tcc",
+		"*.doxygen", "*.inl", "*.vapi", "*.deps"]
+	copyElements(srcDir, dstDir, extensions=extensions, keepLinks=True, keepInclude=True)
 
 #===============================================================================
 #===============================================================================
 def copySdk(srcDir, dstDir):
-	for (dirPath, dirNames, fileNames) in os.walk(srcDir):
-		for fileName in fileNames:
-			srcFilePath = os.path.join(dirPath, fileName)
-			relPath = os.path.relpath(srcFilePath, srcDir)
-			dstFilePath = os.path.join(dstDir, relPath)
-			# When combining several sdk the same file could be found several times
-			if not os.path.lexists(dstFilePath):
-				if not os.path.exists(os.path.split(dstFilePath)[0]):
-					os.makedirs(os.path.split(dstFilePath)[0], mode=0755)
-				if os.path.islink(srcFilePath):
-					logging.debug("Link: %s -> %s", srcFilePath, dstFilePath)
-					linkTarget = os.readlink(srcFilePath)
-					os.symlink(linkTarget, dstFilePath)
-				else:
-					logging.debug("Copy: %s -> %s", srcFilePath, dstFilePath)
-					shutil.copy2(srcFilePath, dstFilePath)
-		# Link to directories are in dirNames...
-		for dirName in dirNames:
-			srcDirPath = os.path.join(dirPath, dirName)
-			relPath = os.path.relpath(srcDirPath, srcDir)
-			dstDirPath = os.path.join(dstDir, relPath)
-			# When combining several sdk the same file could be found several times
-			if not os.path.lexists(dstDirPath):
-				if not os.path.exists(os.path.split(dstDirPath)[0]):
-					os.makedirs(os.path.split(dstDirPath)[0], mode=0755)
-				if os.path.islink(srcDirPath):
-					logging.debug("Link: %s -> %s", srcDirPath, dstDirPath)
-					linkTarget = os.readlink(srcDirPath)
-					os.symlink(linkTarget, dstDirPath)
+	copyElements(srcDir, dstDir, keepLinks=True, scanDirs=True)
 
 #===============================================================================
 #===============================================================================
 def copyHeaders(srcDir, dstDir):
-	extensions = [".h", ".hpp", ".hxx", ".doxygen", ".inl"]
-	if not os.path.exists(srcDir):
-		logging.warning("Missing include directory: %s", srcDir)
-	for (dirPath, dirNames, fileNames) in os.walk(srcDir):
-		for fileName in fileNames:
-			srcFilePath = os.path.normpath(os.path.join(dirPath, fileName))
-			relPath = os.path.relpath(srcFilePath, srcDir)
-			dstFilePath = os.path.normpath(os.path.join(dstDir, relPath))
-			if os.path.splitext(fileName)[1] in extensions:
-				logging.debug("Copy: %s -> %s", srcFilePath, dstFilePath)
-				if not os.path.exists(os.path.dirname(dstFilePath)):
-					os.makedirs(os.path.dirname(dstFilePath), mode=0755)
-				shutil.copy2(srcFilePath, dstFilePath)
+	extensions = ["*.h", "*.hpp", "*.hxx", "*.doxygen", "*.inl"]
+	copyElements(srcDir, dstDir, extensions)
 
 #===============================================================================
 #===============================================================================
 def copyLibs(srcDir, dstDir):
-	extensions = [".a"]
+	extensions = ["*.a"]
+	# Limit the copy to the base of the module
+	copyElements(srcDir, dstDir, extensions, depth=1)
+
+#===============================================================================
+# Copy elements based on their extensions and limiting to a max depth if any
+# If no extension is provided, any element will be took into account
+#===============================================================================
+def copyElement(srcPath, dstPath, keepLinks=False):
+	if not os.path.exists(os.path.dirname(dstPath)):
+		os.makedirs(os.path.dirname(dstPath), mode=0755)
+
+	# Set the function to use for copy
+	if os.path.isdir(srcPath):
+		copy_func = { "function":shutil.copytree, "description":"Copy"}
+	else:
+		copy_func = { "function":shutil.copy2, "description":"Copy"}
+
+	if os.path.islink(srcPath):
+		# We voluntarily make no normalization of path
+		# as the final environment may be peculiar
+		srcPath = os.readlink(srcPath)
+		# If asked to keep links instead of hard copy,
+		# change the function to use
+		if keepLinks:
+			copy_func = { "function":os.symlink, "description":"Link"}
+	# Do the copy/symlink
+	logging.debug("%s: %s -> %s", copy_func["description"], srcPath, dstPath)
+	copy_func["function"](srcPath, dstPath)
+
+def copyElements(srcDir, dstDir, extensions=["*"], depth=0, keepLinks=False, keepDst=False, keepInclude=False, scanDirs=False):
 	if not os.path.exists(srcDir):
-		logging.warning("Missing lib directory: %s", srcDir)
+		logging.warning("Missing directory: %s", srcDir)
+
+	# Manage depth only if provided or different than 0
+	if depth is None or depth == 0:
+		current_depth = None
+	else:
+		# Save the current level
+		current_depth = os.path.normpath(srcDir).count(os.sep)
+
 	for (dirPath, dirNames, fileNames) in os.walk(srcDir):
+		# Aren't we deep enough to parse the content of the files
+		if current_depth:
+			# We use continue instead of break,
+			# In order not to skip potentials remaining directories
+			if os.path.normpath(dirPath).count(os.sep) > (current_depth + depth):
+				continue
+
 		for fileName in fileNames:
-			srcFilePath = os.path.join(dirPath, fileName)
+			# Get normalized path for src and dst
+			srcFilePath = os.path.normpath(os.path.join(dirPath, fileName))
 			relPath = os.path.relpath(srcFilePath, srcDir)
-			dstFilePath = os.path.join(dstDir, relPath)
-			if os.path.splitext(fileName)[1] in extensions:
-				logging.debug("Copy: %s -> %s", srcFilePath, dstFilePath)
-				if not os.path.exists(os.path.split(dstFilePath)[0]):
-					os.makedirs(os.path.split(dstFilePath)[0], mode=0755)
-				shutil.copy2(srcFilePath, dstFilePath)
-		# Only first level
-		break
+			dstFilePath = os.path.normpath(os.path.join(dstDir, relPath))
+			if any([fnmatch.fnmatch(os.path.basename(srcFilePath), ext) for ext in extensions]):
+				copyElement(srcFilePath, dstFilePath, keepLinks=keepLinks)
 
 #===============================================================================
 #===============================================================================
