@@ -20,6 +20,7 @@ class Context(object):
 		self.stagingDir = os.path.abspath(args[4])
 		self.outDir = os.path.abspath(args[5])
 		self.atom = StringIO()
+		self.setup = StringIO()
 		self.sdkDirs = []
 		self.modules = None
 
@@ -307,6 +308,13 @@ def checkTargetVar(ctx, name):
 		ctx.atom.write("endif\n\n")
 
 #===============================================================================
+#===============================================================================
+def setupTargetEnvironment(ctx, name):
+	val = ctx.modules.targetVars.get(name, "")
+	if val:
+		ctx.setup.write("TARGET_%s := %s\n" % (name, val))
+
+#===============================================================================
 # Main function.
 #===============================================================================
 def main():
@@ -340,13 +348,15 @@ def main():
 	logging.info("Copying staging directory")
 	copyStaging(ctx.stagingDir, ctx.outDir)
 
-	# Make sure that when the sdk is used it will be on the same target
-	checkTargetVar(ctx, "OS")
-	checkTargetVar(ctx, "OS_FLAVOUR")
-	checkTargetVar(ctx, "ARCH")
-	checkTargetVar(ctx, "CPU")
-	checkTargetVar(ctx, "LIBC")
-	checkTargetVar(ctx, "DEFAULT_ARM_MODE")
+	# Save specific sdk target components in a setup.mk file for future usage,
+	# Also add a check in the atom.mk
+	# to make sure that the sdk is used in the correct environment
+	target_elements = [ "OS", "OS_FLAVOUR",
+		"ARCH", "CPU",
+		"LIBC", "DEFAULT_ARM_MODE" ]
+	for element_to_check in target_elements:
+		checkTargetVar(ctx, element_to_check)
+		setupTargetEnvironment(ctx, element_to_check)
 
 	# Process modules
 	for module in ctx.modules:
@@ -359,11 +369,16 @@ def main():
 		ctx.atom.write("\nendef\n")
 
 	# Write the atom.mk
-	atomFile = open(os.path.join(ctx.outDir, "atom.mk"), "w")
-	atomFile.write("# GENERATED FILE, DO NOT EDIT\n\n")
-	atomFile.write("LOCAL_PATH := $(call my-dir)\n\n")
-	atomFile.write(ctx.atom.getvalue())
-	atomFile.close()
+	with open(os.path.join(ctx.outDir, "atom.mk"), "w") as atomFile:
+		atomFile.write("# GENERATED FILE, DO NOT EDIT\n\n")
+		atomFile.write("LOCAL_PATH := $(call my-dir)\n\n")
+		atomFile.write(ctx.atom.getvalue())
+
+	# Write the setup.mk
+	with open(os.path.join(ctx.outDir, "setup.mk"), "w") as setupFile:
+		setupFile.write("# GENERATED FILE, DO NOT EDIT\n\n")
+		setupFile.write(ctx.setup.getvalue())
+		setupFile.write("\n")
 
 #===============================================================================
 # Setup option parser and parse command line.
