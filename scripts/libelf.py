@@ -462,8 +462,12 @@ class ElfShdr(object):
 			fmt = elf.ehdr.getFmtPrefix() + "IIQQQQIIQQ"
 			self.size = ElfPhdr.size64
 
-		# Save fields (same order for 32-bit/64-bit)
-		fields = struct.unpack(fmt, buf)
+		try:
+			# Save fields (same order for 32-bit/64-bit)
+			fields = struct.unpack(fmt, buf)
+		except struct.error:
+			raise ElfError("Bad Section Header")
+
 		self.sh_name = fields[0]      # Section name (string tbl index)
 		self.sh_type = fields[1]      # Section type
 		self.sh_flags = fields[2]     # Section flags
