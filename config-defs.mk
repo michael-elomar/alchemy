@@ -24,16 +24,16 @@ ifndef CONFIG_GLOBAL_FILE
   CONFIG_GLOBAL_FILE := $(TARGET_CONFIG_DIR)/global.config
 endif
 
-# Remember if the config directory is present or not
-ifeq ("$(wildcard $(TARGET_CONFIG_DIR))","")
-  CONFIG_DIR_AVAILABLE := 0
+# Remember if the global config file is present or not
+ifeq ("$(wildcard $(CONFIG_GLOBAL_FILE))","")
+  CONFIG_GLOBAL_FILE_AVAILABLE := 0
 else
-  CONFIG_DIR_AVAILABLE := 1
+  CONFIG_GLOBAL_FILE_AVAILABLE := 1
 endif
 
 # Include global config file, do not fail if directory does not exists or we
 # are requested to skip checks.
-ifeq ("$(CONFIG_DIR_AVAILABLE)","1")
+ifeq ("$(CONFIG_GLOBAL_FILE_AVAILABLE)","1")
   ifeq ("$(SKIP_DEPS_AND_CHECKS)","0")
     include $(CONFIG_GLOBAL_FILE)
   else

@@ -6,9 +6,9 @@
 ## Configuration management, rules.
 ###############################################################################
 
-# Avoid checking global config if directory does not exists or we
+# Avoid checking global config if it does not exists or we
 # are requested to skip checks.
-ifeq ("$(CONFIG_DIR_AVAILABLE)","1")
+ifeq ("$(CONFIG_GLOBAL_FILE_AVAILABLE)","1")
 ifeq ("$(SKIP_DEPS_AND_CHECKS)","0")
 $(CONFIG_GLOBAL_FILE): __config-check
 endif
@@ -40,6 +40,24 @@ else ifneq ("$(USE_CONFIG_CHECK)","0")
 	@$(CONFWRAPPER) --main=$(CONFIG_GLOBAL_FILE) check $(__args)
 else
 	@echo "Config check disabled : USE_CONFIG_CHECK=$(USE_CONFIG_CHECK)"
+endif
+
+# Generate a global.config will all modules activated
+# As it uses ALL_BUILD_MODULES it will be a no op if the file alredy exists.
+# ALL_BUILD_MODULES is set to really all module only if no previous file.
+# Mainly used for automatic builds with a sdk
+.PHONY: config-force-all
+config-force-all:
+ifeq ("$(CONFIG_GLOBAL_FILE_AVAILABLE)","1")
+	@echo "Ignoring 'config-force-all', '$(CONFIG_GLOBAL_FILE)' exists"
+else
+	@:>$(CONFIG_GLOBAL_FILE)
+	$(foreach __mod,$(ALL_BUILD_MODULES), \
+		@echo "CONFIG_ALCHEMY_BUILD_$(call module-get-define,$(__mod))=y" \
+			>> $(CONFIG_GLOBAL_FILE)$(endl) \
+	)
+	$(eval __args := $(call __generate-config-args))
+	@$(CONFWRAPPER) --main=$(CONFIG_GLOBAL_FILE) update $(__args)
 endif
 
 # Update everything at once

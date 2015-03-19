@@ -367,12 +367,12 @@ __modules-get-required-host-direct = $(strip $(sort \
 ## $1 : module to check.
 ## Prebuild modules are considered as in the config (even if they are
 ## not actually in it).
-## If no configuration directory present, always return true.
+## If no global configuration file present, always return true.
 ###############################################################################
 is-module-in-build-config = $(strip \
 	$(if $(call is-module-prebuilt,$1),$(true), \
 		$(eval __var := CONFIG_ALCHEMY_BUILD_$(call module-get-define,$1)) \
-		$(if $(call streq,$(CONFIG_DIR_AVAILABLE),0),$(true), \
+		$(if $(call streq,$(CONFIG_GLOBAL_FILE_AVAILABLE),0),$(true), \
 			$(if $(call is-var-defined,$(__var)), \
 				$(if $($(__var)),$(true),$(false)), \
 				$(false) \
