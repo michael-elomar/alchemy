@@ -87,7 +87,8 @@ def copyElement(srcPath, dstPath, keepLinks=False):
 	logging.debug("%s: %s -> %s", copy_func["description"], srcPath, dstPath)
 	copy_func["function"](srcPath, dstPath)
 
-def copyElements(srcDir, dstDir, extensions=["*"], depth=0, keepLinks=False, keepDst=False, keepInclude=False, scanDirs=False):
+def copyElements(srcDir, dstDir, extensions=["*"], depth=0,
+		keepLinks=False, keepInclude=False, scanDirs=False):
 	if not os.path.exists(srcDir):
 		logging.warning("Missing directory: %s", srcDir)
 
