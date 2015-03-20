@@ -181,9 +181,9 @@ def processModule(ctx, module):
 				# TODO: simplify destination by remove extra 'lib' and 'module name'
 				relPath = os.path.relpath(libDir, modulePath)
 				if relPath != ".":
-					dstDir = "usr/lib/" + module.name + "/" + relPath
+					dstDir = os.path.join("usr", "lib", module.name, relPath)
 				else:
-					dstDir = "usr/lib/" + module.name
+					dstDir = os.path.join("usr", "lib", module.name)
 				# Copy libs and add new directory only if files have actually
 				# been copied (ie directory was created)
 				copyLibs(libDir, os.path.join(ctx.outDir, dstDir))
@@ -212,9 +212,9 @@ def processModule(ctx, module):
 				# TODO: simplify destination by remove extra 'include' and 'module name'
 				relPath = os.path.relpath(includeDir, modulePath)
 				if relPath != ".":
-					dstDir = "usr/include/" + module.name + "/" + relPath
+					dstDir = os.path.join("usr", "include", module.name, relPath)
 				else:
-					dstDir = "usr/include/" + module.name
+					dstDir = os.path.join("usr", "include", module.name)
 				# Copy headers and add new directory only if files have actually
 				# been copied (ie directory was created)
 				copyHeaders(includeDir, os.path.join(ctx.outDir, dstDir))
@@ -224,9 +224,9 @@ def processModule(ctx, module):
 				# TODO: simplify destination by remove extra 'include' and 'module name'
 				relPath = os.path.relpath(includeDir, os.path.join(ctx.buildDir, module.name))
 				if relPath != ".":
-					dstDir = "usr/include/" + module.name + "/" + relPath
+					dstDir = os.path.join("usr", "include", module.name, relPath)
 				else:
-					dstDir = "usr/include/" + module.name
+					dstDir = os.path.join("usr", "include", module.name)
 				# Copy headers and add new directory only if files have actually
 				# been copied (ie directory was created)
 				copyHeaders(includeDir, os.path.join(ctx.outDir, dstDir))
@@ -252,12 +252,12 @@ def processModule(ctx, module):
 	if "CONFIG_FILES" in module.fields:
 		autoconfFileName = "autoconf-%s.h" % module.name
 		ctx.atom.write("LOCAL_CONFIG_FILES := 1\n")
-		if not os.path.exists(os.path.join(ctx.outDir, "usr/include", module.name)):
-			os.makedirs(os.path.join(ctx.outDir, "usr/include", module.name), mode=0755)
+		if not os.path.exists(os.path.join(ctx.outDir, "usr", "include", module.name)):
+			os.makedirs(os.path.join(ctx.outDir, "usr", "include", module.name), mode=0755)
 		if os.path.exists(os.path.join(ctx.buildDir, module.name, autoconfFileName)):
 			shutil.copy2(
 					os.path.join(ctx.buildDir, module.name, autoconfFileName),
-					os.path.join(ctx.outDir, "usr/include", module.name, autoconfFileName))
+					os.path.join(ctx.outDir, "usr", "include", module.name, autoconfFileName))
 
 	# Set LOCAL_LIBRARIES with the content of 'depends'
 	if "depends" in module.fields:
