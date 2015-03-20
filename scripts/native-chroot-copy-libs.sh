@@ -39,6 +39,7 @@ copy_file()
 	local readonly src=$1
 	local readonly dst=$2/$(basename ${src})
 	if [ ! -e ${dst} -o ${src} -nt ${dst} ]; then
+		mkdir -p $(dirname ${dst})
 		cp -af ${src} ${dst}
 	fi
 }
