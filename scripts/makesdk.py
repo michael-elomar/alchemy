@@ -28,21 +28,25 @@ class Context(object):
 #===============================================================================
 #===============================================================================
 def copyHostStaging(srcDir, dstDir):
-	copyElements(srcDir, dstDir, keepLinks=True)
+	shutil.copytree(srcDir, dstDir, symlinks=True)
 
 #===============================================================================
 #===============================================================================
 def copyStaging(srcDir, dstDir):
-	extensions = [
-		"*.h", "*.hpp", "*.hxx", "*.so",
-		"*.so.*", "*.a", "*.pc", "*.tcc",
-		"*.doxygen", "*.inl", "*.vapi", "*.deps"]
-	copyElements(srcDir, dstDir, extensions=extensions, keepLinks=True, keepInclude=True)
+	dirs_to_keep = ["lib" ,
+		os.path.join("usr", "lib"),
+		os.path.join("usr", "include"),
+		os.path.join("usr", "share", "vala")
+	]
+	for dirName in dirs_to_keep:
+		srcDirPath=os.path.normpath(os.path.join(srcDir, dirName))
+		dstDirPath=os.path.normpath(os.path.join(dstDir, dirName))
+		shutil.copytree(srcDirPath, dstDirPath, symlinks=True)
 
 #===============================================================================
 #===============================================================================
 def copySdk(srcDir, dstDir):
-	copyElements(srcDir, dstDir, keepLinks=True, scanDirs=True)
+	shutil.copytree(srcDir, dstDir, symlinks=True)
 
 #===============================================================================
 #===============================================================================
