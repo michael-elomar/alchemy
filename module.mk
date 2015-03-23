@@ -751,7 +751,7 @@ else
 # Use LOCAL_PATH and other input
 doc_input := $(LOCAL_PATH) $(LOCAL_DOXYGEN_INPUT)
 doc_input := $(foreach __path,$(doc_input), \
-	$(if $(call is-path-absolute,$(path)), \
+	$(if $(call is-path-absolute,$(__path)), \
 		$(__path),$(addprefix $(LOCAL_PATH)/,$(__path)) \
 	))
 
