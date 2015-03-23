@@ -127,6 +127,15 @@ TARGET_LINUX_GENERATE_UIMAGE ?= 0
 # Append a device tree to the linux image
 TARGET_LINUX_DEVICE_TREE ?=
 
+# Target image format (tar, cpio, ext2, ext3, ext4, plf)
+# It can optionaly be suffixed with .gz or .bz2 to compress the image
+TARGET_IMAGE_FORMAT ?= tar.gz
+
+# Target image generation options (not used for plf images)
+# --size : size ((in bytes, suffixes K,M,G allowed)) of the image file
+# --sparse : generate a sparse image
+TARGET_IMAGE_OPTIONS ?=
+
 ###############################################################################
 ## Toolchain setup.
 ###############################################################################
