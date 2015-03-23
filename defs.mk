@@ -243,6 +243,11 @@ module-add = \
 			) \
 		) \
 		$(call install-headers-setup,$(LOCAL_MODULE)) \
+	) \
+	$(eval __var := GLOBAL_PREREQUISITES) \
+	$(if $(call macro-compare,TARGET_$(__var),saved-TARGET_$(__var)),$(empty), \
+		$(eval __modules-with-global-prerequisites += $(__mod)) \
+		$(call macro-copy,saved-TARGET_$(__var),TARGET_$(__var)) \
 	)
 
 ###############################################################################
@@ -1259,8 +1264,16 @@ check-custom-macro = \
 ## message displayed when used while TARGET_DEFAULT_ARM_MODE is 'arm'.
 ###############################################################################
 
+# This variable will hold the list of modules with global prerequisites
+# Those module will always have their rule loaded in case the global
+# prerequisites need to be updated
+__modules-with-global-prerequisites :=
+
 # Save TARGET_XXX variables
+# We save GLOBAL_PREREQUISITES here and we check it at each module-add
 user-makefile-before-include = \
+	$(eval __var := GLOBAL_PREREQUISITES) \
+	$(call macro-copy,saved-TARGET_$(__var),TARGET_$(__var)) \
 	$(foreach __var,$(vars-TARGET), \
 		$(if $(call is-var-defined,TARGET_$(__var)), \
 			$(call macro-copy,saved-TARGET_$(__var),TARGET_$(__var)) \

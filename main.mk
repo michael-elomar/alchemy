@@ -496,8 +496,9 @@ endif
 __modlist += $(call modules-get-required-host,$(__modlist))
 __modlist := $(sort $(__modlist))
 
-# Now, generate rules of selected modules
-$(foreach __mod,$(__modlist), \
+# Now, generate rules of selected modules, always include modules with global
+# prerequisites
+$(foreach __mod,$(sort $(__modlist) $(__modules-with-global-prerequisites)), \
 	$(eval LOCAL_MODULE := $(__mod)) \
 	$(eval include $(BUILD_SYSTEM)/module.mk) \
 )

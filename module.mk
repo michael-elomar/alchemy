@@ -45,6 +45,8 @@ LOCAL_STAGING_MODULE := $(call module-get-staging-filename,$(LOCAL_MODULE))
 # Assemble the list of targets to create PRIVATE_ variables for.
 LOCAL_TARGETS := \
 	$(LOCAL_BUILD_MODULE) \
+	$(LOCAL_CUSTOM_TARGETS) \
+	$(LOCAL_MODULE) \
 	$(LOCAL_MODULE)-clean \
 	$(LOCAL_MODULE)-dirclean \
 	$(LOCAL_MODULE)-path
