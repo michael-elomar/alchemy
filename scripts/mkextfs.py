@@ -928,11 +928,13 @@ class Extfs(object):
 
 #===============================================================================
 #===============================================================================
-def genImage(image, root):
-    size = 256 * 1024 * 1024
-    os.ftruncate(image.fout.fileno(), size)
-    buf = mmap.mmap(image.fout.fileno(), size)
-    fs = Extfs(buf, size // Extfs.BLOCKSIZE, 65536, 13107)
+def genImage(image, root, version=2):
+    os.ftruncate(image.fout.fileno(), image.size)
+    buf = mmap.mmap(image.fout.fileno(), image.size)
+    blockCount = image.size // Extfs.BLOCKSIZE
+    inodeCount = (blockCount * Extfs.BLOCKSIZE) // Extfs.INODE_RATIO
+    reservedBlockCount = (blockCount * Extfs.RESERVED_RATIO) // 100
+    fs = Extfs(buf, blockCount, inodeCount, reservedBlockCount, version)
     fs.populate(EXTFS_ROOT_INO, root)
     fs.finalize()
     buf.close()
