@@ -640,6 +640,25 @@ include $(BUILD_SYSTEM)/coverage.mk
 include $(BUILD_SYSTEM)/help.mk
 
 ###############################################################################
+#
+###############################################################################
+
+# Depends on this to be executed AFTER building all modules
+# If nothing has been requested to be built, this is a no op
+.PHONY: post-build
+post-build: $(__modlist)
+all: post-build
+
+# Depends on this to be executed AFTER final directory has been done
+# If 'final' is not given in goals, this is a no op
+.PHONY: post-final
+ifneq ("$(call is-targets-in-make-goals,final)","")
+post-final: post-build final
+else
+post-final: post-build
+endif
+
+###############################################################################
 ## Under native linux target, copy wrapper scripts
 ###############################################################################
 

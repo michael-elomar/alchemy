@@ -52,11 +52,6 @@ symbols-clean:
 .PHONY: symbols
 symbols: symbols-tar-gz
 
-# Only add dependency if it is also given in goals to avoid unecessary checks
-# symbols target never depends on final
-ifneq ("$(call is-targets-in-make-goals,all)","")
-__symbols-tar-internal: all
-endif
-
-# Clean symbols when clobber is done
+# Setup dependencies
+__symbols-tar-internal: post-build
 clobber: symbols-clean

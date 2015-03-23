@@ -51,7 +51,6 @@ gen-build-prop-clean:
 	@rm -f $(BUILD_PROP_FILE_TMP)
 	@rm -f $(BUILD_PROP_FILE)
 
-# Add in common targets
-all: gen-build-prop
+# Setup dependencies
+post-build: gen-build-prop
 clobber: gen-build-prop-clean
-

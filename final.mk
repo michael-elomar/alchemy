@@ -129,8 +129,5 @@ final:
 	$(Q)$(__final-ldconfig)
 	@echo "Done generating final tree"
 
-# Only add dependency if it is also given in goals to avoid unecessary checks
-ifneq ("$(call is-targets-in-make-goals,all)","")
-final: all
-endif
-
+# Setup dependencies
+final: post-build

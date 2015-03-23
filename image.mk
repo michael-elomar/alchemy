@@ -97,13 +97,7 @@ image-$1-clean:
 	$(Q) rm -f $(__image-$1-file).gz
 	$(Q) rm -f $(__image-$1-file).bz2
 image-all-clean: image-$1-clean
-# Only add dependency if it is also given in goals to avoid unecessary checks
-ifneq ("$(call is-targets-in-make-goals,all)","")
-__image-$1-internal: all
-endif
-ifneq ("$(call is-targets-in-make-goals,final)","")
-__image-$1-internal: final
-endif
+__image-$1-internal: post-final
 endef
 
 # Generate all rules
@@ -167,12 +161,6 @@ native-fix-script:
 native-fix-script-clean:
 	$(Q) rm -f $(TARGET_OUT_FINAL)/native-fixperms.sh
 
-# Only add dependency if it is also given in goals to avoid unecessary checks
-ifneq ("$(call is-targets-in-make-goals,all)","")
-native-fix-script: all
-endif
-ifneq ("$(call is-targets-in-make-goals,final)","")
+# Setup dependencies
 native-fix-script: final
-endif
-
 image-all-clean: native-fix-script-clean
