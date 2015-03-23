@@ -68,13 +68,13 @@ def executeCmd(cmd):
 def isExec(filePath):
 	result = False
 	try:
-		file = open(filePath, "r")
+		file = open(filePath, "rb")
 		header = str(file.read(4))
 		if header.find("ELF") >= 0:
 			result = True
 		file.close()
 	except IOError as ex:
-		logging.error("Unable to open %s ([err=%d] %s)",
+		logging.error("Failed to open file: %s ([err=%d] %s)",
 			filePath, ex.errno, ex.strerror)
 	return result
 
@@ -422,7 +422,7 @@ def main():
 		try:
 			options.fileListFile = open(options.fileListPath, "w")
 		except IOError as ex:
-			logging.error("Failed to create file: '%s' [err=%d %s]",
+			logging.error("Failed to create file: %s [err=%d %s]",
 					options.fileListPath, ex.errno, ex.strerror)
 
 	# regex for strip filters

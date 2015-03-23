@@ -143,7 +143,7 @@ def main():
     (options, args) = parseArgs()
     setupLog(options)
 
-    # Open output image file
+    # Open output image file (for reading and writing to be mapped)
     outImagePath = args[0]
     try:
         fout = open(outImagePath, "w+b")

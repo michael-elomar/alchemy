@@ -28,13 +28,13 @@ TEMP_SUFFIX = ".alchemy"
 def isElf(filePath):
 	result = False
 	try:
-		file = open(filePath, "r")
+		file = open(filePath, "rb")
 		header = str(file.read(4))
 		if header.find("ELF") >= 0:
 			result = True
 		file.close()
 	except IOError as ex:
-		logging.error("Unable to open %s ([err=%d] %s)",
+		logging.error("Failed to open file: %s ([err=%d] %s)",
 			filePath, ex.errno, ex.strerror)
 	return result
 
@@ -77,7 +77,7 @@ def addBuildId(options, filePath, buildId):
 				logging.error("Failed to add '%s' section (err=%d) : %s",
 						options.sectionName, process.returncode, filePath)
 		except OSError as ex:
-			logging.error("Unable to execute command: %s [err=%d %s]",
+			logging.error("Failed to execute command: %s [err=%d %s]",
 				" ".join(args), ex.errno, ex.strerror)
 	# Cleaning
 	os.unlink(tempPath)

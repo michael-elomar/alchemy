@@ -716,7 +716,7 @@ class Extfs(object):
                     blk = Extfs.allocate(self.getGroupBBM(grp), 0)
                     break
             else:
-                logging.error("Unable to allocate block for inode : %d", inum)
+                logging.error("Failed to allocate block for inode : %d", inum)
                 return 0
         # Update stats and return block number
         self.groups[grp].free_blocks_count -= 1
@@ -731,7 +731,7 @@ class Extfs(object):
                 self.groups[grp].free_inodes_count -= 1
                 self.sb.free_inodes_count -= 1
                 return inum + grp * self.sb.inodes_per_group
-        logging.error("Unable to allocate inode")
+        logging.error("Failed to allocate inode")
         return 0
 
     def extendBlock(self, inum, data, amount, nocopy=False):

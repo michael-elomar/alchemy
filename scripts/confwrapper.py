@@ -323,7 +323,7 @@ def writeDiffConfig(configPath, diff):
 		diffFile.writelines(diff)
 		diffFile.close()
 	except IOError as ex:
-		logging.error("Unable to create file: %s [err=%d %s]",
+		logging.error("Failed to create file: %s [err=%d %s]",
 			getDiffConfigPath(configPath), ex.errno, ex.strerror)
 
 #===============================================================================
@@ -541,10 +541,10 @@ def writeConfigMenu(outFile, menu, mainConfig):
 				except IOError as ex:
 					# Display error inly if module was set...
 					if moduleBuildDefineSet in mainConfig:
-						logging.error("Unable to open file: %s [err=%d %s]",
+						logging.error("Failed to open file: %s [err=%d %s]",
 							module.configPath, ex.errno, ex.strerror)
 					else:
-						logging.debug("Unable to open file: %s [err=%d %s]",
+						logging.debug("Failed to open file: %s [err=%d %s]",
 							module.configPath, ex.errno, ex.strerror)
 				# Skip the 8 first lines, as well as empty last line
 				# (header + extra menu added by generateModuleConfigIn)
@@ -568,7 +568,7 @@ def prepareFullConfig(outFile, menu, mainConfigPath, modules):
 		mainConfig = mainConfigFile.read().split("\n")
 		mainConfigFile.close()
 	except IOError as ex:
-		logging.error("Unable to open file: %s [err=%d %s]",
+		logging.error("Failed to open file: %s [err=%d %s]",
 			mainConfigPath, ex.errno, ex.strerror)
 
 	# Write header followed by menus
@@ -607,7 +607,7 @@ def processFullConfig(inFile, modules, mainConfigPath):
 			# Get new module
 			match = reConfigBuild.match(line)
 			if match == None:
-				logging.warning("Unable to extract module name from: %s", line)
+				logging.warning("Failed to extract module name from: %s", line)
 			else:
 				module = findModule(modules, match.group(2))
 				if module == None:
@@ -629,7 +629,7 @@ def processFullConfig(inFile, modules, mainConfigPath):
 			idx = line.find("=")
 			if match == None:
 				modulefile = None
-				logging.warning("Unable to extract module name from: %s", line)
+				logging.warning("Failed to extract module name from: %s", line)
 			else:
 				modulefile = findModule(modules, match.group(1))
 
@@ -647,7 +647,7 @@ def processFullConfig(inFile, modules, mainConfigPath):
 								getEditConfigPath(moduleConfigPath))
 						writeConfigHeader(moduleConfigFile, module)
 					except IOError as ex:
-						logging.error("Unable to create file: %s [err=%d %s]",
+						logging.error("Failed to create file: %s [err=%d %s]",
 								getEditConfigPath(moduleConfigPath),
 								ex.errno, ex.strerror)
 		# End of file
@@ -679,7 +679,7 @@ def processFullConfig(inFile, modules, mainConfigPath):
 	try:
 		mainConfigFile = safeCreateFile(getEditConfigPath(mainConfigPath))
 	except IOError as ex:
-		logging.error("Unable to create file: %s [err=%d %s]",
+		logging.error("Failed to create file: %s [err=%d %s]",
 			getEditConfigPath(mainConfigPath), ex.errno, ex.strerror)
 		return
 	writeConfigHeader(mainConfigFile)
@@ -906,7 +906,7 @@ def execConf(configInPath, configPath):
 		if process.returncode != 0:
 			logging.error("%s failed with status %d", cmdline, process.returncode)
 	except OSError as ex:
-		logging.error("Unable to execute command: %s [err=%d %s]",
+		logging.error("Failed to execute command: %s [err=%d %s]",
 			cmdline, ex.errno, ex.strerror)
 
 #===============================================================================
@@ -939,7 +939,7 @@ def execConfUi(confUi, configInPath, configPath):
 		if process.returncode != 0:
 			logging.error("%s failed with status %d", cmdline, process.returncode)
 	except OSError as ex:
-		logging.error("Unable to execute command: %s [err=%d %s]",
+		logging.error("Failed to execute command: %s [err=%d %s]",
 			cmdline, ex.errno, ex.strerror)
 
 #===============================================================================

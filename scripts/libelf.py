@@ -624,7 +624,7 @@ class Elf(object):
 		elfFile = None
 		try:
 			# Open file, map it in memory and start reading it
-			elfFile = open(filePath, "r")
+			elfFile = open(filePath, "rb")
 			self._data = mmap.mmap(elfFile.fileno(), 0, access=mmap.ACCESS_READ)
 			self._read()
 		finally:

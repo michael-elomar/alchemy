@@ -10,13 +10,13 @@ import tarfile
 def isExec(filePath):
     result = False
     try:
-        fd = open(filePath, "r")
+        fd = open(filePath, "rb")
         header = str(fd.read(4))
         if header.find("ELF") >= 0:
             result = True
         fd.close()
     except IOError as ex:
-        logging.error("Unable to open %s ([err=%d] %s)",
+        logging.error("Failed to open file: %s ([err=%d] %s)",
             filePath, ex.errno, ex.strerror)
     return result
 
@@ -45,7 +45,7 @@ def createTarFile(outTarFile, fileList, stagingDir, symbolsRoot):
     try:
         tarfd = tarfile.open(outTarFile, "w")
     except tarfile.TarError as ex:
-        logging.error("Unable to open %s ([err=%d] %s)",
+        logging.error("Failed to create file: %s ([err=%d] %s)",
             outTarFile, ex.errno, ex.strerror)
         sys.exit(1)
 
