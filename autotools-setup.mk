@@ -120,7 +120,7 @@ endif
 ## Variable used for autotools on target modules.
 ###############################################################################
 
-ifeq ("$(or $(LOCAL_USE_CLANG), $(USE_CLANG))","1")
+ifeq ("$(USE_CLANG)","1")
 module_compiler_flavour := clang
 else
 module_compiler_flavour := gcc
