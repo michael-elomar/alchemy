@@ -180,23 +180,6 @@ modules-fields-depends := \
 	depends.all
 
 ###############################################################################
-## Check for usage of CPPFLAGS instead of CXXFLAGS.
-## Correctly save same in CXXFLAGS but warn user.
-## TODO: remove completely in next version (first step is error instead of warning).
-###############################################################################
-check-cppflags-compat = \
-	$(if $(LOCAL_CPPFLAGS), \
-		$(eval LOCAL_CXXFLAGS += $(LOCAL_CPPFLAGS)) \
-		$(eval __msg := Please use LOCAL_CXXFLAGS instead of LOCAL_CPPFLAGS) \
-		$(error $(LOCAL_PATH): module '$(__mod)': $(__msg)) \
-	) \
-	$(if $(LOCAL_EXPORT_CPPFLAGS), \
-		$(eval LOCAL_EXPORT_CXXFLAGS += $(LOCAL_EXPORT_CPPFLAGS)) \
-		$(eval __msg := Please use LOCAL_EXPORT_CXXFLAGS instead of LOCAL_EXPORT_CPPFLAGS) \
-		$(error $(LOCAL_PATH): module '$(__mod)': $(__msg)) \
-	)
-
-###############################################################################
 ## Add a module in the build system and save its LOCAL_xxx variables.
 ## All LOCAL_xxx variables will be saved in module database.
 ## An internal prebuilt module (for example a bionic one) will take precedence
@@ -259,7 +242,6 @@ module-add = \
 				$(eval __modules.$(__mod).MODULE_FILENAME := $(__mod).done) \
 			) \
 		) \
-		$(check-cppflags-compat) \
 		$(call install-headers-setup,$(LOCAL_MODULE)) \
 	)
 
