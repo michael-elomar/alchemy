@@ -24,6 +24,11 @@ endif
 ## Macros.
 ###############################################################################
 
+# First things to do before dumping database
+# Compute revision of all modules
+__dump-database-setup = \
+	$(if $(call strneq,$(USE_GIT_REV),0),$(call module-compute-revisions))
+
 # This will dump everything
 __dump-database = \
 	$(info --------------------) \
@@ -158,6 +163,7 @@ endif
 
 .PHONY: dump
 dump:
+	$(call __dump-database-setup)
 	$(call __dump-database)
 
 .PHONY: dump-depends
@@ -168,6 +174,7 @@ dump-depends:
 dump-xml:
 ifdef __dumping-xml
 	@# Called inside a sub-make to dump using 'info' in a file
+	$(call __dump-database-setup)
 	$(info @@@@@XML-BEGIN@@@@@)
 	$(call __dump-database-xml)
 	$(info @@@@@XML-END@@@@@)
@@ -196,6 +203,7 @@ ifdef __dump-xml-with-info
 		rm -f $${tmpfile}; \
 	)
 else
+	$(call __dump-database-setup)
 	$(call __dump-database-xml)
 endif
 	@echo "Database dump: done -> $(DUMP_DATABASE_XML_FILE)"

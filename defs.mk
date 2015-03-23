@@ -874,13 +874,33 @@ module-get-debug-flags = $(strip \
 
 ifneq ("$(USE_GIT_REV)","0")
 
+# Compute revision of all modules
+module-compute-revisions = \
+	$(foreach __mod,$(__modules), \
+		$(call module-compute-revision,$(__mod)) \
+	)
+
+# Compute revision of a single module
+# $1: module name
+module-compute-revision = \
+	$(if $(__modules.$1.REVISION),$(empty), \
+		$(eval __path := $(__modules.$1.PATH)) \
+		$(eval __rev := $(shell cd $(__path) && git rev-parse HEAD 2>/dev/null)) \
+		$(eval __rev-desc := $(shell cd $(__path) && git describe --tags --always 2>/dev/null)) \
+		$(if $(__rev),$(empty),$(eval __rev := unknown)) \
+		$(if $(__rev-desc),$(empty),$(eval __rev-desc := unknown)) \
+		$(eval __modules.$1.REVISION := $(__rev)) \
+		$(eval __modules.$1.REVISION_DESCRIBE := $(__rev-desc)) \
+		$(if $(call strneq,$(V),0),$(info Revision of $1: $(__rev) / $(__rev-desc))) \
+	) \
+
 # Get revision of one module
 # $1 : module name.
-module-get-revision = $(__modules.$1.REVISION)
+module-get-revision = $(module-compute-revision)$(__modules.$1.REVISION)
 
 # Get revision (with git describe) of one module
 # $1 : module name.
-module-get-revision-describe = $(__modules.$1.REVISION_DESCRIBE)
+module-get-revision-describe = $(module-compute-revision)$(__modules.$1.REVISION_DESCRIBE)
 
 # Get last revision of one module. It is found in a generated file that may
 # not exist so the result can be empty.
@@ -889,19 +909,6 @@ module-get-last-revision = $(strip \
 	$(if $(call is-var-defined,build.$1.revision.last), \
 		$(build.$1.revision.last) \
 	))
-
-# Compute revision of all modules
-module-compute-revisions = \
-	$(foreach __mod,$(__modules), \
-		$(if $(__modules.$(__mod).REVISION),$(empty), \
-			$(eval __path := $(__modules.$(__mod).PATH)) \
-			$(eval __rev := $(shell cd $(__path) && git rev-parse HEAD 2>/dev/null)) \
-			$(eval __rev-desc := $(shell cd $(__path) && git describe --tags --always 2>/dev/null)) \
-			$(eval __modules.$(__mod).REVISION := $(__rev)) \
-			$(eval __modules.$(__mod).REVISION_DESCRIBE := $(__rev-desc)) \
-			$(if $(call strneq,$(V),0),$(info Revision of $(__mod): $(__rev) / $(__rev-desc))) \
-		) \
-	)
 
 # Check if revision of module has changed since last build.
 # If either current/last revision is unknown, it will return false.
@@ -1311,7 +1318,7 @@ link-hook = $(strip \
 define add-depends-section
 $(eval __depsdata := $(empty))
 $(foreach __lib,$(PRIVATE_MODULE) $(__modules.$(PRIVATE_MODULE).depends.all), \
-	$(eval __depsdata += $(__lib):$(__modules.$(__lib).REVISION)) \
+	$(eval __depsdata += $(__lib):$(call module-get-revision,$(__lib))) \
 )
 $(eval __depsdata := $(subst $(space),\n,$(strip $(__depsdata))))
 @( \

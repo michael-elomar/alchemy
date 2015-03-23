@@ -410,11 +410,6 @@ ifdef TARGET_TEST
   $(call modules-enable-test-depends)
 endif
 
-# Compute revision of all modules
-ifneq ("$(USE_GIT_REV)","0")
-  $(call module-compute-revisions)
-endif
-
 # All modules
 ALL_MODULES := $(__modules)
 
