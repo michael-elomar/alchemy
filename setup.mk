@@ -37,9 +37,14 @@ TARGET_OUT_BUILD ?= $(TARGET_OUT)/build
 TARGET_OUT_DOC ?= $(TARGET_OUT)/doc
 TARGET_OUT_STAGING ?= $(TARGET_OUT)/staging
 TARGET_OUT_FINAL ?= $(TARGET_OUT)/final
-TARGET_SKEL ?=
 TARGET_SKEL_DIRS ?=
 TARGET_NOSTRIP_FINAL ?= 0
+
+# TODO: remove completely in next version (first step is error).
+TARGET_SKEL ?=
+ifneq ("$(TARGET_SKEL)","")
+$(error Please use TARGET_SKEL_DIRS instead of TARGET_SKEL)
+endif
 
 TARGET_CONFIG_DIR ?= $(TOP_DIR)/Alchemy-config/$(TARGET_PRODUCT)-$(TARGET_PRODUCT_VARIANT)
 
