@@ -13,6 +13,9 @@ ifneq ("$(V)","0")
 $(info Generating rules for $(LOCAL_MODULE))
 endif
 
+# This will print a warning if this module misses a custom macro
+$(call check-custom-macro,$(LOCAL_MODULE))
+
 # Do we need to copy build module to staging/final dir
 copy_to_staging := 0
 copy_to_final := 0

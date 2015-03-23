@@ -1212,7 +1212,10 @@ macro-exec-cmd = \
 ## The LOCAL_xxx variables of the modules are first restored and at the end
 ## put back in database.
 ##
-## It verifies that it really exists.
+## It verifies that it really exists but with no message at this point.
+## This is because this is called early in parsing before computing all
+## dependencies and so before we know exactly what needs to be built.
+##
 ## To call the macros with argument, we 'eval' a string that will contain the
 ## 'call'. It is a bit diffent of standard uses of 'eval' where we evaluate the
 ## result of the call. This is done so that the variable containing the parameters
@@ -1228,9 +1231,7 @@ exec-custom-macro = \
 		$(eval __entry2 := $(subst :,$(space),$(__entry))) \
 		$(eval __w1 := $(word 1,$(__entry2))) \
 		$(eval __w2 := $(word 2,$(__entry2))) \
-		$(if $(call is-var-undefined,$(__w1)), \
-			$(warning $(LOCAL_PATH): module '$(LOCAL_MODULE)' \
-				uses undefined custom macro '$(__w1)'), \
+		$(if $(call is-var-defined,$(__w1)), \
 			$(eval __tmp := $$(call $(__w1),$(__w2))) \
 			$(eval $(__tmp)) \
 		) \
@@ -1238,6 +1239,21 @@ exec-custom-macro = \
 	$(foreach __var,$(vars-LOCAL), \
 		$(eval __modules.$(__mod).$(__var) := $(LOCAL_$(__var))) \
 	) \
+
+###############################################################################
+## Check that custom macros of a module are well defined.
+## $1 : module name.
+###############################################################################
+check-custom-macro = \
+	$(foreach __entry,$(__modules.$1.CUSTOM_MACROS), \
+		$(eval __entry2 := $(subst :,$(space),$(__entry))) \
+		$(eval __w1 := $(word 1,$(__entry2))) \
+		$(eval __w2 := $(word 2,$(__entry2))) \
+		$(if $(call is-var-undefined,$(__w1)), \
+			$(warning $(__modules.$1.PATH): module '$1' \
+				uses undefined custom macro '$(__w1)'), \
+		) \
+	)
 
 ###############################################################################
 ## Macros to be called before and after inclusion of user makefiles.

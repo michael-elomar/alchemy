@@ -384,7 +384,8 @@ include $(BUILD_SYSTEM)/pbuild-hook/atom.mk
 __modules := $(sort $(__modules))
 $(info Found $(words $(__modules)) modules)
 
-# Execute custom macros of modules
+# Execute custom macros of modules. Done on all modules because it can modify
+# the dependencies.
 $(foreach __mod,$(__modules), \
 	$(call exec-custom-macro,$(__mod)) \
 )
