@@ -142,6 +142,9 @@ SKIP_DEPS_AND_CHECKS := 0
 # their .done file).
 SKIP_EXT_DEPS_AND_CHECKS := 0
 
+# Silently skip config check (in contrast to USE_CONFIG_CHECK that warn)
+SKIP_CONFIG_CHECK := 0
+
 # Include product env file
 ifdef TARGET_CONFIG_DIR
 -include $(TARGET_CONFIG_DIR)/product.mk
@@ -171,28 +174,19 @@ include $(BUILD_SYSTEM)/setup.mk
 # Optimizations for some goals.
 ###############################################################################
 
-# Skip external checks if requested
-ifeq ("$(TARGET_FORCE_EXTERNAL_CHECKS)","0")
-  SKIP_EXT_DEPS_AND_CHECKS := 1
-endif
-
-# Skip some steps for some make goals
-__clean-targets := clean dirclean clobber _clean _dirclean
+# Define som target class
+__clobber-targets := clobber clean dirclean
 __query-targets := scan help help-modules dump dump-depends dump-xml build-graph
 __config-targets := config config-check config-update xconfig menuconfig nconfig
-__fs-targets := final plf image-plf image-cpio sdk symbols symbols-tar symbols-tar-gz
-__skip_targets := \
-	$(__clean-targets) \
-	$(__query-targets) \
-	$(__config-targets) \
-	$(__fs-targets)
 
-# No optimization if 'all' is also given
-ifeq ("$(call is-targets-in-make-goals,all)","")
-
-ifneq ("$(call is-targets-in-make-goals,$(__skip_targets))","")
-  SKIP_DEPS_AND_CHECKS := 1
+# Do not check config if we are cloberring or doing some query or configuration
+__skip-config-check-targets := $(__clobber-targets) $(__query-targets) $(__config-targets)
+ifneq ("$(call is-targets-in-make-goals,$(__skip-config-check-targets))","")
+  SKIP_CONFIG_CHECK := 1
 endif
+
+# Skip some steps for some make goals. No optimization if 'all' is also given
+ifeq ("$(call is-targets-in-make-goals,all)","")
 ifneq ("$(findstring -clean,$(MAKECMDGOALS))","")
   SKIP_DEPS_AND_CHECKS := 1
 endif
@@ -202,19 +196,11 @@ endif
 ifneq ("$(findstring -path,$(MAKECMDGOALS))","")
   SKIP_DEPS_AND_CHECKS := 1
 endif
-ifneq ("$(findstring -config,$(MAKECMDGOALS))","")
-  SKIP_DEPS_AND_CHECKS := 1
-endif
-ifneq ("$(findstring -xconfig,$(MAKECMDGOALS))","")
-  SKIP_DEPS_AND_CHECKS := 1
-endif
-ifneq ("$(findstring -menuconfig,$(MAKECMDGOALS))","")
-  SKIP_DEPS_AND_CHECKS := 1
-endif
-ifneq ("$(findstring -nconfig,$(MAKECMDGOALS))","")
-  SKIP_DEPS_AND_CHECKS := 1
 endif
 
+# Skip external checks if requested
+ifeq ("$(TARGET_FORCE_EXTERNAL_CHECKS)","0")
+  SKIP_EXT_DEPS_AND_CHECKS := 1
 endif
 
 # No reason to do external checks if we are skipping our own deps and checks...
@@ -366,7 +352,7 @@ endif
 
 # Include makefile containing all available makefiles
 # If it does not exists, it will trigger its creation
-ifeq ("$(call is-targets-in-make-goals,scan clobber)","")
+ifeq ("$(call is-targets-in-make-goals,scan $(__clobber-targets))","")
   -include $(USER_MAKEFILES_CACHE)
   $(call display-user-makefiles-summary)
 endif
@@ -450,7 +436,7 @@ include $(BUILD_SYSTEM)/config-rules.mk
 # Now, really generate rules for modules.
 
 # Completely skip this for simple queries or clobber.
-ifeq ("$(call is-targets-in-make-goals,$(__query-targets) clobber)","")
+ifeq ("$(call is-targets-in-make-goals,$(__query-targets) $(__clobber-targets))","")
 
 # Check that, if a registered module is specified in goals,
 # it is in the build config
@@ -476,14 +462,12 @@ endif
 
 # Determine the list of modules to really include
 # If a module is specified in goals, only include this one and its dependencies.
-# If 'all' is also given do not do the filter
+# If 'all' or 'check' is also given do not do the filter
 # For meta packages, also get config dependencies (for build/clean shortcuts)
-__dofilter := 0
 __modlist := $(empty)
-ifeq ("$(call is-targets-in-make-goals,all)","")
+ifeq ("$(call is-targets-in-make-goals,all check)","")
 $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST), \
 	$(if $(call is-module-in-make-goals,$(__mod)), \
-		$(eval __dofilter := 1) \
 		$(eval __modlist += $(__mod) $(call module-get-all-depends,$(__mod))) \
 		$(if $(call is-module-meta-package,$(__mod)), \
 			$(foreach __mod2,$(call module-get-config-depends,$(__mod)), \
@@ -492,6 +476,8 @@ $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST), \
 		) \
 	) \
 )
+else
+__modlist := $(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST)
 endif
 
 # If autoconf-merge is present, force including all modules having a config .in
@@ -501,11 +487,6 @@ $(foreach __mod,$(ALL_BUILD_MODULES), \
 		$(if $(__modules.$(__mod).CONFIG_FILES),$(__mod)) \
 	) \
 )
-endif
-
-# Update module list, based on filtering
-ifeq ("$(__dofilter)","0")
-  __modlist := $(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST)
 endif
 
 # Add required host modules

@@ -31,16 +31,14 @@ else
   CONFIG_GLOBAL_FILE_AVAILABLE := 1
 endif
 
-# Include global config file, do not fail if directory does not exists or we
+# Include global config file, do not fail if it does not exists or we
 # are requested to skip checks.
 ifeq ("$(CONFIG_GLOBAL_FILE_AVAILABLE)","1")
-  ifeq ("$(SKIP_DEPS_AND_CHECKS)","0")
+  ifeq ("$(SKIP_CONFIG_CHECK)","0")
     include $(CONFIG_GLOBAL_FILE)
   else
     -include $(CONFIG_GLOBAL_FILE)
   endif
-else
-  -include $(CONFIG_GLOBAL_FILE)
 endif
 
 ###############################################################################
