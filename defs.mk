@@ -873,6 +873,47 @@ module-get-debug-flags = $(strip \
 
 ifneq ("$(USE_GIT_REV)","0")
 
+# Cache of already compute revisions
+__git-rev-cache := $(empty)
+
+# Compute revision of a directory and update cache with the top level directory
+# ofthe gir repo containing the given directory.
+# Do not add in cache if top level has a .gitmodules
+# $1 : path inside of a git repo
+__git-rev-compute = \
+	$(eval __data := $(shell cd $1 && git rev-parse --show-toplevel HEAD 2>/dev/null)) \
+	$(eval __top-level := $(word 1,$(__data))) \
+	$(eval __sha1 := $(word 2,$(__data))) \
+	$(if $(__top-level), \
+		$(eval __desc := $(shell cd $(__top-level) && git describe --tags --always 2>/dev/null)) \
+		$(if $(wildcard $(__top-level)/.gitmodules),$(empty), \
+			$(eval __git-rev-cache.$(__top-level).sha1 := $(__sha1)) \
+			$(eval __git-rev-cache.$(__top-level).desc := $(__desc)) \
+			$(eval __git-rev-cache += $(__top-level)) \
+		) \
+		, \
+		$(eval __sha1 := $(empty)) \
+		$(eval __desc := $(empty)) \
+	)
+
+# Search in cache if directory has already on of its parent in the cache
+# If yes, retreive __sha1 and __desc.
+# If no, update the cache and retreive __sha1 and __desc.
+# $1 : path inside a git repo
+__git-rev-get = \
+	$(eval __found := $(false)) \
+	$(foreach __top-level,$(__git-rev-cache), \
+		$(if $(__found),$(empty), \
+			$(if $(or $(call streq,$(__top-level),$1), \
+					$(call not,$(patsubst $(__top-level)/%,,$1/))), \
+				$(eval __sha1 := $(__git-rev-cache.$(__top-level).sha1)) \
+				$(eval __desc := $(__git-rev-cache.$(__top-level).desc)) \
+				$(eval __found := $(true)) \
+			) \
+		) \
+	) \
+	$(if $(__found),$(empty),$(call __git-rev-compute,$1))
+
 # Compute revision of all modules
 module-compute-revisions = \
 	$(foreach __mod,$(__modules), \
@@ -884,13 +925,12 @@ module-compute-revisions = \
 module-compute-revision = \
 	$(if $(__modules.$1.REVISION),$(empty), \
 		$(eval __path := $(__modules.$1.PATH)) \
-		$(eval __rev := $(shell cd $(__path) && git rev-parse HEAD 2>/dev/null)) \
-		$(eval __rev-desc := $(shell cd $(__path) && git describe --tags --always 2>/dev/null)) \
-		$(if $(__rev),$(empty),$(eval __rev := unknown)) \
-		$(if $(__rev-desc),$(empty),$(eval __rev-desc := unknown)) \
-		$(eval __modules.$1.REVISION := $(__rev)) \
-		$(eval __modules.$1.REVISION_DESCRIBE := $(__rev-desc)) \
-		$(if $(call strneq,$(V),0),$(info Revision of $1: $(__rev) / $(__rev-desc))) \
+		$(call __git-rev-get,$(__path)) \
+		$(if $(__sha1),$(empty),$(eval __sha1 := unknown)) \
+		$(if $(__desc),$(empty),$(eval __desc := unknown)) \
+		$(eval __modules.$1.REVISION := $(__sha1)) \
+		$(eval __modules.$1.REVISION_DESCRIBE := $(__desc)) \
+		$(if $(call strneq,$(V),0),$(info Revision of $1: $(__sha1) / $(__desc))) \
 	) \
 
 # Get revision of one module
