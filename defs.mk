@@ -121,7 +121,7 @@ is-item-in-list = $(strip $(foreach __it,$2,$(call streq,$(__it),$1)))
 # Dertermine if an item is not in a list
 # $1 : item to search.
 # $2 : list.
-is-not-item-in-list = $(call not $(call is-item-in-list,$1,$2))
+is-not-item-in-list = $(call not,$(call is-item-in-list,$1,$2))
 
 ###############################################################################
 ## Use some colors if requested.
