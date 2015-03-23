@@ -396,14 +396,49 @@ class ExtfsExtentHeader(ctypes.LittleEndianStructure):
 
 #===============================================================================
 #===============================================================================
+class ExtfsJournalSuperBlock(ctypes.BigEndianStructure):
+    _fields_ = [
+        ("magic" , ctypes.c_uint32),        #
+        ("blocktype", ctypes.c_uint32),     #
+        ("sequence", ctypes.c_uint32),      #
+        ("blocksize", ctypes.c_uint32),     # Journal device blocksize
+        ("maxlen", ctypes.c_uint32),        # Total blocks in journal file
+        ("first", ctypes.c_uint32),         # First block of log information
+        ("sequence", ctypes.c_uint32),      # First commit ID expected in log
+        ("start", ctypes.c_uint32),         # blocknr of start of log
+        ("errno", ctypes.c_int32),          # Error value
+        ("feature_compat", ctypes.c_uint32),    # compatible feature set
+        ("feature_incompat", ctypes.c_uint32),  # incompatible feature set
+        ("feature_ro_compat", ctypes.c_uint32), # readonly-compatible feature set
+        ("uuid", ctypes.c_uint8 * 16),          # 128-bit uuid for journal
+        ("nr_users", ctypes.c_uint32),          # Nr of filesystems sharing log
+        ("dynsuper", ctypes.c_uint32),          # Blocknr of dynamic superblock copy
+        ("max_transaction", ctypes.c_uint32),   # Limit of journal blocks per trans
+        ("max_trans_data", ctypes.c_uint32),    # Limit of data blocks per trans
+        ("padding", ctypes.c_uint32 * 44),      #
+        ("users", ctypes.c_uint8 * 16 * 48),    # ids of all fs'es sharing the log
+    ]
+assert ctypes.sizeof(ExtfsJournalSuperBlock) == 1024
+
+JFS_MAGIC_NUMBER = 0xc03b3998
+JFS_DESCRIPTOR_BLOCK = 1
+JFS_COMMIT_BLOCK = 2
+JFS_SUPERBLOCK_V1 = 3
+JFS_SUPERBLOCK_V2 = 4
+JFS_REVOKE_BLOCK = 5
+
+#===============================================================================
+#===============================================================================
 class Extfs(object):
     BLOCKSIZE = 1024
     BLOCKS_PER_GROUP = 8192
     INODES_PER_GROUP = 8192
     INODE_BLOCKSIZE = 512
     INOBLK = BLOCKSIZE // INODE_BLOCKSIZE
+    INODE_RATIO = 4096
+    RESERVED_RATIO = 5
 
-    def __init__(self, buf, blockCount, inodeCount, reservedBlockCount):
+    def __init__(self, buf, blockCount, inodeCount, reservedBlockCount, version=2):
         self.buf = buf
         self.sb = _from_buffer(ExtfsSuperBlock, self.buf, Extfs.BLOCKSIZE)
         self.groups = []
@@ -475,6 +510,11 @@ class Extfs(object):
         self.sb.feature_compat = 0
         self.sb.feature_incompat = EXTFS_FEATURE_INCOMPAT_FILETYPE
         self.sb.feature_ro_compat = 0
+
+        # Need to specify some more info if using 64-bit block group desc
+        if self.groupDescStructSize >= EXTFS_GROUP_DESC_V4_STRUCT_SIZE:
+            self.sb.desc_size = self.groupDescStructSize
+            self.sb.feature_incompat |= EXTFS_FEATURE_INCOMPAT_64BIT
 
         # Generate uuid
         for i in range(0, 16):
@@ -554,8 +594,10 @@ class Extfs(object):
         self.addToDir(EXTFS_ROOT_INO, EXTFS_ROOT_INO, ".")
         self.addToDir(EXTFS_ROOT_INO, EXTFS_ROOT_INO, "..")
 
-        # Add lost+found directory
+        # Add lost+found directory, and journal for ext3+
         self.addLostFoundDir()
+        if version >= 3:
+            self.addJournal()
 
     def finalize(self):
         groupDescSize = len(self.groups) * self.groupDescStructSize
@@ -843,6 +885,36 @@ class Extfs(object):
         entry.st.st_mtime = entry.st.st_atime
         entry.st.st_ctime = entry.st.st_atime
         return self.addDirNode(EXTFS_ROOT_INO, entry)
+
+    def addJournal(self):
+        # Setup inode
+        inum = EXTFS_JOURNAL_INO
+        inode = self.getInode(inum)
+        inode.mode = stat.S_IFREG | stat.S_IRUSR | stat.S_IWUSR
+        inode.links_count = 1
+
+        # Setup journal superblock
+        content = bytearray(Extfs.BLOCKSIZE)
+        jsb = _from_buffer(ExtfsJournalSuperBlock, content)
+        jsb.magic = JFS_MAGIC_NUMBER
+        jsb.blocktype = JFS_SUPERBLOCK_V2
+        jsb.blocksize = Extfs.BLOCKSIZE
+        jsb.maxlen = 1024
+        jsb.nr_users = 1
+        jsb.first = 1
+        jsb.sequence = 1
+        for i in range(0, 16):
+            jsb.uuid[i] = self.sb.uuid[i]
+
+        # Write journal super block and pad with empty data
+        self.extendBlock(inum, content, Extfs.BLOCKSIZE)
+        empty = bytearray(Extfs.BLOCKSIZE)
+        for _ in range(1, jsb.maxlen):
+            self.extendBlock(inum, empty, Extfs.BLOCKSIZE)
+
+        # Update fd super block
+        self.sb.feature_compat |= EXTFS_FEATURE_COMPAT_HAS_JOURNAL
+        self.sb.journal_inum = EXTFS_JOURNAL_INO
 
     def populate(self, parent_inum, tree):
         for child in tree.children.values():
