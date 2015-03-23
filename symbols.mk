@@ -51,8 +51,7 @@ symbols-tar: all
 symbols-tar-gz: all
 endif
 
-clean: symbols-clean
-dirclean: symbols-clean
+# Clean symbols when clobber is done
 clobber: symbols-clean
 
 # Compatiblility

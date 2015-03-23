@@ -598,7 +598,7 @@ _dirclean: $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST),$(__mo
 
 # Most users want a clobber when they ask for clean or dirclean
 # To really do clean or dirclean for EACH module (takes some time)
-# see _clean and -dirclean
+# see _clean and _dirclean
 .PHONY: clean
 .PHONY: dirclean
 clean: clobber

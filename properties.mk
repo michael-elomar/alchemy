@@ -53,7 +53,5 @@ gen-build-prop-clean:
 
 # Add in common targets
 all: gen-build-prop
-clean: gen-build-prop-clean
-dirclean: gen-build-prop-clean
 clobber: gen-build-prop-clean
 

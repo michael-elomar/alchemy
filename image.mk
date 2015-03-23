@@ -69,8 +69,6 @@ ifneq ("$(call is-targets-in-make-goals,final)","")
 image-plf: final
 endif
 
-clean: image-plf-clean
-dirclean: image-plf-clean
 clobber: image-plf-clean
 
 # Compatibility shortcut
@@ -129,8 +127,6 @@ ifneq ("$(call is-targets-in-make-goals,final)","")
 image-cpio: final
 endif
 
-clean: image-cpio-clean
-dirclean: image-cpio-clean
 clobber: image-cpio-clean
 
 ###############################################################################
@@ -160,8 +156,6 @@ ifneq ("$(call is-targets-in-make-goals,final)","")
 image-ext2: final
 endif
 
-clean: image-ext2-clean
-dirclean: image-ext2-clean
 clobber: image-ext2-clean
 
 ###############################################################################
@@ -189,6 +183,4 @@ ifneq ("$(call is-targets-in-make-goals,final)","")
 native-fix-script: final
 endif
 
-clean: native-fix-script-clean
-dirclean: native-fix-script-clean
 clobber: native-fix-script-clean

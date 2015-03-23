@@ -52,8 +52,6 @@ coverage-copy-gcno-clean:
 
 # Setup dependencies
 final: coverage-copy-gcno
-clean: coverage-copy-gcno-clean
-dirclean: coverage-copy-gcno-clean
 clobber: coverage-copy-gcno-clean
 
 # Only add dependency if it is also given in goals to avoid unecessary checks

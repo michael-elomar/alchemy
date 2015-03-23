@@ -205,7 +205,6 @@ endif
 dump-xml-clean:
 	$(Q)rm -f $(DUMP_DATABASE_XML_FILE)
 
-clean: dump-xml-clean
-dirclean: dump-xml-clean
+
 clobber: dump-xml-clean
 

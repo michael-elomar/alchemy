@@ -246,8 +246,6 @@ $(__autotools-target-cache-file): $(BUILD_SYSTEM)/autotools-cache/configure
 autotools-target-cache-file-clean:
 	@rm -f $(__autotools-target-cache-file)
 
-clean: autotools-target-cache-file-clean
-dirclean: autotools-target-cache-file-clean
 clobber: autotools-target-cache-file-clean
 
 ###############################################################################

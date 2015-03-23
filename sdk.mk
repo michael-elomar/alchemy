@@ -33,7 +33,5 @@ ifneq ("$(call is-targets-in-make-goals,final)","")
 sdk: final
 endif
 
-clean: sdk-clean
-dirclean: sdk-clean
 clobber: sdk-clean
 
