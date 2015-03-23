@@ -13,7 +13,7 @@ endif
 LINUX_MODULE := $(call local-get-build-dir)/$(LOCAL_MODULE_FILENAME)
 LINUX_MODULE_OBJ_DIR := $(call local-get-build-dir)/obj
 LINUX_MODULE_KBUILD := $(LINUX_MODULE_OBJ_DIR)/Kbuild
-LINUX_MODULE_SRC_FILES := $(addprefix $(LINUX_MODULE_OBJ_DIR)/, $(LOCAL_SRC_FILES))
+LINUX_MODULE_SRC_FILES := $(addprefix $(LINUX_MODULE_OBJ_DIR)/src/, $(LOCAL_SRC_FILES))
 
 ifeq ("$(TARGET_OS_FLAVOUR:-chroot=)","native")
 $(LINUX_MODULE): PRIVATE_LINUX_BUILD_DIR := /lib/modules/$(shell uname -r)/build
@@ -42,19 +42,19 @@ $(LINUX_MODULE_KBUILD): $(LOCAL_PATH)/$(USER_MAKEFILE_NAME)
 	$(Q) mkdir -p $(dir $@)
 	$(Q)( \
 		echo "obj-m := $(PRIVATE_NAME:.ko=.o)"; \
+		echo "$(PRIVATE_NAME:.ko=-y) := $(PRIVATE_OBJECTS)"; \
 		echo "ccflags-y := $(PRIVATE_INCLUDES)"; \
 		echo "ccflags-y += $(PRIVATE_CFLAGS)"; \
 	) > $@
 
 # Copy sources files as KBuild needs to be at the same place than sources
 $(foreach __f, $(LOCAL_SRC_FILES), \
-	$(eval $(call copy-one-file,$(LOCAL_PATH)/$(__f),$(LINUX_MODULE_OBJ_DIR)/$(__f))) \
+	$(eval $(call copy-one-file,$(LOCAL_PATH)/$(__f),$(LINUX_MODULE_OBJ_DIR)/src/$(__f))) \
 )
 
 $(LINUX_MODULE): PRIVATE_OBJ_DIR := $(LINUX_MODULE_OBJ_DIR)
 $(LINUX_MODULE): PRIVATE_NAME := $(LOCAL_MODULE_FILENAME)
-$(LINUX_MODULE): PRIVATE_OBJY := $(LOCAL_MODULE_FILENAME:.ko=-y)
-$(LINUX_MODULE): PRIVATE_OBJECTS := $(LOCAL_SRC_FILES:.c=.o)
+$(LINUX_MODULE): PRIVATE_OBJECTS := $(addprefix src/,$(LOCAL_SRC_FILES:.c=.o))
 $(LINUX_MODULE): PRIVATE_INCLUDES := $(addprefix -I$(LOCAL_PATH)/, $(call uniq2, $(dir $(LOCAL_SRC_FILES))))
 $(LINUX_MODULE): PRIVATE_INCLUDES += $(addprefix -I, $(LOCAL_C_INCLUDES))
 $(LINUX_MODULE): PRIVATE_CFLAGS := $(LOCAL_CFLAGS)
