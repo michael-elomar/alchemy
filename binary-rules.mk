@@ -228,7 +228,19 @@ $(vala_done_file): $(addprefix $(LOCAL_PATH)/,$(vala_sources))
 	@mv -f $@.tmp $@
 	@[ ! -f $(PRIVATE_VALA_DEPS_FILE) ] || sed \
 		-e 's|$(PRIVATE_VALA_DEPS_FILE)|$@|g' \
-		-i $(PRIVATE_VALA_DEPS_FILE) \
+		-i $(PRIVATE_VALA_DEPS_FILE)
+
+# Copy generated source files in staging directory so it can be included in symbols
+vala_staging_c_sources_dir := $(TARGET_OUT_STAGING)/usr/src/vala/$(LOCAL_MODULE)
+vala_staging_c_sources :=
+$(foreach __f,$(vala_c_sources), \
+	$(eval __dst := $(patsubst $(build_dir)/obj/%,$(vala_staging_c_sources_dir)/%,$(__f))) \
+	$(eval $(call copy-one-file,$(__f),$(__dst))) \
+	$(eval vala_staging_c_sources += $(__dst)) \
+)
+
+# Do the copy before compiling (completely arbitrary)
+$(vala_objects): $(vala_staging_c_sources)
 
 ifneq ("$(skip_include_deps)","1")
 -include $(vala_objects:%.o=%.d)
@@ -265,6 +277,7 @@ $(vala_done_file): | $(filter-out $(vala_header_file) $(vala_vapi_file),$(all_pr
 $(vala_done_file): $(all_internal_depends)
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(vala_done_file)
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(vala_done_file).tmp
+$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(vala_staging_c_sources)
 endif
 
 ###############################################################################
