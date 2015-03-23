@@ -118,7 +118,9 @@ module_ranlib := $(TARGET_RANLIB)
 module_objcopy := $(TARGET_OBJCOPY)
 module_objdump := $(TARGET_OBJDUMP)
 
-ifeq ("$(or $(LOCAL_USE_CLANG), $(USE_CLANG))","1")
+ifeq ("$(USE_CLANG)","1")
+module_compiler_flavour := clang
+else ifeq ("$(LOCAL_USE_CLANG)","1")
 module_compiler_flavour := clang
 else
 module_compiler_flavour := gcc
