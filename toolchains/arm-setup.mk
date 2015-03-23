@@ -104,7 +104,6 @@ TARGET_GLOBAL_CFLAGS_arm ?= \
 
 TARGET_GLOBAL_CFLAGS_arm_gcc ?= -finline-limit=300
 
-
 # Thumb mode specific flags
 ifneq ("$(TARGET_DEFAULT_ARM_MODE)","arm")
 TARGET_GLOBAL_CFLAGS_thumb ?= \
@@ -114,9 +113,11 @@ TARGET_GLOBAL_CFLAGS_thumb ?= \
 	-fno-strict-aliasing
 
 TARGET_GLOBAL_CFLAGS_thumb_gcc ?= -finline-limit=64
+TARGET_GLOBAL_CFLAGS_thumb_clang ?=
 
 else
 # Make sure that if in arm mode, the thumb flags will not be used
 override TARGET_GLOBAL_CFLAGS_thumb :=
 override TARGET_GLOBAL_CFLAGS_thumb_gcc :=
+override TARGET_GLOBAL_CFLAGS_thumb_clang :=
 endif
