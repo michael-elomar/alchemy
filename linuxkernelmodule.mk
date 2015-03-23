@@ -42,7 +42,6 @@ $(LINUX_MODULE_KBUILD): $(LOCAL_PATH)/$(USER_MAKEFILE_NAME)
 	$(Q) mkdir -p $(dir $@)
 	$(Q)( \
 		echo "obj-m := $(PRIVATE_NAME:.ko=.o)"; \
-		echo "$(PRIVATE_OBJY) :=  $(PRIVATE_OBJECTS)"; \
 		echo "ccflags-y := $(PRIVATE_INCLUDES)"; \
 		echo "ccflags-y += $(PRIVATE_CFLAGS)"; \
 	) > $@
