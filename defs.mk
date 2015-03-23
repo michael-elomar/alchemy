@@ -352,7 +352,7 @@ __modules-get-required-host-direct = $(strip $(sort \
 ## If no global configuration file present, always return true.
 ###############################################################################
 is-module-in-build-config = $(strip \
-	$(if $(call is-module-prebuilt,$1),$(true), \
+	$(if $(and $(call is-module-registered,$1),$(call is-module-prebuilt,$1)),$(true), \
 		$(eval __var := CONFIG_ALCHEMY_BUILD_$(call module-get-define,$1)) \
 		$(if $(call streq,$(CONFIG_GLOBAL_FILE_AVAILABLE),0),$(true), \
 			$(if $(call is-var-defined,$(__var)), \
@@ -610,7 +610,11 @@ modules-compute-depends = \
 # $1 : module name.
 __module-update-depends-direct = \
 	$(foreach __lib,$(__modules.$1.LIBRARIES), \
-		$(eval __class := $(__modules.$(__lib).MODULE_CLASS)) \
+		$(if $(call is-module-registered,$(__lib)), \
+			$(eval __class := $(__modules.$(__lib).MODULE_CLASS)) \
+			, \
+			$(eval __class := $(empty)) \
+		) \
 		$(if $(call streq,$(__class),STATIC_LIBRARY), \
 			$(if $(call streq,$(__modules.$(__lib).FORCE_WHOLE_STATIC_LIBRARY),1), \
 				$(eval __modules.$1.WHOLE_STATIC_LIBRARIES += $(__lib)), \
@@ -677,10 +681,14 @@ __module-compute-depends-static = \
 __module-compute-depends-static-internal = \
 	$(__modules.$1.$2) \
 	$(foreach __mod,$(__modules.$1.STATIC_LIBRARIES), \
-		$(call __module-compute-depends-static,$(__mod),$2) \
+		$(if $(call is-module-registered,$(__mod)), \
+			$(call __module-compute-depends-static,$(__mod),$2) \
+		) \
 	) \
 	$(foreach __mod,$(__modules.$1.WHOLE_STATIC_LIBRARIES), \
-		$(call __module-compute-depends-static,$(__mod),$2) \
+		$(if $(call is-module-registered,$(__mod)), \
+			$(call __module-compute-depends-static,$(__mod),$2) \
+		) \
 	)
 
 # Compute dependencies for link. It simply aggregate (and sort) dependencies
@@ -718,7 +726,9 @@ __module-compute-depends-all = \
 __module-compute-depends-all-internal = \
 	$(__modules.$1.depends) \
 	$(foreach __mod,$(__modules.$1.depends), \
-		$(call __module-compute-depends-all,$(__mod)) \
+		$(if $(call is-module-registered,$(__mod)), \
+			$(call __module-compute-depends-all,$(__mod)) \
+		) \
 	)
 
 # Update dependencies for static executables.
@@ -727,12 +737,14 @@ __module-compute-depends-all-internal = \
 # version to static version.
 __module-update-static-executable = \
 	$(foreach __lib,$(__modules.$1.depends.all), \
-		$(if $(call streq,$(__modules.$(__lib).MODULE_CLASS),LIBRARY), \
-			$(eval __modules.$1.depends.STATIC_LIBRARIES := $(strip \
-				$(call uniq2,$(__modules.$1.depends.STATIC_LIBRARIES) $(__lib))) \
-			) \
-			$(eval __modules.$1.depends.SHARED_LIBRARIES := $(strip \
-				$(filter-out $(__lib),$(__modules.$1.depends.SHARED_LIBRARIES))) \
+		$(if $(call is-module-registered,$(__lib)), \
+			$(if $(call streq,$(__modules.$(__lib).MODULE_CLASS),LIBRARY), \
+				$(eval __modules.$1.depends.STATIC_LIBRARIES := $(strip \
+					$(call uniq2,$(__modules.$1.depends.STATIC_LIBRARIES) $(__lib))) \
+				) \
+				$(eval __modules.$1.depends.SHARED_LIBRARIES := $(strip \
+					$(filter-out $(__lib),$(__modules.$1.depends.SHARED_LIBRARIES))) \
+				) \
 			) \
 		) \
 	)
