@@ -670,6 +670,7 @@ __module-compute-depends-static = \
 	$(if $(call __is-in-depends-loop,$1), \
 		$(error cyclic dependency detected: $(__depends-loop) $1) \
 	) \
+	$(eval __depends-loop += $1) \
 	$(eval $1.__var := __modules.$1.depends.$2) \
 	$(if $($($1.__var)),$($($1.__var)), \
 		$(eval $($1.__var) := $(strip \
