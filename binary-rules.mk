@@ -66,6 +66,8 @@ vala_done_file := $(build_dir)/obj/vala.done
 vala_deps_file := $(build_dir)/obj/vala.d
 vala_header_file := $(build_dir)/include/$(LOCAL_MODULE).vala.h
 vala_vapi_file := $(build_dir)/include/$(LOCAL_MODULE).vapi
+vala_staging_c_sources_dir := $(TARGET_OUT_STAGING)/usr/src/vala/$(LOCAL_MODULE)
+vala_staging_c_sources :=
 LOCAL_VALAFLAGS += \
 	--header=$(vala_header_file) \
 	--vapi=$(vala_vapi_file)
@@ -75,6 +77,8 @@ else
 vala_done_file :=
 vala_header_file :=
 vala_vapi_file :=
+vala_staging_c_sources_dir :=
+vala_staging_c_sources :=
 endif
 
 all_gen_sources := \
@@ -230,8 +234,6 @@ $(vala_done_file): $(addprefix $(LOCAL_PATH)/,$(vala_sources))
 		-i $(PRIVATE_VALA_DEPS_FILE)
 
 # Copy generated source files in staging directory so it can be included in symbols
-vala_staging_c_sources_dir := $(TARGET_OUT_STAGING)/usr/src/vala/$(LOCAL_MODULE)
-vala_staging_c_sources :=
 $(foreach __f,$(vala_c_sources), \
 	$(eval __dst := $(patsubst $(build_dir)/obj/%,$(vala_staging_c_sources_dir)/%,$(__f))) \
 	$(eval $(call copy-one-file,$(__f),$(__dst))) \

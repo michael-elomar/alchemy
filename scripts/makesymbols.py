@@ -23,10 +23,11 @@ def isExec(filePath):
 #===============================================================================
 #===============================================================================
 def getFileList(stagingDir):
+    usrSrcValaDir = os.path.join(stagingDir, "usr", "src", "vala")
     result = []
     for (dirPath, dirNames, fileNames) in os.walk(stagingDir):
         for fileName in fileNames:
-            filePath = os.path.join(stagingDir, dirPath, fileName)
+            filePath = os.path.join(dirPath, fileName)
             if os.path.islink(filePath):
                 targetPath = os.path.realpath(filePath)
                 if targetPath in result:
@@ -34,8 +35,9 @@ def getFileList(stagingDir):
                 elif targetPath.startswith(stagingDir) and isExec(targetPath):
                     result.append(filePath)
                     result.append(targetPath)
-            elif filePath not in result and isExec(filePath):
-                result.append(filePath)
+            elif filePath not in result:
+                if isExec(filePath) or filePath.startswith(usrSrcValaDir):
+                    result.append(filePath)
     return result
 
 #===============================================================================
