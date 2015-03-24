@@ -39,9 +39,10 @@ def copyStaging(srcDir, dstDir):
 		os.path.join("usr", "share", "vala")
 	]
 	for dirName in dirs_to_keep:
-		srcDirPath=os.path.normpath(os.path.join(srcDir, dirName))
-		dstDirPath=os.path.normpath(os.path.join(dstDir, dirName))
-		shutil.copytree(srcDirPath, dstDirPath, symlinks=True)
+		if os.path.exists(dirName):
+			srcDirPath=os.path.normpath(os.path.join(srcDir, dirName))
+			dstDirPath=os.path.normpath(os.path.join(dstDir, dirName))
+			shutil.copytree(srcDirPath, dstDirPath, symlinks=True)
 
 #===============================================================================
 #===============================================================================
