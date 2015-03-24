@@ -159,7 +159,8 @@ def processModule(ctx, module):
 
 	# Write verbatim some fields
 	fields = ["DESCRIPTION", "CATEGORY_PATH",
-			"REVISION", "FORCE_WHOLE_STATIC_LIBRARY",
+			"REVISION", "REVISION_DESCRIBE",
+			"FORCE_WHOLE_STATIC_LIBRARY",
 			"EXPORT_CFLAGS", "EXPORT_CXXFLAGS"]
 	for field in fields:
 		if field in module.fields and module.fields[field] :
