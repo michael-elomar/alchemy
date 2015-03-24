@@ -175,7 +175,7 @@ include $(BUILD_SYSTEM)/setup.mk
 # Optimizations for some goals.
 ###############################################################################
 
-# Define som target class
+# Define some target class
 __clobber-targets := clobber clean dirclean
 __query-targets := scan help help-modules dump dump-depends dump-xml build-graph
 __config-targets := config config-check config-update xconfig menuconfig nconfig
@@ -419,8 +419,10 @@ $(foreach __mod,$(ALL_BUILD_MODULES_HOST), \
 
 # Check dependencies and variables of modules
 ifeq ("$(SKIP_DEPS_AND_CHECKS)","0")
+ifeq ("$(SKIP_CONFIG_CHECK)","0")
   $(call modules-check-depends)
   $(call modules-check-variables)
+endif
 endif
 
 # Generate files with module list
