@@ -36,7 +36,8 @@ def copyStaging(srcDir, dstDir):
 	dirs_to_keep = ["lib" ,
 		os.path.join("usr", "lib"),
 		os.path.join("usr", "include"),
-		os.path.join("usr", "share", "vala")
+		os.path.join("usr", "share", "vala"),
+		os.path.join("usr", "src", "linux-sdk")
 	]
 	for dirName in dirs_to_keep:
 		if os.path.exists(os.path.join(srcDir, dirName)):

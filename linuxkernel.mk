@@ -164,6 +164,35 @@ $(LINUX_BUILD_DIR)/.config: $(LINUX_CONFIG_FILE)
 
 endif # ifneq ("$(LINUX_CONFIG_FILE_IS_TARGET)","")
 
+# Generate everything for the sdk (so we can build external kernel modules from it)
+# Inspired from <linux>/scripts/package/builddeb, 'Build header package' section
+LINUX_SDK_DIR := $(TARGET_OUT_STAGING)/usr/src/linux-sdk
+define linux-gen-sdk
+	$(Q) :> $(LINUX_BUILD_DIR)/sdksrcfiles
+	$(Q) :> $(LINUX_BUILD_DIR)/sdkobjfiles
+	$(Q) (cd $(PRIVATE_PATH); \
+		find . -name Makefile -o -name Kconfig\* -o -name \*.pl \
+		>> $(LINUX_BUILD_DIR)/sdksrcfiles)
+	$(Q) (cd $(PRIVATE_PATH); \
+		find arch/$(LINUX_ARCH)/include include scripts -type f \
+		>> $(LINUX_BUILD_DIR)/sdksrcfiles)
+$(if $(call streq,$(LINUX_ARCH),arm), \
+	$(Q) (cd $(PRIVATE_PATH); \
+		find arch/$(LINUX_ARCH)/*/include -type f \
+		>> $(LINUX_BUILD_DIR)/sdksrcfiles) \
+)
+	$(Q) (cd $(LINUX_BUILD_DIR); \
+		find arch/$(LINUX_ARCH)/include include scripts .config Module.symvers -type f \
+		>> $(LINUX_BUILD_DIR)/sdkobjfiles)
+	$(Q) mkdir -p $(LINUX_SDK_DIR)
+	$(Q) tar -C $(PRIVATE_PATH) -cf - -T $(LINUX_BUILD_DIR)/sdksrcfiles | \
+		tar -C $(LINUX_SDK_DIR) -xf -
+	$(Q) tar -C $(LINUX_BUILD_DIR) -cf - -T $(LINUX_BUILD_DIR)/sdkobjfiles | \
+		tar -C $(LINUX_SDK_DIR) -xf -
+	$(Q) rm -f $(LINUX_BUILD_DIR)/sdksrcfiles
+	$(Q) rm -f $(LINUX_BUILD_DIR)/sdkobjfiles
+endef
+
 # Avoid compiling kernel at same time than header installation by adding a prerequisite
 $(LINUX_BUILD_DIR)/$(LOCAL_MODULE_FILENAME): $(LINUX_BUILD_DIR)/.config $(LINUX_HEADERS_DONE_FILE)
 	@mkdir -p $(LINUX_BUILD_DIR)/drivers/parrot/nand
@@ -194,6 +223,7 @@ ifneq ("$(TARGET_LINUX_DEVICE_TREE)","")
 		> $(TARGET_OUT_STAGING)/boot/zImage_$(TARGET_LINUX_DEVICE_TREE)
 endif
 	$(Q)cp -af $(LINUX_BUILD_DIR)/vmlinux $(TARGET_OUT_STAGING)/boot
+	$(call linux-gen-sdk)
 	@echo "Linux kernel built"
 	@touch $@
 
@@ -258,6 +288,7 @@ linux-clean:
 	$(Q)rm -f $(TARGET_OUT_STAGING)/boot/uImage
 	$(Q)rm -f $(LINUX_HEADERS_DONE_FILE)
 	$(Q)rm -rf $(TARGET_OUT_STAGING)/usr/src/linux-headers
+	$(Q)rm -rf $(LINUX_SDK_DIR)
 	$(Q)$(foreach header,$(LINUX_EXPORTED_HEADERS),\
 		rm -f $(TARGET_OUT_STAGING)/usr/include/linux/$(notdir $(header)); \
 	)
