@@ -52,8 +52,78 @@ LINUX_BASIC_SKEL = [
 	["lib/modules", None],
 ]
 
-class CopyType:
+#==============================================================================
+#==============================================================================
+class CopyType(object):
 	(ONLY_LINKS, NO_LINKS, ALL) = range(0, 3)
+
+#==============================================================================
+#==============================================================================
+class Makefile(object):
+	def __init__(self, fout):
+		self.fout = fout
+		self.rules = {}
+
+	def addCopyCmd(self, dstFileName, srcFileName, doStrip):
+		# Overwrite existing
+		if dstFileName in self.rules:
+			logging.debug("Overwrite %s: %s -> %s", dstFileName,
+					self.rules[dstFileName][1], srcFileName)
+		self.rules[dstFileName] = (dstFileName, srcFileName, doStrip)
+
+	# Makefile banner
+	# The .SUFFIXES is important to remove all implicit rules.
+	# There is one which is really, really nasty :
+	#   a file x is updated from a file x.sh automatically
+	# Guess what happen when you have both in a folder :
+	#  the executable is replaced by the script if older...
+	def _writeHeader(self):
+		self.fout.write("# GENERATED FILE, DO NOT MODIFY\n\n")
+		# turns off suffix rules built into make
+		self.fout.write(".SUFFIXES:\n")
+		# turns off the RCS / SCCS implicit rules of GNU Make
+		self.fout.write("%: RCS/%,v\n")
+		self.fout.write("%: RCS/%\n")
+		self.fout.write("%: %,v\n")
+		self.fout.write("%: s.%\n")
+		self.fout.write("%: SCCS/s.%\n")
+		# other defines
+		self.fout.write("ALL :=\n")
+		self.fout.write("V ?= 0\n")
+		self.fout.write("ifeq (\"$(V)\",\"0\")\n")
+		self.fout.write("  PRINT =\n")
+		self.fout.write("else\n")
+		self.fout.write("  PRINT = @echo $1\n")
+		self.fout.write("endif\n")
+		self.fout.write(".PHONY: all\n")
+		self.fout.write("all: do-all\n\n")
+
+	# Makefile footer.
+	def _writeFooter(self):
+		self.fout.write(".PHONY: do-all\n")
+		self.fout.write("do-all: $(ALL)\n\n")
+
+	def write(self, options):
+		self._writeHeader()
+		idx = 0
+		for rule in self.rules.values():
+			(dstFileName, srcFileName, doStrip) = rule
+
+			# use a generic target name to avoid issue with file names containing
+			# special characters
+			self.fout.write("ALL += file%d\n" % idx)
+			self.fout.write(".PHONY: file%d\n" % idx)
+			self.fout.write("file%d:\n" % idx)
+			idx += 1
+
+			# commands, see doCopy for more info
+			cmds = getCopyCmds(dstFileName, srcFileName, options, doStrip)
+			self.fout.write("\t$(call PRINT,\"Alchemy install: %s\")\n" %
+					os.path.relpath(dstFileName))
+			for cmd in cmds:
+				self.fout.write("\t@%s\n" % cmd.replace("$", "$$"))
+			self.fout.write("\n")
+		self._writeFooter()
 
 #==============================================================================
 # Execute a command and get its output
@@ -68,13 +138,13 @@ def executeCmd(cmd):
 def isExec(filePath):
 	result = False
 	try:
-		file = open(filePath, "r")
+		file = open(filePath, "rb")
 		header = str(file.read(4))
 		if header.find("ELF") >= 0:
 			result = True
 		file.close()
 	except IOError as ex:
-		logging.error("Unable to open %s ([err=%d] %s)",
+		logging.error("Failed to open file: %s ([err=%d] %s)",
 			filePath, ex.errno, ex.strerror)
 	return result
 
@@ -188,22 +258,8 @@ def getCopyCmds(dstFileName, srcFileName, options, doStrip=False):
 #===============================================================================
 # Copy a file using a makefile (to do strip in parallel).
 #===============================================================================
-_MAKEFILE_FILE_IDX = 0
 def doCopyByMakefile(dstFileName, srcFileName, options, doStrip=False):
-	global _MAKEFILE_FILE_IDX
-	# use a generic target name to avoid issue with file names containing
-	# special characters
-	options.makefile.write("ALL += file%d\n" % _MAKEFILE_FILE_IDX)
-	options.makefile.write(".PHONY: file%d\n" % _MAKEFILE_FILE_IDX)
-	options.makefile.write("file%d:\n" % _MAKEFILE_FILE_IDX)
-	_MAKEFILE_FILE_IDX += 1
-
-	# commands, see doCopy for more info
-	cmds = getCopyCmds(dstFileName, srcFileName, options, doStrip)
-	options.makefile.write("\t$(call PRINT,\"Alchemy install: %s\")\n" % os.path.relpath(dstFileName))
-	for cmd in cmds:
-		options.makefile.write("\t@%s\n" % cmd.replace("$", "$$"))
-	options.makefile.write("\n")
+	options.makefile.addCopyCmd(dstFileName, srcFileName, doStrip)
 
 #===============================================================================
 # Copy a file by directly making a copy.
@@ -290,42 +346,6 @@ def doCopy(dstFileName, srcFileName, options, forceCopy=False):
 		doCopyDirect(dstFileName, srcFileName, options, doStrip)
 
 #===============================================================================
-# Makefile banner
-# The .SUFFIXES is important to remove all implicit rules.
-# There is one which is really, really nasty :
-#   a file x is updated from a file x.sh automatically
-# Guess what happen when you have both in a folder :
-#  the executable is replaced by the script if older...
-#===============================================================================
-def writeMakefileHeader(options):
-	options.makefile.write("# GENERATED FILE, DO NOT MODIFY\n\n")
-	# turns off suffix rules built into make
-	options.makefile.write(".SUFFIXES:\n")
-	# turns off the RCS / SCCS implicit rules of GNU Make
-	options.makefile.write("%: RCS/%,v\n")
-	options.makefile.write("%: RCS/%\n")
-	options.makefile.write("%: %,v\n")
-	options.makefile.write("%: s.%\n")
-	options.makefile.write("%: SCCS/s.%\n")
-	# other devines
-	options.makefile.write("ALL :=\n")
-	options.makefile.write("V ?= 0\n")
-	options.makefile.write("ifeq (\"$(V)\",\"0\")\n")
-	options.makefile.write("  PRINT =\n")
-	options.makefile.write("else\n")
-	options.makefile.write("  PRINT = @echo $1\n")
-	options.makefile.write("endif\n")
-	options.makefile.write(".PHONY: all\n")
-	options.makefile.write("all: do-all\n\n")
-
-#===============================================================================
-# Makefile footer.
-#===============================================================================
-def writeMakefileFooter(options):
-	options.makefile.write(".PHONY: do-all\n")
-	options.makefile.write("do-all: $(ALL)\n\n")
-
-#===============================================================================
 # Process a directory and copy dirs/files to final directory.
 #===============================================================================
 def processDir(rootDir, options, withEmptyDir, copyType, forceCopy=False):
@@ -409,7 +429,11 @@ def main():
 	options.makefile = None
 	if len(args) >= 3:
 		logging.info("makefile : %s", args[2])
-		options.makefile = open(args[2], "w")
+		try:
+			options.makefile = Makefile(open(args[2], "w"))
+		except IOError as ex:
+			logging.error("Failed to create file: %s [err=%d %s]",
+					args[2], ex.errno, ex.strerror)
 
 	# update filter
 	if not options.keepPythonFiles:
@@ -422,7 +446,7 @@ def main():
 		try:
 			options.fileListFile = open(options.fileListPath, "w")
 		except IOError as ex:
-			logging.error("Failed to create file: '%s' [err=%d %s]",
+			logging.error("Failed to create file: %s [err=%d %s]",
 					options.fileListPath, ex.errno, ex.strerror)
 
 	# regex for strip filters
@@ -435,9 +459,6 @@ def main():
 	# check that staging directory exists
 	if not os.path.isdir(options.stagingDir):
 		logging.error("%s is not a directory", options.stagingDir)
-
-	if options.makefile != None:
-		writeMakefileHeader(options)
 
 	# process links of skeleton directory (with empty dirs and links)
 	for skelDir in options.skelDirs:
@@ -456,7 +477,8 @@ def main():
 		processLinuxBasicSkel(options)
 
 	if options.makefile != None:
-		writeMakefileFooter(options)
+		options.makefile.write(options)
+		options.makefile.fout.close()
 
 #===============================================================================
 # Setup option parser and parse command line.

@@ -1,4 +1,6 @@
-#!/usr/bin/env python
+#===============================================================================
+# Generate a file system image in 'extfs' format.
+#===============================================================================
 
 import os, logging
 import stat
@@ -121,7 +123,7 @@ EXTFS_FILE_TYPE_SOCKET = 6
 EXTFS_FILE_TYPE_SYMLINK = 7
 EXTFS_FILE_TYPE_MAX = 8
 
-EXTFS_FILE_TYPE_BY_MODE = {
+EXTFS_FILE_TYPE_FROM_STAT_TYPE = {
     stat.S_IFREG: EXTFS_FILE_TYPE_REGULAR,
     stat.S_IFDIR: EXTFS_FILE_TYPE_DIR,
     stat.S_IFCHR: EXTFS_FILE_TYPE_CHARDEV,
@@ -130,6 +132,19 @@ EXTFS_FILE_TYPE_BY_MODE = {
     stat.S_IFSOCK: EXTFS_FILE_TYPE_SOCKET,
     stat.S_IFLNK: EXTFS_FILE_TYPE_SYMLINK,
 }
+
+#===============================================================================
+# Wrapper just to avoid errors with pylint saying that methods
+# from_buffer and from_address does not exist for class deriving from ctypes
+# structures.
+#===============================================================================
+def _from_buffer(cls, buf, off=0):
+    return cls.from_buffer(buf, off)
+
+#===============================================================================
+#===============================================================================
+def _from_address(cls, addr):
+    return cls.from_address(addr)
 
 #===============================================================================
 # Structure of the super block
@@ -213,7 +228,7 @@ assert ctypes.sizeof(ExtfsSuperBlock) == EXTFS_SUPER_BLOCK_STRUCT_SIZE
 #===============================================================================
 
 # Common part
-class ExtfsGroupDesc_Common(ctypes.LittleEndianStructure):
+class ExtfsGroupDescCommon(ctypes.LittleEndianStructure):
     _fields_ = [
         ("block_bitmap", ctypes.c_uint32),          # Blocks bitmap block
         ("inode_bitmap", ctypes.c_uint32),          # Inodes bitmap block
@@ -225,16 +240,16 @@ class ExtfsGroupDesc_Common(ctypes.LittleEndianStructure):
     ]
 
 # ext2
-class ExtfsGroupDesc_v2(ExtfsGroupDesc_Common):
+class ExtfsGroupDescV2(ExtfsGroupDescCommon):
     _fields_ = [
         ("reserved", ctypes.c_uint32 * 3),          # Reserved
     ]
 
 # ext3 is same as ext2
-ExtfsGroupDesc_v3 = ExtfsGroupDesc_v2
+ExtfsGroupDescV3 = ExtfsGroupDescV2
 
 # ext4
-class ExtfsGroupDesc_v4(ExtfsGroupDesc_Common):
+class ExtfsGroupDescV4(ExtfsGroupDescCommon):
     _fields_ = [
         ("reserved", ctypes.c_uint32 * 2),          # Reserved
         ("itable_unused", ctypes.c_uint16),         # Unused inodes count
@@ -250,16 +265,16 @@ class ExtfsGroupDesc_v4(ExtfsGroupDesc_Common):
         ("reserved2", ctypes.c_uint32 * 3),
     ]
 
-assert ctypes.sizeof(ExtfsGroupDesc_v2) == EXTFS_GROUP_DESC_V2_STRUCT_SIZE
-assert ctypes.sizeof(ExtfsGroupDesc_v3) == EXTFS_GROUP_DESC_V3_STRUCT_SIZE
-assert ctypes.sizeof(ExtfsGroupDesc_v4) == EXTFS_GROUP_DESC_V4_STRUCT_SIZE
+assert ctypes.sizeof(ExtfsGroupDescV2) == EXTFS_GROUP_DESC_V2_STRUCT_SIZE
+assert ctypes.sizeof(ExtfsGroupDescV3) == EXTFS_GROUP_DESC_V3_STRUCT_SIZE
+assert ctypes.sizeof(ExtfsGroupDescV4) == EXTFS_GROUP_DESC_V4_STRUCT_SIZE
 
 #===============================================================================
 # Structure of an inode on the disk
 #===============================================================================
 
 # Common part
-class ExtfsInode_Common(ctypes.LittleEndianStructure):
+class ExtfsInodeCommon(ctypes.LittleEndianStructure):
     _fields_ = [
         ("mode", ctypes.c_uint16),                  # File mode
         ("uid", ctypes.c_uint16),                   # Low 16 bits of Owner Uid
@@ -279,56 +294,56 @@ class ExtfsInode_Common(ctypes.LittleEndianStructure):
     ]
 
 # ext2
-class ExtfsInode_v2(ExtfsInode_Common):
+class ExtfsInodeV2(ExtfsInodeCommon):
     _fields_ = [
-        ("dir_acl", ctypes.c_uint32),               # Directory ACL
-        ("faddr", ctypes.c_uint32),                 # fragment address
-        ("frag", ctypes.c_uint8),                   # Fragment number
-        ("fsize", ctypes.c_uint8),                  # Fragment size
-        ("pad1", ctypes.c_uint16),                  #
-        ("uid_high", ctypes.c_uint16),              #
-        ("gid_high", ctypes.c_uint16),              #
-        ("reserved2", ctypes.c_uint32),             #
+        ("dir_acl", ctypes.c_uint32),       # Directory ACL
+        ("faddr", ctypes.c_uint32),         # fragment address
+        ("frag", ctypes.c_uint8),           # Fragment number
+        ("fsize", ctypes.c_uint8),          # Fragment size
+        ("pad1", ctypes.c_uint16),          #
+        ("uid_high", ctypes.c_uint16),      #
+        ("gid_high", ctypes.c_uint16),      #
+        ("reserved2", ctypes.c_uint32),     #
     ]
 
 # ext3
-class ExtfsInode_v3(ExtfsInode_Common):
+class ExtfsInodeV3(ExtfsInodeCommon):
     _fields_ = [
-        ("dir_acl", ctypes.c_uint32),               # Directory ACL
-        ("faddr", ctypes.c_uint32),                 # fragment address
-        ("frag", ctypes.c_uint8),                   # Fragment number
-        ("fsize", ctypes.c_uint8),                  # Fragment size
-        ("pad1", ctypes.c_uint16),                  #
-        ("uid_high", ctypes.c_uint16),              #
-        ("gid_high", ctypes.c_uint16),              #
-        ("reserved2", ctypes.c_uint32),             #
-        ("extra_isize", ctypes.c_uint16),           #
-        ("pad1", ctypes.c_uint16),                  #
+        ("dir_acl", ctypes.c_uint32),       # Directory ACL
+        ("faddr", ctypes.c_uint32),         # fragment address
+        ("frag", ctypes.c_uint8),           # Fragment number
+        ("fsize", ctypes.c_uint8),          # Fragment size
+        ("pad1", ctypes.c_uint16),          #
+        ("uid_high", ctypes.c_uint16),      #
+        ("gid_high", ctypes.c_uint16),      #
+        ("reserved2", ctypes.c_uint32),     #
+        ("extra_isize", ctypes.c_uint16),   #
+        ("pad1", ctypes.c_uint16),          #
     ]
 
 # ext4
-class ExtfsInode_v4(ExtfsInode_Common):
+class ExtfsInodeV4(ExtfsInodeCommon):
     _fields_ = [
-        ("size_high", ctypes.c_uint32),             #
-        ("obso_faddr", ctypes.c_uint32),            # Obsoleted fragment address
-        ("blocks_high", ctypes.c_uint16),           #
-        ("file_acl_high", ctypes.c_uint16),         #
-        ("uid_high", ctypes.c_uint16),              #
-        ("gid_high", ctypes.c_uint16),              #
-        ("reserved2", ctypes.c_uint32),             #
-        ("extra_isize", ctypes.c_uint16),           #
-        ("pad1", ctypes.c_uint16),                  #
-        ("ctime_extra", ctypes.c_uint32),           # Extra Change time      (nsec << 2 | epoch)
-        ("mtime_extra", ctypes.c_uint32),           # Extra Modification time(nsec << 2 | epoch)
-        ("atime_extra", ctypes.c_uint32),           # Extra Access time      (nsec << 2 | epoch)
-        ("crtime", ctypes.c_uint32),                # File Creation time
-        ("crtime_extra", ctypes.c_uint32),          # Extra FileCreationtime (nsec << 2 | epoch)
-        ("version_hi", ctypes.c_uint32),            # High 32 bits for 64-bit version
+        ("size_high", ctypes.c_uint32),     #
+        ("obso_faddr", ctypes.c_uint32),    # Obsoleted fragment address
+        ("blocks_high", ctypes.c_uint16),   #
+        ("file_acl_high", ctypes.c_uint16), #
+        ("uid_high", ctypes.c_uint16),      #
+        ("gid_high", ctypes.c_uint16),      #
+        ("reserved2", ctypes.c_uint32),     #
+        ("extra_isize", ctypes.c_uint16),   #
+        ("pad1", ctypes.c_uint16),          #
+        ("ctime_extra", ctypes.c_uint32),   # Extra Change time      (nsec << 2 | epoch)
+        ("mtime_extra", ctypes.c_uint32),   # Extra Modification time(nsec << 2 | epoch)
+        ("atime_extra", ctypes.c_uint32),   # Extra Access time      (nsec << 2 | epoch)
+        ("crtime", ctypes.c_uint32),        # File Creation time
+        ("crtime_extra", ctypes.c_uint32),  # Extra FileCreationtime (nsec << 2 | epoch)
+        ("version_hi", ctypes.c_uint32),    # High 32 bits for 64-bit version
     ]
 
-assert ctypes.sizeof(ExtfsInode_v2) == EXTFS_INODE_V2_STRUCT_SIZE
-assert ctypes.sizeof(ExtfsInode_v3) == EXTFS_INODE_V3_STRUCT_SIZE
-assert ctypes.sizeof(ExtfsInode_v4) == EXTFS_INODE_V4_STRUCT_SIZE
+assert ctypes.sizeof(ExtfsInodeV2) == EXTFS_INODE_V2_STRUCT_SIZE
+assert ctypes.sizeof(ExtfsInodeV3) == EXTFS_INODE_V3_STRUCT_SIZE
+assert ctypes.sizeof(ExtfsInodeV4) == EXTFS_INODE_V4_STRUCT_SIZE
 
 #===============================================================================
 # Structure of a directory entry (actual name length is in name_len)
@@ -339,7 +354,7 @@ class ExtfsDirEntry(ctypes.LittleEndianStructure):
         ("rec_len", ctypes.c_uint16),                   # Directory entry length
         ("name_len", ctypes.c_uint8),                   # Name length
         ("file_type", ctypes.c_uint8),                  # File type
-        ("name", ctypes.c_uint8 * (EXTFS_NAME_LEN + 1)),# File name (we will ensure null-terminated)
+        ("name", ctypes.c_uint8 * (EXTFS_NAME_LEN + 1)),# File name (null-terminated)
     ]
 assert ctypes.sizeof(ExtfsDirEntry) == EXTFS_DIRENTRY_STRUCT_NO_NAME_SIZE + EXTFS_NAME_LEN + 1
 
@@ -361,7 +376,7 @@ assert ctypes.sizeof(ExtfsExtent) == EXTFS_EXT_ENTRY_SIZE
 class ExtfsExtentIdx(ctypes.LittleEndianStructure):
     _fields_ = [
         ("block", ctypes.c_uint32),         # Index covers logical blocks from 'block'
-        ("leaf_lo", ctypes.c_uint32),       # Pointer to the physical block of the next level.
+        ("leaf_lo", ctypes.c_uint32),       # Physical block of the next level.
         ("leaf_hi", ctypes.c_uint16),       # High 16 bits of physical block
         ("unused", ctypes.c_uint16),        #
     ]
@@ -381,22 +396,61 @@ class ExtfsExtentHeader(ctypes.LittleEndianStructure):
 
 #===============================================================================
 #===============================================================================
+class ExtfsJournalSuperBlock(ctypes.BigEndianStructure):
+    _fields_ = [
+        ("magic" , ctypes.c_uint32),        #
+        ("blocktype", ctypes.c_uint32),     #
+        ("sequence", ctypes.c_uint32),      #
+        ("blocksize", ctypes.c_uint32),     # Journal device blocksize
+        ("maxlen", ctypes.c_uint32),        # Total blocks in journal file
+        ("first", ctypes.c_uint32),         # First block of log information
+        ("sequence", ctypes.c_uint32),      # First commit ID expected in log
+        ("start", ctypes.c_uint32),         # blocknr of start of log
+        ("errno", ctypes.c_int32),          # Error value
+        ("feature_compat", ctypes.c_uint32),    # compatible feature set
+        ("feature_incompat", ctypes.c_uint32),  # incompatible feature set
+        ("feature_ro_compat", ctypes.c_uint32), # readonly-compatible feature set
+        ("uuid", ctypes.c_uint8 * 16),          # 128-bit uuid for journal
+        ("nr_users", ctypes.c_uint32),          # Nr of filesystems sharing log
+        ("dynsuper", ctypes.c_uint32),          # Blocknr of dynamic superblock copy
+        ("max_transaction", ctypes.c_uint32),   # Limit of journal blocks per trans
+        ("max_trans_data", ctypes.c_uint32),    # Limit of data blocks per trans
+        ("padding", ctypes.c_uint32 * 44),      #
+        ("users", ctypes.c_uint8 * 16 * 48),    # ids of all fs'es sharing the log
+    ]
+assert ctypes.sizeof(ExtfsJournalSuperBlock) == 1024
+
+JFS_MAGIC_NUMBER = 0xc03b3998
+JFS_DESCRIPTOR_BLOCK = 1
+JFS_COMMIT_BLOCK = 2
+JFS_SUPERBLOCK_V1 = 3
+JFS_SUPERBLOCK_V2 = 4
+JFS_REVOKE_BLOCK = 5
+
+#===============================================================================
+#===============================================================================
 class Extfs(object):
     BLOCKSIZE = 1024
     BLOCKS_PER_GROUP = 8192
     INODES_PER_GROUP = 8192
     INODE_BLOCKSIZE = 512
     INOBLK = BLOCKSIZE // INODE_BLOCKSIZE
+    INODE_RATIO = 4096
+    RESERVED_RATIO = 5
 
-    def __init__(self, buf, blockCount, inodeCount, reservedBlockCount):
+    def __init__(self, buf, blockCount, inodeCount, reservedBlockCount, version=2):
         self.buf = buf
-        self.sb = ExtfsSuperBlock.from_buffer(self.buf, Extfs.BLOCKSIZE)
+        self.sb = _from_buffer(ExtfsSuperBlock, self.buf, Extfs.BLOCKSIZE)
         self.groups = []
 
-        self.groupDescStructType = ExtfsGroupDesc_v2
-        self.groupDescStructSize = EXTFS_GROUP_DESC_V2_STRUCT_SIZE
-        self.inodeStructType = ExtfsInode_v2
+        # Always use v2 structures
+        # Inode v3 and v4 requires inode size to be 256 instead of 128
+        # Group desc v3 is same as v2
+        # Group desc v4 is for 64-bit block numbers (big images)
+        self.inodeStructType = ExtfsInodeV2
         self.inodeStructSize = EXTFS_INODE_V2_STRUCT_SIZE
+        self.groupDescStructType = ExtfsGroupDescV2
+        self.groupDescStructSize = EXTFS_GROUP_DESC_V2_STRUCT_SIZE
 
         # Check parameters
         if reservedBlockCount < 0:
@@ -457,6 +511,11 @@ class Extfs(object):
         self.sb.feature_incompat = EXTFS_FEATURE_INCOMPAT_FILETYPE
         self.sb.feature_ro_compat = 0
 
+        # Need to specify some more info if using 64-bit block group desc
+        if self.groupDescStructSize >= EXTFS_GROUP_DESC_V4_STRUCT_SIZE:
+            self.sb.desc_size = self.groupDescStructSize
+            self.sb.feature_incompat |= EXTFS_FEATURE_INCOMPAT_64BIT
+
         # Generate uuid
         for i in range(0, 16):
             self.sb.uuid[i] = random.randint(0, 255)
@@ -467,7 +526,7 @@ class Extfs(object):
         itblpos = ibmpos + 1
         for i in range(0, groupCount):
             # Get group descriptor structure
-            group = self.groupDescStructType.from_buffer(self.buf,
+            group = _from_buffer(self.groupDescStructType, self.buf,
                     Extfs.BLOCKSIZE +
                     ctypes.sizeof(ExtfsSuperBlock) +
                     i * self.groupDescStructSize)
@@ -535,8 +594,10 @@ class Extfs(object):
         self.addToDir(EXTFS_ROOT_INO, EXTFS_ROOT_INO, ".")
         self.addToDir(EXTFS_ROOT_INO, EXTFS_ROOT_INO, "..")
 
-        # Add lost+found directory
+        # Add lost+found directory, and journal for ext3+
         self.addLostFoundDir()
+        if version >= 3:
+            self.addJournal()
 
     def finalize(self):
         groupDescSize = len(self.groups) * self.groupDescStructSize
@@ -582,7 +643,7 @@ class Extfs(object):
         grp = self.getGroupOfInode(inum)
         off = self.groups[grp].inode_table * Extfs.BLOCKSIZE
         off += self.getIBMOffset(inum) * self.inodeStructSize
-        return self.inodeStructType.from_buffer(self.buf, off)
+        return _from_buffer(self.inodeStructType, self.buf, off)
 
     # Get group block bitmap (bbm) given the group number
     def getGroupBBM(self, grp):
@@ -655,7 +716,7 @@ class Extfs(object):
                     blk = Extfs.allocate(self.getGroupBBM(grp), 0)
                     break
             else:
-                logging.error("Unable to allocate block for inode : %d", inum)
+                logging.error("Failed to allocate block for inode : %d", inum)
                 return 0
         # Update stats and return block number
         self.groups[grp].free_blocks_count -= 1
@@ -670,7 +731,7 @@ class Extfs(object):
                 self.groups[grp].free_inodes_count -= 1
                 self.sb.free_inodes_count -= 1
                 return inum + grp * self.sb.inodes_per_group
-        logging.error("Unable to allocate inode")
+        logging.error("Failed to allocate inode")
         return 0
 
     def extendBlock(self, inum, data, amount, nocopy=False):
@@ -687,7 +748,7 @@ class Extfs(object):
             cpyLen = min(srcLen, dstLen)
             if not nocopy:
                 ctypes.memmove(
-                        ctypes.c_void_p.from_address(ctypes.addressof(dst) + dstOff),
+                        _from_address(ctypes.c_void_p, ctypes.addressof(dst) + dstOff),
                         (ctypes.c_uint8 * cpyLen).from_buffer_copy(src, srcOff),
                         cpyLen)
             inode.size += cpyLen
@@ -719,13 +780,13 @@ class Extfs(object):
             off = 0
             while off < Extfs.BLOCKSIZE \
                     and off + EXTFS_DIRENTRY_STRUCT_NO_NAME_SIZE < Extfs.BLOCKSIZE:
-                dent = ExtfsDirEntry.from_address(ctypes.addressof(block) + off)
+                dent = _from_address(ExtfsDirEntry, ctypes.addressof(block) + off)
                 # If empty dir entry, large enough, use it
                 if dent.inode == 0 and dent.rec_len >= reclen:
                     dent.inode = inum
                     inode.links_count += 1
                     dent.name_len = nlen
-                    dent.file_type = EXTFS_FILE_TYPE_BY_MODE[stat.S_IFMT(inode.mode)]
+                    dent.file_type = EXTFS_FILE_TYPE_FROM_STAT_TYPE[stat.S_IFMT(inode.mode)]
                     ctypes.memmove(dent.name,
                             (ctypes.c_uint8 * dent.name_len).from_buffer_copy(name),
                             dent.name_len)
@@ -736,12 +797,12 @@ class Extfs(object):
                     reclen = dent.rec_len
                     dent.rec_len = min_rec_len
                     reclen -= dent.rec_len
-                    dent = ExtfsDirEntry.from_address(ctypes.addressof(dent) + dent.rec_len)
+                    dent = _from_address(ExtfsDirEntry, ctypes.addressof(dent) + dent.rec_len)
                     dent.rec_len = reclen
                     dent.inode = inum
                     inode.links_count += 1
                     dent.name_len = nlen
-                    dent.file_type = EXTFS_FILE_TYPE_BY_MODE[stat.S_IFMT(inode.mode)]
+                    dent.file_type = EXTFS_FILE_TYPE_FROM_STAT_TYPE[stat.S_IFMT(inode.mode)]
                     ctypes.memmove(dent.name,
                             (ctypes.c_uint8 * dent.name_len).from_buffer_copy(name),
                             dent.name_len)
@@ -754,12 +815,12 @@ class Extfs(object):
 
         # We found no free entry in the directory, so we add a block
         buf = bytearray(Extfs.BLOCKSIZE)
-        dent = ExtfsDirEntry.from_buffer(buf)
+        dent = _from_buffer(ExtfsDirEntry, buf)
         dent.inode = inum
         inode.links_count += 1
         dent.rec_len = Extfs.BLOCKSIZE
         dent.name_len = nlen
-        dent.file_type = EXTFS_FILE_TYPE_BY_MODE[stat.S_IFMT(inode.mode)]
+        dent.file_type = EXTFS_FILE_TYPE_FROM_STAT_TYPE[stat.S_IFMT(inode.mode)]
         ctypes.memmove(dent.name,
                 (ctypes.c_uint8 * dent.name_len).from_buffer_copy(name),
                 dent.name_len)
@@ -810,12 +871,13 @@ class Extfs(object):
         inode.block[0] = entry.st.st_dev
 
     def addLostFoundDir(self):
-        class FakeEntry(object): pass
         class FakeStat(object): pass
-        entry = FakeEntry()
-        entry.filePath = "lost+found"
-        entry.fileName = "lost+found"
-        entry.st = FakeStat()
+        class FakeEntry(object):
+            def __init__(self, filePath, fileName):
+                self.filePath = filePath
+                self.fileName = fileName
+                self.st = FakeStat()
+        entry = FakeEntry("lost+found", "lost+found")
         entry.st.st_mode = stat.S_IFDIR | stat.S_IRWXU
         entry.st.st_uid = 0
         entry.st.st_gid = 0
@@ -823,6 +885,36 @@ class Extfs(object):
         entry.st.st_mtime = entry.st.st_atime
         entry.st.st_ctime = entry.st.st_atime
         return self.addDirNode(EXTFS_ROOT_INO, entry)
+
+    def addJournal(self):
+        # Setup inode
+        inum = EXTFS_JOURNAL_INO
+        inode = self.getInode(inum)
+        inode.mode = stat.S_IFREG | stat.S_IRUSR | stat.S_IWUSR
+        inode.links_count = 1
+
+        # Setup journal superblock
+        content = bytearray(Extfs.BLOCKSIZE)
+        jsb = _from_buffer(ExtfsJournalSuperBlock, content)
+        jsb.magic = JFS_MAGIC_NUMBER
+        jsb.blocktype = JFS_SUPERBLOCK_V2
+        jsb.blocksize = Extfs.BLOCKSIZE
+        jsb.maxlen = 1024
+        jsb.nr_users = 1
+        jsb.first = 1
+        jsb.sequence = 1
+        for i in range(0, 16):
+            jsb.uuid[i] = self.sb.uuid[i]
+
+        # Write journal super block and pad with empty data
+        self.extendBlock(inum, content, Extfs.BLOCKSIZE)
+        empty = bytearray(Extfs.BLOCKSIZE)
+        for _ in range(1, jsb.maxlen):
+            self.extendBlock(inum, empty, Extfs.BLOCKSIZE)
+
+        # Update fd super block
+        self.sb.feature_compat |= EXTFS_FEATURE_COMPAT_HAS_JOURNAL
+        self.sb.journal_inum = EXTFS_JOURNAL_INO
 
     def populate(self, parent_inum, tree):
         for child in tree.children.values():
@@ -836,11 +928,13 @@ class Extfs(object):
 
 #===============================================================================
 #===============================================================================
-def genImage(image, root):
-    size = 256 * 1024 * 1024
-    os.ftruncate(image.fout.fileno(), size)
-    buf = mmap.mmap(image.fout.fileno(), size)
-    fs = Extfs(buf, size // Extfs.BLOCKSIZE, 65536, 13107)
+def genImage(image, root, version=2):
+    os.ftruncate(image.fout.fileno(), image.size)
+    buf = mmap.mmap(image.fout.fileno(), image.size)
+    blockCount = image.size // Extfs.BLOCKSIZE
+    inodeCount = (blockCount * Extfs.BLOCKSIZE) // Extfs.INODE_RATIO
+    reservedBlockCount = (blockCount * Extfs.RESERVED_RATIO) // 100
+    fs = Extfs(buf, blockCount, inodeCount, reservedBlockCount, version)
     fs.populate(EXTFS_ROOT_INO, root)
     fs.finalize()
     buf.close()

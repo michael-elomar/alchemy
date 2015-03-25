@@ -18,9 +18,6 @@ $(call clear-vars, $(filter-out LOCAL_PATH,$(macros-LOCAL:%=LOCAL_%)))
 MAKEFILE_LIST := $(lastword $(MAKEFILE_LIST))
 
 # Compatibility variables, still checked but no more in vars-LOCAL
-LOCAL_CPPFLAGS :=
-LOCAL_EXPORT_CPPFLAGS :=
-
 LOCAL_AUTOTOOLS_ARCHIVE :=
 LOCAL_AUTOTOOLS_VERSION :=
 LOCAL_AUTOTOOLS_SUBDIR :=

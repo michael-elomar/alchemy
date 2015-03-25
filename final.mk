@@ -124,13 +124,10 @@ final:
 	$(Q)$(__final-prepare)
 	$(Q)$(MAKEFINAL_SCRIPT) $(MAKEFINAL_ARGS) \
 		$(TARGET_OUT_STAGING) $(TARGET_OUT_FINAL) $(TARGET_OUT)/final.mk
-	$(Q) $(MAKE) -f $(TARGET_OUT)/final.mk -j1
+	$(Q) $(MAKE) -f $(TARGET_OUT)/final.mk
 	$(Q)$(__final-finish)
 	$(Q)$(__final-ldconfig)
 	@echo "Done generating final tree"
 
-# Only add dependency if it is also given in goals to avoid unecessary checks
-ifneq ("$(call is-targets-in-make-goals,all)","")
-final: all
-endif
-
+# Setup dependencies
+final: post-build

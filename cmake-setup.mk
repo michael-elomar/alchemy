@@ -82,6 +82,4 @@ $(CMAKE_TOOLCHAIN_FILE):
 cmake-toolchain-file-clean:
 	$(Q) rm -f $(CMAKE_TOOLCHAIN_FILE)
 
-clean: cmake-toolchain-file-clean
-dirclean: cmake-toolchain-file-clean
 clobber: cmake-toolchain-file-clean

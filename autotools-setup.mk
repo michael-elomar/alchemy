@@ -120,7 +120,7 @@ endif
 ## Variable used for autotools on target modules.
 ###############################################################################
 
-ifeq ("$(or $(LOCAL_USE_CLANG), $(USE_CLANG))","1")
+ifeq ("$(USE_CLANG)","1")
 module_compiler_flavour := clang
 else
 module_compiler_flavour := gcc
@@ -246,8 +246,6 @@ $(__autotools-target-cache-file): $(BUILD_SYSTEM)/autotools-cache/configure
 autotools-target-cache-file-clean:
 	@rm -f $(__autotools-target-cache-file)
 
-clean: autotools-target-cache-file-clean
-dirclean: autotools-target-cache-file-clean
 clobber: autotools-target-cache-file-clean
 
 ###############################################################################

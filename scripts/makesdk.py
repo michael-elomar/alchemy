@@ -3,6 +3,7 @@
 import sys, os, logging
 import optparse
 import shutil
+import fnmatch
 import xml.parsers
 
 from cStringIO import StringIO
@@ -20,121 +21,101 @@ class Context(object):
 		self.stagingDir = os.path.abspath(args[4])
 		self.outDir = os.path.abspath(args[5])
 		self.atom = StringIO()
+		self.setup = StringIO()
 		self.sdkDirs = []
 		self.modules = None
 
 #===============================================================================
 #===============================================================================
 def copyHostStaging(srcDir, dstDir):
-	for (dirPath, dirNames, fileNames) in os.walk(srcDir):
-		for fileName in fileNames:
-			srcFilePath = os.path.join(dirPath, fileName)
-			relPath = os.path.relpath(srcFilePath, srcDir)
-			dstFilePath = os.path.join(dstDir, relPath)
-			# When combining several sdk the same file could be found several times
-			if not os.path.lexists(dstFilePath):
-				if not os.path.exists(os.path.split(dstFilePath)[0]):
-					os.makedirs(os.path.split(dstFilePath)[0], mode=0755)
-				if os.path.islink(srcFilePath):
-					logging.debug("Link: %s -> %s", srcFilePath, dstFilePath)
-					linkTarget = os.readlink(srcFilePath)
-					os.symlink(linkTarget, dstFilePath)
-				else:
-					logging.debug("Copy: %s -> %s", srcFilePath, dstFilePath)
-					shutil.copy2(srcFilePath, dstFilePath)
+	shutil.copytree(srcDir, dstDir, symlinks=True)
 
 #===============================================================================
 #===============================================================================
 def copyStaging(srcDir, dstDir):
-	extensions = [".h", ".hpp", ".hxx", ".so", ".a", ".pc", ".tcc", ".doxygen", ".inl", ".vapi", ".deps"]
-	for (dirPath, dirNames, fileNames) in os.walk(srcDir):
-		for fileName in fileNames:
-			srcFilePath = os.path.join(dirPath, fileName)
-			relPath = os.path.relpath(srcFilePath, srcDir)
-			dstFilePath = os.path.join(dstDir, relPath)
-			# When combining several sdk the same file could be found several times
-			if not os.path.lexists(dstFilePath) \
-					and (os.path.splitext(fileName)[1] in extensions \
-							or ".so." in fileName \
-							or "include" in dirPath):
-				if not os.path.exists(os.path.split(dstFilePath)[0]):
-					os.makedirs(os.path.split(dstFilePath)[0], mode=0755)
-				if os.path.islink(srcFilePath):
-					logging.debug("Link: %s -> %s", srcFilePath, dstFilePath)
-					linkTarget = os.readlink(srcFilePath)
-					os.symlink(linkTarget, dstFilePath)
-				else:
-					logging.debug("Copy: %s -> %s", srcFilePath, dstFilePath)
-					shutil.copy2(srcFilePath, dstFilePath)
+	dirs_to_keep = ["lib" ,
+		os.path.join("usr", "lib"),
+		os.path.join("usr", "include"),
+		os.path.join("usr", "share", "vala"),
+		os.path.join("usr", "src", "linux-sdk")
+	]
+	for dirName in dirs_to_keep:
+		if os.path.exists(os.path.join(srcDir, dirName)):
+			srcDirPath=os.path.normpath(os.path.join(srcDir, dirName))
+			dstDirPath=os.path.normpath(os.path.join(dstDir, dirName))
+			shutil.copytree(srcDirPath, dstDirPath, symlinks=True)
 
 #===============================================================================
 #===============================================================================
 def copySdk(srcDir, dstDir):
-	for (dirPath, dirNames, fileNames) in os.walk(srcDir):
-		for fileName in fileNames:
-			srcFilePath = os.path.join(dirPath, fileName)
-			relPath = os.path.relpath(srcFilePath, srcDir)
-			dstFilePath = os.path.join(dstDir, relPath)
-			# When combining several sdk the same file could be found several times
-			if not os.path.lexists(dstFilePath):
-				if not os.path.exists(os.path.split(dstFilePath)[0]):
-					os.makedirs(os.path.split(dstFilePath)[0], mode=0755)
-				if os.path.islink(srcFilePath):
-					logging.debug("Link: %s -> %s", srcFilePath, dstFilePath)
-					linkTarget = os.readlink(srcFilePath)
-					os.symlink(linkTarget, dstFilePath)
-				else:
-					logging.debug("Copy: %s -> %s", srcFilePath, dstFilePath)
-					shutil.copy2(srcFilePath, dstFilePath)
-		# Link to directories are in dirNames...
-		for dirName in dirNames:
-			srcDirPath = os.path.join(dirPath, dirName)
-			relPath = os.path.relpath(srcDirPath, srcDir)
-			dstDirPath = os.path.join(dstDir, relPath)
-			# When combining several sdk the same file could be found several times
-			if not os.path.lexists(dstDirPath):
-				if not os.path.exists(os.path.split(dstDirPath)[0]):
-					os.makedirs(os.path.split(dstDirPath)[0], mode=0755)
-				if os.path.islink(srcDirPath):
-					logging.debug("Link: %s -> %s", srcDirPath, dstDirPath)
-					linkTarget = os.readlink(srcDirPath)
-					os.symlink(linkTarget, dstDirPath)
+	shutil.copytree(srcDir, dstDir, symlinks=True)
 
 #===============================================================================
 #===============================================================================
 def copyHeaders(srcDir, dstDir):
-	extensions = [".h", ".hpp", ".hxx", ".doxygen", ".inl"]
-	if not os.path.exists(srcDir):
-		logging.warning("Missing include directory: %s", srcDir)
-	for (dirPath, dirNames, fileNames) in os.walk(srcDir):
-		for fileName in fileNames:
-			srcFilePath = os.path.normpath(os.path.join(dirPath, fileName))
-			relPath = os.path.relpath(srcFilePath, srcDir)
-			dstFilePath = os.path.normpath(os.path.join(dstDir, relPath))
-			if os.path.splitext(fileName)[1] in extensions:
-				logging.debug("Copy: %s -> %s", srcFilePath, dstFilePath)
-				if not os.path.exists(os.path.dirname(dstFilePath)):
-					os.makedirs(os.path.dirname(dstFilePath), mode=0755)
-				shutil.copy2(srcFilePath, dstFilePath)
+	extensions = ["*.h", "*.hpp", "*.hxx", "*.doxygen", "*.inl"]
+	copyElements(srcDir, dstDir, extensions)
 
 #===============================================================================
 #===============================================================================
 def copyLibs(srcDir, dstDir):
-	extensions = [".a"]
+	extensions = ["*.a"]
+	# Limit the copy to the base of the module
+	copyElements(srcDir, dstDir, extensions, depth=1)
+
+#===============================================================================
+# Copy elements based on their extensions and limiting to a max depth if any
+# If no extension is provided, any element will be took into account
+#===============================================================================
+def copyElement(srcPath, dstPath, keepLinks=False):
+	if not os.path.exists(os.path.dirname(dstPath)):
+		os.makedirs(os.path.dirname(dstPath), mode=0755)
+
+	# Set the function to use for copy
+	if os.path.isdir(srcPath):
+		copy_func = { "function":shutil.copytree, "description":"Copy"}
+	else:
+		copy_func = { "function":shutil.copy2, "description":"Copy"}
+
+	if os.path.islink(srcPath):
+		# We voluntarily make no normalization of path
+		# as the final environment may be peculiar
+		srcPath = os.readlink(srcPath)
+		# If asked to keep links instead of hard copy,
+		# change the function to use
+		if keepLinks:
+			copy_func = { "function":os.symlink, "description":"Link"}
+	# Do the copy/symlink
+	logging.debug("%s: %s -> %s", copy_func["description"], srcPath, dstPath)
+	copy_func["function"](srcPath, dstPath)
+
+def copyElements(srcDir, dstDir, extensions=["*"], depth=0,
+		keepLinks=False, keepInclude=False, scanDirs=False):
 	if not os.path.exists(srcDir):
-		logging.warning("Missing lib directory: %s", srcDir)
+		logging.warning("Missing directory: %s", srcDir)
+
+	# Manage depth only if provided or different than 0
+	if depth is None or depth == 0:
+		current_depth = None
+	else:
+		# Save the current level
+		current_depth = os.path.normpath(srcDir).count(os.sep)
+
 	for (dirPath, dirNames, fileNames) in os.walk(srcDir):
+		# Aren't we deep enough to parse the content of the files
+		if current_depth:
+			# We use continue instead of break,
+			# In order not to skip potentials remaining directories
+			if os.path.normpath(dirPath).count(os.sep) > (current_depth + depth):
+				continue
+
 		for fileName in fileNames:
-			srcFilePath = os.path.join(dirPath, fileName)
+			# Get normalized path for src and dst
+			srcFilePath = os.path.normpath(os.path.join(dirPath, fileName))
 			relPath = os.path.relpath(srcFilePath, srcDir)
-			dstFilePath = os.path.join(dstDir, relPath)
-			if os.path.splitext(fileName)[1] in extensions:
-				logging.debug("Copy: %s -> %s", srcFilePath, dstFilePath)
-				if not os.path.exists(os.path.split(dstFilePath)[0]):
-					os.makedirs(os.path.split(dstFilePath)[0], mode=0755)
-				shutil.copy2(srcFilePath, dstFilePath)
-		# Only first level
-		break
+			dstFilePath = os.path.normpath(os.path.join(dstDir, relPath))
+			if any([fnmatch.fnmatch(os.path.basename(srcFilePath), ext) for ext in extensions]):
+				copyElement(srcFilePath, dstFilePath, keepLinks=keepLinks)
 
 #===============================================================================
 #===============================================================================
@@ -179,7 +160,8 @@ def processModule(ctx, module):
 
 	# Write verbatim some fields
 	fields = ["DESCRIPTION", "CATEGORY_PATH",
-			"REVISION", "FORCE_WHOLE_STATIC_LIBRARY",
+			"REVISION", "REVISION_DESCRIBE",
+			"FORCE_WHOLE_STATIC_LIBRARY",
 			"EXPORT_CFLAGS", "EXPORT_CXXFLAGS"]
 	for field in fields:
 		if field in module.fields and module.fields[field] :
@@ -202,9 +184,9 @@ def processModule(ctx, module):
 				# TODO: simplify destination by remove extra 'lib' and 'module name'
 				relPath = os.path.relpath(libDir, modulePath)
 				if relPath != ".":
-					dstDir = "usr/lib/" + module.name + "/" + relPath
+					dstDir = os.path.join("usr", "lib", module.name, relPath)
 				else:
-					dstDir = "usr/lib/" + module.name
+					dstDir = os.path.join("usr", "lib", module.name)
 				# Copy libs and add new directory only if files have actually
 				# been copied (ie directory was created)
 				copyLibs(libDir, os.path.join(ctx.outDir, dstDir))
@@ -233,9 +215,9 @@ def processModule(ctx, module):
 				# TODO: simplify destination by remove extra 'include' and 'module name'
 				relPath = os.path.relpath(includeDir, modulePath)
 				if relPath != ".":
-					dstDir = "usr/include/" + module.name + "/" + relPath
+					dstDir = os.path.join("usr", "include", module.name, relPath)
 				else:
-					dstDir = "usr/include/" + module.name
+					dstDir = os.path.join("usr", "include", module.name)
 				# Copy headers and add new directory only if files have actually
 				# been copied (ie directory was created)
 				copyHeaders(includeDir, os.path.join(ctx.outDir, dstDir))
@@ -245,9 +227,9 @@ def processModule(ctx, module):
 				# TODO: simplify destination by remove extra 'include' and 'module name'
 				relPath = os.path.relpath(includeDir, os.path.join(ctx.buildDir, module.name))
 				if relPath != ".":
-					dstDir = "usr/include/" + module.name + "/" + relPath
+					dstDir = os.path.join("usr", "include", module.name, relPath)
 				else:
-					dstDir = "usr/include/" + module.name
+					dstDir = os.path.join("usr", "include", module.name)
 				# Copy headers and add new directory only if files have actually
 				# been copied (ie directory was created)
 				copyHeaders(includeDir, os.path.join(ctx.outDir, dstDir))
@@ -273,12 +255,12 @@ def processModule(ctx, module):
 	if "CONFIG_FILES" in module.fields:
 		autoconfFileName = "autoconf-%s.h" % module.name
 		ctx.atom.write("LOCAL_CONFIG_FILES := 1\n")
-		if not os.path.exists(os.path.join(ctx.outDir, "usr/include", module.name)):
-			os.makedirs(os.path.join(ctx.outDir, "usr/include", module.name), mode=0755)
+		if not os.path.exists(os.path.join(ctx.outDir, "usr", "include", module.name)):
+			os.makedirs(os.path.join(ctx.outDir, "usr", "include", module.name), mode=0755)
 		if os.path.exists(os.path.join(ctx.buildDir, module.name, autoconfFileName)):
 			shutil.copy2(
 					os.path.join(ctx.buildDir, module.name, autoconfFileName),
-					os.path.join(ctx.outDir, "usr/include", module.name, autoconfFileName))
+					os.path.join(ctx.outDir, "usr", "include", module.name, autoconfFileName))
 
 	# Set LOCAL_LIBRARIES with the content of 'depends'
 	if "depends" in module.fields:
@@ -287,7 +269,7 @@ def processModule(ctx, module):
 	# Register shared/static libraries as normal so we can manage dependencies
 	# Other are simply put as prebuilt
 	ctx.atom.write("LOCAL_SDK := $(LOCAL_PATH)\n")
-	if moduleClass == "SHARED_LIBRARY" or moduleClass == "STATIC_LIBRARY" or moduleClass == "LIBRARY":
+	if moduleClass in ["SHARED_LIBRARY", "STATIC_LIBRARY", "LIBRARY"]:
 		ctx.atom.write("LOCAL_DESTDIR := %s\n" % module.fields["DESTDIR"])
 		ctx.atom.write("LOCAL_MODULE_FILENAME := %s\n" % module.fields["MODULE_FILENAME"])
 		ctx.atom.write("include $(BUILD_%s)\n" % moduleClass)
@@ -305,6 +287,13 @@ def checkTargetVar(ctx, name):
 		ctx.atom.write("ifneq (\"$(TARGET_%s)\",\"%s\")\n" % (name, val))
 		ctx.atom.write("  $(error This sdk is for TARGET_%s=%s)\n" % (name, val))
 		ctx.atom.write("endif\n\n")
+
+#===============================================================================
+#===============================================================================
+def setupTargetEnvironment(ctx, name):
+	val = ctx.modules.targetVars.get(name, "")
+	if val:
+		ctx.setup.write("TARGET_%s := %s\n" % (name, val))
 
 #===============================================================================
 # Main function.
@@ -340,13 +329,15 @@ def main():
 	logging.info("Copying staging directory")
 	copyStaging(ctx.stagingDir, ctx.outDir)
 
-	# Make sure that when the sdk is used it will be on the same target
-	checkTargetVar(ctx, "OS")
-	checkTargetVar(ctx, "OS_FLAVOUR")
-	checkTargetVar(ctx, "ARCH")
-	checkTargetVar(ctx, "CPU")
-	checkTargetVar(ctx, "LIBC")
-	checkTargetVar(ctx, "DEFAULT_ARM_MODE")
+	# Save specific sdk target components in a setup.mk file for future usage,
+	# Also add a check in the atom.mk
+	# to make sure that the sdk is used in the correct environment
+	target_elements = [ "OS", "OS_FLAVOUR",
+		"ARCH", "CPU",
+		"LIBC", "DEFAULT_ARM_MODE" ]
+	for element_to_check in target_elements:
+		checkTargetVar(ctx, element_to_check)
+		setupTargetEnvironment(ctx, element_to_check)
 
 	# Process modules
 	for module in ctx.modules:
@@ -359,11 +350,16 @@ def main():
 		ctx.atom.write("\nendef\n")
 
 	# Write the atom.mk
-	atomFile = open(os.path.join(ctx.outDir, "atom.mk"), "w")
-	atomFile.write("# GENERATED FILE, DO NOT EDIT\n\n")
-	atomFile.write("LOCAL_PATH := $(call my-dir)\n\n")
-	atomFile.write(ctx.atom.getvalue())
-	atomFile.close()
+	with open(os.path.join(ctx.outDir, "atom.mk"), "w") as atomFile:
+		atomFile.write("# GENERATED FILE, DO NOT EDIT\n\n")
+		atomFile.write("LOCAL_PATH := $(call my-dir)\n\n")
+		atomFile.write(ctx.atom.getvalue())
+
+	# Write the setup.mk
+	with open(os.path.join(ctx.outDir, "setup.mk"), "w") as setupFile:
+		setupFile.write("# GENERATED FILE, DO NOT EDIT\n\n")
+		setupFile.write(ctx.setup.getvalue())
+		setupFile.write("\n")
 
 #===============================================================================
 # Setup option parser and parse command line.

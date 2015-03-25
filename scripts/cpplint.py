@@ -2923,7 +2923,7 @@ def CheckComment(line, filename, linenum, next_line_start, error):
   commentpos = line.find('//')
   if commentpos != -1:
     # Check if the // may be in quotes.  If so, ignore it
-    # Comparisons made explicit for clarity -- pylint: disable=g-explicit-bool-comparison
+    # Comparisons made explicit for clarity
     if (line.count('"', 0, commentpos) -
         line.count('\\"', 0, commentpos)) % 2 == 0:   # not in quotes
       # Allow one space for new scopes, two spaces otherwise:
@@ -2952,7 +2952,7 @@ def CheckComment(line, filename, linenum, next_line_start, error):
                 '"// TODO(my_username): Stuff."')
 
         middle_whitespace = match.group(3)
-        # Comparisons made explicit for correctness -- pylint: disable=g-explicit-bool-comparison
+        # Comparisons made explicit for correctness
         if middle_whitespace != ' ' and middle_whitespace != '':
           error(filename, linenum, 'whitespace/todo', 2,
                 'TODO(my_username) should be followed by a space')

@@ -13,6 +13,9 @@ ifneq ("$(V)","0")
 $(info Generating rules for $(LOCAL_MODULE))
 endif
 
+# This will print a warning if this module misses a custom macro
+$(call check-custom-macro,$(LOCAL_MODULE))
+
 # Do we need to copy build module to staging/final dir
 copy_to_staging := 0
 copy_to_final := 0
@@ -42,6 +45,8 @@ LOCAL_STAGING_MODULE := $(call module-get-staging-filename,$(LOCAL_MODULE))
 # Assemble the list of targets to create PRIVATE_ variables for.
 LOCAL_TARGETS := \
 	$(LOCAL_BUILD_MODULE) \
+	$(LOCAL_CUSTOM_TARGETS) \
+	$(LOCAL_MODULE) \
 	$(LOCAL_MODULE)-clean \
 	$(LOCAL_MODULE)-dirclean \
 	$(LOCAL_MODULE)-path
@@ -115,7 +120,9 @@ module_ranlib := $(TARGET_RANLIB)
 module_objcopy := $(TARGET_OBJCOPY)
 module_objdump := $(TARGET_OBJDUMP)
 
-ifeq ("$(or $(LOCAL_USE_CLANG), $(USE_CLANG))","1")
+ifeq ("$(USE_CLANG)","1")
+module_compiler_flavour := clang
+else ifeq ("$(LOCAL_USE_CLANG)","1")
 module_compiler_flavour := clang
 else
 module_compiler_flavour := gcc
@@ -748,7 +755,7 @@ else
 # Use LOCAL_PATH and other input
 doc_input := $(LOCAL_PATH) $(LOCAL_DOXYGEN_INPUT)
 doc_input := $(foreach __path,$(doc_input), \
-	$(if $(call is-path-absolute,$(path)), \
+	$(if $(call is-path-absolute,$(__path)), \
 		$(__path),$(addprefix $(LOCAL_PATH)/,$(__path)) \
 	))
 

@@ -4,12 +4,14 @@ import sys, os, logging
 import optparse
 import re
 import stat
-import mkextfs, mkcpio
+import mktar, mkextfs, mkcpio
 
-# List od supported file systems
+# List of supported file systems
 FS_LIST = [
-    "cpio", "ext2",
+    "tar", "cpio", "ext2", "ext3", "ext4"
 ]
+
+_DEFAULT_IMAGE_SIZE = "256M"
 
 #===============================================================================
 #===============================================================================
@@ -75,25 +77,8 @@ def addFsEntry(root, entry):
     parent.children[entry.fileName] = entry
 
 #===============================================================================
-# Main function.
 #===============================================================================
-def main():
-    (options, args) = parseArgs()
-    setupLog(options)
-
-    # Open output image file
-    outImagePath = args[0]
-    try:
-        fout = open(outImagePath, "w+b")
-    except IOError as ex:
-        logging.error("Failed to open file: %s [err=%d %s]",
-                outImagePath, ex.errno, ex.strerror)
-        sys.exit(1)
-    image = FsImage(fout, 0)
-
-    # Root entry
-    root = FsEntry(None, 0, None)
-
+def addFsEntries(root):
     # Read file names on stdin
     reLine = re.compile("([^;]*)(;mode=([0-7]*);uid=([0-9]*);gid=([0-9]*))?")
     for line in sys.stdin:
@@ -125,8 +110,11 @@ def main():
         # Add entry in tree
         addFsEntry(root, entry)
 
+#===============================================================================
+#===============================================================================
+def addDevNodes(root, devNodes):
     # Device nodes
-    for devNode in options.devNodes:
+    for devNode in devNodes:
         fields = devNode.split(":")
         filePath = fields[0]
         st = MyStat()
@@ -148,10 +136,49 @@ def main():
         entry = FsEntry(filePath, 0, st)
         addFsEntry(root, entry)
 
-    if options.fstype == "cpio":
+#===============================================================================
+# Main function.
+#===============================================================================
+def main():
+    (options, args) = parseArgs()
+    setupLog(options)
+
+    # Open output image file (for reading and writing to be mapped)
+    outImagePath = args[0]
+    try:
+        fout = open(outImagePath, "w+b")
+    except IOError as ex:
+        logging.error("Failed to create file: %s [err=%d %s]",
+                outImagePath, ex.errno, ex.strerror)
+        sys.exit(1)
+
+    # Determine image size
+    if options.imageSize.endswith("K"):
+        imageSize = int(options.imageSize[:-1]) * 1024
+    elif options.imageSize.endswith("M"):
+        imageSize = int(options.imageSize[:-1]) * 1024 * 1024
+    elif options.imageSize.endswith("G"):
+        imageSize = int(options.imageSize[:-1]) * 1024 * 1024 * 1024
+    else:
+        imageSize = int(options.imageSize)
+    image = FsImage(fout, imageSize)
+
+    # Construct image from root
+    root = FsEntry(None, 0, None)
+    addFsEntries(root)
+    addDevNodes(root, options.devNodes)
+
+    # Generate the oupt file
+    if options.fstype == "tar":
+        mktar.genImage(image, root)
+    elif options.fstype == "cpio":
         mkcpio.genImage(image, root)
     elif options.fstype == "ext2":
-        mkextfs.genImage(image, root)
+        mkextfs.genImage(image, root, 2)
+    elif options.fstype == "ext3":
+        mkextfs.genImage(image, root, 3)
+    elif options.fstype == "ext4":
+        mkextfs.genImage(image, root, 4)
 
     # Free resources
     fout.close()
@@ -167,6 +194,11 @@ def parseArgs():
         dest="fstype",
         default=None,
         help="file system type : " + ",".join(FS_LIST))
+
+    parser.add_option("--size",
+        dest="imageSize",
+        default=_DEFAULT_IMAGE_SIZE,
+        help="file system image size (in bytes, suffixes K,M,G allowed)")
 
     parser.add_option("--devnode",
         dest="devNodes",

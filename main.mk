@@ -142,6 +142,9 @@ SKIP_DEPS_AND_CHECKS := 0
 # their .done file).
 SKIP_EXT_DEPS_AND_CHECKS := 0
 
+# Silently skip config check (in contrast to USE_CONFIG_CHECK that warn)
+SKIP_CONFIG_CHECK := 0
+
 # Include product env file
 ifdef TARGET_CONFIG_DIR
 -include $(TARGET_CONFIG_DIR)/product.mk
@@ -160,6 +163,7 @@ $(foreach __var,$(vars-TARGET), \
 )
 
 # If a sdk has a setup.mk file, include it
+TARGET_SDK_DIRS ?=
 $(foreach __dir,$(TARGET_SDK_DIRS), \
 	$(eval -include $(__dir)/setup.mk) \
 )
@@ -171,28 +175,19 @@ include $(BUILD_SYSTEM)/setup.mk
 # Optimizations for some goals.
 ###############################################################################
 
-# Skip external checks if requested
-ifeq ("$(TARGET_FORCE_EXTERNAL_CHECKS)","0")
-  SKIP_EXT_DEPS_AND_CHECKS := 1
-endif
-
-# Skip some steps for some make goals
-__clean-targets := clean dirclean clobber _clean _dirclean
+# Define some target class
+__clobber-targets := clobber clean dirclean
 __query-targets := scan help help-modules dump dump-depends dump-xml build-graph
 __config-targets := config config-check config-update xconfig menuconfig nconfig
-__fs-targets := final plf image-plf image-cpio sdk symbols symbols-tar symbols-tar-gz
-__skip_targets := \
-	$(__clean-targets) \
-	$(__query-targets) \
-	$(__config-targets) \
-	$(__fs-targets)
 
-# No optimization if 'all' is also given
-ifeq ("$(call is-targets-in-make-goals,all)","")
-
-ifneq ("$(call is-targets-in-make-goals,$(__skip_targets))","")
-  SKIP_DEPS_AND_CHECKS := 1
+# Do not check config if we are cloberring or doing some query or configuration
+__skip-config-check-targets := $(__clobber-targets) $(__query-targets) $(__config-targets)
+ifneq ("$(call is-targets-in-make-goals,$(__skip-config-check-targets))","")
+  SKIP_CONFIG_CHECK := 1
 endif
+
+# Skip some steps for some make goals. No optimization if 'all' is also given
+ifeq ("$(call is-targets-in-make-goals,all)","")
 ifneq ("$(findstring -clean,$(MAKECMDGOALS))","")
   SKIP_DEPS_AND_CHECKS := 1
 endif
@@ -202,19 +197,11 @@ endif
 ifneq ("$(findstring -path,$(MAKECMDGOALS))","")
   SKIP_DEPS_AND_CHECKS := 1
 endif
-ifneq ("$(findstring -config,$(MAKECMDGOALS))","")
-  SKIP_DEPS_AND_CHECKS := 1
-endif
-ifneq ("$(findstring -xconfig,$(MAKECMDGOALS))","")
-  SKIP_DEPS_AND_CHECKS := 1
-endif
-ifneq ("$(findstring -menuconfig,$(MAKECMDGOALS))","")
-  SKIP_DEPS_AND_CHECKS := 1
-endif
-ifneq ("$(findstring -nconfig,$(MAKECMDGOALS))","")
-  SKIP_DEPS_AND_CHECKS := 1
 endif
 
+# Skip external checks if requested
+ifeq ("$(TARGET_FORCE_EXTERNAL_CHECKS)","0")
+  SKIP_EXT_DEPS_AND_CHECKS := 1
 endif
 
 # No reason to do external checks if we are skipping our own deps and checks...
@@ -366,7 +353,7 @@ endif
 
 # Include makefile containing all available makefiles
 # If it does not exists, it will trigger its creation
-ifeq ("$(call is-targets-in-make-goals,scan clobber)","")
+ifeq ("$(call is-targets-in-make-goals,scan $(__clobber-targets))","")
   -include $(USER_MAKEFILES_CACHE)
   $(call display-user-makefiles-summary)
 endif
@@ -398,7 +385,8 @@ include $(BUILD_SYSTEM)/pbuild-hook/atom.mk
 __modules := $(sort $(__modules))
 $(info Found $(words $(__modules)) modules)
 
-# Execute custom macros of modules
+# Execute custom macros of modules. Done on all modules because it can modify
+# the dependencies.
 $(foreach __mod,$(__modules), \
 	$(call exec-custom-macro,$(__mod)) \
 )
@@ -408,11 +396,6 @@ $(call modules-compute-depends)
 
 ifdef TARGET_TEST
   $(call modules-enable-test-depends)
-endif
-
-# Compute revision of all modules
-ifneq ("$(USE_GIT_REV)","0")
-  $(call module-compute-revisions)
 endif
 
 # All modules
@@ -436,8 +419,10 @@ $(foreach __mod,$(ALL_BUILD_MODULES_HOST), \
 
 # Check dependencies and variables of modules
 ifeq ("$(SKIP_DEPS_AND_CHECKS)","0")
+ifeq ("$(SKIP_CONFIG_CHECK)","0")
   $(call modules-check-depends)
   $(call modules-check-variables)
+endif
 endif
 
 # Generate files with module list
@@ -455,7 +440,7 @@ include $(BUILD_SYSTEM)/config-rules.mk
 # Now, really generate rules for modules.
 
 # Completely skip this for simple queries or clobber.
-ifeq ("$(call is-targets-in-make-goals,$(__query-targets) clobber)","")
+ifeq ("$(call is-targets-in-make-goals,$(__query-targets) $(__clobber-targets))","")
 
 # Check that, if a registered module is specified in goals,
 # it is in the build config
@@ -481,14 +466,12 @@ endif
 
 # Determine the list of modules to really include
 # If a module is specified in goals, only include this one and its dependencies.
-# If 'all' is also given do not do the filter
+# If 'all' or 'check' is also given do not do the filter
 # For meta packages, also get config dependencies (for build/clean shortcuts)
-__dofilter := 0
 __modlist := $(empty)
-ifeq ("$(call is-targets-in-make-goals,all)","")
+ifeq ("$(call is-targets-in-make-goals,all check)","")
 $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST), \
 	$(if $(call is-module-in-make-goals,$(__mod)), \
-		$(eval __dofilter := 1) \
 		$(eval __modlist += $(__mod) $(call module-get-all-depends,$(__mod))) \
 		$(if $(call is-module-meta-package,$(__mod)), \
 			$(foreach __mod2,$(call module-get-config-depends,$(__mod)), \
@@ -497,6 +480,8 @@ $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST), \
 		) \
 	) \
 )
+else
+__modlist := $(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST)
 endif
 
 # If autoconf-merge is present, force including all modules having a config .in
@@ -508,18 +493,14 @@ $(foreach __mod,$(ALL_BUILD_MODULES), \
 )
 endif
 
-# Update module list, based on filtering
-ifeq ("$(__dofilter)","0")
-  __modlist := $(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST)
-endif
-
 # Add required host modules
 # Sorting will ensure they appear only once as well
 __modlist += $(call modules-get-required-host,$(__modlist))
 __modlist := $(sort $(__modlist))
 
-# Now, generate rules of selected modules
-$(foreach __mod,$(__modlist), \
+# Now, generate rules of selected modules, always include modules with global
+# prerequisites
+$(foreach __mod,$(sort $(__modlist) $(__modules-with-global-prerequisites)), \
 	$(eval LOCAL_MODULE := $(__mod)) \
 	$(eval include $(BUILD_SYSTEM)/module.mk) \
 )
@@ -598,7 +579,7 @@ _dirclean: $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST),$(__mo
 
 # Most users want a clobber when they ask for clean or dirclean
 # To really do clean or dirclean for EACH module (takes some time)
-# see _clean and -dirclean
+# see _clean and _dirclean
 .PHONY: clean
 .PHONY: dirclean
 clean: clobber
@@ -662,6 +643,25 @@ include $(BUILD_SYSTEM)/coverage.mk
 
 # Help
 include $(BUILD_SYSTEM)/help.mk
+
+###############################################################################
+#
+###############################################################################
+
+# Depends on this to be executed AFTER building all modules
+# If nothing has been requested to be built, this is a no op
+.PHONY: post-build
+post-build: $(__modlist)
+all: post-build
+
+# Depends on this to be executed AFTER final directory has been done
+# If 'final' is not given in goals, this is a no op
+.PHONY: post-final
+ifneq ("$(call is-targets-in-make-goals,final)","")
+post-final: post-build final
+else
+post-final: post-build
+endif
 
 ###############################################################################
 ## Under native linux target, copy wrapper scripts

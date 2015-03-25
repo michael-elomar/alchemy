@@ -6,12 +6,10 @@
 ## Configuration management, rules.
 ###############################################################################
 
-# Avoid checking global config if it does not exists or we
-# are requested to skip checks.
-ifeq ("$(CONFIG_GLOBAL_FILE_AVAILABLE)","1")
-ifeq ("$(SKIP_DEPS_AND_CHECKS)","0")
+# Check config file when needed, another check will be done with USE_CONFIG_CHECK
+# but with warning
+ifeq ("$(SKIP_CONFIG_CHECK)","0")
 $(CONFIG_GLOBAL_FILE): __config-check
-endif
 endif
 
 ###############################################################################

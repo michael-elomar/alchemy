@@ -6,8 +6,7 @@
 ## Generate an archive with debugging symbols from staging directory.
 ###############################################################################
 
-SYMBOLS_TAR := $(TARGET_OUT)/symbols-$(TARGET_PRODUCT_FULL_NAME).tar
-SYMBOLS_TAR_GZ := $(TARGET_OUT)/symbols-$(TARGET_PRODUCT_FULL_NAME).tar.gz
+SYMBOLS_FILE := $(TARGET_OUT)/symbols-$(TARGET_PRODUCT_FULL_NAME).tar
 MAKESYMBOLS_SCRIPT := $(BUILD_SYSTEM)/scripts/makesymbols.py
 
 # Determine chroot path of the target
@@ -18,44 +17,41 @@ ifeq ("$(TARGET_CHROOT)","1")
   endif
 endif
 
+.PHONY: __symbols-tar-internal
+__symbols-tar-internal: symbols-clean
+	@echo "Symbols: start"
+	$(Q) $(MAKESYMBOLS_SCRIPT) $(TARGET_OUT_STAGING) $(SYMBOLS_FILE) \
+		--symbols-root=$(SYMBOLS_ROOT)
+
 # Tar archive, no compression
 .PHONY: symbols-tar
-symbols-tar:
-	@echo "Symbols: start"
-	@rm -f $(SYMBOLS_TAR)
-	$(Q) $(MAKESYMBOLS_SCRIPT) $(TARGET_OUT_STAGING) $(SYMBOLS_TAR) \
-		--symbols-root=$(SYMBOLS_ROOT)
-	@echo "Symbols: done -> $(SYMBOLS_TAR)"
+symbols-tar: __symbols-tar-internal
+	@echo "Symbols: done -> $(SYMBOLS_FILE)"
 
 # Tar archive gzip compressed
 .PHONY: symbols-tar-gz
-symbols-tar-gz:
-	@echo "Symbols: start"
-	@rm -f $(SYMBOLS_TAR)
-	@rm -f $(SYMBOLS_TAR_GZ)
-	$(Q) $(MAKESYMBOLS_SCRIPT) $(TARGET_OUT_STAGING) $(SYMBOLS_TAR) \
-		--symbols-root=$(SYMBOLS_ROOT)
+symbols-tar-gz: __symbols-tar-internal
 	@echo "Symbols: compressing"
-	$(Q) gzip $(SYMBOLS_TAR)
-	@echo "Symbols: done -> $(SYMBOLS_TAR_GZ)"
+	$(Q) gzip $(SYMBOLS_FILE)
+	@echo "Symbols: done -> $(SYMBOLS_FILE).gz"
+
+# Tar archive bzip2 compressed
+.PHONY: symbols-tar-bz2
+symbols-tar-bz2: __symbols-tar-internal
+	@echo "Symbols: compressing"
+	$(Q) bzip2 $(SYMBOLS_FILE)
+	@echo "Symbols: done -> $(SYMBOLS_FILE).bz2"
 
 .PHONY: symbols-clean
 symbols-clean:
-	$(Q) rm -rf $(SYMBOLS_TAR)
-	$(Q) rm -rf $(SYMBOLS_TAR_GZ)
-
-# Only add dependency if it is also given in goals to avoid unecessary checks
-# symbols target never depends on final
-ifneq ("$(call is-targets-in-make-goals,all)","")
-symbols-tar: all
-symbols-tar-gz: all
-endif
-
-clean: symbols-clean
-dirclean: symbols-clean
-clobber: symbols-clean
+	$(Q) rm -f $(SYMBOLS_FILE)
+	$(Q) rm -f $(SYMBOLS_FILE).gz
+	$(Q) rm -f $(SYMBOLS_FILE).bz2
 
 # Compatiblility
 .PHONY: symbols
 symbols: symbols-tar-gz
 
+# Setup dependencies
+__symbols-tar-internal: post-build
+clobber: symbols-clean

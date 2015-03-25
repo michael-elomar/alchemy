@@ -45,6 +45,4 @@ build-graph-clean:
 	@rm -f $(BUILD_GRAPH_SVG)
 	@rm -f $(BUILD_GRAPH_PDF)
 
-clean: build-graph-clean
-dirclean: build-graph-clean
 clobber: build-graph-clean

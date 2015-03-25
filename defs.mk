@@ -121,7 +121,7 @@ is-item-in-list = $(strip $(foreach __it,$2,$(call streq,$(__it),$1)))
 # Dertermine if an item is not in a list
 # $1 : item to search.
 # $2 : list.
-is-not-item-in-list = $(call not $(call is-item-in-list,$1,$2))
+is-not-item-in-list = $(call not,$(call is-item-in-list,$1,$2))
 
 ###############################################################################
 ## Use some colors if requested.
@@ -178,23 +178,6 @@ modules-fields-depends := \
 	depends.other \
 	depends.headers \
 	depends.all
-
-###############################################################################
-## Check for usage of CPPFLAGS instead of CXXFLAGS.
-## Correctly save same in CXXFLAGS but warn user.
-## TODO: remove completely in next version (first step is error instead of warning).
-###############################################################################
-check-cppflags-compat = \
-	$(if $(LOCAL_CPPFLAGS), \
-		$(eval LOCAL_CXXFLAGS += $(LOCAL_CPPFLAGS)) \
-		$(eval __msg := Please use LOCAL_CXXFLAGS instead of LOCAL_CPPFLAGS) \
-		$(error $(LOCAL_PATH): module '$(__mod)': $(__msg)) \
-	) \
-	$(if $(LOCAL_EXPORT_CPPFLAGS), \
-		$(eval LOCAL_EXPORT_CXXFLAGS += $(LOCAL_EXPORT_CPPFLAGS)) \
-		$(eval __msg := Please use LOCAL_EXPORT_CXXFLAGS instead of LOCAL_EXPORT_CPPFLAGS) \
-		$(error $(LOCAL_PATH): module '$(__mod)': $(__msg)) \
-	)
 
 ###############################################################################
 ## Add a module in the build system and save its LOCAL_xxx variables.
@@ -259,8 +242,12 @@ module-add = \
 				$(eval __modules.$(__mod).MODULE_FILENAME := $(__mod).done) \
 			) \
 		) \
-		$(check-cppflags-compat) \
 		$(call install-headers-setup,$(LOCAL_MODULE)) \
+	) \
+	$(eval __var := GLOBAL_PREREQUISITES) \
+	$(if $(call macro-compare,TARGET_$(__var),saved-TARGET_$(__var)),$(empty), \
+		$(eval __modules-with-global-prerequisites += $(__mod)) \
+		$(call macro-copy,saved-TARGET_$(__var),TARGET_$(__var)) \
 	)
 
 ###############################################################################
@@ -370,7 +357,7 @@ __modules-get-required-host-direct = $(strip $(sort \
 ## If no global configuration file present, always return true.
 ###############################################################################
 is-module-in-build-config = $(strip \
-	$(if $(call is-module-prebuilt,$1),$(true), \
+	$(if $(and $(call is-module-registered,$1),$(call is-module-prebuilt,$1)),$(true), \
 		$(eval __var := CONFIG_ALCHEMY_BUILD_$(call module-get-define,$1)) \
 		$(if $(call streq,$(CONFIG_GLOBAL_FILE_AVAILABLE),0),$(true), \
 			$(if $(call is-var-defined,$(__var)), \
@@ -628,7 +615,11 @@ modules-compute-depends = \
 # $1 : module name.
 __module-update-depends-direct = \
 	$(foreach __lib,$(__modules.$1.LIBRARIES), \
-		$(eval __class := $(__modules.$(__lib).MODULE_CLASS)) \
+		$(if $(call is-module-registered,$(__lib)), \
+			$(eval __class := $(__modules.$(__lib).MODULE_CLASS)) \
+			, \
+			$(eval __class := $(empty)) \
+		) \
 		$(if $(call streq,$(__class),STATIC_LIBRARY), \
 			$(if $(call streq,$(__modules.$(__lib).FORCE_WHOLE_STATIC_LIBRARY),1), \
 				$(eval __modules.$1.WHOLE_STATIC_LIBRARIES += $(__lib)), \
@@ -696,10 +687,14 @@ __module-compute-depends-static = \
 __module-compute-depends-static-internal = \
 	$(__modules.$1.$2) \
 	$(foreach __mod,$(__modules.$1.STATIC_LIBRARIES), \
-		$(call __module-compute-depends-static,$(__mod),$2) \
+		$(if $(call is-module-registered,$(__mod)), \
+			$(call __module-compute-depends-static,$(__mod),$2) \
+		) \
 	) \
 	$(foreach __mod,$(__modules.$1.WHOLE_STATIC_LIBRARIES), \
-		$(call __module-compute-depends-static,$(__mod),$2) \
+		$(if $(call is-module-registered,$(__mod)), \
+			$(call __module-compute-depends-static,$(__mod),$2) \
+		) \
 	)
 
 # Compute dependencies for link. It simply aggregate (and sort) dependencies
@@ -737,7 +732,9 @@ __module-compute-depends-all = \
 __module-compute-depends-all-internal = \
 	$(__modules.$1.depends) \
 	$(foreach __mod,$(__modules.$1.depends), \
-		$(call __module-compute-depends-all,$(__mod)) \
+		$(if $(call is-module-registered,$(__mod)), \
+			$(call __module-compute-depends-all,$(__mod)) \
+		) \
 	)
 
 # Update dependencies for static executables.
@@ -746,12 +743,14 @@ __module-compute-depends-all-internal = \
 # version to static version.
 __module-update-static-executable = \
 	$(foreach __lib,$(__modules.$1.depends.all), \
-		$(if $(call streq,$(__modules.$(__lib).MODULE_CLASS),LIBRARY), \
-			$(eval __modules.$1.depends.STATIC_LIBRARIES := $(strip \
-				$(call uniq2,$(__modules.$1.depends.STATIC_LIBRARIES) $(__lib))) \
-			) \
-			$(eval __modules.$1.depends.SHARED_LIBRARIES := $(strip \
-				$(filter-out $(__lib),$(__modules.$1.depends.SHARED_LIBRARIES))) \
+		$(if $(call is-module-registered,$(__lib)), \
+			$(if $(call streq,$(__modules.$(__lib).MODULE_CLASS),LIBRARY), \
+				$(eval __modules.$1.depends.STATIC_LIBRARIES := $(strip \
+					$(call uniq2,$(__modules.$1.depends.STATIC_LIBRARIES) $(__lib))) \
+				) \
+				$(eval __modules.$1.depends.SHARED_LIBRARIES := $(strip \
+					$(filter-out $(__lib),$(__modules.$1.depends.SHARED_LIBRARIES))) \
+				) \
 			) \
 		) \
 	)
@@ -875,13 +874,73 @@ module-get-debug-flags = $(strip \
 
 ifneq ("$(USE_GIT_REV)","0")
 
+# Cache of already compute revisions
+__git-rev-cache := $(empty)
+
+# Compute revision of a directory and update cache with the top level directory
+# ofthe gir repo containing the given directory.
+# Do not add in cache if top level has a .gitmodules
+# $1 : path inside of a git repo
+__git-rev-compute = \
+	$(eval __data := $(shell cd $1 && git rev-parse --show-toplevel HEAD 2>/dev/null)) \
+	$(eval __top-level := $(word 1,$(__data))) \
+	$(eval __sha1 := $(word 2,$(__data))) \
+	$(if $(__top-level), \
+		$(eval __desc := $(shell cd $(__top-level) && git describe --tags --always 2>/dev/null)) \
+		$(if $(wildcard $(__top-level)/.gitmodules),$(empty), \
+			$(eval __git-rev-cache.$(__top-level).sha1 := $(__sha1)) \
+			$(eval __git-rev-cache.$(__top-level).desc := $(__desc)) \
+			$(eval __git-rev-cache += $(__top-level)) \
+		) \
+		, \
+		$(eval __sha1 := $(empty)) \
+		$(eval __desc := $(empty)) \
+	)
+
+# Search in cache if directory has already on of its parent in the cache
+# If yes, retreive __sha1 and __desc.
+# If no, update the cache and retreive __sha1 and __desc.
+# $1 : path inside a git repo
+__git-rev-get = \
+	$(eval __found := $(false)) \
+	$(foreach __top-level,$(__git-rev-cache), \
+		$(if $(__found),$(empty), \
+			$(if $(or $(call streq,$(__top-level),$1), \
+					$(call not,$(patsubst $(__top-level)/%,,$1/))), \
+				$(eval __sha1 := $(__git-rev-cache.$(__top-level).sha1)) \
+				$(eval __desc := $(__git-rev-cache.$(__top-level).desc)) \
+				$(eval __found := $(true)) \
+			) \
+		) \
+	) \
+	$(if $(__found),$(empty),$(call __git-rev-compute,$1))
+
+# Compute revision of all modules
+module-compute-revisions = \
+	$(foreach __mod,$(__modules), \
+		$(call module-compute-revision,$(__mod)) \
+	)
+
+# Compute revision of a single module
+# $1: module name
+module-compute-revision = \
+	$(if $(__modules.$1.REVISION),$(empty), \
+		$(eval __path := $(__modules.$1.PATH)) \
+		$(call __git-rev-get,$(__path)) \
+		$(if $(__sha1),$(empty),$(eval __sha1 := unknown)) \
+		$(if $(__desc),$(empty),$(eval __desc := unknown)) \
+		$(eval __modules.$1.REVISION := $(__sha1)) \
+		$(eval __modules.$1.REVISION_DESCRIBE := $(__desc)) \
+		$(if $(call strneq,$(V),0),$(info Revision of $1: $(__sha1) / $(__desc))) \
+	) \
+
 # Get revision of one module
 # $1 : module name.
-module-get-revision = $(__modules.$1.REVISION)
+module-get-revision = $(module-compute-revision)$(__modules.$1.REVISION)
 
 # Get revision (with git describe) of one module
 # $1 : module name.
-module-get-revision-describe = $(__modules.$1.REVISION_DESCRIBE)
+module-get-revision-describe = $(module-compute-revision)$(__modules.$1.REVISION_DESCRIBE)
 
 # Get last revision of one module. It is found in a generated file that may
 # not exist so the result can be empty.
@@ -890,19 +949,6 @@ module-get-last-revision = $(strip \
 	$(if $(call is-var-defined,build.$1.revision.last), \
 		$(build.$1.revision.last) \
 	))
-
-# Compute revision of all modules
-module-compute-revisions = \
-	$(foreach __mod,$(__modules), \
-		$(if $(__modules.$(__mod).REVISION),$(empty), \
-			$(eval __path := $(__modules.$(__mod).PATH)) \
-			$(eval __rev := $(shell cd $(__path) && git rev-parse HEAD 2>/dev/null)) \
-			$(eval __rev-desc := $(shell cd $(__path) && git describe --tags --always 2>/dev/null)) \
-			$(eval __modules.$(__mod).REVISION := $(__rev)) \
-			$(eval __modules.$(__mod).REVISION_DESCRIBE := $(__rev-desc)) \
-			$(if $(call strneq,$(V),0),$(info Revision of $(__mod): $(__rev) / $(__rev-desc))) \
-		) \
-	)
 
 # Check if revision of module has changed since last build.
 # If either current/last revision is unknown, it will return false.
@@ -1206,7 +1252,10 @@ macro-exec-cmd = \
 ## The LOCAL_xxx variables of the modules are first restored and at the end
 ## put back in database.
 ##
-## It verifies that it really exists.
+## It verifies that it really exists but with no message at this point.
+## This is because this is called early in parsing before computing all
+## dependencies and so before we know exactly what needs to be built.
+##
 ## To call the macros with argument, we 'eval' a string that will contain the
 ## 'call'. It is a bit diffent of standard uses of 'eval' where we evaluate the
 ## result of the call. This is done so that the variable containing the parameters
@@ -1222,9 +1271,7 @@ exec-custom-macro = \
 		$(eval __entry2 := $(subst :,$(space),$(__entry))) \
 		$(eval __w1 := $(word 1,$(__entry2))) \
 		$(eval __w2 := $(word 2,$(__entry2))) \
-		$(if $(call is-var-undefined,$(__w1)), \
-			$(warning $(LOCAL_PATH): module '$(LOCAL_MODULE)' \
-				uses undefined custom macro '$(__w1)'), \
+		$(if $(call is-var-defined,$(__w1)), \
 			$(eval __tmp := $$(call $(__w1),$(__w2))) \
 			$(eval $(__tmp)) \
 		) \
@@ -1232,6 +1279,21 @@ exec-custom-macro = \
 	$(foreach __var,$(vars-LOCAL), \
 		$(eval __modules.$(__mod).$(__var) := $(LOCAL_$(__var))) \
 	) \
+
+###############################################################################
+## Check that custom macros of a module are well defined.
+## $1 : module name.
+###############################################################################
+check-custom-macro = \
+	$(foreach __entry,$(__modules.$1.CUSTOM_MACROS), \
+		$(eval __entry2 := $(subst :,$(space),$(__entry))) \
+		$(eval __w1 := $(word 1,$(__entry2))) \
+		$(eval __w2 := $(word 2,$(__entry2))) \
+		$(if $(call is-var-undefined,$(__w1)), \
+			$(warning $(__modules.$1.PATH): module '$1' \
+				uses undefined custom macro '$(__w1)'), \
+		) \
+	)
 
 ###############################################################################
 ## Macros to be called before and after inclusion of user makefiles.
@@ -1243,8 +1305,16 @@ exec-custom-macro = \
 ## message displayed when used while TARGET_DEFAULT_ARM_MODE is 'arm'.
 ###############################################################################
 
+# This variable will hold the list of modules with global prerequisites
+# Those module will always have their rule loaded in case the global
+# prerequisites need to be updated
+__modules-with-global-prerequisites :=
+
 # Save TARGET_XXX variables
+# We save GLOBAL_PREREQUISITES here and we check it at each module-add
 user-makefile-before-include = \
+	$(eval __var := GLOBAL_PREREQUISITES) \
+	$(call macro-copy,saved-TARGET_$(__var),TARGET_$(__var)) \
 	$(foreach __var,$(vars-TARGET), \
 		$(if $(call is-var-defined,TARGET_$(__var)), \
 			$(call macro-copy,saved-TARGET_$(__var),TARGET_$(__var)) \
@@ -1312,7 +1382,7 @@ link-hook = $(strip \
 define add-depends-section
 $(eval __depsdata := $(empty))
 $(foreach __lib,$(PRIVATE_MODULE) $(__modules.$(PRIVATE_MODULE).depends.all), \
-	$(eval __depsdata += $(__lib):$(__modules.$(__lib).REVISION)) \
+	$(eval __depsdata += $(__lib):$(call module-get-revision,$(__lib))) \
 )
 $(eval __depsdata := $(subst $(space),\n,$(strip $(__depsdata))))
 @( \

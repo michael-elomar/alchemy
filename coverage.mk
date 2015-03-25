@@ -51,15 +51,9 @@ coverage-copy-gcno-clean:
 	$(Q) rm -rf $(TARGET_OUT)/gcov
 
 # Setup dependencies
+coverage-copy-gcno: post-build
 final: coverage-copy-gcno
-clean: coverage-copy-gcno-clean
-dirclean: coverage-copy-gcno-clean
 clobber: coverage-copy-gcno-clean
-
-# Only add dependency if it is also given in goals to avoid unecessary checks
-ifneq ("$(call is-targets-in-make-goals,all)","")
-coverage-copy-gcno: all
-endif
 
 endif # ifeq ("$(USE_COVERAGE)","1")
 

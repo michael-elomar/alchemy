@@ -18,13 +18,13 @@ class Context(object):
 def isElf(filePath):
 	result = False
 	try:
-		file = open(filePath, "r")
+		file = open(filePath, "rb")
 		header = str(file.read(4))
 		if header.find("ELF") >= 0:
 			result = True
 		file.close()
 	except IOError as ex:
-		logging.error("Unable to open %s ([err=%d] %s)",
+		logging.error("Failed to open file: %s ([err=%d] %s)",
 			filePath, ex.errno, ex.strerror)
 	return result
 

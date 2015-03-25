@@ -75,6 +75,7 @@ LOCAL_C_INCLUDES += \
 	$(build_dir)/include
 else
 vala_done_file :=
+vala_deps_file :=
 vala_header_file :=
 vala_vapi_file :=
 vala_staging_c_sources_dir :=

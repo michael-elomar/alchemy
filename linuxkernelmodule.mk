@@ -21,11 +21,16 @@ $(LINUX_MODULE): PRIVATE_KBUILD_FLAGS := \
 	INSTALL_MOD_PATH=$(TARGET_OUT_STAGING)
 else
 LOCAL_LIBRARIES := linux
-$(LINUX_MODULE): PRIVATE_LINUX_BUILD_DIR := $(call module-get-build-dir,linux)
+$(LINUX_MODULE): PRIVATE_LINUX_BUILD_DIR := $(strip \
+	$(if $(__modules.linux.SDK), \
+		$(__modules.linux.SDK)/usr/src/linux-sdk \
+		, \
+		$(call module-get-build-dir,linux) \
+	))
 $(LINUX_MODULE): PRIVATE_KBUILD_FLAGS := \
 	ARCH=$(TARGET_ARCH) \
-	KERNELSRCDIR=$(call module-get-build-dir,linux) \
-	KERNELBUILDDIR=$(call module-get-build-dir,linux) \
+	KERNELSRCDIR=$(PRIVATE_LINUX_BUILD_DIR) \
+	KERNELBUILDDIR=$(PRIVATE_LINUX_BUILD_DIR) \
 	INSTALL_MOD_PATH=$(TARGET_OUT_STAGING)
 endif
 
@@ -63,9 +68,13 @@ $(LINUX_MODULE): PRIVATE_CFLAGS := $(LOCAL_CFLAGS)
 $(LINUX_MODULE): $(LINUX_MODULE_KBUILD) $(LINUX_MODULE_SRC_FILES)
 	$(call print-banner2,"Linux module",$(PRIVATE_MODULE),$(call path-from-top,$@))
 	$(Q) $(MAKE) -C $(PRIVATE_LINUX_BUILD_DIR) M=$(PRIVATE_OBJ_DIR) \
-		$(PRIVATE_KBUILD_FLAGS) CROSS_COMPILE=$(TARGET_LINUX_CROSS) modules
+		$(PRIVATE_KBUILD_FLAGS) \
+		CROSS_COMPILE=$(if $(TARGET_LINUX_CROSS),$(TARGET_LINUX_CROSS),$(TARGET_CROSS)) \
+		modules
 	$(Q) $(MAKE) -C $(PRIVATE_LINUX_BUILD_DIR) M=$(PRIVATE_OBJ_DIR) \
-		$(PRIVATE_KBUILD_FLAGS) CROSS_COMPILE=$(TARGET_LINUX_CROSS) modules_install
+		$(PRIVATE_KBUILD_FLAGS) \
+		CROSS_COMPILE=$(if $(TARGET_LINUX_CROSS),$(TARGET_LINUX_CROSS),$(TARGET_CROSS)) \
+		modules_install
 	$(Q) mv -f $(PRIVATE_OBJ_DIR)/$(PRIVATE_NAME) $@
 
 # Register as a custom build in the system

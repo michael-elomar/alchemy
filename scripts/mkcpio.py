@@ -1,4 +1,6 @@
-#!/usr/bin/env python
+#===============================================================================
+# Generate a file system image in 'cpio' format.
+#===============================================================================
 
 import os
 import stat
@@ -97,4 +99,3 @@ def genImage(image, root):
     cpio = Cpio(image.fout)
     processTree(cpio, root)
     cpio.writeTrailer()
-
