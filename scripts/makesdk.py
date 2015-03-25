@@ -26,9 +26,49 @@ class Context(object):
 		self.modules = None
 
 #===============================================================================
+# Similar to shutil.copytree but does not fail if destination exists
+# Also, the ignore argument is removed
+#===============================================================================
+def copyTree(src, dst, symlinks=False):
+	names = os.listdir(src)
+	if not os.path.exists(dst):
+		os.makedirs(dst, mode=0755)
+	errors = []
+	for name in names:
+		srcname = os.path.join(src, name)
+		dstname = os.path.join(dst, name)
+		try:
+			if symlinks and os.path.islink(srcname):
+				if not os.path.lexists(dstname):
+					linkto = os.readlink(srcname)
+					os.symlink(linkto, dstname)
+			elif os.path.isdir(srcname):
+				copyTree(srcname, dstname, symlinks)
+			else:
+				# Will raise a SpecialFileError for unsupported file types
+				if not os.path.lexists(dstname):
+					shutil.copy2(srcname, dstname)
+		# catch the Error from the recursive copyTree so that we can
+		# continue with other files
+		except shutil.Error, err:
+			errors.extend(err.args[0])
+		except EnvironmentError, why:
+			errors.append((srcname, dstname, str(why)))
+	try:
+		shutil.copystat(src, dst)
+	except OSError, why:
+		if shutil.WindowsError is not None and isinstance(why, shutil.WindowsError):
+			# Copying file access times may fail on Windows
+			pass
+		else:
+			errors.append((src, dst, str(why)))
+	if errors:
+		raise shutil.Error, errors
+
+#===============================================================================
 #===============================================================================
 def copyHostStaging(srcDir, dstDir):
-	shutil.copytree(srcDir, dstDir, symlinks=True)
+	copyTree(srcDir, dstDir, symlinks=True)
 
 #===============================================================================
 #===============================================================================
@@ -43,12 +83,12 @@ def copyStaging(srcDir, dstDir):
 		if os.path.exists(os.path.join(srcDir, dirName)):
 			srcDirPath=os.path.normpath(os.path.join(srcDir, dirName))
 			dstDirPath=os.path.normpath(os.path.join(dstDir, dirName))
-			shutil.copytree(srcDirPath, dstDirPath, symlinks=True)
+			copyTree(srcDirPath, dstDirPath, symlinks=True)
 
 #===============================================================================
 #===============================================================================
 def copySdk(srcDir, dstDir):
-	shutil.copytree(srcDir, dstDir, symlinks=True)
+	copyTree(srcDir, dstDir, symlinks=True)
 
 #===============================================================================
 #===============================================================================
@@ -73,7 +113,7 @@ def copyElement(srcPath, dstPath, keepLinks=False):
 
 	# Set the function to use for copy
 	if os.path.isdir(srcPath):
-		copy_func = { "function":shutil.copytree, "description":"Copy"}
+		copy_func = { "function":copyTree, "description":"Copy"}
 	else:
 		copy_func = { "function":shutil.copy2, "description":"Copy"}
 
@@ -86,9 +126,12 @@ def copyElement(srcPath, dstPath, keepLinks=False):
 		if keepLinks:
 			copy_func = { "function":os.symlink, "description":"Link"}
 	# Do the copy/symlink
-	logging.debug("%s: %s -> %s", copy_func["description"], srcPath, dstPath)
-	copy_func["function"](srcPath, dstPath)
+	if not os.path.lexists(dstPath):
+		logging.debug("%s: %s -> %s", copy_func["description"], srcPath, dstPath)
+		copy_func["function"](srcPath, dstPath)
 
+#===============================================================================
+#===============================================================================
 def copyElements(srcDir, dstDir, extensions=["*"], depth=0,
 		keepLinks=False, keepInclude=False, scanDirs=False):
 	if not os.path.exists(srcDir):
