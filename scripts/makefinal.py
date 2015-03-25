@@ -26,7 +26,7 @@ import addbuildid
 # Directories to exclude
 EXCLUDE_DIRS = [
 	".git", ".repo",
-	"linux-headers", "include", "vapi",
+	"linux-headers", "linux-sdk", "include", "vapi",
 	"man", "doc", "html", "info",
 	"pkgconfig", "cmake",
 	"aclocal", "locale"]
