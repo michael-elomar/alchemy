@@ -26,6 +26,12 @@ class Context(object):
 		self.modules = None
 
 #===============================================================================
+# Escape quotes in string.
+#===============================================================================
+def escapeStr(s):
+	return s.replace("\"", "\\\"")
+
+#===============================================================================
 # Similar to shutil.copytree but does not fail if destination exists
 # Also, the ignore argument is removed
 #===============================================================================
@@ -201,14 +207,14 @@ def processModule(ctx, module):
 	modulePath = module.fields["PATH"]
 	moduleClass = module.fields["MODULE_CLASS"]
 
-	# Write verbatim some fields
+	# Write verbatim some fields (and escape quotes)
 	fields = ["DESCRIPTION", "CATEGORY_PATH",
 			"REVISION", "REVISION_DESCRIBE",
 			"FORCE_WHOLE_STATIC_LIBRARY",
 			"EXPORT_CFLAGS", "EXPORT_CXXFLAGS"]
 	for field in fields:
 		if field in module.fields and module.fields[field] :
-			ctx.atom.write("LOCAL_%s := %s\n" % (field, module.fields[field]))
+			ctx.atom.write("LOCAL_%s := %s\n" % (field, escapeStr(module.fields[field])))
 
 	if module.name.startswith("host."):
 		ctx.atom.write("LOCAL_HOST_MODULE := %s\n" % module.name[5:])
