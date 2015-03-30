@@ -66,7 +66,8 @@ define cmake-gen-toolchain-file
 	echo "set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)"; \
 	echo "set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)"; \
 	echo "set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)"; \
-	echo "set(CMAKE_COLOR_MAKEFILE OFF CACHE BOOL \"COLOR_MAKEFILE\" FORCE)";
+	echo "set(CMAKE_COLOR_MAKEFILE OFF CACHE BOOL \"COLOR_MAKEFILE\" FORCE)"; \
+	echo "set(CMAKE_SKIP_INSTALL_RPATH ON CACHE BOOL \"SKIP_INSTALL_RPATH\" FORCE)";
 endef
 
 # Regenerate the toolchain file if toolchain setup makefiles are updated
