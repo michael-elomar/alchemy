@@ -59,6 +59,9 @@ ifeq ("$(strip $(toolchain_libc_usrlib_files))","")
   toolchain_libc_usrlib_files += $(wildcard $(toolchain_libc_support_dir)/libstdc++*.so*)
 endif
 
+# Remove gdb python file
+toolchain_libc_usrlib_files := $(filter-out %.py,$(toolchain_libc_usrlib_files))
+
 # ldd
 toolchain_libc_ldd :=
 ifneq ("$(wildcard $(TOOLCHAIN_LIBC)/usr/bin/ldd)","")
