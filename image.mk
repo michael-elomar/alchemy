@@ -157,7 +157,7 @@ fixstat-script:
 
 .PHONY: fixstat-script-clean
 fixstat-script-clean:
-	@rm $(TARGET_OUT)/fixstat.sh
+	@rm -f $(TARGET_OUT)/fixstat.sh
 
 ###############################################################################
 ## Script for fixing permissions on-the-fly in native final tree.
