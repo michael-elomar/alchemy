@@ -214,14 +214,18 @@ endif
 # The copy will be done only when the atom.mk of the sdk is changed (which is
 # normally the case when the sdk is regenerated)
 # The copy will be triggered before the build (TARGET_GLOBAL_PREREQUISITES)
+# If several sdk are used, copy them sequentially (__sdk-copy-host-list will
+# contains previously copied sdk).
+__sdk-copy-host-list :=
 define __sdk-copy-host
-$(TARGET_OUT_BUILD)/sdk_$(subst /,_,$1).done: $1/$(USER_MAKEFILE_NAME)
+$(TARGET_OUT_BUILD)/sdk_$(subst /,_,$1).done: $1/$(USER_MAKEFILE_NAME) $(__sdk-copy-host-list)
 	@echo "Copying $1/host/ to $(HOST_OUT_STAGING)"
 	@mkdir -p $$(dir $$@)
 	@mkdir -p $(HOST_OUT_STAGING)
 	@cp -Raf $1/host/* $(HOST_OUT_STAGING)
 	@touch $$@
 TARGET_GLOBAL_PREREQUISITES += $(TARGET_OUT_BUILD)/sdk_$(subst /,_,$1).done
+__sdk-copy-host-list += $(TARGET_OUT_BUILD)/sdk_$(subst /,_,$1).done
 endef
 
 $(foreach __dir,$(TARGET_SDK_DIRS), \
