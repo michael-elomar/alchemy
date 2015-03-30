@@ -145,6 +145,21 @@ __image-cpio-relink-linux: __image-cpio-internal
 endif
 
 ###############################################################################
+## Generate the fixstat script so it can be used externally.
+###############################################################################
+.PHONY: fixstat-script
+fixstat-script:
+	@( \
+		echo "#!/bin/sh"; \
+		echo "$(FIXSTAT)"; \
+	) > $(TARGET_OUT)/fixstat.sh
+	@chmod +x $(TARGET_OUT)/fixstat.sh
+
+.PHONY: fixstat-script-clean
+fixstat-script-clean:
+	@rm $(TARGET_OUT)/fixstat.sh
+
+###############################################################################
 ## Script for fixing permissions on-the-fly in native final tree.
 ###############################################################################
 .PHONY: native-fix-script
@@ -162,5 +177,6 @@ native-fix-script-clean:
 	$(Q) rm -f $(TARGET_OUT_FINAL)/native-fixperms.sh
 
 # Setup dependencies
+post-build: fixstat-script
 native-fix-script: final
-image-all-clean: native-fix-script-clean
+image-all-clean: native-fix-script-clean fixstat-script-clean
