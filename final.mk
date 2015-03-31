@@ -127,6 +127,8 @@ final:
 	$(Q) $(MAKE) -f $(TARGET_OUT)/final.mk
 	$(Q)$(__final-finish)
 	$(Q)$(__final-ldconfig)
+	@mkdir -p $(TARGET_OUT_FINAL)/etc
+	@echo `date +%s` > $(TARGET_OUT_FINAL)/etc/final.stamp
 	@echo "Done generating final tree"
 
 # Setup dependencies
