@@ -121,6 +121,7 @@ image-clean: image-$(subst .,-,$(TARGET_IMAGE_FORMAT))-clean
 .PHONY: plf plf-clean
 plf: image-plf
 plf-clean: image-plf-clean
+image-cpio: image-cpio-gz
 
 # Additional plf clean
 .PHONY: __image-plf-clean-extra
