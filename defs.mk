@@ -1546,6 +1546,23 @@ $(Q) $(HOST_OUT_STAGING)/usr/bin/valac \
 endef
 
 ###############################################################################
+## Commands to compile a cu file (cuda).
+###############################################################################
+define transform-cu-to-o
+$(call print-banner1,"Cuda",$(PRIVATE_MODULE),$(call path-from-top,$<))
+$(call check-pwd-is-top-dir)
+@mkdir -p $(dir $@)
+$(Q) $(TARGET_NVCC) \
+	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
+	$(call normalize-system-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
+	$(TARGET_GLOBAL_NVCFLAGS) \
+	$(PRIVATE_NVCFLAGS) \
+	-ccbin $(TARGET_CC) -c -o $@ \
+	$(call path-from-top,$<)
+$(call fix-deps-file,$(@:.o=.d))
+endef
+
+###############################################################################
 ## Commands for running ar.
 ###############################################################################
 

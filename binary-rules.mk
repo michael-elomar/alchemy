@@ -33,6 +33,9 @@ cc_objects := $(addprefix $(build_dir)/obj/,$(cc_sources:.cc=.cc.o))
 c_sources := $(filter %.c,$(LOCAL_SRC_FILES))
 c_objects := $(addprefix $(build_dir)/obj/,$(c_sources:.c=.c.o))
 
+cu_sources := $(filter %.cu,$(LOCAL_SRC_FILES))
+cu_objects := $(addprefix $(build_dir)/obj/,$(cu_sources:.cu=.cu.o))
+
 s_sources := $(filter %.s,$(LOCAL_SRC_FILES))
 s_objects := $(addprefix $(build_dir)/obj/,$(s_sources:.s=.s.o))
 
@@ -95,6 +98,7 @@ all_objects := \
 	$(cxx_objects) \
 	$(cc_objects) \
 	$(c_objects) \
+	$(cu_objects) \
 	$(s_objects) \
 	$(S_objects) \
 	$(gen_cpp_objects) \
@@ -146,6 +150,15 @@ $(c_objects): $(build_dir)/obj/%.c.o: $(LOCAL_PATH)/%.c
 	$(transform-c-to-o)
 ifneq ("$(skip_include_deps)","1")
 -include $(c_objects:%.o=%.d)
+endif
+endif
+
+# cu files (cuda)
+ifneq ("$(strip $(cu_objects))","")
+$(cu_objects): $(build_dir)/obj/%.cu.o: $(LOCAL_PATH)/%.cu
+	$(transform-cu-to-o)
+ifneq ("$(skip_include_deps)","1")
+-include $(cu_objects:%.o=%.d)
 endif
 endif
 
@@ -344,6 +357,14 @@ $(LOCAL_TARGETS): PRIVATE_ALL_SHARED_LIBRARIES := $(all_shared_libs_filename)
 $(LOCAL_TARGETS): PRIVATE_ALL_STATIC_LIBRARIES := $(all_static_libs_filename)
 $(LOCAL_TARGETS): PRIVATE_ALL_WHOLE_STATIC_LIBRARIES := $(all_whole_static_libs_filename)
 $(LOCAL_TARGETS): PRIVATE_ALL_OBJECTS := $(all_objects)
+
+# Nvcc flags
+# Remove from standard CFLAGS unsuported flags
+# Give filtered flags directly to compiler (with -Xcompiler prefix)
+__nvcflags-all := $(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARCH)) $(LOCAL_CFLAGS)
+__nvcflags-1 := $(filter-out -pipe -f% -m%, $(__nvcflags-all))
+__nvcflags-2 := $(addprefix -Xcompiler ,$(filter -pipe -f% -m%, $(__nvcflags-all)))
+$(LOCAL_TARGETS): PRIVATE_NVCFLAGS := $(__nvcflags-1) $(__nvcflags-2)
 
 ifeq ("$(W)","0")
 ifneq ("$(strip $(vala_objects))","")
