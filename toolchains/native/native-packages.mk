@@ -35,4 +35,15 @@ LOCAL_MODULE := zlib
 LOCAL_EXPORT_LDLIBS := -lz
 include $(BUILD_PREBUILT)
 
+include $(CLEAR_VARS)
+LOCAL_MODULE := avahi
+LOCAL_EXPORT_LDLIBS := $(shell pkg-config --libs avahi-client)
+include $(BUILD_PREBUILT)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := json
+LOCAL_EXPORT_CFLAGS := $(shell pkg-config --cflags json)
+LOCAL_EXPORT_LDLIBS := $(shell pkg-config --libs json)
+include $(BUILD_PREBUILT)
+
 endif
