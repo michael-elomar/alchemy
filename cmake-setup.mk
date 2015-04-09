@@ -45,6 +45,7 @@ endif
 
 define cmake-gen-toolchain-file
 	echo "set(CMAKE_SYSTEM_NAME Linux)"; \
+	echo "set(CMAKE_SYSTEM_PROCESSOR \"$(TARGET_ARCH)\")"; \
 	echo "set(CMAKE_C_COMPILER \"$(TARGET_CC)\")"; \
 	echo "set(CMAKE_CXX_COMPILER \"$(TARGET_CXX)\")"; \
 	echo "set(CMAKE_AR \"$(TARGET_AR)\" CACHE FILEPATH "Archiver")"; \
