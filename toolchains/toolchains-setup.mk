@@ -205,8 +205,22 @@ endif
 
 # Machine targetted by toolchain to be used by autotools and libc installation
 ifndef TOOLCHAIN_TARGET_NAME
-  TOOLCHAIN_TARGET_NAME := $(shell $(TARGET_CC) -dumpmachine)
+  TOOLCHAIN_TARGET_NAME := $(shell $(TARGET_CC) $(TARGET_GLOBAL_CFLAGS) -print-multiarch 2>&1)
+  ifneq ("$(findstring -print-multiarch,$(TOOLCHAIN_TARGET_NAME))","")
+    TOOLCHAIN_TARGET_NAME := $(shell $(TARGET_CC) $(TARGET_GLOBAL_CFLAGS) -dumpmachine)
+  endif
 endif
+
+# Clang uses toochain(libc&binutils) to cross-compile
+# The sysroot is the top level one (without subarch like thumb2 for arm)
+__toolchain_sysroot := $(shell $(TARGET_CC) $(TARGET_GLOBAL_CFLAGS) -print-sysroot)
+__toolchain_root := $(shell PARAM=$(TARGET_CC_PATH); echo $${PARAM%/bin*})
+TARGET_GLOBAL_CFLAGS_clang += --sysroot=$(__toolchain_sysroot) \
+	-target $(TOOLCHAIN_TARGET_NAME) -B $(__toolchain_root)
+TARGET_GLOBAL_LDFLAGS_clang += --sysroot=$(__toolchain_sysroot) \
+	-target $(TOOLCHAIN_TARGET_NAME) -B $(__toolchain_root)
+TARGET_GLOBAL_LDFLAGS_SHARED_clang += --sysroot=$(__toolchain_sysroot) \
+	-target $(TOOLCHAIN_TARGET_NAME) -B $(__toolchain_root)
 
 # Determine compiler version
 TARGET_CC_VERSION := $(shell $(TARGET_CC) -dumpversion)

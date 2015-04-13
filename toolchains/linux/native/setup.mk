@@ -17,10 +17,8 @@ TARGET_GLOBAL_LDLIBS_SHARED += -pthread -lrt
 # Use a name that will force autotools to believe we are cross-compiling
 ifeq ("$(TARGET_ARCH)","x64")
   GNU_TARGET_NAME := x86_64-pc-linux-gnu
-  TOOLCHAIN_TARGET_NAME := x86_64-linux-gnu
-else
-  GNU_TARGET_NAME := i386-pc-linux-gnu
-  TOOLCHAIN_TARGET_NAME := i386-linux-gnu
+else ifeq ("$(TARGET_ARCH)","x86")
+  GNU_TARGET_NAME := i686-pc-linux-gnu
 endif
 
 # Copy host libc
