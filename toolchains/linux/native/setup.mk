@@ -23,5 +23,8 @@ else
   TOOLCHAIN_TARGET_NAME := i386-linux-gnu
 endif
 
+# Copy host libc
+TOOLCHAIN_LIBC := /
+
 # Get gdbserver path if available
 TOOLCHAIN_GDBSERVER := $(wildcard /usr/bin/gdbserver)
