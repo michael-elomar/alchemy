@@ -462,11 +462,8 @@ class ElfShdr(object):
 			fmt = elf.ehdr.getFmtPrefix() + "IIQQQQIIQQ"
 			self.size = ElfPhdr.size64
 
-		try:
-			# Save fields (same order for 32-bit/64-bit)
-			fields = struct.unpack(fmt, buf)
-		except struct.error:
-			raise ElfError("Bad Section Header")
+		# Save fields (same order for 32-bit/64-bit)
+		fields = struct.unpack(fmt, buf)
 
 		self.sh_name = fields[0]      # Section name (string tbl index)
 		self.sh_type = fields[1]      # Section type
@@ -627,6 +624,8 @@ class Elf(object):
 			elfFile = open(filePath, "rb")
 			self._data = mmap.mmap(elfFile.fileno(), 0, access=mmap.ACCESS_READ)
 			self._read()
+		except struct.error as ex:
+			raise ElfError(str(ex))
 		finally:
 			# In any case, close file
 			if elfFile:
