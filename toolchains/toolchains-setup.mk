@@ -65,10 +65,23 @@ endif
 TARGET_GLOBAL_ARFLAGS += rcs
 
 ###############################################################################
-## Arm setup.
+## Architecture specific setup.
 ###############################################################################
+
 ifeq ("$(TARGET_ARCH)","arm")
    include $(BUILD_SYSTEM)/toolchains/arm-setup.mk
+endif
+
+ifeq ("$(TARGET_ARCH)","x64")
+  TARGET_GLOBAL_CFLAGS += -m64 -fPIC
+  TARGET_GLOBAL_LDFLAGS += -m64
+  TARGET_GLOBAL_LDFLAGS_SHARED += -m64
+endif
+
+ifeq ("$(TARGET_ARCH)","x86")
+  TARGET_GLOBAL_CFLAGS += -m32
+  TARGET_GLOBAL_LDFLAGS += -m32
+  TARGET_GLOBAL_LDFLAGS_SHARED += -m32
 endif
 
 ###############################################################################
@@ -127,10 +140,10 @@ TARGET_EXE_SUFFIX := .exe
 endif
 
 ###############################################################################
-## Include specific libc setup.
+## Include os specific setup.
 ###############################################################################
 
-include $(BUILD_SYSTEM)/toolchains/$(TARGET_LIBC)/$(TARGET_LIBC)-setup.mk
+include $(BUILD_SYSTEM)/toolchains/$(TARGET_OS)/setup.mk
 
 ###############################################################################
 ## Tools for target.

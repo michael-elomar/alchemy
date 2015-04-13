@@ -1,5 +1,5 @@
 ###############################################################################
-## @file native-packages.mk
+## @file linux/native/packages.mk
 ## @author Y.M. Morgan
 ## @date 2012/10/18
 ##

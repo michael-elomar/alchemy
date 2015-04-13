@@ -1,5 +1,5 @@
 ###############################################################################
-## @file native-setup.mk
+## @file linux/native/setup.mk
 ## @author Y.M. Morgan
 ## @date 2012/10/18
 ##
@@ -9,26 +9,14 @@
 # Use empty cross compilation flag by default
 TARGET_CROSS ?=
 
-# Update flags based on architecture
-# 64-bit requires -fPIC to build shared libraries
-ifeq ("$(TARGET_ARCH)","x64")
-  TARGET_GLOBAL_CFLAGS += -m64 -fPIC
-  TARGET_GLOBAL_LDFLAGS += -m64
-  TARGET_GLOBAL_LDFLAGS_SHARED += -m64
-else
-  TARGET_GLOBAL_CFLAGS += -m32
-  TARGET_GLOBAL_LDFLAGS += -m32
-  TARGET_GLOBAL_LDFLAGS_SHARED += -m32
-endif
-
 # Assume everybody will want this
 TARGET_GLOBAL_LDLIBS += -pthread -lrt
 TARGET_GLOBAL_LDLIBS_SHARED += -pthread -lrt
 
 # Machine targetted by toolchain to be used by autotools
+# Use a name that will force autotools to believe we are cross-compiling
 ifeq ("$(TARGET_ARCH)","x64")
   TOOLCHAIN_TARGET_NAME := x86_64-pc-linux-gnu
 else
   TOOLCHAIN_TARGET_NAME := i386-pc-linux-gnu
 endif
-

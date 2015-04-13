@@ -1,5 +1,5 @@
 ###############################################################################
-## @file ecos-packages.mk
+## @file ecos/packages.mk
 ## @author Y.M. Morgan
 ## @date 2012/10/18
 ##
@@ -12,4 +12,3 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := alsa-lib
 LOCAL_MODULE_CLASS := PREBUILT
 include $(BUILD_PREBUILT)
-
