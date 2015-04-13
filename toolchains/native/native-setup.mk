@@ -27,9 +27,11 @@ TARGET_GLOBAL_LDLIBS_SHARED += -pthread -lrt
 
 # Machine targetted by toolchain to be used by autotools
 ifeq ("$(TARGET_ARCH)","x64")
-  TOOLCHAIN_TARGET_NAME := x86_64-pc-linux-gnu
+  GNU_TARGET_NAME := x86_64-pc-linux-gnu
+  TOOLCHAIN_TARGET_NAME := x86_64-linux-gnu
 else
-  TOOLCHAIN_TARGET_NAME := i386-pc-linux-gnu
+  GNU_TARGET_NAME := i386-pc-linux-gnu
+  TOOLCHAIN_TARGET_NAME := i386-linux-gnu
 endif
 
 TARGET_CPU_HAS_SSE2 := 1

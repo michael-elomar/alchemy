@@ -183,10 +183,14 @@ TARGET_AUTOTOOLS_CONFIGURE_ENV := \
 	$(TARGET_PKG_CONFIG_ENV)
 
 # Build triplet
-GNU_BUILD_NAME := $(shell $(HOST_CC) -dumpmachine)
+ifndef GNU_BUILD_NAME
+  GNU_BUILD_NAME := $(shell $(HOST_CC) -dumpmachine)
+endif
 
 # Target triplet
-GNU_TARGET_NAME := $(TOOLCHAIN_TARGET_NAME)
+ifndef GNU_TARGET_NAME
+  GNU_TARGET_NAME := $(TOOLCHAIN_TARGET_NAME)
+endif
 
 # Arguments to give to configure script. Autotools 'host' is the name of the machine
 # on which the package will run and  we call it 'target'.
