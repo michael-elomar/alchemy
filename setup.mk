@@ -48,7 +48,7 @@ endif
 
 TARGET_CONFIG_DIR ?= $(TOP_DIR)/Alchemy-config/$(TARGET_PRODUCT)-$(TARGET_PRODUCT_VARIANT)
 
-# Force usind static libraries instead of shared for module that specifies they support it
+# Force using static libraries instead of shared for module that specifies they support it
 TARGET_PBUILD_FORCE_STATIC ?= 0
 
 # Register list of tags used by a module. It can be retrieved at run time with
