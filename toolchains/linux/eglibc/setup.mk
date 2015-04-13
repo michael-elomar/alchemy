@@ -9,20 +9,20 @@
 # Select a default toolchain
 ifndef TARGET_CROSS
   ifeq ("$(TARGET_ARCH)","arm")
-    TARGET_TRIPLET := arm-none-linux-gnueabi
+    __target_triplet := arm-none-linux-gnueabi
     ifeq ("$(TARGET_CPU)","p6")
-      TARGET_COMPILER_PATH := /opt/arm-2009q1
+      __toolchain_root := /opt/arm-2009q1
     else ifeq ("$(TARGET_CPU)","p6i")
-      TARGET_COMPILER_PATH := /opt/arm-2009q1
+      __toolchain_root := /opt/arm-2009q1
     else
-      TARGET_COMPILER_PATH := /opt/arm-2012.03
+      __toolchain_root := /opt/arm-2012.03
     endif
-    TARGET_CROSS := $(TARGET_COMPILER_PATH)/bin/$(TARGET_TRIPLET)-
+    TARGET_CROSS := $(__toolchain_root)/bin/$(__target_triplet)-
   endif
 else
   # Try to extract info from TARGET_CROSS
-  TARGET_TRIPLET :=$(notdir $(TARGET_CROSS:-=))
-  TARGET_COMPILER_PATH := $(shell PARAM=$(TARGET_CROSS);echo $${PARAM%/bin*})
+  __target_triplet :=$(notdir $(TARGET_CROSS:-=))
+  __toolchain_root := $(shell PARAM=$(TARGET_CROSS);echo $${PARAM%/bin*})
 endif
 
 # Assume everybody will wants this
@@ -54,9 +54,9 @@ endif
 ifeq ("$(TARGET_ARCH)","arm")
 # Clang needs the raw sysroot, so remove the binary specific version.
 TARGET_GLOBAL_CFLAGS_clang += --sysroot=$(subst thumb2,,$(gcc-sysroot)) \
-	-target $(TARGET_TRIPLET) -B $(TARGET_COMPILER_PATH)
+	-target $(__target_triplet) -B $(__toolchain_root)
 TARGET_GLOBAL_LDFLAGS_clang += --sysroot=$(subst thumb2,,$(gcc-sysroot)) \
-	-target $(TARGET_TRIPLET) -B $(TARGET_COMPILER_PATH)
+	-target $(__target_triplet) -B $(__toolchain_root)
 TARGET_GLOBAL_LDFLAGS_SHARED_clang += --sysroot=$(subst thumb2,,$(gcc-sysroot)) \
-	-target $(TARGET_TRIPLET) -B $(TARGET_COMPILER_PATH)
+	-target $(__target_triplet) -B $(__toolchain_root)
 endif

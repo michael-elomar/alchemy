@@ -157,7 +157,7 @@ endif # ifeq ("$(TARGET_SDK_DIRS)","")
 # Version specific fixes.
 ###############################################################################
 
-ifeq ("$(TARGET_COMPILER_PATH)","/opt/arm-2012.03")
+ifneq ("$(call str-starts-with,$(TARGET_CC_PATH),/opt/arm-2012.03)","")
 include $(LOCAL_PATH)/arm-2012.03/atom.mk
 endif
 
