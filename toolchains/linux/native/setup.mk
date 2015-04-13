@@ -24,7 +24,9 @@ else
 endif
 
 # Copy host libc
-TOOLCHAIN_LIBC := /
+ifeq ("$(TARGET_OS_FLAVOUR)","native-chroot")
+  TOOLCHAIN_LIBC := /
+endif
 
 # Get gdbserver path if available
 TOOLCHAIN_GDBSERVER := $(wildcard /usr/bin/gdbserver)
