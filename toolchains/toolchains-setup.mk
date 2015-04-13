@@ -206,7 +206,9 @@ endif
 # Machine targetted by toolchain to be used by autotools and libc installation
 ifndef TOOLCHAIN_TARGET_NAME
   TOOLCHAIN_TARGET_NAME := $(shell $(TARGET_CC) $(TARGET_GLOBAL_CFLAGS) -print-multiarch 2>&1)
-  ifneq ("$(findstring -print-multiarch,$(TOOLCHAIN_TARGET_NAME))","")
+  ifeq ("$(TOOLCHAIN_TARGET_NAME)","")
+    TOOLCHAIN_TARGET_NAME := $(shell $(TARGET_CC) $(TARGET_GLOBAL_CFLAGS) -dumpmachine)
+  else ifneq ("$(findstring -print-multiarch,$(TOOLCHAIN_TARGET_NAME))","")
     TOOLCHAIN_TARGET_NAME := $(shell $(TARGET_CC) $(TARGET_GLOBAL_CFLAGS) -dumpmachine)
   endif
 endif
