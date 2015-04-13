@@ -26,8 +26,6 @@ _libc_arch_subdir := $(TOOLCHAIN_TARGET_NAME)
 # List of files to be put in /lib
 _libc_lib_names := \
 	ld \
-	ld-linux \
-	ld-linux-armhf \
 	libc \
 	libcrypt \
 	libdl \
@@ -72,6 +70,9 @@ $(foreach __f,$(_libc_lib_names), \
 		$(wildcard $(_libc_lib_dir)/$(__f)-*.so) \
 	) \
 )
+
+# Linker links
+_libc_lib_files += $(wildcard $(_libc_lib_dir)/ld-linux*.so*)
 
 # List of files to be put in /usr/lib
 _libc_usrlib_files +=

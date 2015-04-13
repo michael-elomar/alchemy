@@ -84,6 +84,7 @@ endif
 ## We use the ldconfig from the host to generate. Hopefully it will be compatible
 ## with the target. This is what buildroot do if there is no ldconfig in the
 ## cross toolchain.
+## Do not recreate missing links (-X option).
 ##
 ## Check that there is no missing libraies needed by some binaries and that
 ## there is no DT_RPATH flag set.
@@ -100,7 +101,7 @@ endif
 	@mkdir -p $(TARGET_OUT_FINAL)/etc
 ifeq ("$(TARGET_LIBC)","eglibc")
 	$(Q) touch $(TARGET_OUT_FINAL)/etc/ld.so.conf
-	$(Q) /sbin/ldconfig -r $(TARGET_OUT_FINAL)
+	$(Q) /sbin/ldconfig -X -r $(TARGET_OUT_FINAL)
 endif
 ifeq ("$(TARGET_SKEL_DIRS)","")
 ifeq ("$(TARGET_OS)","linux")
