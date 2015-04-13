@@ -123,6 +123,16 @@ is-item-in-list = $(strip $(foreach __it,$2,$(call streq,$(__it),$1)))
 # $2 : list.
 is-not-item-in-list = $(call not,$(call is-item-in-list,$1,$2))
 
+# Determine if a string starts with a given prefix
+# $1 : input string
+# $2 : prefix to check
+str-starts-with = $(strip $(call not,$(patsubst $2%,,$1)))
+
+# Determine if a string ends with a given suffix
+# $1 : input string
+# $2 : suffix to check
+str-ends-with = $(strip $(call not,$(patsubst %$2,,$1)))
+
 ###############################################################################
 ## Use some colors if requested.
 ###############################################################################
