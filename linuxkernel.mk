@@ -16,8 +16,16 @@ ifeq ("$(LOCAL_MODULE)", "linux")
 # Override the module name...
 LOCAL_MODULE_FILENAME := $(LOCAL_MODULE).done
 
+# LINUX_SRCARCH is the name of the sub-directory in linux/arch
+ifeq ("$(TARGET_ARCH)","x64")
+  LINUX_ARCH := x86_64
+  LINUX_SRCARCH := x86
+else
+  LINUX_ARCH := $(TARGET_ARCH)
+  LINUX_SRCARCH := $(TARGET_ARCH)
+endif
+
 # General setup
-LINUX_ARCH := $(TARGET_ARCH)
 LINUX_DIR := $(LOCAL_PATH)
 LINUX_BUILD_DIR := $(call local-get-build-dir)
 LINUX_HEADERS_DONE_FILE := $(LINUX_BUILD_DIR)/linux-headers.done
@@ -28,10 +36,10 @@ LINUX_CONFIG_FILE := $(call module-get-config,$(LOCAL_MODULE))
 LINUX_CONFIG_FILE_IS_TARGET := $(false)
 ifeq ("$(wildcard $(LINUX_CONFIG_FILE))","")
   ifdef LINUX_CONFIG_TARGET
-    LINUX_CONFIG_FILE := $(LINUX_DIR)/arch/$(LINUX_ARCH)/configs/$(LINUX_CONFIG_TARGET)
+    LINUX_CONFIG_FILE := $(LINUX_DIR)/arch/$(LINUX_SRCARCH)/configs/$(LINUX_CONFIG_TARGET)
     LINUX_CONFIG_FILE_IS_TARGET := $(true)
   else ifdef LINUX_DEFAULT_CONFIG_TARGET
-    LINUX_CONFIG_FILE := $(LINUX_DIR)/arch/$(LINUX_ARCH)/configs/$(LINUX_DEFAULT_CONFIG_TARGET)
+    LINUX_CONFIG_FILE := $(LINUX_DIR)/arch/$(LINUX_SRCARCH)/configs/$(LINUX_DEFAULT_CONFIG_TARGET)
     LINUX_CONFIG_TARGET := $(LINUX_DEFAULT_CONFIG_TARGET)
     LINUX_CONFIG_FILE_IS_TARGET := $(true)
   else
@@ -92,9 +100,9 @@ LINUX_EXPORTED_HEADERS_OVER := \
 # Macro to copy a kernel image from boot directory to staging directory
 # $1 image file to copy from arch/boot directory
 linux-copy-image = \
-	if [ -f $(LINUX_BUILD_DIR)/arch/$(LINUX_ARCH)/boot/$1 ]; then \
+	if [ -f $(LINUX_BUILD_DIR)/arch/$(LINUX_SRCARCH)/boot/$1 ]; then \
 		mkdir -p $(TARGET_OUT_STAGING)/boot; \
-		cp -af $(LINUX_BUILD_DIR)/arch/$(LINUX_ARCH)/boot/$1 $(TARGET_OUT_STAGING)/boot; \
+		cp -af $(LINUX_BUILD_DIR)/arch/$(LINUX_SRCARCH)/boot/$1 $(TARGET_OUT_STAGING)/boot; \
 	fi;
 
 define linux-copy-images
@@ -174,15 +182,15 @@ define linux-gen-sdk
 		find . -name Makefile -o -name Kconfig\* -o -name \*.pl \
 		>> $(LINUX_BUILD_DIR)/sdksrcfiles)
 	$(Q) (cd $(PRIVATE_PATH); \
-		find arch/$(LINUX_ARCH)/include include scripts -type f \
+		find arch/$(LINUX_SRCARCH)/include include scripts -type f \
 		>> $(LINUX_BUILD_DIR)/sdksrcfiles)
 $(if $(call streq,$(LINUX_ARCH),arm), \
 	$(Q) (cd $(PRIVATE_PATH); \
-		find arch/$(LINUX_ARCH)/*/include -type f \
+		find arch/$(LINUX_SRCARCH)/*/include -type f \
 		>> $(LINUX_BUILD_DIR)/sdksrcfiles) \
 )
 	$(Q) (cd $(LINUX_BUILD_DIR); \
-		find arch/$(LINUX_ARCH)/include include scripts .config Module.symvers -type f \
+		find arch/$(LINUX_SRCARCH)/include include scripts .config Module.symvers -type f \
 		>> $(LINUX_BUILD_DIR)/sdkobjfiles)
 	$(Q) mkdir -p $(LINUX_SDK_DIR)
 	$(Q) tar -C $(PRIVATE_PATH) -cf - -T $(LINUX_BUILD_DIR)/sdksrcfiles | \
@@ -219,7 +227,7 @@ endif
 	$(call linux-copy-images)
 ifneq ("$(TARGET_LINUX_DEVICE_TREE)","")
 	$(Q)cat $(TARGET_OUT_STAGING)/boot/zImage \
-		$(LINUX_BUILD_DIR)/arch/$(LINUX_ARCH)/boot/dts/$(TARGET_LINUX_DEVICE_TREE) \
+		$(LINUX_BUILD_DIR)/arch/$(LINUX_SRCARCH)/boot/dts/$(TARGET_LINUX_DEVICE_TREE) \
 		> $(TARGET_OUT_STAGING)/boot/zImage_$(TARGET_LINUX_DEVICE_TREE)
 endif
 	$(Q)cp -af $(LINUX_BUILD_DIR)/vmlinux $(TARGET_OUT_STAGING)/boot
