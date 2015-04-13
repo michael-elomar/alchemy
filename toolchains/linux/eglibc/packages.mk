@@ -28,11 +28,6 @@ toolchain_libc_sysroot := $(TOOLCHAIN_LIBC)
 # File indicating that installation was done
 toolchain_libc_installed_file := $(call local-get-build-dir)/$(LOCAL_MODULE).installed
 
-# Get the path of a libc file in the staging directory.
-# $1 : path of the libc file in the toolchain directory.
-toolchain_libc_get_staging_path = \
-	$(subst $(toolchain_libc_sysroot),$(TARGET_OUT_STAGING),$1)
-
 # List of files to be put in /lib
 toolchain_libc_lib_files :=
 ifneq ("$(wildcard $(toolchain_libc_sysroot)/lib/$(TOOLCHAIN_TARGET_NAME))","")
