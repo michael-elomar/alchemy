@@ -89,7 +89,7 @@ ifeq ("$(TARGET_LIBC)","")
   endif
 endif
 
-# Prefix of output
+# Suffix of output
 TARGET_STATIC_LIB_SUFFIX := .a
 TARGET_SHARED_LIB_SUFFIX := .so
 TARGET_EXE_SUFFIX :=
@@ -104,10 +104,25 @@ ifeq ("$(TARGET_OS)","ecos")
 # Force libc
 TARGET_LIBC := ecos
 
-# Prefix of output
+# Suffix of output
 TARGET_STATIC_LIB_SUFFIX := .a
 TARGET_SHARED_LIB_SUFFIX := .so.a
 TARGET_EXE_SUFFIX := .elf
+
+endif
+
+###############################################################################
+## mingw32 setup.
+###############################################################################
+ifeq ("$(TARGET_OS)","mingw32")
+
+# Force libc
+TARGET_LIBC := mingw32
+
+# Suffix of output
+TARGET_STATIC_LIB_SUFFIX := .a
+TARGET_SHARED_LIB_SUFFIX := .dll
+TARGET_EXE_SUFFIX := .exe
 
 endif
 
