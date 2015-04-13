@@ -597,14 +597,6 @@ clobber:
 	$(Q)rm -rf $(HOST_OUT_STAGING)
 	@echo "Deleting doc directory..."
 	$(Q)rm -rf $(TARGET_OUT)/doc
-ifneq ("$(TARGET_OS_FLAVOUR)","native-chroot")
-ifneq ("$(TARGET_OS_FLAVOUR)","native")
-	@echo "Deleting final directory..."
-	$(Q)rm -rf $(TARGET_OUT_FINAL)
-	$(Q)rm -f $(TARGET_OUT)/filelist.txt
-	$(Q)rm -f $(TARGET_OUT)/final.mk
-endif
-endif
 	@echo "Done deleting directories..."
 
 # Dummy target to check internal variables

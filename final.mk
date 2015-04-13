@@ -53,10 +53,8 @@ endif
 
 # Remove write access to 'group' and 'other'. For native only, a fixstat tools
 # is used on other variant when generating the image
-ifeq ("$(TARGET_OS)","linux")
 ifeq ("$(TARGET_OS_FLAVOUR)","native-chroot")
   MAKEFINAL_ARGS += --remove-wgo
-endif
 endif
 
 # Additional files to filter
@@ -72,7 +70,6 @@ MAKEFINAL_ARGS += \
 ## but fixes a bug present on some version of toolchain we use (arm-20009q1 for
 ## example).
 ###############################################################################
-
 ifneq ("$(TARGET_ADD_BUILDID_SECTION)","0")
 MAKEFINAL_ARGS += \
 	--build-id \
@@ -81,53 +78,64 @@ MAKEFINAL_ARGS += \
 endif
 
 ###############################################################################
-## Hooks.
+## Internal generation of final tree.
+##
+## Create /etc/ld.so.conf and create cache with ldconfig
+## We use the ldconfig from the host to generate. Hopefully it will be compatible
+## with the target. This is what buildroot do if there is no ldconfig in the
+## cross toolchain.
 ###############################################################################
-
-# Prepare final tree by deleting it in some configurations
-ifeq ("$(TARGET_OS_FLAVOUR)","native-chroot")
-__final-prepare =
-else
-__final-prepare = rm -rf $(TARGET_OUT_FINAL)
-endif
-
-# Finish final tree
-ifeq ("$(TARGET_OS_FLAVOUR)","native-chroot")
-__final-finish =
-else
-__final-finish =
-endif
-
-# Create /etc/ld.so.conf and create cache with ldconfig
-# We use the ldconfig from the host to generate. Hopefully it will be compatible
-# with the target. This is what buildroot do if there is no ldconfig in the
-# cross toolchain.
-ifeq ("$(TARGET_LIBC)","eglibc")
-__final-ldconfig = \
-	mkdir -p $(TARGET_OUT_FINAL)/etc; \
-	touch $(TARGET_OUT_FINAL)/etc/ld.so.conf; \
-	/sbin/ldconfig -r $(TARGET_OUT_FINAL);
-else
-__final-ldconfig =
-endif
-
-###############################################################################
-## Rules.
-###############################################################################
-
-# Generate final tree
-.PHONY: final
-final:
+.PHONY: __final-internal
+__final-internal:
 	@echo "Generating final tree..."
-	$(Q)$(__final-prepare)
-	$(Q)$(MAKEFINAL_SCRIPT) $(MAKEFINAL_ARGS) \
+ifneq ("$(TARGET_OS_FLAVOUR)","native-chroot")
+	$(Q) rm -rf $(TARGET_OUT_FINAL)
+endif
+	$(Q) $(MAKEFINAL_SCRIPT) $(MAKEFINAL_ARGS) \
 		$(TARGET_OUT_STAGING) $(TARGET_OUT_FINAL) $(TARGET_OUT)/final.mk
 	$(Q) $(MAKE) -f $(TARGET_OUT)/final.mk
-	$(Q)$(__final-finish)
-	$(Q)$(__final-ldconfig)
 	@mkdir -p $(TARGET_OUT_FINAL)/etc
+ifeq ("$(TARGET_LIBC)","eglibc")
+	$(Q) touch $(TARGET_OUT_FINAL)/etc/ld.so.conf
+	$(Q) /sbin/ldconfig -r $(TARGET_OUT_FINAL)
+endif
 	@echo `date +%s` > $(TARGET_OUT_FINAL)/etc/final.stamp
 	@echo "Done generating final tree"
 
-# Setup dependencies
-final: post-build
+.PHONY: final
+final: __final-internal
+
+# Do not clean when in native or native-chroot mode
+.PHONY: final-clean
+final-clean:
+ifneq ("$(TARGET_OS_FLAVOUR)","native-chroot")
+ifneq ("$(TARGET_OS_FLAVOUR)","native")
+	@echo "Deleting final directory..."
+	$(Q)rm -rf $(TARGET_OUT_FINAL)
+	$(Q)rm -f $(TARGET_OUT)/filelist.txt
+	$(Q)rm -f $(TARGET_OUT)/final.mk
+endif
+endif
+
+###############################################################################
+## Script for fixing permissions on-the-fly in native final tree.
+###############################################################################
+ifeq ("$(TARGET_OS_FLAVOUR)","native-chroot")
+
+.PHONY: native-fix-script
+native-fix-script: __final-internal fixstat-script
+	$(Q) cd $(TARGET_OUT_FINAL); \
+			cat $(TARGET_OUT)/filelist.txt | \
+			$(TARGET_OUT)/fixstat.sh --generate-fix-script > \
+			$(TARGET_OUT_FINAL)/native-fixperms.sh
+	@chmod +x $(TARGET_OUT_FINAL)/native-fixperms.sh
+
+final: native-fix-script
+
+endif
+
+###############################################################################
+## Setup dependencies.
+###############################################################################
+__final-internal: post-build
+clobber: final-clean

@@ -112,7 +112,7 @@ $(eval $(call image-rules,ext4))
 .PHONY: image-all-clean
 image-all-clean:
 
-# SHortcut when TARGET_IMAGE_FORMAT is defined
+# Shortcut when TARGET_IMAGE_FORMAT is defined
 .PHONY: image image-clean
 image: image-$(subst .,-,$(TARGET_IMAGE_FORMAT))
 image-clean: image-$(subst .,-,$(TARGET_IMAGE_FORMAT))-clean
@@ -152,7 +152,7 @@ endif
 fixstat-script:
 	@( \
 		echo "#!/bin/sh"; \
-		echo "$(FIXSTAT)"; \
+		echo "$(FIXSTAT) \"\$$@\""; \
 	) > $(TARGET_OUT)/fixstat.sh
 	@chmod +x $(TARGET_OUT)/fixstat.sh
 
@@ -161,23 +161,7 @@ fixstat-script-clean:
 	@rm -f $(TARGET_OUT)/fixstat.sh
 
 ###############################################################################
-## Script for fixing permissions on-the-fly in native final tree.
+## Setup dependencies
 ###############################################################################
-.PHONY: native-fix-script
-native-fix-script:
-	$(Q) if [ -f $(TARGET_OUT)/filelist.txt ]; then \
-		cd $(TARGET_OUT_FINAL); \
-			cat $(TARGET_OUT)/filelist.txt | \
-			$(FIXSTAT) --generate-fix-script > \
-			$(TARGET_OUT_FINAL)/native-fixperms.sh; \
-	fi
-	@chmod +x $(TARGET_OUT_FINAL)/native-fixperms.sh
-
-.PHONY: native-fix-script-clean
-native-fix-script-clean:
-	$(Q) rm -f $(TARGET_OUT_FINAL)/native-fixperms.sh
-
-# Setup dependencies
 post-build: fixstat-script
-native-fix-script: final
-image-all-clean: native-fix-script-clean fixstat-script-clean
+image-all-clean: fixstat-script-clean
