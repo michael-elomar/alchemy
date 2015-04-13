@@ -297,8 +297,6 @@ def addPathInFileList(relPath, isDir, options):
 def doCopy(dstFileName, srcFileName, options, forceCopy=False):
 	relPath = os.path.relpath(dstFileName, options.finalDir)
 
-	addPathInFileList(relPath, False, options)
-
 	# do we need to strip ?
 	# FIXME: stripping kernel modules under android causes issues
 	doStrip = False
@@ -308,6 +306,12 @@ def doCopy(dstFileName, srcFileName, options, forceCopy=False):
 		and isExec(srcFileName) \
 		and canStrip(srcFileName):
 		doStrip = True
+
+	# If the file to be stripped is in usr/lib/debug, simply skip it
+	if doStrip and relPath.startswith("usr/lib/debug"):
+		return
+
+	addPathInFileList(relPath, False, options)
 
 	# check strip filter
 	if doStrip and options.reStripFilters:
