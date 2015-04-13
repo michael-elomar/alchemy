@@ -20,3 +20,6 @@ ifeq ("$(TARGET_ARCH)","x64")
 else
   TOOLCHAIN_TARGET_NAME := i386-pc-linux-gnu
 endif
+
+# Get gdbserver path if available
+TOOLCHAIN_GDBSERVER := $(wildcard /usr/bin/gdbserver)

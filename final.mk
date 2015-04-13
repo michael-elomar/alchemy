@@ -93,9 +93,7 @@ endif
 
 # Finish final tree
 ifeq ("$(TARGET_OS_FLAVOUR)","native-chroot")
-__final-finish = \
-	$(BUILD_SYSTEM)/scripts/native-chroot-copy-libs.sh \
-		$(TARGET_OUT_FINAL) $(TARGET_ARCH)
+__final-finish =
 else
 __final-finish =
 endif
