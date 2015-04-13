@@ -164,7 +164,7 @@ $(_libc_installed_file):
 	)
 # Link /lib64 -> /lib
 ifeq ("$(TARGET_ARCH)","x64")
-	$(Q) ln -sf lib $(TARGET_OUT_STAGING)/lib64
+	$(Q) [ -e $(TARGET_OUT_STAGING)/lib64 ] || ln -sf lib $(TARGET_OUT_STAGING)/lib64
 endif
 # Include gdbserver only if requested (GPLv3)
 ifneq ("$(TARGET_INCLUDE_GDBSERVER)","0")
