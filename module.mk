@@ -42,6 +42,11 @@ LOCAL_BUILD_MODULE := $(call module-get-build-filename,$(LOCAL_MODULE))
 # Full path to staging module
 LOCAL_STAGING_MODULE := $(call module-get-staging-filename,$(LOCAL_MODULE))
 
+ifeq ("$(LOCAL_MODULE_CLASS)","LIBRARY")
+LOCAL_BUILD_MODULE_STATIC := $(LOCAL_BUILD_MODULE:$(TARGET_SHARED_LIB_SUFFIX)=$(TARGET_STATIC_LIB_SUFFIX))
+LOCAL_STAGING_MODULE_STATIC := $(LOCAL_STAGING_MODULE:$(TARGET_SHARED_LIB_SUFFIX)=$(TARGET_STATIC_LIB_SUFFIX))
+endif
+
 # Assemble the list of targets to create PRIVATE_ variables for.
 LOCAL_TARGETS := \
 	$(LOCAL_BUILD_MODULE) \
@@ -186,14 +191,22 @@ all_static_libs_filename := \
 	$(foreach __lib,$(all_static_libs), \
 		$(eval __class := $(__modules.$(__lib).MODULE_CLASS)) \
 		$(eval __fn := $(call module-get-staging-filename,$(__lib))) \
-		$(if $(call streq,$(__class),LIBRARY),$(__fn:.so=.a),$(__fn)) \
+		$(if $(call streq,$(__class),LIBRARY), \
+			$(__fn:$(TARGET_SHARED_LIB_SUFFIX)=$(TARGET_STATIC_LIB_SUFFIX)) \
+			, \
+			$(__fn) \
+		) \
 	)
 
 all_whole_static_libs_filename := \
 	$(foreach __lib,$(all_whole_static_libs), \
 		$(eval __class := $(__modules.$(__lib).MODULE_CLASS)) \
 		$(eval __fn := $(call module-get-staging-filename,$(__lib))) \
-		$(if $(call streq,$(__class),LIBRARY),$(__fn:.so=.a),$(__fn)) \
+		$(if $(call streq,$(__class),LIBRARY), \
+			$(__fn:$(TARGET_SHARED_LIB_SUFFIX)=$(TARGET_STATIC_LIB_SUFFIX)) \
+			, \
+			$(__fn) \
+		) \
 	)
 
 all_shared_libs_filename := \
@@ -515,8 +528,8 @@ $(LOCAL_MODULE)-path:
 # Generic library needs static version as well
 ifeq ("$(LOCAL_MODULE_CLASS)","LIBRARY")
 ifeq ("$(LOCAL_SDK)","")
-$(LOCAL_MODULE): $(LOCAL_BUILD_MODULE:.so=.a)
-LOCAL_TARGETS += $(LOCAL_BUILD_MODULE:.so=.a)
+$(LOCAL_MODULE): $(LOCAL_BUILD_MODULE_STATIC)
+LOCAL_TARGETS += $(LOCAL_BUILD_MODULE_STATIC)
 endif
 endif
 
@@ -1015,7 +1028,7 @@ ifeq ("$(LOCAL_SDK)","")
 include $(BUILD_SYSTEM)/binary-rules.mk
 
 # Static version
-$(LOCAL_BUILD_MODULE:.so=.a): $(all_objects) $(all_link_libs_filenames)
+$(LOCAL_BUILD_MODULE_STATIC): $(all_objects) $(all_link_libs_filenames)
 	$(transform-o-to-static-lib)
 
 # Shared version
@@ -1167,9 +1180,9 @@ $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(LOCAL_STAGING_MODULE)
 $(eval $(call copy-one-file,$(LOCAL_BUILD_MODULE),$(LOCAL_STAGING_MODULE)))
 
 ifeq ("$(LOCAL_MODULE_CLASS)","LIBRARY")
-$(LOCAL_MODULE): $(LOCAL_STAGING_MODULE:.so=.a)
-$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(LOCAL_STAGING_MODULE:.so=.a)
-$(eval $(call copy-one-file,$(LOCAL_BUILD_MODULE:.so=.a),$(LOCAL_STAGING_MODULE:.so=.a)))
+$(LOCAL_MODULE): $(LOCAL_STAGING_MODULE_STATIC)
+$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(LOCAL_STAGING_MODULE_STATIC)
+$(eval $(call copy-one-file,$(LOCAL_BUILD_MODULE_STATIC),$(LOCAL_STAGING_MODULE_STATIC)))
 endif
 
 # If final directory exists, also copy file in it
