@@ -203,8 +203,10 @@ ifeq ("$(TARGET_CC_PATH)","")
 $(error Unable to find compiler: $(TARGET_CC))
 endif
 
-# Machine targetted by toolchain to be used by autotools
-TOOLCHAIN_TARGET_NAME ?= $(shell $(TARGET_CC) -dumpmachine)
+# Machine targetted by toolchain to be used by autotools and libc installation
+ifndef TOOLCHAIN_TARGET_NAME
+  TOOLCHAIN_TARGET_NAME := $(shell $(TARGET_CC) -dumpmachine)
+endif
 
 # Determine compiler version
 TARGET_CC_VERSION := $(shell $(TARGET_CC) -dumpversion)
