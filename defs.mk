@@ -1209,17 +1209,17 @@ filter-get-external-modules = $(strip \
 # Manipulation of .config files based on the Kconfig infrastructure.
 ###############################################################################
 define kconfig-enable-opt
-	@sed -i -e "/\\<$1\\>/d" $2
+	@sed -i= -e "/\\<$1\\>/d" $2
 	@echo "$1=y" >> $2
 endef
 
 define kconfig-set-opt
-	@sed -i -e "/\\<$1\\>/d" $3
+	@sed -i= -e "/\\<$1\\>/d" $3
 	@echo "$1=$2" >> $3
 endef
 
 define kconfig-disable-opt
-	@sed -i -e "/\\<$1\\>/d" $2
+	@sed -i= -e "/\\<$1\\>/d" $2
 	@echo "# $1 is not set" >> $2
 endef
 
@@ -1454,7 +1454,7 @@ define fix-deps-file
 	[ ! -f $1 ] || sed \
 		-e 's| \([^/\\: ]\)| $(TOP_DIR)/\1|g' \
 		-e 's|^\([^/\\: ]\)|$(TOP_DIR)/\1|g' \
-		-i $1 \
+		-i= $1 \
 )
 endef
 
@@ -1595,6 +1595,35 @@ endef
 ## Commands to link a shared library.
 ###############################################################################
 
+ifeq ("$(TARGET_OS)","darwin")
+
+define transform-o-to-shared-lib
+@mkdir -p $(dir $@)
+$(call print-banner2,"SharedLib",$(PRIVATE_MODULE),$(call path-from-top,$@))
+$(call check-pwd-is-top-dir)
+$(Q)$(PRIVATE_CXX) \
+	$(TARGET_GLOBAL_LDFLAGS_SHARED) \
+	$(TARGET_GLOBAL_LDFLAGS_$(PRIVATE_COMPILER_FLAVOUR)) \
+	-Wl,-map -Wl,$(basename $@).map \
+	-shared \
+	-Wl,-dead_strip \
+	-Wl,-install_name -Wl,$(notdir $@) \
+	$(PRIVATE_LDFLAGS) \
+	$(PRIVATE_ALL_OBJECTS) \
+	$(call link-hook,$(PRIVATE_MODULE),$@, \
+		$(PRIVATE_ALL_OBJECTS) \
+		$(PRIVATE_ALL_STATIC_LIBRARIES) \
+		$(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES)) \
+	$(foreach __lib, $(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES), -force_load $(__lib)) \
+	$(PRIVATE_ALL_STATIC_LIBRARIES) \
+	$(PRIVATE_ALL_SHARED_LIBRARIES) \
+	-o $@ \
+	$(PRIVATE_LDLIBS) \
+	$(TARGET_GLOBAL_LDLIBS_SHARED)
+endef
+
+else # !eq("$(TARGET_OS)","darwin")
+
 define transform-o-to-shared-lib
 @mkdir -p $(dir $@)
 $(call print-banner2,"SharedLib",$(PRIVATE_MODULE),$(call path-from-top,$@))
@@ -1624,9 +1653,38 @@ $(Q)$(PRIVATE_CXX) \
 	$(TARGET_GLOBAL_LDLIBS_SHARED)
 endef
 
+endif
+
 ###############################################################################
 ## Commands to link an executable.
 ###############################################################################
+
+ifeq ("$(TARGET_OS)","darwin")
+
+define transform-o-to-executable
+@mkdir -p $(dir $@)
+$(call print-banner2,"Executable",$(PRIVATE_MODULE),$(call path-from-top,$@))
+$(call check-pwd-is-top-dir)
+$(Q)$(PRIVATE_CXX) \
+	$(TARGET_GLOBAL_LDFLAGS) \
+	$(TARGET_GLOBAL_LDFLAGS_$(PRIVATE_COMPILER_FLAVOUR)) \
+	-Wl,-map -Wl,$(basename $@).map \
+	-Wl,-dead_strip \
+	$(PRIVATE_LDFLAGS) \
+	$(PRIVATE_ALL_OBJECTS) \
+	$(call link-hook,$(PRIVATE_MODULE),$@, \
+		$(PRIVATE_ALL_OBJECTS) \
+		$(PRIVATE_ALL_STATIC_LIBRARIES) \
+		$(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES)) \
+	$(foreach __lib, $(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES), -force_load $(__lib)) \
+	$(PRIVATE_ALL_STATIC_LIBRARIES) \
+	$(PRIVATE_ALL_SHARED_LIBRARIES) \
+	-o $@ \
+	$(PRIVATE_LDLIBS) \
+	$(TARGET_GLOBAL_LDLIBS)
+endef
+
+else # !eq("$(TARGET_OS)","darwin")
 
 define transform-o-to-executable
 @mkdir -p $(dir $@)
@@ -1654,6 +1712,8 @@ $(Q)$(PRIVATE_CXX) \
 	$(TARGET_GLOBAL_LDLIBS)
 endef
 
+endif
+
 ###############################################################################
 ## Commands for copying files.
 ###############################################################################
@@ -1668,7 +1728,8 @@ define copy-one-file
 $(2): $(1)
 	@echo "Copy: $$(call path-from-top,$$<) => $$(call path-from-top,$$@)"
 	@mkdir -p $$(dir $$@)
-	$(Q)cp -a --remove-destination $$< $$@
+	@if [ -e $$@ ] ; then rm $$@; fi
+	$(Q)cp -a $$< $$@
 endef
 
 ###############################################################################

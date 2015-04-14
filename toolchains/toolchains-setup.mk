@@ -112,6 +112,24 @@ TARGET_EXE_SUFFIX := .elf
 endif
 
 ###############################################################################
+## MacOS/iOS setup.
+###############################################################################
+ifeq ("$(TARGET_OS)","darwin")
+
+# Force libc
+TARGET_LIBC := darwin
+
+# Prefix of output
+TARGET_STATIC_LIB_SUFFIX := .a
+TARGET_SHARED_LIB_SUFFIX := .dylib
+TARGET_EXE_SUFFIX :=
+
+# Overide various flags
+TARGET_GLOBAL_PCH_FLAGS := -x c++-header
+
+endif
+
+###############################################################################
 ## Include specific libc setup.
 ###############################################################################
 

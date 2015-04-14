@@ -687,10 +687,10 @@ endif
 ## Under native linux target, copy wrapper scripts
 ###############################################################################
 
-ifeq ("$(TARGET_OS)","linux")
-
 NATIVE_WRAPPER_SCRIPT :=
 NATIVE_CHROOT_WRAPPER_SCRIPT :=
+
+ifeq ("$(TARGET_OS)","linux")
 
 ifeq ("$(TARGET_OS_FLAVOUR)","native")
   NATIVE_WRAPPER_SCRIPT := native-wrapper.sh
@@ -699,6 +699,14 @@ endif
 ifeq ("$(TARGET_OS_FLAVOUR)","native-chroot")
   NATIVE_WRAPPER_SCRIPT := native-wrapper.sh
   NATIVE_CHROOT_WRAPPER_SCRIPT := native-chroot-wrapper.sh
+endif
+
+else ifeq ("$(TARGET_OS)","darwin")
+
+ifeq ("$(TARGET_OS_FLAVOUR)","native")
+  NATIVE_WRAPPER_SCRIPT := native-darwin-wrapper.sh
+endif
+
 endif
 
 ifneq ("$(NATIVE_WRAPPER_SCRIPT)","")
@@ -725,7 +733,5 @@ $(ALL_BUILD_MODULES): $(TARGET_OUT_STAGING)/THIS_IS_NOT_THE_DIRECTORY_FOR_NATIVE
 $(TARGET_OUT_STAGING)/THIS_IS_NOT_THE_DIRECTORY_FOR_NATIVE_CHROOT:
 	@mkdir -p $(dir $@)
 	@echo "Please use the 'final' directory to launch native chroot" > $@
-
-endif
 
 endif

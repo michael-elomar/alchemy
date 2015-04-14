@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 # Autodetect target architecture
 if [ "${TARGET_ARCH}" = "" ]; then
@@ -11,7 +11,6 @@ if [ "${TARGET_ARCH}" = "" ]; then
 fi
 
 # Expor some settings
-export TARGET_OS=linux
 export TARGET_OUT=out-${TARGET_OS}-${TARGET_ARCH}
 export TARGET_OUT_BUILD=${TARGET_OUT}/build
 export TARGET_OUT_STAGING=${TARGET_OUT}/staging

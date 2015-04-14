@@ -60,11 +60,17 @@ conflict with other build systems (android for example).
 * `TARGET_OS` : Specify the OS of the target. Possible values are :
   * `linux`.
   * `ecos`.
-  </br>Default is `linux`.
-* `TARGET_OS_FLAVOUR` : Flavour of the OS, currently only for `linux` :
+  * `darwin`.
+  </br>Default is `linux` on linux hosts, and `darwin` on mac hosts.
+* `TARGET_OS_FLAVOUR` : Flavour of the OS, depending on `TARGET_OS`.
+  For `linux` :
   * `parrot` for linux-only product.
   * `android` for android products.
   * `native` or `native-chroot` for pc.
+  For `darwin` :
+  * `iphoneos` for iOS devices.
+  * `iphonesimulator` for iOS simulator.
+  * `native` for mac.
    </br>Default is `native`.
 * `TARGET_LIBC` : Libc to be used. Normally automatically guessed based on other
   settings. Mainly to be used in `atom.mk` files to select different behaviours.
@@ -72,12 +78,14 @@ conflict with other build systems (android for example).
   * `eglibc` for embedded linux.
   * `ecos` for ecos OS.
   * `native` for native libc on pc.
+  * `darwin` for mac and iphone.
   </br>Default is :
      * `bionic` if `TARGET_OS` is `linux` and `TARGET_OS_FLAVOUR` is `android`.
      * `native` if `TARGET_OS` is `linux` and `TARGET_OS_FLAVOUR` is `native` or
        `native-chroot`.
      * `eglibc` if `TARGET_OS` is `linux`.
      * `ecos` if `TARGET_OS` is `ecos`.
+     * `darwin` if `TARGET_OS` is `darwin`.
 * `TARGET_ARCH` : Architecture of the target. Useful to select prebuilt binaries
   based on architecture. Possible values are :
   * `arm`.
@@ -155,6 +163,15 @@ conflict with other build systems (android for example).
   shall be the one with the `.dtb` extension. Default is empty.
 * `TARGET_GENERATE_LINUX_UIMAGE` : generate a u-boot image of linux.
   </br>Default is `0`
+
+### Darwin specific
+
+* `TARGET_IPHONE_VERSION` : when targetting `iphoneos` or `iphonesimulator`,
+  allows specifying the minimum supported version of iOS.
+  </br>Default is `8.2`
+* `TARGET_MACOS_VERSION` : when targetting `native` (e.g. MacOS desktop),
+  allows specifying the minimum supported version of OSX.
+  </br>Default is `10.10`
 
 ### Global flags for tools.
 Normally not needed, default values are determined based on target setting.

@@ -16,6 +16,7 @@ SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
 
 # 32-bit or 64-bit ?
 ARCH = "x64" if (platform.architecture()[0] == "64bit") else "x86"
+SYSTEM = platform.system().lower()
 
 # Possible actions
 ACTION_CHECK = "check"
@@ -32,7 +33,7 @@ ARG_FIELD_SEP = "|"
 # Suffix for temp files
 TEMP_SUFFIX = ".alchemy"
 
-# Title we wand to display (also saved in config files)
+# Title we want to display (also saved in config files)
 KCONFIG_TITLE = "Alchemy Configuration"
 
 # Suffix of tools when installed on host
@@ -175,7 +176,7 @@ class Module:
 #===============================================================================
 def getKconfigPath(name):
 	# Use the one in alchemy tree if available
-	binDir = os.path.join(SCRIPT_PATH, "../kconfig/bin-linux-" + ARCH)
+	binDir = os.path.join(SCRIPT_PATH, "../kconfig/bin-" + SYSTEM + "-" + ARCH)
 	path = os.path.join(binDir, name)
 	if os.path.exists(path):
 		return path
@@ -883,12 +884,11 @@ def updateFullConfig(modules, mainConfigPath):
 def execConf(configInPath, configPath):
 	logging.info("Executing conf %s %s", configInPath, configPath)
 
-	# Construct command line, simulate accepting all new options to their
-	# default values by piping 'yes' as input
+	# Construct command line
 	if configInPath:
-		cmdline = "yes \"\" | %s --oldconfig %s" % (getKconfigPath("conf"), configInPath)
+		cmdline = "%s --oldconfig %s" % (getKconfigPath("conf"), configInPath)
 	else:
-		cmdline = "yes \"\" | %s --alldefconfig" % (getKconfigPath("conf"))
+		cmdline = "%s --alldefconfig" % (getKconfigPath("conf"))
 
 	# Setup environment
 	# KCONFIG_CONFIG : name of .config file to use as input/ouput
@@ -899,13 +899,18 @@ def execConf(configInPath, configPath):
 	env["KCONFIG_OVERWRITECONFIG"] = "1"
 	env["KCONFIG_TITLE"] = KCONFIG_TITLE
 
-	# Execute command in silence (stdout/stderr redirected and not used)
+	# Execute command in silence (stdout/stderr redirected and not used), piping
+        # 'yes' as input to simulate accepting all new options to their default values
 	try:
+		yes = subprocess.Popen('yes', stdout=subprocess.PIPE)
 		process = subprocess.Popen(cmdline,
+			stdin=yes.stdout,
 			stdout=subprocess.PIPE,
 			stderr=subprocess.PIPE,
 			shell=True, env=env)
+                yes.stdout.close()
 		process.communicate()
+                yes.terminate()
 		if process.returncode != 0:
 			logging.error("%s failed with status %d", cmdline, process.returncode)
 	except OSError as ex:
