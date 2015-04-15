@@ -885,7 +885,10 @@ def execConf(configInPath, configPath):
 
 	# Construct command line, simulate accepting all new options to their
 	# default values by piping 'yes' as input
-	cmdline = "yes \"\" | %s --oldconfig %s" % (getKconfigPath("conf"), configInPath)
+	if configInPath:
+		cmdline = "yes \"\" | %s --oldconfig %s" % (getKconfigPath("conf"), configInPath)
+	else:
+		cmdline = "yes \"\" | %s --alldefconfig" % (getKconfigPath("conf"))
 
 	# Setup environment
 	# KCONFIG_CONFIG : name of .config file to use as input/ouput
