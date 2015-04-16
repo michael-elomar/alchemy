@@ -9,11 +9,7 @@
 LOCAL_PATH := $(call my-dir)
 
 # Skip most of this if a sdk is used for the android part
-ifndef USE_ALCHEMY_ANDROID_SDK
-
-$(error Please use new Alchemy-raptor version)
-
-endif # ifndef USE_ALCHEMY_ANDROID_SDK
+ifdef USE_ALCHEMY_ANDROID_SDK
 
 USE_ALCHEMY_ANDROID_BUSYDROID ?= 1
 ifeq ("$(USE_ALCHEMY_ANDROID_BUSYDROID)","1")
@@ -21,3 +17,5 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := busybox
 include $(BUILD_PREBUILT)
 endif
+
+endif # ifdef USE_ALCHEMY_ANDROID_SDK
