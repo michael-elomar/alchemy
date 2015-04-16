@@ -409,6 +409,26 @@ ALL_BUILD_MODULES := $(strip \
 		) \
 	))
 
+# If no config file available, remove modules with unknown dependencies
+ifeq ("$(CONFIG_GLOBAL_FILE_AVAILABLE)","0")
+$(foreach __mod,$(ALL_BUILD_MODULES), \
+	$(foreach __lib,$(call module-get-all-depends,$(__mod)), \
+		$(if $(call is-module-registered,$(__lib)),$(empty), \
+			$(info Disabling $(__mod): has unknown dependency $(__lib)) \
+			$(eval ALL_BUILD_MODULES := $(filter-out $(__mod),$(ALL_BUILD_MODULES))) \
+			$(call module-force-disabled,$(__mod)) \
+		) \
+	) \
+	$(foreach __host,$(__modules.$(__mod).DEPENDS_HOST_MODULES), \
+		$(if $(call is-module-registered,$(__lib)),$(empty), \
+			$(info Disabling $(__mod): has unknown dependency $(__host)) \
+			$(eval ALL_BUILD_MODULES := $(filter-out $(__mod),$(ALL_BUILD_MODULES))) \
+			$(call module-force-disabled,$(__mod)) \
+		) \
+	) \
+)
+endif
+
 # All host modules to actually build (based on built modules)
 # Force defining the CONFIG_ALCHEMY_BUILD_xxx variable to 'y' so the module is
 # now considered as being part of the config

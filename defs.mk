@@ -364,18 +364,33 @@ __modules-get-required-host-direct = $(strip $(sort \
 ## $1 : module to check.
 ## Prebuild modules are considered as in the config (even if they are
 ## not actually in it).
-## If no global configuration file present, always return true.
+## If no global configuration file present, always return true (unless if was
+## forcibly disabled).
 ###############################################################################
 is-module-in-build-config = $(strip \
-	$(if $(and $(call is-module-registered,$1),$(call is-module-prebuilt,$1)),$(true), \
-		$(eval __var := CONFIG_ALCHEMY_BUILD_$(call module-get-define,$1)) \
-		$(if $(call streq,$(CONFIG_GLOBAL_FILE_AVAILABLE),0),$(true), \
-			$(if $(call is-var-defined,$(__var)), \
-				$(if $($(__var)),$(true),$(false)), \
-				$(false) \
+	$(if $(call is-module-registered,$1), \
+		$(if $(call is-module-prebuilt,$1), \
+			$(true) \
+			, \
+			$(if $(call streq,$(CONFIG_GLOBAL_FILE_AVAILABLE),1), \
+				$(eval __var := CONFIG_ALCHEMY_BUILD_$(call module-get-define,$1)) \
+				$(if $(call is-var-defined,$(__var)), \
+					$(if $($(__var)),$(true),$(false)) \
+					, \
+					$(false) \
+				) \
+				, \
+				$(call not $(call is-var-defined,__modules.$(__mod).force-disabled)) \
 			) \
 		) \
 	))
+
+###############################################################################
+## Force disabling a module when there is no global configuration file.
+## $1 : module name
+###############################################################################
+module-force-disabled = \
+	$(eval __modules.$1.force-disabled := 1)
 
 ###############################################################################
 ## Restore the recorded LOCAL_XXX definitions for a given module. Called
