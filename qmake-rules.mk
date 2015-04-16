@@ -8,10 +8,10 @@
 
 ifdef QT5_QMAKE
   QMAKE := $(QT5_QMAKE)
-  __qmake_use_qt5 := $(true)
+  __qmake_has_qt_sysroot := $(true)
 else ifdef QT4_QMAKE
   QMAKE := $(QT4_QMAKE)
-  __qmake_use_qt5 := $(false)
+  __qmake_has_qt_sysroot := $(false)
 else
   QMAKE :=
 endif
@@ -43,7 +43,7 @@ define qmake_gen_deps
 	@rm -f $(PRIVATE_ALCHEMY_PRI_FILE)
 	@mkdir -p $(dir $(PRIVATE_ALCHEMY_PRI_FILE))
 	@( \
-		echo "target.path = $(if $(__qmake_use_qt5),$(TARGET_OUT_STAGING))/$(PRIVATE_DESTDIR)"; \
+		echo "target.path = $(if $(__qmake_has_qt_sysroot),$(TARGET_OUT_STAGING))/$(PRIVATE_DESTDIR)"; \
 		echo "INSTALLS += target"; \
 		echo "INCLUDEPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
 		echo "DEPENDPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
@@ -64,7 +64,7 @@ define qmake_gen_deps
 	@rm -f $(PRIVATE_ALCHEMY_PRI_FILE)
 	@mkdir -p $(dir $(PRIVATE_ALCHEMY_PRI_FILE))
 	@( \
-		echo "target.path = $(if $(__qmake_use_qt5),$(TARGET_OUT_STAGING))/$(PRIVATE_DESTDIR)"; \
+		echo "target.path = $(if $(__qmake_has_qt_sysroot),$(TARGET_OUT_STAGING))/$(PRIVATE_DESTDIR)"; \
 		echo "INSTALLS += target"; \
 		echo "INCLUDEPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
 		echo "DEPENDPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
@@ -79,6 +79,16 @@ define qmake_gen_deps
 	) >> $(PRIVATE_ALCHEMY_PRI_FILE)
 endef
 
+endif
+
+# Export android NDK path
+ifeq ("$(TARGET_OS_FLAVOUR)","android")
+QMAKE := ANDROID_NDK_ROOT=$(TARGET_ANDROID_NDK) $(QMAKE)
+endif
+
+# QT_SYSROOT is set only with USE_ALCHEMY_ANDROID_SDK
+ifndef USE_ALCHEMY_ANDROID_SDK
+__qmake_has_qt_sysroot := $(false)
 endif
 
 ###############################################################################
@@ -117,7 +127,7 @@ $(installed_file): $(built_file)
 	$(Q) cd $(PRIVATE_BUILD_DIR) \
 		&& $(MAKE) $(qmake_make_arg) \
 			STRIP="true || ls" \
-			$(if $(__qmake_use_qt5),$(empty),INSTALL_ROOT=$(TARGET_OUT_STAGING)) \
+			$(if $(__qmake_has_qt_sysroot),$(empty),INSTALL_ROOT=$(TARGET_OUT_STAGING)) \
 			install
 	$(qt5_la_prl_files_fixup)
 	@touch $@
@@ -133,7 +143,7 @@ $(LOCAL_MODULE)-clean:
 	$(Q) if [ -f $(PRIVATE_BUILD_DIR)/Makefile ]; then \
 		cd $(PRIVATE_BUILD_DIR); \
 		$(MAKE) --keep-going --ignore-errors $(qmake_make_arg) \
-			$(if $(__qmake_use_qt5),$(empty),INSTALL_ROOT=$(TARGET_OUT_STAGING)) \
+			$(if $(__qmake_has_qt_sysroot),$(empty),INSTALL_ROOT=$(TARGET_OUT_STAGING)) \
 			uninstall || echo "Ignoring uninstall errors"; \
 		$(MAKE) --keep-going --ignore-errors $(qmake_make_arg) \
 			clean || echo "Ignoring clean errors"; \

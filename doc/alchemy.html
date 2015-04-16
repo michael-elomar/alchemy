@@ -198,6 +198,25 @@ allows specifying the minimum supported version of OSX.
 </br>Default is <code>10.10</code></li>
 </ul>
 
+<h3>Android specific</h3>
+
+<p>Alchemy supports targetting Android in two configurations: either using an 
+official Android NDK, or using a custom-built Android system.</p>
+
+<ul>
+<li>When the <code>Alchemy-android</code> package is present, Alchemy will automatically use
+it when targetting Android.</li>
+<li>Otherwise, alchemy will try to use an Android NDK. This mode supports a few options:
+<ul>
+<li><code>TARGET_ANDROID_APILEVEL</code> : Android API level to target.
+</br>Default is <code>17</code></li>
+<li><code>TARGET_ANDROID_NDK</code> : Path of the Android NDK to use.
+</br>Default tries to auto-detect the NDK from a few somewhat standard location (<code>/opt/android-ndk-*</code>, <code>~/android-ndk-*</code>,...)</li>
+<li><code>TARGET_ANDROID_TOOLCHAIN</code> : name of the android toolchain, e.g. arm-linux-androideabi-4.7.
+</br>Default is the default toolchain for the current target architecture (<code>TARGET_ARCH</code>).</li>
+</ul></li>
+</ul>
+
 <h3>Global flags for tools.</h3>
 
 <p>Normally not needed, default values are determined based on target setting.
