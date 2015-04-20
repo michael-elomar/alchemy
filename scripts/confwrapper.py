@@ -900,17 +900,20 @@ def execConf(configInPath, configPath):
 	env["KCONFIG_TITLE"] = KCONFIG_TITLE
 
 	# Execute command in silence (stdout/stderr redirected and not used), piping
-        # 'yes' as input to simulate accepting all new options to their default values
+	# 'yes' as input to simulate accepting all new options to their default values
 	try:
-		yes = subprocess.Popen('yes', stdout=subprocess.PIPE)
+		yes = subprocess.Popen("yes ''",
+			stdout=subprocess.PIPE,
+			stderr=subprocess.PIPE,
+			shell=True, env=env)
 		process = subprocess.Popen(cmdline,
 			stdin=yes.stdout,
 			stdout=subprocess.PIPE,
 			stderr=subprocess.PIPE,
 			shell=True, env=env)
-                yes.stdout.close()
+		yes.stdout.close()
 		process.communicate()
-                yes.terminate()
+		yes.terminate()
 		if process.returncode != 0:
 			logging.error("%s failed with status %d", cmdline, process.returncode)
 	except OSError as ex:
