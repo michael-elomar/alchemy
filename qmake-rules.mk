@@ -37,23 +37,49 @@ endif
 
 # Generate a .pri file to be included by the .pro file with dependencies found
 # by alchemy
+ifeq ("$(TARGET_OS)","darwin")
+
 define qmake_gen_deps
 	@rm -f $(PRIVATE_ALCHEMY_PRI_FILE)
 	@mkdir -p $(dir $(PRIVATE_ALCHEMY_PRI_FILE))
 	@( \
 		echo "target.path = $(if $(__qmake_use_qt5),$(TARGET_OUT_STAGING))/$(PRIVATE_DESTDIR)"; \
 		echo "INSTALLS += target"; \
-		echo "INCLUDEPATH += $(PRIVATE_C_INCLUDES)"; \
-		echo "DEPENDPATH += $(PRIVATE_C_INCLUDES)"; \
-		echo "QMAKE_CFLAGS += $(PRIVATE_CFLAGS)"; \
-		echo "QMAKE_CXXFLAGS += $(PRIVATE_CFLAGS) $(PRIVATE_CXXFLAGS)"; \
-		echo "LIBS += $(PRIVATE_LDFLAGS)"; \
+		echo "INCLUDEPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
+		echo "DEPENDPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
+		echo "QMAKE_CFLAGS += $(PRIVATE_CFLAGS $(TARGET_GLOBAL_CFLAGS))"; \
+		echo "QMAKE_CXXFLAGS += $(PRIVATE_CFLAGS) $(TARGET_GLOBAL_CFLAGS) $(PRIVATE_CXXFLAGS) $(TARGET_GLOBAL_CXXFLAGS)"; \
+		echo "LIBS += $(PRIVATE_LDFLAGS) $(TARGET_GLOBAL_LDFLAGS)"; \
+		echo "LIBS += $(foreach __lib, $(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES), -force_load $(__lib))"; \
+		echo "LIBS += $(PRIVATE_ALL_STATIC_LIBRARIES)"; \
+		echo "LIBS += $(PRIVATE_ALL_SHARED_LIBRARIES)"; \
+		echo "LIBS += $(PRIVATE_LDLIBS)"; \
+		echo "LIBS += $(TARGET_GLOBAL_LDLIBS_SHARED)"; \
+	) >> $(PRIVATE_ALCHEMY_PRI_FILE)
+endef
+
+else # !eq("$(TARGET_OS)","darwin")
+
+define qmake_gen_deps
+	@rm -f $(PRIVATE_ALCHEMY_PRI_FILE)
+	@mkdir -p $(dir $(PRIVATE_ALCHEMY_PRI_FILE))
+	@( \
+		echo "target.path = $(if $(__qmake_use_qt5),$(TARGET_OUT_STAGING))/$(PRIVATE_DESTDIR)"; \
+		echo "INSTALLS += target"; \
+		echo "INCLUDEPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
+		echo "DEPENDPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
+		echo "QMAKE_CFLAGS += $(PRIVATE_CFLAGS $(TARGET_GLOBAL_CFLAGS))"; \
+		echo "QMAKE_CXXFLAGS += $(PRIVATE_CFLAGS) $(TARGET_GLOBAL_CFLAGS) $(PRIVATE_CXXFLAGS) $(TARGET_GLOBAL_CXXFLAGS)"; \
+		echo "LIBS += $(PRIVATE_LDFLAGS) $(TARGET_GLOBAL_LDFLAGS)"; \
 		echo "LIBS += -Wl,--whole-archive $(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES) -Wl,--no-whole-archive"; \
 		echo "LIBS += $(PRIVATE_ALL_STATIC_LIBRARIES)"; \
 		echo "LIBS += $(PRIVATE_ALL_SHARED_LIBRARIES)"; \
 		echo "LIBS += $(PRIVATE_LDLIBS)"; \
+		echo "LIBS += $(TARGET_GLOBAL_LDLIBS_SHARED)"; \
 	) >> $(PRIVATE_ALCHEMY_PRI_FILE)
 endef
+
+endif
 
 ###############################################################################
 ## Rules.
