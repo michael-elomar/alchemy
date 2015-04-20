@@ -42,6 +42,9 @@ TARGET_ARCH = x64
 TARGET_GLOBAL_CFLAGS += -I/usr/local/opt/gettext/include
 TARGET_GLOBAL_LDFLAGS += -L/usr/local/opt/gettext/lib -lintl
 
+# Need to explicitely link C++ lib on MacOS
+TARGET_GLOBAL_LDFLAGS += -lc++
+
 else
 
 $(error "Unsupported Darwin flavour '${TARGET_OS_FLAVOUR}'. Supported flavours: iphoneos, iphonesimulator, native.")
