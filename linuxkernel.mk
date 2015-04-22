@@ -87,7 +87,9 @@ LINUX_EXPORTED_HEADERS_OVER := \
 	include/linux/uhid.h \
 	include/linux/ion.h \
 	include/linux/sock_diag.h \
-	include/linux/inet_diag.h
+	include/linux/inet_diag.h \
+	include/linux/iio/events.h \
+	include/linux/iio/types.h
 
 # Macro to copy a kernel image from boot directory to staging directory
 # $1 image file to copy from arch/boot directory
