@@ -367,5 +367,9 @@ endif
 ## Default rules of makefile add TARGET_ARCH in CFLAGS.
 ## As it is not the way we use it, prevent export of this variable
 ###############################################################################
+ifeq ("$(HOST_OS)","darwin")
+# Unexport seems broken, force clearing it
+# FIXME: this can causes more troubles if submakefile wants to define it...
 MAKE += TARGET_ARCH=
+endif
 unexport TARGET_ARCH
