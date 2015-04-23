@@ -47,7 +47,8 @@ cp -f ${CONFIG_IN_FILE} ${CONFIG_OUT_FILE_TMP}
 # Apply sed files
 for f in $*; do
 	logv "Apply $f on ${CONFIG_IN_FILE} to ${CONFIG_OUT_FILE}"
-	sed --file=$f -i= ${CONFIG_OUT_FILE_TMP}
+	sed --file=$f ${CONFIG_OUT_FILE_TMP} > ${CONFIG_OUT_FILE_TMP}.tmp
+	mv ${CONFIG_OUT_FILE_TMP}.tmp ${CONFIG_OUT_FILE_TMP}
 done
 
 # Move in final place if needed

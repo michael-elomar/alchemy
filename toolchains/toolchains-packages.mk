@@ -100,8 +100,7 @@ $(toolchain_libc_installed_file):
 	)
 	$(if $(toolchain_libc_ldd), \
 		@mkdir -p $(TARGET_OUT_STAGING)/usr/bin$(endl) \
-		$(Q) cp -af $(toolchain_libc_ldd) $(TARGET_OUT_STAGING)/usr/bin$(endl) \
-		$(Q) sed -i= -e 's|^\#! */bin/bash$$|\#!/bin/sh|' $(TARGET_OUT_STAGING)/usr/bin/ldd$(endl) \
+		$(Q) sed -e 's|^\#! */bin/bash$$|\#!/bin/sh|' $(toolchain_libc_ldd) > $(TARGET_OUT_STAGING)/usr/bin/ldd$(endl) \
 	)
 	$(if $(toolchain_libc_tzdata), \
 		@mkdir -p $(TARGET_OUT_STAGING)/usr/share/zoneinfo$(endl) \

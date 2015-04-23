@@ -24,11 +24,12 @@ define __autotools-libtool_patch
 	$(Q) for f in `find $(PRIVATE_OBJ_DIR) -name libtool -o -name ltmain.sh`; do \
 		echo "Patching $$f"; \
 		$(if $($(PRIVATE_MODE)AUTOTOOLS_INSTALL_DESTDIR), \
-			sed -i= -e "s|^libdir='\$$install_libdir'|libdir='\$${install_libdir:\+$($(PRIVATE_MODE)OUT_STAGING)\$$install_libdir}'|1" $$f; \
+			sed -e "s|^libdir='\$$install_libdir'|libdir='\$${install_libdir:\+$($(PRIVATE_MODE)OUT_STAGING)\$$install_libdir}'|1" $$f \
+				> $$f.tmp && mv $$f.tmp $$f; \
 		) \
-		sed -i= -e "s|{wl}-rpath|{wl}-rpath-link|1" $$f; \
-		sed -i= -e "s|{wl}--rpath|{wl}-rpath-link|1" $$f; \
-		sed -i= -e "s|need_relink=yes|need_relink=no|1" $$f; \
+		sed -e "s|{wl}-rpath|{wl}-rpath-link|1" $$f > $$f.tmp && mv $$f.tmp $$f; \
+		sed -e "s|{wl}--rpath|{wl}-rpath-link|1" $$f > $$f.tmp && mv $$f.tmp $$f; \
+		sed -e "s|need_relink=yes|need_relink=no|1" $$f > $$f.tmp && mv $$f.tmp $$f; \
 	done
 endef
 
