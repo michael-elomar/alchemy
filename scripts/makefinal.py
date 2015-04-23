@@ -325,6 +325,10 @@ def doCopy(dstFileName, srcFileName, options, forceCopy=False):
 	if not os.path.lexists(dstFileName):
 		doAction = True
 	elif not os.path.islink(srcFileName):
+		if os.path.islink(dstFileName):
+			logging.warning("Unable to overwrite symlink '%s' with file '%s'",
+				dstFileName, srcFileName)
+			return
 		srcStat = os.stat(srcFileName)
 		dstStat = os.stat(dstFileName)
 		if srcStat.st_mtime > dstStat.st_mtime:
