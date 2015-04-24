@@ -1209,17 +1209,17 @@ filter-get-external-modules = $(strip \
 # Manipulation of .config files based on the Kconfig infrastructure.
 ###############################################################################
 define kconfig-enable-opt
-	@sed -i= -e "/\\<$1\\>/d" $2
+	@sed -i.bak -e "/\\<$1\\>/d" $2 && rm -f $2.bak
 	@echo "$1=y" >> $2
 endef
 
 define kconfig-set-opt
-	@sed -i= -e "/\\<$1\\>/d" $3
+	@sed -i.bak -e "/\\<$1\\>/d" $3 && rm -f $3.bak
 	@echo "$1=$2" >> $3
 endef
 
 define kconfig-disable-opt
-	@sed -i= -e "/\\<$1\\>/d" $2
+	@sed -i.bak -e "/\\<$1\\>/d" $2 && rm -f $2.bak
 	@echo "# $1 is not set" >> $2
 endef
 
@@ -1451,10 +1451,10 @@ endef
 ###############################################################################
 define fix-deps-file
 @( \
-	[ ! -f $1 ] || sed \
+	[ ! -f $1 ] || (sed -i.bak \
 		-e 's| \([^/\\: ]\)| $(TOP_DIR)/\1|g' \
 		-e 's|^\([^/\\: ]\)|$(TOP_DIR)/\1|g' \
-		-i= $1 \
+		$1 && rm -f $1.bak) \
 )
 endef
 
