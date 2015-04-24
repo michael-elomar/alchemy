@@ -160,7 +160,8 @@ $(_libc_installed_file):
 	$(if $(_libc_ldd), \
 		@mkdir -p $(TARGET_OUT_STAGING)/usr/bin$(endl) \
 		$(Q) cp -af $(_libc_ldd) $(TARGET_OUT_STAGING)/usr/bin$(endl) \
-		$(Q) sed -i= -e 's|^\#! */bin/bash$$|\#!/bin/sh|' $(TARGET_OUT_STAGING)/usr/bin/ldd$(endl) \
+		$(Q) sed -i.bak -e 's|^\#! */bin/bash$$|\#!/bin/sh|' $(TARGET_OUT_STAGING)/usr/bin/ldd$(endl) \
+		@rm -f $(TARGET_OUT_STAGING)/usr/bin/ldd.bak$(endl) \
 	)
 # Link /lib64 -> /lib
 ifeq ("$(TARGET_ARCH)","x64")
