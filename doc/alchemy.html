@@ -65,14 +65,20 @@ conflict with other build systems (android for example).</p>
 <li><code>TARGET_OS</code> : Specify the OS of the target. Possible values are :
 <ul>
 <li><code>linux</code>.</li>
-<li><code>ecos</code>.
-</br>Default is <code>linux</code>.</li>
+<li><code>ecos</code>.</li>
+<li><code>darwin</code>.
+</br>Default is <code>linux</code> on linux hosts, and <code>darwin</code> on mac hosts.</li>
 </ul></li>
-<li><code>TARGET_OS_FLAVOUR</code> : Flavour of the OS, currently only for <code>linux</code> :
+<li><code>TARGET_OS_FLAVOUR</code> : Flavour of the OS, depending on <code>TARGET_OS</code>.
+For <code>linux</code> :
 <ul>
 <li><code>parrot</code> for linux-only product.</li>
 <li><code>android</code> for android products.</li>
 <li><code>native</code> or <code>native-chroot</code> for pc.
+For <code>darwin</code> :</li>
+<li><code>iphoneos</code> for iOS devices.</li>
+<li><code>iphonesimulator</code> for iOS simulator.</li>
+<li><code>native</code> for mac.
 </br>Default is <code>native</code>.</li>
 </ul></li>
 <li><code>TARGET_LIBC</code> : Libc to be used. Normally automatically guessed based on other
@@ -81,7 +87,8 @@ settings. Mainly to be used in <code>atom.mk</code> files to select different be
 <li><code>bionic</code> for android libc.</li>
 <li><code>eglibc</code> for embedded linux.</li>
 <li><code>ecos</code> for ecos OS.</li>
-<li><code>native</code> for native libc on pc.
+<li><code>native</code> for native libc on pc.</li>
+<li><code>darwin</code> for mac and iphone.
 </br>Default is :
 <ul>
 <li><code>bionic</code> if <code>TARGET_OS</code> is <code>linux</code> and <code>TARGET_OS_FLAVOUR</code> is <code>android</code>.</li>
@@ -89,6 +96,7 @@ settings. Mainly to be used in <code>atom.mk</code> files to select different be
 <code>native-chroot</code>.</li>
 <li><code>eglibc</code> if <code>TARGET_OS</code> is <code>linux</code>.</li>
 <li><code>ecos</code> if <code>TARGET_OS</code> is <code>ecos</code>.</li>
+<li><code>darwin</code> if <code>TARGET_OS</code> is <code>darwin</code>.</li>
 </ul></li>
 </ul></li>
 <li><code>TARGET_ARCH</code> : Architecture of the target. Useful to select prebuilt binaries
@@ -105,6 +113,7 @@ optimization and select some module (for ex: linux). Possible values are :
 <li><code>p6</code>.</li>
 <li><code>p6i</code>.</li>
 <li><code>p7</code>.</li>
+<li><code>o3</code>.</li>
 <li><code>omap3</code>.</li>
 <li><code>omap4</code>.</li>
 <li><code>armv7a-neon</code>.
@@ -170,7 +179,23 @@ dome drivers that need access to internal linux headers.</li>
 kernel. During cpio image generation, the kernel will be re-linked to add it
 inside. Also, required options are internally set in linux config. Although
 only the copy in build directory is modified, the original one is not touched.
-</br>Default is <code>r0</code></li>
+</br>Default is <code>0</code></li>
+<li><code>TARGET_LINUX_DEVICE_TREE</code> : name of a device tree to append to kernel image.
+It shall be in <code>$(LINUX_BUILD_DIR)/arch/$(TARGET_ARCH)/boot/dts</code>. The name
+shall be the one with the <code>.dtb</code> extension. Default is empty.</li>
+<li><code>TARGET_GENERATE_LINUX_UIMAGE</code> : generate a u-boot image of linux.
+</br>Default is <code>0</code></li>
+</ul>
+
+<h3>Darwin specific</h3>
+
+<ul>
+<li><code>TARGET_IPHONE_VERSION</code> : when targetting <code>iphoneos</code> or <code>iphonesimulator</code>,
+allows specifying the minimum supported version of iOS.
+</br>Default is <code>8.2</code></li>
+<li><code>TARGET_MACOS_VERSION</code> : when targetting <code>native</code> (e.g. MacOS desktop),
+allows specifying the minimum supported version of OSX.
+</br>Default is <code>10.10</code></li>
 </ul>
 
 <h3>Global flags for tools.</h3>
@@ -504,8 +529,9 @@ unpacked sources and applied patches will be kept in the build directory.</li>
 <li><code>make &lt;module&gt;-dirclean</code> : will remove the build directory of the module.</li>
 <li><code>make &lt;module&gt;-doc</code> : will generate the documentation for the module.</li>
 <li><code>make &lt;module&gt;-path</code> : will display the path of the module.</li>
-<li><code>make &lt;module&gt;-codecheck</code> : will check coding style of C source files</li>
-<li><code>make &lt;module&gt;-cppcheck</code> : will check coding style of C++ source files</li>
+<li><code>make &lt;module&gt;-codecheck</code> : will check coding style of C source files.</li>
+<li><code>make &lt;module&gt;-cppcheck</code> : will check coding style of C++ source files.</li>
+<li><code>make &lt;module&gt;-cloc</code> : will count the number of lines of code.</li>
 </ul>
 
 <h3>Module registration</h3>
@@ -788,7 +814,7 @@ your custom rules.</p>
 
 <p>Variables to be exported by this module and then imported by modules depending
 on it. This simplifies the maintenance of the build system by forcing module to
-export everything required to use them. </p>
+export everything required to use them.</p>
 
 <p>For <code>internal</code> modules, <code>LOCAL_EXPORT_LDLIBS</code> is rarely used because the build
 system knows how to link with it and hence it is not needed to explicitly do so.</p>
@@ -1269,7 +1295,7 @@ The order of link of static libraries is also automatically done so that the
 order given in an atom.mk is not a problem.</p>
 
 <p>For example, if <code>A</code> is an executable and <code>B</code>, <code>C</code>, <code>D</code>, and <code>E</code> are static libraries.
-If dependencies are as below: </p>
+If dependencies are as below:</p>
 
 <pre>
 A->E,B
@@ -1335,8 +1361,9 @@ the error:</p>
     NOLINT(category)
 </pre>
 
-<p>Where category is the message type returned by <code>make &lt;module&gt;-cppcheck</code>
-(for example <code>whitespace/braces</code>, etc).</p>
+<p>Where category is the message returned by <code>make &lt;module&gt;-cppcheck</code>
+(for example <code>whitespace/braces</code>, etc).  NOLINT or NOLINT(*)
+suppresses errors of all categories on that line.</p>
 
 <p>Ex:</p>
 
@@ -1363,22 +1390,20 @@ will look like this :</p>
 
 readonly TOP_DIR=`pwd`
 
-export TARGET_PRODUCT="fc6050"
-export TARGET_PRODUCT_VARIANT="hiphop"
+export ALCHEMY_TARGET_PRODUCT="fc6050"
+export ALCHEMY_TARGET_PRODUCT_VARIANT="hiphop"
+export ALCHEMY_TARGET_OUT="${TOP_DIR}/Alchemy-out/${ALCHEMY_TARGET_PRODUCT}-${ALCHEMY_TARGET_PRODUCT_VARIANT}"
+export ALCHEMY_TARGET_SKEL_DIRS="${TOP_DIR}/Data/Common"
+export ALCHEMY_TARGET_CONFIG_DIR="${TOP_DIR}/Alchemy/test/config/${ALCHEMY_TARGET_PRODUCT}-${ALCHEMY_TARGET_PRODUCT_VARIANT}"
+export ALCHEMY_TARGET_SCAN_PRUNE_DIRS="Alchemy-out raptor"
+export ALCHEMY_USE_COLORS=1
+
+# This can be put in a product.mk file localted in ALCHEMY_TARGET_CONFIG_DIR
 export TARGET_OS="linux"
 export TARGET_OS_FLAVOUR="parrot"
 export TARGET_LIBC="eglibc"
 export TARGET_ARCH="arm"
 export TARGET_CPU="p6i"
-export TARGET_OUT="${TOP_DIR}/Alchemy-out/${TARGET_PRODUCT}-${TARGET_PRODUCT_VARIANT}"
-export TARGET_OUT_BUILD="${TARGET_OUT}/build"
-export TARGET_OUT_STAGING="${TARGET_OUT}/staging"
-export TARGET_OUT_FINAL="${TARGET_OUT}/final"
-export TARGET_SKEL="${TOP_DIR}/Data/Common"
-export TARGET_CONFIG_DIR="${TOP_DIR}/Alchemy/test/config/${TARGET_PRODUCT}-${TARGET_PRODUCT_VARIANT}"
-export TARGET_SCAN_PRUNE_DIRS="Alchemy-out raptor"
-
-export USE_COLORS=1
 
 time ./Alchemy/scripts/alchemake.py -f ./Alchemy/main.mk $*
 </pre>

@@ -20,7 +20,7 @@ endif
 
 TARGET_ARCH ?= x86
 TARGET_CPU ?=
-TARGET_OS ?= linux
+TARGET_OS ?= $(shell uname -s | awk '{print tolower($$0)}')
 TARGET_OS_FLAVOUR ?= native
 TARGET_LIBC ?=
 TARGET_PRODUCT ?= $(TARGET_OS)-$(TARGET_OS_FLAVOUR)
@@ -150,7 +150,7 @@ include $(BUILD_SYSTEM)/toolchains/toolchains-setup.mk
 ## Host setup.
 ###############################################################################
 
-HOST_OS := linux
+HOST_OS := $(shell uname -s | awk '{print tolower($$0)}')
 HOST_OUT_BUILD ?= $(TARGET_OUT)/build-host
 HOST_OUT_STAGING ?= $(TARGET_OUT)/staging-host
 
@@ -238,10 +238,16 @@ $(foreach __dir,$(TARGET_SDK_DIRS), \
 ## Find some tools.
 ###############################################################################
 
-# We need bison 2.5 but android force version 2.3 in the path that causes troubles
+ifeq ("$(HOST_OS)","darwin")
+# Use bison from Homebrew by default on MacOS, as Xcode version is too old
+BISON_HOMEBREW_PATH = /usr/local/opt/bison/bin/bison
+BISON_PATH ?= $(shell if [ -e $(BISON_HOMEBREW_PATH) ]; then echo $(BISON_HOMEBREW_PATH); else which bison; fi)
+else
 BISON_PATH ?= $(shell which bison)
+endif
+# We need bison 2.5 but android force version 2.3 in the path that causes troubles
 ifneq ("$(BISON_PATH)","")
-  BISON_VERSION := $(shell $(BISON_PATH) --version | head -1 | sed "s/.*\([0-9]\.[0-9]\).*/\1/")
+  BISON_VERSION := $(shell $(BISON_PATH) --version | head -1 | perl -pe "s/.*?([0-9]\.[0-9](\.[0-9])?)$$/\1/")
   ifeq ("$(call check-version,$(BISON_VERSION),2.5)","")
     BISON_PATH := /usr/bin/bison
   endif
@@ -270,9 +276,14 @@ __extra-host-ldflags := $(strip \
 	$(foreach __dir,$(HOST_OUT_STAGING), \
 		-L$(__dir)/lib \
 		-L$(__dir)/usr/lib \
+	))
+ifneq ("$(HOST_OS)","darwin")
+__extra-host-ldflags += $(strip \
+	$(foreach __dir,$(HOST_OUT_STAGING), \
 		-Wl,-rpath-link=$(__dir)/lib \
 		-Wl,-rpath-link=$(__dir)/usr/lib \
 	))
+endif
 
 HOST_GLOBAL_LDFLAGS += $(__extra-host-ldflags)
 HOST_GLOBAL_LDFLAGS_SHARED += $(__extra-host-ldflags)
@@ -307,9 +318,14 @@ __extra-target-ldflags := $(strip \
 	$(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
 		-L$(__dir)/lib \
 		-L$(__dir)/usr/lib \
+	))
+ifneq ("$(TARGET_OS)","darwin")
+__extra-target-ldflags += $(strip \
+	$(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
 		-Wl,-rpath-link=$(__dir)/lib \
 		-Wl,-rpath-link=$(__dir)/usr/lib \
 	))
+endif
 
 TARGET_GLOBAL_LDFLAGS += $(__extra-target-ldflags)
 TARGET_GLOBAL_LDFLAGS_SHARED += $(__extra-target-ldflags)
@@ -351,4 +367,5 @@ endif
 ## Default rules of makefile add TARGET_ARCH in CFLAGS.
 ## As it is not the way we use it, prevent export of this variable
 ###############################################################################
+MAKE += TARGET_ARCH=
 unexport TARGET_ARCH

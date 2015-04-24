@@ -36,7 +36,7 @@ $(PARSER_BUILD_DIR)/zconf.hash.c: $(LOCAL_PATH)/parser/zconf.gperf
 $(PARSER_BUILD_DIR)/zconf.tab.c: $(LOCAL_PATH)/parser/zconf.y
 	@mkdir -p $(dir $@)
 	@echo "Generating zconf.tab.c"
-	$(Q)bison --debug --no-lines --name-prefix=zconf --output=$@ $<
+	$(Q)$(BISON_PATH) --debug --no-lines --name-prefix=zconf --output=$@ $<
 
 include $(BUILD_STATIC_LIBRARY)
 
