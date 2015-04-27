@@ -184,6 +184,7 @@ $(if $(call streq,$(LINUX_ARCH),arm), \
 		>> $(LINUX_BUILD_DIR)/sdksrcfiles) \
 )
 	$(Q) (cd $(LINUX_BUILD_DIR); \
+		[ ! -d arch/$(LINUX_ARCH)/include ] || \
 		find arch/$(LINUX_ARCH)/include include scripts .config Module.symvers -type f \
 		>> $(LINUX_BUILD_DIR)/sdkobjfiles)
 	$(Q) mkdir -p $(LINUX_SDK_DIR)
