@@ -298,18 +298,21 @@ def processModule(ctx, module):
 			ctx.atom.write(" \\\n\t%s" % includeDir)
 		ctx.atom.write("\n")
 
-	# Autoconf file
+	# Config file
 	# Note: for sdk modules, LOCAL_CONFIG_FILES will simply indicate that a
-	# autoconf file is present, reconfiguration will not be possible.
+	# config file is present, reconfiguration will not be possible.
 	if "CONFIG_FILES" in module.fields:
-		autoconfFileName = "autoconf-%s.h" % module.name
-		ctx.atom.write("LOCAL_CONFIG_FILES := 1\n")
-		if not os.path.exists(os.path.join(ctx.outDir, "usr", "include", module.name)):
-			os.makedirs(os.path.join(ctx.outDir, "usr", "include", module.name), mode=0755)
-		if os.path.exists(os.path.join(ctx.buildDir, module.name, autoconfFileName)):
-			shutil.copy2(
-					os.path.join(ctx.buildDir, module.name, autoconfFileName),
-					os.path.join(ctx.outDir, "usr", "include", module.name, autoconfFileName))
+		configFileName = "%s.config" % module.name
+		srcFilePath = os.path.join(ctx.buildDir, module.name, configFileName)
+		dstDirPath = os.path.join(ctx.outDir, "config")
+		if os.path.exists(srcFilePath):
+			if not os.path.exists(dstDirPath):
+				os.makedirs(dstDirPath, mode=0755)
+			shutil.copy2(srcFilePath, os.path.join(dstDirPath, configFileName))
+			ctx.atom.write("LOCAL_CONFIG_FILES := 1\n")
+			ctx.atom.write("sdk.%s.config := $(LOCAL_PATH)/config/%s\n" % (
+					module.name, configFileName))
+			ctx.atom.write("$(call load-config)\n")
 
 	# Set LOCAL_LIBRARIES with the content of 'depends'
 	if "depends" in module.fields:

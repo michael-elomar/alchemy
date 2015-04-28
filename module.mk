@@ -618,19 +618,9 @@ config_file := $(call module-get-config,$(LOCAL_MODULE))
 autoconf_file := $(call module-get-autoconf,$(LOCAL_MODULE))
 ifneq ("$(autoconf_file)","")
 
-ifeq ("$(LOCAL_SDK)","")
-
 # autoconf.h file depends on module config
 $(autoconf_file): $(config_file)
 	@$(call generate-autoconf-file,$<,$@)
-
-else
-
-# Copy autoconf file from sdk location
-autoconf_file_sdk := $(LOCAL_SDK)/usr/include/$(LOCAL_MODULE)/autoconf-$(LOCAL_MODULE).h
-$(eval $(call copy-one-file,$(autoconf_file_sdk),$(autoconf_file)))
-
-endif # ifeq ("$(LOCAL_SDK)","")
 
 # Don't forget to clean autoconf.h file
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(autoconf_file)
