@@ -13,6 +13,9 @@ ifneq ("$(V)","0")
 $(info Generating rules for $(LOCAL_MODULE))
 endif
 
+# Make sure config is loaded
+$(call load-config)
+
 # This will print a warning if this module misses a custom macro
 $(call check-custom-macro,$(LOCAL_MODULE))
 

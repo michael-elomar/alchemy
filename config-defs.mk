@@ -182,10 +182,12 @@ $(if $(wildcard $(call __get-orig-module-config,$1)), \
 	) \
 )
 -include $(call module-get-config,$1)
+$(eval __modules.$1.config-loaded := 1)
 endef
 
 ###############################################################################
 ## Load configuration of a module.
 ## Simply evaluate a call to simplify job of caller.
 ###############################################################################
-load-config = $(eval $(call __load-config-internal,$(LOCAL_MODULE)))
+load-config = $(if $(call is-var-undefined,__modules.$(LOCAL_MODULE).config-loaded), \
+	$(eval $(call __load-config-internal,$(LOCAL_MODULE))))
