@@ -239,7 +239,7 @@ def processModule(ctx, module):
 				# Copy libs and add new directory only if files have actually
 				# been copied (ie directory was created)
 				copyLibs(libDir, os.path.join(ctx.outDir, dstDir))
-				if os.path.exists(os.path.join(ctx.outDir, dstDir)):
+				if os.path.exists(os.path.normpath(os.path.join(ctx.outDir, dstDir))):
 					newLibs.append("-L$(LOCAL_PATH)/" + dstDir)
 			elif lib.startswith(ctx.stagingDir):
 				# Some module directly reference a path in staging, simply update
@@ -270,7 +270,7 @@ def processModule(ctx, module):
 				# Copy headers and add new directory only if files have actually
 				# been copied (ie directory was created)
 				copyHeaders(includeDir, os.path.join(ctx.outDir, dstDir))
-				if os.path.exists(os.path.join(ctx.outDir, dstDir)):
+				if os.path.exists(os.path.normpath(os.path.join(ctx.outDir, dstDir))):
 					newIncludeDirs.append("$(LOCAL_PATH)/" + dstDir)
 			elif includeDir.startswith(os.path.join(ctx.buildDir, module.name)):
 				# TODO: simplify destination by remove extra 'include' and 'module name'
@@ -282,7 +282,7 @@ def processModule(ctx, module):
 				# Copy headers and add new directory only if files have actually
 				# been copied (ie directory was created)
 				copyHeaders(includeDir, os.path.join(ctx.outDir, dstDir))
-				if os.path.exists(os.path.join(ctx.outDir, dstDir)):
+				if os.path.exists(os.path.normpath(os.path.join(ctx.outDir, dstDir))):
 					newIncludeDirs.append("$(LOCAL_PATH)/" + dstDir)
 
 			elif includeDir.startswith(ctx.stagingDir):
