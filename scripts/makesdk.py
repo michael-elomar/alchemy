@@ -23,7 +23,8 @@ class Context(object):
 		self.atom = StringIO()
 		self.setup = StringIO()
 		self.sdkDirs = []
-		self.modules = None
+		self.moduledb = None
+		self.headerLibs = []
 
 #===============================================================================
 # Escape quotes in string.
@@ -191,9 +192,9 @@ def processModuleSdk(ctx, module):
 
 #===============================================================================
 #===============================================================================
-def processModule(ctx, module):
+def processModule(ctx, module, force=False):
 	# Skip module not built
-	if not module.build:
+	if not module.build and not force:
 		return
 	logging.info("Processing module %s", module.name)
 
@@ -201,6 +202,15 @@ def processModule(ctx, module):
 	if "SDK" in module.fields:
 		processModuleSdk(ctx, module)
 		return
+
+	# Remember modules not built but whose headers are required
+	if "DEPENDS_HEADERS" in module.fields:
+		libs = module.fields["DEPENDS_HEADERS"].split()
+		for lib in libs:
+			if lib not in ctx.headerLibs \
+					and lib in ctx.moduledb \
+					and not ctx.moduledb[lib].build:
+				ctx.headerLibs.append(lib)
 
 	# Start a new module
 	ctx.atom.write("include $(CLEAR_VARS)\n")
@@ -334,7 +344,7 @@ def processModule(ctx, module):
 #===============================================================================
 #===============================================================================
 def checkTargetVar(ctx, name):
-	val = ctx.modules.targetVars.get(name, "")
+	val = ctx.moduledb.targetVars.get(name, "")
 	if val:
 		ctx.atom.write("ifneq (\"$(TARGET_%s)\",\"%s\")\n" % (name, val))
 		ctx.atom.write("  $(error This sdk is for TARGET_%s=%s)\n" % (name, val))
@@ -343,7 +353,7 @@ def checkTargetVar(ctx, name):
 #===============================================================================
 #===============================================================================
 def setupTargetEnvironment(ctx, name):
-	val = ctx.modules.targetVars.get(name, "")
+	val = ctx.moduledb.targetVars.get(name, "")
 	if val:
 		ctx.setup.write("TARGET_%s := %s\n" % (name, val))
 
@@ -360,7 +370,7 @@ def main():
 	# Load modules from xml
 	logging.info("Loading xml '%s'", ctx.dumpXmlPath)
 	try:
-		ctx.modules = moduledb.loadXml(ctx.dumpXmlPath)
+		ctx.moduledb = moduledb.loadXml(ctx.dumpXmlPath)
 	except xml.parsers.expat.ExpatError as ex:
 		sys.stderr.write("Error while loading '%s':\n" % ctx.dumpXmlPath)
 		sys.stderr.write("  %s\n" % ex)
@@ -392,11 +402,15 @@ def main():
 		setupTargetEnvironment(ctx, element_to_check)
 
 	# Process modules
-	for module in ctx.modules:
+	for module in ctx.moduledb:
 		processModule(ctx, module)
 
+	# Process modules not built but whose headers are required
+	for lib in ctx.headerLibs:
+		processModule(ctx, ctx.moduledb[lib], force=True)
+
 	# Process custom macros
-	for macro in ctx.modules.customMacros.values():
+	for macro in ctx.moduledb.customMacros.values():
 		ctx.atom.write("define %s\n" % macro.name)
 		ctx.atom.write(macro.value)
 		ctx.atom.write("\nendef\n")
