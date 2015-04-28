@@ -16,6 +16,8 @@ ifndef TARGET_CROSS
     else
       TARGET_CROSS := /opt/arm-2012.03/bin/arm-none-linux-gnueabi-
     endif
+  else ifeq ("$(TARGET_ARCH)","aarch64")
+      TARGET_CROSS := /opt/aarch64-2014.05/bin/aarch64-linux-gnu-
   endif
 endif
 

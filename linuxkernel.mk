@@ -16,13 +16,22 @@ ifeq ("$(LOCAL_MODULE)", "linux")
 # Override the module name...
 LOCAL_MODULE_FILENAME := $(LOCAL_MODULE).done
 
+# Allows kernel to be of a different architecture
+# ex: aarch64 for kernel and arm for system
+ifndef TARGET_LINUX_ARCH
+  TARGET_LINUX_ARCH := $(TARGET_ARCH)
+endif
+
 # LINUX_SRCARCH is the name of the sub-directory in linux/arch
-ifeq ("$(TARGET_ARCH)","x64")
+ifeq ("$(TARGET_LINUX_ARCH)","x64")
   LINUX_ARCH := x86_64
   LINUX_SRCARCH := x86
+else ifeq ("$(TARGET_LINUX_ARCH)","aarch64")
+  LINUX_ARCH := arm64
+  LINUX_SRCARCH := arm64
 else
-  LINUX_ARCH := $(TARGET_ARCH)
-  LINUX_SRCARCH := $(TARGET_ARCH)
+  LINUX_ARCH := $(TARGET_LINUX_ARCH)
+  LINUX_SRCARCH := $(TARGET_LINUX_ARCH)
 endif
 
 # General setup

@@ -72,6 +72,10 @@ ifeq ("$(TARGET_ARCH)","arm")
    include $(BUILD_SYSTEM)/toolchains/arm-setup.mk
 endif
 
+ifeq ("$(TARGET_ARCH)","aarch64")
+  TARGET_GLOBAL_CFLAGS += -fPIC
+endif
+
 ifeq ("$(TARGET_ARCH)","x64")
   TARGET_GLOBAL_CFLAGS += -m64 -fPIC
   TARGET_GLOBAL_LDFLAGS += -m64

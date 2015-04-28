@@ -141,6 +141,14 @@ TARGET_IMAGE_FORMAT ?= tar.gz
 # --sparse : generate a sparse image
 TARGET_IMAGE_OPTIONS ?=
 
+# To simplify tests for arm architecture
+TARGET_ARCH_ARM := 0
+ifeq ("$(TARGET_ARCH)","arm")
+  TARGET_ARCH_ARM := 1
+else ifeq ("$(TARGET_ARCH)","aarch64")
+  TARGET_ARCH_ARM := 1
+endif
+
 ###############################################################################
 ## Toolchain setup.
 ###############################################################################
