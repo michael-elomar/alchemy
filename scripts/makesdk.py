@@ -274,7 +274,8 @@ def processModule(ctx, module, force=False):
 				# TODO: simplify destination by remove extra 'include' and 'module name'
 				relPath = os.path.relpath(includeDir, modulePath)
 				if relPath != ".":
-					dstDir = os.path.join("usr", "include", module.name, relPath)
+					dstDir = os.path.join("usr", "include", module.name,
+							relPath.replace("..", "dotdot"))
 				else:
 					dstDir = os.path.join("usr", "include", module.name)
 				# Copy headers and add new directory only if files have actually
@@ -286,7 +287,8 @@ def processModule(ctx, module, force=False):
 				# TODO: simplify destination by remove extra 'include' and 'module name'
 				relPath = os.path.relpath(includeDir, os.path.join(ctx.buildDir, module.name))
 				if relPath != ".":
-					dstDir = os.path.join("usr", "include", module.name, relPath)
+					dstDir = os.path.join("usr", "include", module.name,
+							relPath.replace("..", "dotdot"))
 				else:
 					dstDir = os.path.join("usr", "include", module.name)
 				# Copy headers and add new directory only if files have actually
