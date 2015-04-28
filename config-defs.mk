@@ -43,27 +43,37 @@ endif
 
 ###############################################################################
 ## Get the name of the configuration file of a module.
-## If a variable named custom.<module>.config exists, it is used, otherwise
-## it gets the file from the original config directory.
+## Priority is:
+## - custom config specified in custom.<module>.config if it exists.
+## - $(TARGET_CONFIG_DIR)/$1.config if it exists.
+## - sdk.$1.config if module is from a sdk.
+## - $(TARGET_CONFIG_DIR)/$1.config (even if it does not exist.
+##
 ## $1 : module name.
 ###############################################################################
 
 # Path to original file given as input
 __get-orig-module-config = $(strip \
 	$(if $(call is-var-defined,custom.$1.config), \
-		$(custom.$1.config),$(TARGET_CONFIG_DIR)/$1.config \
+		$(custom.$1.config) \
+		, \
+		$(if $(wildcard $(TARGET_CONFIG_DIR)/$1.config), \
+			$(TARGET_CONFIG_DIR)/$1.config \
+			, \
+			$(if $(call is-var-defined,sdk.$1.config), \
+				$(sdk.$1.config) \
+				, \
+				$(TARGET_CONFIG_DIR)/$1.config \
+			) \
+		) \
 	))
 
-# Path to final file after optional patching with sed files
-__get-final-module-config = $(strip \
-	$(if $(call is-var-defined,custom.$1.config.sedfiles), \
-		$(call module-get-build-dir,$1)/$1.config \
-		, \
-		$(call __get-orig-module-config,$1) \
-	))
+# Path to file copied in build (after optional patching with sed files)
+__get-build-module-config = $(strip \
+	$(call module-get-build-dir,$1)/$1.config)
 
 # Public version
-module-get-config = $(call __get-final-module-config,$1)
+module-get-config = $(call __get-build-module-config,$1)
 
 ###############################################################################
 ## Get the list of path to Config.in files of a module.
@@ -144,25 +154,31 @@ __generate-config-args = $(strip \
 	))
 
 ###############################################################################
-## Load configuration of a module. If sed files are specified, a copy is made
-## in build directory and sed files applied there.
+## Load configuration of a module.
+## A copy is made in the build directory (with optional sed files applied).
 ## $1: module name.
 ###############################################################################
 
-# Path to script used to aply sed files on config file
+# Path to script used to apply sed files on config file
 __apply-sed-script := $(BUILD_SYSTEM)/scripts/config-apply-sedfiles.sh
 
 define __load-config-internal
-$(if $(call is-var-defined,custom.$1.config.sedfiles), \
-	$(if $(wildcard $(call __get-orig-module-config,$1)), \
+$(if $(wildcard $(call __get-orig-module-config,$1)), \
+	$(if $(call strneq,$(V),0), \
+		$(info $1: Loading config file $(call __get-orig-module-config,$1)) \
+	)
+	$(if $(call is-var-defined,custom.$1.config.sedfiles), \
 		$(foreach __f,$(custom.$1.config.sedfiles), \
 			$(info Apply $(__f) on '$1' config) \
 		) \
 		$(eval __out := $(shell $(__apply-sed-script) \
 			$(call __get-orig-module-config,$1) \
-			$(call __get-final-module-config,$1) \
+			$(call __get-build-module-config,$1) \
 			$(custom.$1.config.sedfiles) \
 		)) \
+		, \
+		$(shell mkdir -p $(dir $(call __get-build-module-config,$1))) \
+		$(shell cp -af $(call __get-orig-module-config,$1) $(call __get-build-module-config,$1)) \
 	) \
 )
 -include $(call module-get-config,$1)
