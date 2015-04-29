@@ -192,9 +192,9 @@ def processModuleSdk(ctx, module):
 
 #===============================================================================
 #===============================================================================
-def processModule(ctx, module, force=False):
+def processModule(ctx, module, headersOnly=False):
 	# Skip module not built
-	if not module.build and not force:
+	if not module.build and not headersOnly:
 		return
 	logging.info("Processing module %s", module.name)
 
@@ -204,7 +204,7 @@ def processModule(ctx, module, force=False):
 		return
 
 	# Remember modules not built but whose headers are required
-	if "DEPENDS_HEADERS" in module.fields:
+	if not headersOnly and "DEPENDS_HEADERS" in module.fields:
 		libs = module.fields["DEPENDS_HEADERS"].split()
 		for lib in libs:
 			if lib not in ctx.headerLibs \
@@ -234,7 +234,7 @@ def processModule(ctx, module, force=False):
 	# Libraries
 	# If a module contains prelinked '.a' mentionned in its EXPORT_LDLIBS, copy
 	# them and uptade the variable
-	if "EXPORT_LDLIBS" in module.fields:
+	if not headersOnly and "EXPORT_LDLIBS" in module.fields:
 		libs = module.fields["EXPORT_LDLIBS"].split()
 		newLibs = []
 		for lib in libs:
@@ -327,7 +327,7 @@ def processModule(ctx, module, force=False):
 			ctx.atom.write("$(call load-config)\n")
 
 	# Set LOCAL_LIBRARIES with the content of 'depends'
-	if "depends" in module.fields:
+	if not headersOnly and "depends" in module.fields:
 		ctx.atom.write("LOCAL_LIBRARIES := %s\n" % module.fields["depends"])
 
 	# Register shared/static libraries as normal so we can manage dependencies
@@ -409,7 +409,7 @@ def main():
 
 	# Process modules not built but whose headers are required
 	for lib in ctx.headerLibs:
-		processModule(ctx, ctx.moduledb[lib], force=True)
+		processModule(ctx, ctx.moduledb[lib], headersOnly=True)
 
 	# Process custom macros
 	for macro in ctx.moduledb.customMacros.values():
