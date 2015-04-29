@@ -247,7 +247,7 @@ BISON_PATH ?= $(shell which bison)
 endif
 # We need bison 2.5 but android force version 2.3 in the path that causes troubles
 ifneq ("$(BISON_PATH)","")
-  BISON_VERSION := $(shell $(BISON_PATH) --version | head -1 | perl -pe "s/.*?([0-9]\.[0-9](\.[0-9])?)$$/\1/")
+  BISON_VERSION := $(shell $(BISON_PATH) --version | head -1 | perl -pe "s/.*?([0-9]+\.[0-9]+(\.[0-9]+)?(-[0-9]+)?)$$/\1/")
   ifeq ("$(call check-version,$(BISON_VERSION),2.5)","")
     BISON_PATH := /usr/bin/bison
   endif
