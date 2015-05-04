@@ -168,8 +168,11 @@ $(configured_file): $(src_dir)/configure
 endif
 
 # Force unpack if configure file is missing
+# Assume it is a real autottols if LOCAL_AUTOTOOLS_CMD_CONFIGURE is not redefined
+ifeq ("$(value LOCAL_AUTOTOOLS_CMD_CONFIGURE)","")
 ifeq ("$(wildcard $(src_dir)/configure)","")
 $(call delete-one-done-file,$(unpacked_file))
+endif
 endif
 
 # Restart configuration step if configure cache file has changed
