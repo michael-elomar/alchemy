@@ -72,8 +72,8 @@ __get-orig-module-config = $(strip \
 __get-build-module-config = $(strip \
 	$(call module-get-build-dir,$1)/$1.config)
 
-# Public version
-module-get-config = $(call __get-build-module-config,$1)
+# Public version will get original file (required by busybox and linux kernel)
+module-get-config = $(call __get-orig-module-config,$1)
 
 ###############################################################################
 ## Get the list of path to Config.in files of a module.
@@ -181,7 +181,7 @@ $(if $(wildcard $(call __get-orig-module-config,$1)), \
 		$(shell cp -af $(call __get-orig-module-config,$1) $(call __get-build-module-config,$1)) \
 	) \
 )
--include $(call module-get-config,$1)
+-include $(call __get-build-module-config,$1)
 $(eval __modules.$1.config-loaded := 1)
 endef
 
