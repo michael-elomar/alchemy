@@ -43,6 +43,12 @@ endif
 ## Generation of toolchain file.
 ###############################################################################
 
+ifeq ("$(TARGET_OS_FLAVOUR)","native")
+  CMAKE_SEARCH_OPTION += BOTH
+else
+  CMAKE_SEARCH_OPTION += ONLY
+endif
+
 define cmake-gen-toolchain-file
 	echo "set(CMAKE_SYSTEM_NAME Linux)"; \
 	echo "set(CMAKE_SYSTEM_PROCESSOR \"$(TARGET_ARCH)\")"; \
@@ -65,8 +71,8 @@ define cmake-gen-toolchain-file
 	echo "set(CMAKE_INSTALL_SO_NO_EXE 0)"; \
 	echo "set(CMAKE_FIND_ROOT_PATH \"$(TARGET_OUT_STAGING)\")"; \
 	echo "set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)"; \
-	echo "set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)"; \
-	echo "set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)"; \
+	echo "set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY $(CMAKE_SEARCH_OPTION))"; \
+	echo "set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE $(CMAKE_SEARCH_OPTION))"; \
 	echo "set(CMAKE_COLOR_MAKEFILE OFF CACHE BOOL \"COLOR_MAKEFILE\" FORCE)"; \
 	echo "set(CMAKE_SKIP_INSTALL_RPATH ON CACHE BOOL \"SKIP_INSTALL_RPATH\" FORCE)";
 endef

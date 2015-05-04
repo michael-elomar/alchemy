@@ -143,12 +143,12 @@ $(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
 # Only use packages found in TARGET_OUT_STAGING by setting PKG_CONFIG_LIBDIR empty
 TARGET_PKG_CONFIG_ENV := \
 	PKG_CONFIG="$(__autotools-pkg-config-bin)" \
-	PKG_CONFIG_PATH="$(__target_pkg_config_path)" \
-	PKG_CONFIG_LIBDIR=""
+	PKG_CONFIG_PATH="$(__target_pkg_config_path)"
 ifeq ("$(TARGET_OS_FLAVOUR)","native")
   TARGET_PKG_CONFIG_ENV += PKG_CONFIG_SYSROOT_DIR=""
 else
   TARGET_PKG_CONFIG_ENV += PKG_CONFIG_SYSROOT_DIR="$(TARGET_OUT_STAGING)"
+  PKG_CONFIG_LIBDIR=""
 endif
 
 # Environment to use when executing configure script
