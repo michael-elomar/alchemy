@@ -167,6 +167,11 @@ ifneq ("$(wildcard $(src_dir)/configure)","")
 $(configured_file): $(src_dir)/configure
 endif
 
+# Force unpack if configure file is missing
+ifeq ("$(wildcard $(src_dir)/configure)","")
+$(call delete-one-done-file,$(unpacked_file))
+endif
+
 # Restart configuration step if configure cache file has changed
 ifneq ("$(USE_AUTOTOOLS_CACHE)","0")
 ifeq ("$(mode_host)","")
