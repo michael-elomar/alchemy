@@ -31,7 +31,7 @@ readonly CONFIG_OUT_FILE=$2
 shift 2
 
 # Do the operation in a temp file
-readonly CONFIG_OUT_FILE_TMP=$(mktemp)
+readonly CONFIG_OUT_FILE_TMP=$(mktemp tmp.XXXXXXXXXX)
 
 # Log something if verbose mode is activated
 function logv()
