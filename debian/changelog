@@ -1,3 +1,28 @@
+parrot-tools-alchemy (1.0.20) unstable; urgency=low
+  * Allow static binaries to link with static libraries instead on shared one.
+  * Use -isystem instead of -I for global include dirs
+  * add an optionnal 'ro.parrot.build.group' properties
+  * eclipseproject add --custom-build-args option
+  * Fix some issues while generating sdks
+  * Apply checkpatch.pl on all module files instead of applying it on each file
+  * [CR 165169] Add libraries symbolic links into generated symbols.tar archives
+  * Add cppcheck to Alchemy
+  * Update the way of checking for global.config, add config-force-all
+  * [CR 0165203] Add vala generated c files in symbols archive
+  * Add support for tar, ext3 and ext4 images, allow specifying size of image.
+  * Only compute git revision when required.
+  * Improve dependencies of final/sdk/symbols/image targets
+  * Enable back final generation in parallel.
+  * Remove deprecated LOCAL_CPPFLAGS and LOCAL_EXPORT_CPPFLAGS variables
+  * Put TARGET_SKEL as deprecated
+  * Speedup git revision retrieval by using a cache.
+  * Add setup.mk creation in sdk
+  * Add everything in the sdk to build linux external modules.
+  * Optimize copy of host staging from sdk.
+  * Add support for cuda file compilation.
+
+ -- Yves-Marie Morgan (Parrot) <yves-marie.morgan@parrot.com>  Mon, 13 Apr 2015 11:34:02 +0200
+
 parrot-tools-alchemy (1.0.19) unstable; urgency=low
   * Add support for octopus 3 cpu
   * Install kernel header linux/ion.h
