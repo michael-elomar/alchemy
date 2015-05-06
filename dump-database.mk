@@ -187,7 +187,7 @@ ifdef __dump-xml-with-info
 	@# Force passing TARGET_ARCH because it was unexported in setup.mk
 	@# FIXME: backslashes seems lost in the process...
 	+@( \
-		tmpfile=$$(mktemp); \
+		tmpfile=$$(mktemp tmp.XXXXXXXXXX); \
 		$(filter-out $(MAKECMDGOALS),$(ALCHEMAKE_CMDLINE)) TARGET_ARCH=$(TARGET_ARCH) __dumping-xml=1 dump-xml &> $${tmpfile}; \
 		inxml=0; \
 		while read; do \

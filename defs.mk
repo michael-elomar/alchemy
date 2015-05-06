@@ -1411,7 +1411,7 @@ $(foreach __lib,$(PRIVATE_MODULE) $(__modules.$(PRIVATE_MODULE).depends.all), \
 )
 $(eval __depsdata := $(subst $(space),\n,$(strip $(__depsdata))))
 @( \
-	__tmpfile=$$(mktemp); \
+	__tmpfile=$$(mktemp tmp.XXXXXXXXXX); \
 	/bin/echo -e "$(__depsdata)" > $${__tmpfile}; \
 	$(PRIVATE_OBJCOPY) --add-section \
 		$(TARGET_DEPENDS_SECTION_NAME)=$${__tmpfile} $@; \
