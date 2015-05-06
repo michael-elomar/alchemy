@@ -61,6 +61,9 @@ conflict with other build systems (android for example).
   * `linux`.
   * `ecos`.
   * `darwin`.
+  * `android` : alias for `linux` OS with `android` flavour.
+  * `iphone` : alias for `darwin` OS with `iphoneos` flavour.
+  * `iphonesimulator` : alias for `darwin` OS with `iphonesimulator` flavour.
   </br>Default is `linux` on linux hosts, and `darwin` on mac hosts.
 * `TARGET_OS_FLAVOUR` : Flavour of the OS, depending on `TARGET_OS`.
   For `linux` :

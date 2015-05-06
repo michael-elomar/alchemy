@@ -15,6 +15,23 @@ $(error Top directory contains space characters)
 endif
 
 ###############################################################################
+## Target OS aliases.
+###############################################################################
+
+# TARGET_OS aliases to simplify selection of android/iphone/iphonesimulator targets
+ifeq ("$(TARGET_OS)","android")
+  override TARGET_OS = linux
+  override TARGET_OS_FLAVOUR = android
+  TARGET_ARCH ?= arm
+else ifeq ("$(TARGET_OS)","iphone")
+  override TARGET_OS = darwin
+  override TARGET_OS_FLAVOUR = iphoneos
+else ifeq ("$(TARGET_OS)","iphonesimulator")
+  override TARGET_OS = darwin
+  override TARGET_OS_FLAVOUR = iphonesimulator
+endif
+
+###############################################################################
 ## Target configuration.
 ###############################################################################
 
