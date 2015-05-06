@@ -6,6 +6,8 @@
 ## This file contains additional setup for apple toolchains (ios, macos).
 ###############################################################################
 
+LOCAL_PATH := $(call my-dir)
+
 ifeq ("$(TARGET_OS_FLAVOUR)","native")
 
 include $(CLEAR_VARS)
