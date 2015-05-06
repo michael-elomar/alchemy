@@ -380,7 +380,7 @@ is-module-in-build-config = $(strip \
 					$(false) \
 				) \
 				, \
-				$(call not $(call is-var-defined,__modules.$(__mod).force-disabled)) \
+				$(call not,$(call is-var-defined,__modules.$(__mod).force-disabled)) \
 			) \
 		) \
 	))
