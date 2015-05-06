@@ -420,7 +420,7 @@ $(foreach __mod,$(ALL_BUILD_MODULES), \
 		) \
 	) \
 	$(foreach __host,$(__modules.$(__mod).DEPENDS_HOST_MODULES), \
-		$(if $(call is-module-registered,$(__lib)),$(empty), \
+		$(if $(call is-module-registered,$(__host)),$(empty), \
 			$(info Disabling $(__mod): has unknown dependency $(__host)) \
 			$(eval ALL_BUILD_MODULES := $(filter-out $(__mod),$(ALL_BUILD_MODULES))) \
 			$(call module-force-disabled,$(__mod)) \
