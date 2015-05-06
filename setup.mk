@@ -18,7 +18,11 @@ endif
 ## Target configuration.
 ###############################################################################
 
-TARGET_ARCH ?= x86
+ifneq ("$(shell gcc -dumpmachine | grep 64)","")
+  TARGET_ARCH ?= x64
+else
+  TARGET_ARCH ?= x86
+endif
 TARGET_CPU ?=
 TARGET_OS ?= $(shell uname -s | awk '{print tolower($$0)}')
 TARGET_OS_FLAVOUR ?= native
