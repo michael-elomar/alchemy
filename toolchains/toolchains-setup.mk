@@ -171,6 +171,11 @@ include $(BUILD_SYSTEM)/toolchains/$(TARGET_OS)/setup.mk
 ## Tools for target.
 ###############################################################################
 
+# Make sure TARGET_CROSS is defined (empty by default)
+ifndef TARGET_CROSS
+  TARGET_CROSS :=
+endif
+
 ifneq ("$(USE_CLANG)","1")
 
 TARGET_CC ?= $(TARGET_CROSS)gcc
