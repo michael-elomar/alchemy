@@ -67,9 +67,10 @@ conflict with other build systems (android for example).</p>
 <li><code>linux</code>.</li>
 <li><code>ecos</code>.</li>
 <li><code>darwin</code>.</li>
-<li><code>android</code> : alias for <code>linux</code> OS with <code>android</code> flavour.</li>
+<li><code>android</code> : alias for <code>linux</code> OS with <code>android</code> flavour. <code>TARGET_ARCH</code> defaults to <code>arm</code>.</li>
 <li><code>iphone</code> : alias for <code>darwin</code> OS with <code>iphoneos</code> flavour.</li>
-<li><code>iphonesimulator</code> : alias for <code>darwin</code> OS with <code>iphonesimulator</code> flavour.
+<li><code>iphonesimulator</code> : alias for <code>darwin</code> OS with <code>iphonesimulator</code> flavour.</li>
+<li><code>parrot</code> : alias for <code>linux</code> OS with <code>parrot</code> flavour. <code>TARGET_ARCH</code> defaults to <code>arm</code>.
 </br>Default is <code>linux</code> on linux hosts, and <code>darwin</code> on mac hosts.</li>
 </ul></li>
 <li><code>TARGET_OS_FLAVOUR</code> : Flavour of the OS, depending on <code>TARGET_OS</code>.
@@ -108,7 +109,7 @@ based on architecture. Possible values are :
 <li><code>arm</code>.</li>
 <li><code>x86</code>.</li>
 <li><code>x64</code>.
-</br>Default is <code>x86</code>.</li>
+</br>Default is <code>x86</code> or <code>x64</code>, depending on the host system.</li>
 </ul></li>
 <li><code>TARGET_CPU</code> : Cpu of the target. This value is typically used to select
 optimization and select some module (for ex: linux). Possible values are :

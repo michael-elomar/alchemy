@@ -23,6 +23,10 @@ ifeq ("$(TARGET_OS)","android")
   override TARGET_OS = linux
   override TARGET_OS_FLAVOUR = android
   TARGET_ARCH ?= arm
+else ifeq ("$(TARGET_OS)","parrot")
+  override TARGET_OS = linux
+  override TARGET_OS_FLAVOUR = parrot
+  TARGET_ARCH ?= arm
 else ifeq ("$(TARGET_OS)","iphone")
   override TARGET_OS = darwin
   override TARGET_OS_FLAVOUR = iphoneos

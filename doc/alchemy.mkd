@@ -61,9 +61,10 @@ conflict with other build systems (android for example).
   * `linux`.
   * `ecos`.
   * `darwin`.
-  * `android` : alias for `linux` OS with `android` flavour.
+  * `android` : alias for `linux` OS with `android` flavour. `TARGET_ARCH` defaults to `arm`.
   * `iphone` : alias for `darwin` OS with `iphoneos` flavour.
   * `iphonesimulator` : alias for `darwin` OS with `iphonesimulator` flavour.
+  * `parrot` : alias for `linux` OS with `parrot` flavour. `TARGET_ARCH` defaults to `arm`.
   </br>Default is `linux` on linux hosts, and `darwin` on mac hosts.
 * `TARGET_OS_FLAVOUR` : Flavour of the OS, depending on `TARGET_OS`.
   For `linux` :
@@ -94,7 +95,7 @@ conflict with other build systems (android for example).
   * `arm`.
   * `x86`.
   * `x64`.
-  </br>Default is `x86`.
+  </br>Default is `x86` or `x64`, depending on the host system.
 * `TARGET_CPU` : Cpu of the target. This value is typically used to select
   optimization and select some module (for ex: linux). Possible values are :
   * `p6`.
