@@ -66,7 +66,10 @@ conflict with other build systems (android for example).</p>
 <ul>
 <li><code>linux</code>.</li>
 <li><code>ecos</code>.</li>
-<li><code>darwin</code>.
+<li><code>darwin</code>.</li>
+<li><code>android</code> : alias for <code>linux</code> OS with <code>android</code> flavour.</li>
+<li><code>iphone</code> : alias for <code>darwin</code> OS with <code>iphoneos</code> flavour.</li>
+<li><code>iphonesimulator</code> : alias for <code>darwin</code> OS with <code>iphonesimulator</code> flavour.
 </br>Default is <code>linux</code> on linux hosts, and <code>darwin</code> on mac hosts.</li>
 </ul></li>
 <li><code>TARGET_OS_FLAVOUR</code> : Flavour of the OS, depending on <code>TARGET_OS</code>.
@@ -1199,6 +1202,28 @@ not a <code>:=</code> definition.</p>
 <code>qmake</code>. <code>Alchemy</code> provides internally everything needed for the compilation,
 in particular a <code>alchemy.pri</code> file to be included in your <code>.pro</code> to get all
 dependencies from atom.mk (include paths, libraries...).</p>
+
+<h4>Configuration</h4>
+
+<p>If the workspace contains a Qt build, then no configuration is needed.</p>
+
+<p>Otherwise, a Qt SDK installation can be used, by specifying a few variables:</p>
+
+<ul>
+<li><code>TARGET_QT_SDKROOT</code> : Root path of the SDK.
+</br>Alchemy will try to automatically detect installed Qt SDK if this is not specified.</li>
+<li><code>TARGET_QT_PLATFORM</code> : Qt platform.
+</br>Default is computed automatically based on <code>TARGET_OS</code>, <code>TARGET_OS_FLAVOUR</code> and <code>TARGET_ARCH</code>.</li>
+<li><code>TARGET_QT_VERSION</code> : Qt version.
+</br>Default is 4.5.</li>
+<li><code>TARGET_QT_SDK</code> : Path to the Qt SDK for the target platform. This folder
+must contain the <code>qmake</code> command in the <code>bin</code> folder.
+</br>Default is <code>$(TARGET_QT_SDKROOT)/$(TARGET_QT_PLATFORM)/$(TARGET_QT_VERSION)</code>.</li>
+</ul>
+
+<p>When none of this variables is specified, Alchemy will try to automatically
+discover an appropriate Qt SDK, or use qmake in path when targetting the host
+system.</p>
 
 <h4>Customization variables</h4>
 

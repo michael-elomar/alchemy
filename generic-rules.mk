@@ -12,10 +12,12 @@ ifneq ("$(LOCAL_ARCHIVE_VERSION)","")
   configured_file := $(build_dir)/$(LOCAL_MODULE)-$(LOCAL_ARCHIVE_VERSION).configured
   built_file := $(build_dir)/$(LOCAL_MODULE)-$(LOCAL_ARCHIVE_VERSION).built
   installed_file := $(build_dir)/$(LOCAL_MODULE)-$(LOCAL_ARCHIVE_VERSION).installed
+  post_installed_file := $(build_dir)/$(LOCAL_MODULE)-$(LOCAL_ARCHIVE_VERSION).post-installed
 else
   configured_file := $(build_dir)/$(LOCAL_MODULE).configured
   built_file := $(build_dir)/$(LOCAL_MODULE).built
   installed_file := $(build_dir)/$(LOCAL_MODULE).installed
+  post_installed_file := $(build_dir)/$(LOCAL_MODULE).post-installed
 endif
 
 # Where the source will actually be found once unpacked
@@ -94,13 +96,17 @@ $(installed_file): $(built_file)
 	$(call __generic-msg,Installing)
 	+$(if $(PRIVATE_HOOK_PRE_INSTALL),$(call $(PRIVATE_HOOK_PRE_INSTALL)))
 	+$(call macro-exec-cmd,$(PRIVATE_CMD_PREFIX)_CMD_INSTALL,$(PRIVATE_DEFAULT_CMD_INSTALL))
+	@mkdir -p $(dir $@)
+	@touch $@
+
+$(post_installed_file): $(installed_file)
 	+$(call macro-exec-cmd,$(PRIVATE_CMD_PREFIX)_CMD_POST_INSTALL,empty)
 	+$(if $(PRIVATE_HOOK_POST_INSTALL),$(call $(PRIVATE_HOOK_POST_INSTALL)))
 	@mkdir -p $(dir $@)
 	@touch $@
 
 # Done (copy license files in obj dir if different from src dir)
-$(LOCAL_BUILD_MODULE): $(installed_file)
+$(LOCAL_BUILD_MODULE): $(post_installed_file)
 	@mkdir -p $(dir $@)
 ifneq ("$(src_dir)","$(obj_dir)")
 	$(call copy-license-files,$(PRIVATE_PATH),$(PRIVATE_OBJ_DIR))
@@ -121,6 +127,7 @@ $(LOCAL_MODULE)-clean:
 # clean targets additional variables
 # To NOT put build dir in PRIVATE_CLEAN_DIRS
 # we need to call some makefiles during our custom clean
+$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(post_installed_file)
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(installed_file)
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(built_file)
 

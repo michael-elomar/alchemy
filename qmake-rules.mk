@@ -12,12 +12,15 @@ ifdef QT5_QMAKE
 else ifdef QT4_QMAKE
   QMAKE := $(QT4_QMAKE)
   __qmake_has_qt_sysroot := $(false)
+else ifdef QTSDK_QMAKE
+  QMAKE := $(QTSDK_QMAKE)
+  __qmake_has_qt_sysroot := $(false)
 else
   QMAKE :=
 endif
 
 ifeq ("$(QMAKE)","")
-  $(error $(LOCAL_MODULE): qmake not found)
+  $(error $(LOCAL_MODULE): qmake not found, add Qt4/Qt5 alchemy package or specify Qt SDK path via TARGET_QT_SDKROOT or TARGET_QT_SDK.)
 endif
 
 built_file := $(build_dir)/$(LOCAL_MODULE).built
@@ -84,11 +87,6 @@ endif
 # Export android NDK path
 ifeq ("$(TARGET_OS_FLAVOUR)","android")
 QMAKE := ANDROID_NDK_ROOT=$(TARGET_ANDROID_NDK) $(QMAKE)
-endif
-
-# QT_SYSROOT is set only with USE_ALCHEMY_ANDROID_SDK
-ifndef USE_ALCHEMY_ANDROID_SDK
-__qmake_has_qt_sysroot := $(false)
 endif
 
 ###############################################################################
