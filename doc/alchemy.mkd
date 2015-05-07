@@ -1119,6 +1119,26 @@ This class of modules if for the compilation of packages that use `qt` and
 in particular a `alchemy.pri` file to be included in your `.pro` to get all
 dependencies from atom.mk (include paths, libraries...).
 
+#### Configuration
+
+If the workspace contains a Qt build, then no configuration is needed.
+
+Otherwise, a Qt SDK installation can be used, by specifying a few variables:
+
+* `TARGET_QT_SDKROOT` : Root path of the SDK.
+</br>Alchemy will try to automatically detect installed Qt SDK if this is not specified.
+* `TARGET_QT_PLATFORM` : Qt platform.
+</br>Default is computed automatically based on `TARGET_OS`, `TARGET_OS_FLAVOUR` and `TARGET_ARCH`.
+* `TARGET_QT_VERSION` : Qt version.
+</br>Default is 4.5.
+* `TARGET_QT_SDK` : Path to the Qt SDK for the target platform. This folder
+must contain the `qmake` command in the `bin` folder.
+</br>Default is `$(TARGET_QT_SDKROOT)/$(TARGET_QT_PLATFORM)/$(TARGET_QT_VERSION)`.
+
+When none of this variables is specified, Alchemy will try to automatically
+discover an appropriate Qt SDK, or use qmake in path when targetting the host
+system.
+
 #### Customization variables
 
 * `LOCAL_QMAKE_PRO_FILE` : The name of the `.pro` file to be used. If not

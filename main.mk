@@ -240,6 +240,9 @@ include $(BUILD_SYSTEM)/autotools-setup.mk
 # Setup CMake definitions
 include $(BUILD_SYSTEM)/cmake-setup.mk
 
+# Setup QMake definitions
+include $(BUILD_SYSTEM)/qmake-setup.mk
+
 # Setup warnings flags
 include $(BUILD_SYSTEM)/warnings.mk
 
