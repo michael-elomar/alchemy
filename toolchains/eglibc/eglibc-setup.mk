@@ -18,6 +18,10 @@ ifndef TARGET_CROSS
       TARGET_COMPILER_PATH := /opt/arm-2012.03
     endif
     TARGET_CROSS := $(TARGET_COMPILER_PATH)/bin/$(TARGET_TRIPLET)-
+  else ifeq ("$(TARGET_ARCH)","aarch64")
+      TARGET_TRIPLET := aarch64-linux-gnu
+      TARGET_COMPILER_PATH := /opt/aarch64-2014.05
+      TARGET_CROSS := $(TARGET_COMPILER_PATH)/bin/$(TARGET_TRIPLET)-
   endif
 else
   # Try to extract info from TARGET_CROSS
