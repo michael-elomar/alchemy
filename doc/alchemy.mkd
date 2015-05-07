@@ -187,7 +187,9 @@ it when targetting Android.
   * `TARGET_ANDROID_APILEVEL` : Android API level to target.
   </br>Default is `17`
   * `TARGET_ANDROID_NDK` : Path of the Android NDK to use.
-  </br>Default tries to auto-detect the NDK from a few somewhat standard location (`/opt/android-ndk-*`, `~/android-ndk-*`,...)
+  </br>Default tries to auto-detect the NDK from a few somewhat standard location (`/opt/android-ndk-*`, `~/android-ndk-*`, ...)
+  * `TARGET_ANDROID_SDK` : Path of the Android SDK to use.
+  </br>Default tries to auto-detect the SDK from a few somewhat standard location (`/opt/android-sdk*`, `~/android-sdk*`, ...)
   * `TARGET_ANDROID_TOOLCHAIN` : name of the android toolchain, e.g. arm-linux-androideabi-4.7.
   </br>Default is the default toolchain for the current target architecture (`TARGET_ARCH`).
 
