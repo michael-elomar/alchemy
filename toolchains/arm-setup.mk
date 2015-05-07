@@ -89,6 +89,20 @@ ifeq ("$(TARGET_CPU)","armv7a-neon")
   TARGET_CPU_ARMV7A_NEON := 1
 endif
 
+# TODO: adjust flags
+ifeq ("$(TARGET_CPU)","tegrak1")
+  TARGET_GLOBAL_CFLAGS += $(cflags_armv7a_neon)
+  TARGET_GLOBAL_CFLAGS += -mtune=cortex-a9 -mcpu=cortex-a9
+  TARGET_CPU_ARMV7A_NEON := 1
+endif
+
+# TODO: adjust flags
+ifeq ("$(TARGET_CPU)","tegrax1")
+  TARGET_GLOBAL_CFLAGS += $(cflags_armv7a_neon)
+  TARGET_GLOBAL_CFLAGS += -mtune=cortex-a9 -mcpu=cortex-a9
+  TARGET_CPU_ARMV7A_NEON := 1
+endif
+
 ###############################################################################
 ## Arm/thumb mode flags.
 ## Taken from Android build system setup.
