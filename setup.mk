@@ -53,7 +53,8 @@ else
   TARGET_PRODUCT_FULL_NAME := $(TARGET_PRODUCT)-$(TARGET_PRODUCT_VARIANT)
 endif
 
-TARGET_OUT ?= $(TOP_DIR)/Alchemy-out/$(TARGET_PRODUCT_FULL_NAME)
+TARGET_OUT_PREFIX ?= Alchemy-out/
+TARGET_OUT ?= $(TOP_DIR)/$(TARGET_OUT_PREFIX)$(TARGET_PRODUCT_FULL_NAME)
 TARGET_OUT_BUILD ?= $(TARGET_OUT)/build
 TARGET_OUT_DOC ?= $(TARGET_OUT)/doc
 TARGET_OUT_STAGING ?= $(TARGET_OUT)/staging
@@ -67,7 +68,8 @@ ifneq ("$(TARGET_SKEL)","")
 $(error Please use TARGET_SKEL_DIRS instead of TARGET_SKEL)
 endif
 
-TARGET_CONFIG_DIR ?= $(TOP_DIR)/Alchemy-config/$(TARGET_PRODUCT)-$(TARGET_PRODUCT_VARIANT)
+TARGET_CONFIG_PREFIX ?= Alchemy-config/
+TARGET_CONFIG_DIR ?= $(TOP_DIR)/$(TARGET_CONFIG_PREFIX)$(TARGET_PRODUCT)-$(TARGET_PRODUCT_VARIANT)
 
 # Force usind static libraries instead of shared for module that specifies they support it
 TARGET_PBUILD_FORCE_STATIC ?= 0
@@ -79,6 +81,14 @@ TARGET_PBUILD_HOOK_USE_DESCRIBE ?= 0
 # Extra directories to skip/add during makefile scan
 TARGET_SCAN_PRUNE_DIRS ?=
 TARGET_SCAN_ADD_DIRS ?=
+
+# Ignore config and out directorie(s)
+ifneq ("$(dir $(TOP_DIR)/$(TARGET_CONFIG_PREFIX))","$(TOP_DIR)")
+TARGET_SCAN_PRUNE_DIRS += $(dir $(TOP_DIR)/$(TARGET_CONFIG_PREFIX))
+endif
+ifneq ("$(dir $(TOP_DIR)/$(TARGET_OUT_PREFIX))","$(TOP_DIR)")
+TARGET_SCAN_PRUNE_DIRS += $(dir $(TOP_DIR)/$(TARGET_OUT_PREFIX))
+endif
 
 # Set to 1 to follow symbolic links during scan
 TARGET_SCAN_FOLLOW_LINKS ?= 0
