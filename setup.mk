@@ -30,6 +30,7 @@ else ifeq ("$(TARGET_OS)","parrot")
 else ifeq ("$(TARGET_OS)","iphone")
   override TARGET_OS = darwin
   override TARGET_OS_FLAVOUR = iphoneos
+  TARGET_ARCH ?= arm
 else ifeq ("$(TARGET_OS)","iphonesimulator")
   override TARGET_OS = darwin
   override TARGET_OS_FLAVOUR = iphonesimulator
