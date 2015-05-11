@@ -223,6 +223,7 @@ $(call msg,+ TARGET_LIBC = $(TARGET_LIBC))
 $(call msg,+ TARGET_ARCH = $(TARGET_ARCH))
 $(call msg,+ TARGET_CPU = $(TARGET_CPU))
 $(call msg,+ TARGET_OUT = $(TARGET_OUT))
+$(call msg,+ TARGET_CONFIG_DIR = $(TARGET_CONFIG_DIR))
 $(call msg,+ TARGET_CC_PATH = $(TARGET_CC_PATH))
 $(call msg,+ TARGET_CC_VERSION = $(TARGET_CC_VERSION))
 $(info ----------------------------------------------------------------------)
@@ -233,6 +234,9 @@ include $(BUILD_SYSTEM)/check.mk
 ###############################################################################
 ## Setup part2 (may use optimization flags from above).
 ###############################################################################
+
+# Setup internal build definitions
+include $(BUILD_SYSTEM)/binary-setup.mk
 
 # Setup autotools definitions (shall be after inclusion of defs.mk)
 include $(BUILD_SYSTEM)/autotools-setup.mk

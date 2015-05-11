@@ -37,7 +37,7 @@ else ifeq ("$(TARGET_OS)","darwin")
 endif
 
 # Try to auto-detect Qt SDK path
-QT_SDK_DEFAULT_PATHS = /opt/Qt* /Application/Qt*
+QT_SDK_DEFAULT_PATHS = /opt/Qt* /Applications/Qt*
 TARGET_QT_SDKROOT ?= $(shell shopt -s nullglob ;                       \
                              for path in $(QT_SDK_DEFAULT_PATHS) ; do  \
                                  if [ -e $$path/$(TARGET_QT_VERSION)/$(TARGET_QT_PLATFORM)/bin/qmake ]; then   \

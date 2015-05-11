@@ -61,9 +61,10 @@ conflict with other build systems (android for example).
   * `linux`.
   * `ecos`.
   * `darwin`.
-  * `android` : alias for `linux` OS with `android` flavour.
+  * `android` : alias for `linux` OS with `android` flavour. `TARGET_ARCH` defaults to `arm`.
   * `iphone` : alias for `darwin` OS with `iphoneos` flavour.
   * `iphonesimulator` : alias for `darwin` OS with `iphonesimulator` flavour.
+  * `parrot` : alias for `linux` OS with `parrot` flavour. `TARGET_ARCH` defaults to `arm`.
   </br>Default is `linux` on linux hosts, and `darwin` on mac hosts.
 * `TARGET_OS_FLAVOUR` : Flavour of the OS, depending on `TARGET_OS`.
   For `linux` :
@@ -94,7 +95,7 @@ conflict with other build systems (android for example).
   * `arm`.
   * `x86`.
   * `x64`.
-  </br>Default is `x86`.
+  </br>Default is `x86` or `x64`, depending on the host system.
 * `TARGET_CPU` : Cpu of the target. This value is typically used to select
   optimization and select some module (for ex: linux). Possible values are :
   * `p6`.
@@ -186,7 +187,9 @@ it when targetting Android.
   * `TARGET_ANDROID_APILEVEL` : Android API level to target.
   </br>Default is `17`
   * `TARGET_ANDROID_NDK` : Path of the Android NDK to use.
-  </br>Default tries to auto-detect the NDK from a few somewhat standard location (`/opt/android-ndk-*`, `~/android-ndk-*`,...)
+  </br>Default tries to auto-detect the NDK from a few somewhat standard location (`/opt/android-ndk-*`, `~/android-ndk-*`, ...)
+  * `TARGET_ANDROID_SDK` : Path of the Android SDK to use.
+  </br>Default tries to auto-detect the SDK from a few somewhat standard location (`/opt/android-sdk*`, `~/android-sdk*`, ...)
   * `TARGET_ANDROID_TOOLCHAIN` : name of the android toolchain, e.g. arm-linux-androideabi-4.7.
   </br>Default is the default toolchain for the current target architecture (`TARGET_ARCH`).
 
