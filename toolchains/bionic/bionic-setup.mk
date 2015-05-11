@@ -9,7 +9,7 @@
 ifndef USE_ALCHEMY_ANDROID_SDK
 
 ANDROID_NDK_DEFAULT_PATHS=/opt/android-ndk-* /opt/android/ndk-* ~/Library/Android/android-ndk-* ~/android-ndk-*
-ANDROID_SDK_DEFAULT_PATHS=/opt/android-sdk* /opt/android/sdk* ~/Library/Android/android-sdk* ~/android-sdk*
+ANDROID_SDK_DEFAULT_PATHS=/opt/android-sdk* /opt/android/sdk* ~/Library/Android/sdk* ~/Library/Android/android-sdk* ~/android-sdk*
 
 # Configuration options
 TARGET_ANDROID_APILEVEL?=17
@@ -20,7 +20,7 @@ TARGET_ANDROID_SDK ?= $(shell shopt -s nullglob ;                               
                                   cd $$path && pwd && break;                                        \
                               fi; done)
 ifeq ("$(wildcard $(TARGET_ANDROID_SDK))","")
-$(error No Android SDK found, use Alchemy-raptor package or set your Android NDK path in the TARGET_ANDROID_NDK variable)
+$(error No Android SDK found, use Alchemy-raptor package or set your Android SDK path in the TARGET_ANDROID_SDK variable)
 endif
 
 TARGET_ANDROID_NDK ?= $(shell shopt -s nullglob ;                                                   \
