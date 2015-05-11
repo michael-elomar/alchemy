@@ -235,6 +235,9 @@ include $(BUILD_SYSTEM)/check.mk
 ## Setup part2 (may use optimization flags from above).
 ###############################################################################
 
+# Setup internal build definitions
+include $(BUILD_SYSTEM)/binary-setup.mk
+
 # Setup autotools definitions (shall be after inclusion of defs.mk)
 include $(BUILD_SYSTEM)/autotools-setup.mk
 
