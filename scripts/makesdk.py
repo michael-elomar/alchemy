@@ -296,12 +296,16 @@ def processModule(ctx, module, headersOnly=False):
 				copyHeaders(includeDir, os.path.join(ctx.outDir, dstDir))
 				if os.path.exists(os.path.normpath(os.path.join(ctx.outDir, dstDir))):
 					newIncludeDirs.append("$(LOCAL_PATH)/" + dstDir)
-
-			elif includeDir.startswith(ctx.stagingDir):
+			elif includeDir.startswith(ctx.stagingDir + "/"):
 				relPath = os.path.relpath(includeDir, ctx.stagingDir)
 				# Only add existing directory that is not in a standard place
 				if relPath != "usr/include" and os.path.exists(includeDir):
 					newIncludeDirs.append("$(LOCAL_PATH)/" + relPath)
+			elif includeDir.startswith(ctx.hostStagingDir + "/"):
+				relPath = os.path.relpath(includeDir, ctx.hostStagingDir)
+				# Only add existing directory that is not in a standard place
+				if relPath != "usr/include" and os.path.exists(includeDir):
+					newIncludeDirs.append("$(LOCAL_PATH)/host/" + relPath)
 			else:
 				logging.warning("Ignoring include dir: %s", includeDir)
 		# Write path in a readable way
