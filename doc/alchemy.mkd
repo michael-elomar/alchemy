@@ -1161,6 +1161,14 @@ a dependency to `python` or `python3`.
   `setup.py`.
 * `LOCAL_PYTHONEXT_SETUP_PY_ARGS` : Additional arguments to pass to `setup.py`.
 
+### Linux kernel modules
+
+This class of modules is for the compilation of Linux kernel modules from
+one or several source files. Only `LOCAL_MODULE_FILENAME` (which is optional
+and should be a `.ko` filename), `LOCAL_SRC_FILES`, `LOCAL_C_INCLUDES` and
+`LOCAL_CFLAGS` are supported in addition to generic module description and
+dependency variables.
+
 ### Custom rules
 
 You can add custom rules in you makefile, for example to generate files. However
