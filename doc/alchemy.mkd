@@ -1169,6 +1169,22 @@ and should be a `.ko` filename), `LOCAL_SRC_FILES`, `LOCAL_C_INCLUDES` and
 `LOCAL_CFLAGS` are supported in addition to generic module description and
 dependency variables.
 
+### GObject introspection type library modules
+
+This class of modules is for the compilation of gobject-introspection `.typelib`
+type libraries used by languages bindings to automatically use a library 
+without explicit wrappers. Only GObject introspection of libraries is currently
+supported.
+
+Pulsar gobject-introspection module shoud be present for this to work.
+
+#### Customization variables
+
+* `LOCAL_GI_NAMESPACE` : Mandatory namespace passed to g-ir-scanner.
+* `LOCAL_GI_LIBRARY` : Mandatory introspected library passed to g-ir-scanner.
+* `LOCAL_GI_ID_PREFIX` : Optional identifier prefix passed to g-ir-scanner.
+  If not specified, the namespace is used.
+
 ### Custom rules
 
 You can add custom rules in you makefile, for example to generate files. However

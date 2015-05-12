@@ -417,3 +417,8 @@ ifeq ("$(HOST_OS)","darwin")
 MAKE += TARGET_ARCH=
 endif
 unexport TARGET_ARCH
+
+###############################################################################
+## gobject-introspection setup.
+###############################################################################
+XDG_DATA_DIRS := $(HOST_OUT_STAGING)/usr/share:$(TARGET_OUT_STAGING)/usr/share

@@ -1105,6 +1105,28 @@ $(LOCAL_BUILD_MODULE):
 endif
 
 ###############################################################################
+## Typelib gobject-introspection library.
+###############################################################################
+
+ifeq ("$(LOCAL_MODULE_CLASS)","GI_TYPELIB")
+
+include $(BUILD_SYSTEM)/gobject-introspection-rules.mk
+
+# Gir file
+$(LOCAL_BUILD_MODULE:.typelib=.gir): $(all_link_libs_filenames) $(all_sources)
+	$(transform-c-to-gir)
+
+# Typelib library
+$(LOCAL_BUILD_MODULE): $(LOCAL_BUILD_MODULE:.typelib=.gir)
+	$(transform-gir-to-typelib)
+
+copy_to_staging := 1
+copy_to_final := 1
+
+endif
+
+
+###############################################################################
 ## Custom.
 ###############################################################################
 

@@ -277,6 +277,7 @@ BUILD_META_PACKAGE := $(BUILD_SYSTEM)/meta.mk
 BUILD_LINUX := $(BUILD_SYSTEM)/linuxkernel.mk
 BUILD_PREBUILT := $(BUILD_SYSTEM)/prebuilt.mk
 BUILD_LINUX_MODULE := $(BUILD_SYSTEM)/linuxkernelmodule.mk
+BUILD_GI_TYPELIB := $(BUILD_SYSTEM)/gobject-introspection.mk
 
 # Shall be defined before including user makefiles
 AUTOCONF_MERGE_FILE := $(TARGET_OUT_BUILD)/autoconf-merge.h
