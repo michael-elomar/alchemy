@@ -38,9 +38,13 @@ ifeq ("$(V)","0")
   qmake_make_arg := -s --no-print-directory
 endif
 
-# Generate a .pri file to be included by the .pro file with dependencies found
-# by alchemy
+# Generate a .pri file to be included by the .pro file with dependencies found by alchemy
 ifeq ("$(TARGET_OS)","darwin")
+
+# Need to remove some flags which conflict with flags set by qmake
+qmake_global_cflags := $(filter-out -miphoneos-version-min=%,$(TARGET_GLOBAL_CFLAGS))
+qmake_global_ldflags := $(filter-out -miphoneos-version-min=%,$(TARGET_GLOBAL_LDFLAGS))
+qmake_global_ldflags := $(shell echo $(qmake_global_ldflags) | sed 's/-isysroot  *[^ ][^ ]*//g' | sed 's/-arch  *[^ ][^ ]*//g')
 
 define qmake_gen_deps
 	@rm -f $(PRIVATE_ALCHEMY_PRI_FILE)
@@ -50,14 +54,19 @@ define qmake_gen_deps
 		echo "INSTALLS += target"; \
 		echo "INCLUDEPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
 		echo "DEPENDPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
-		echo "QMAKE_CFLAGS += $(PRIVATE_CFLAGS $(TARGET_GLOBAL_CFLAGS))"; \
-		echo "QMAKE_CXXFLAGS += $(PRIVATE_CFLAGS) $(TARGET_GLOBAL_CFLAGS) $(PRIVATE_CXXFLAGS) $(TARGET_GLOBAL_CXXFLAGS)"; \
-		echo "LIBS += $(PRIVATE_LDFLAGS) $(TARGET_GLOBAL_LDFLAGS)"; \
+		echo "QMAKE_CFLAGS += $(PRIVATE_CFLAGS) $(qmake_global_cflags)"; \
+		echo "QMAKE_CXXFLAGS += $(PRIVATE_CFLAGS) $(qmake_global_cflags) $(PRIVATE_CXXFLAGS) $(TARGET_GLOBAL_CXXFLAGS)"; \
+		echo "LIBS += $(PRIVATE_LDFLAGS) $(qmake_global_ldflags)"; \
 		echo "LIBS += $(foreach __lib, $(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES), -force_load $(__lib))"; \
 		echo "LIBS += $(PRIVATE_ALL_STATIC_LIBRARIES)"; \
 		echo "LIBS += $(PRIVATE_ALL_SHARED_LIBRARIES)"; \
 		echo "LIBS += $(PRIVATE_LDLIBS)"; \
 		echo "LIBS += $(TARGET_GLOBAL_LDLIBS_SHARED)"; \
+		echo "CONFIG += $(APPLE_SDK)"; \
+		echo "QMAKE_IOS_DEVICE_ARCHS = $(filter-out -arch,$(APPLE_ARCH))"; \
+		echo "QMAKE_IOS_SIMULATOR_ARCHS = $(filter-out -arch,$(APPLE_ARCH))"; \
+		echo "QMAKE_IOS_DEPLOYMENT_TARGET = $(TARGET_IPHONE_VERSION)"; \
+		echo "QMAKE_MACOSX_DEPLOYMENT_TARGET = $(TARGET_MACOS_VERSION)"; \
 	) >> $(PRIVATE_ALCHEMY_PRI_FILE)
 endef
 
@@ -71,7 +80,7 @@ define qmake_gen_deps
 		echo "INSTALLS += target"; \
 		echo "INCLUDEPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
 		echo "DEPENDPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
-		echo "QMAKE_CFLAGS += $(PRIVATE_CFLAGS $(TARGET_GLOBAL_CFLAGS))"; \
+		echo "QMAKE_CFLAGS += $(PRIVATE_CFLAGS) $(TARGET_GLOBAL_CFLAGS)"; \
 		echo "QMAKE_CXXFLAGS += $(PRIVATE_CFLAGS) $(TARGET_GLOBAL_CFLAGS) $(PRIVATE_CXXFLAGS) $(TARGET_GLOBAL_CXXFLAGS)"; \
 		echo "LIBS += $(PRIVATE_LDFLAGS) $(TARGET_GLOBAL_LDFLAGS)"; \
 		echo "LIBS += -Wl,--whole-archive $(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES) -Wl,--no-whole-archive"; \
