@@ -362,12 +362,14 @@ __extra-target-ldflags := $(strip \
 	$(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
 		-L$(__dir)/lib \
 		-L$(__dir)/usr/lib \
+		-L$(__dir)/$(TARGET_DEFAULT_LIB_DESTDIR) \
 	))
 ifneq ("$(TARGET_OS)","darwin")
 __extra-target-ldflags += $(strip \
 	$(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
 		-Wl,-rpath-link=$(__dir)/lib \
 		-Wl,-rpath-link=$(__dir)/usr/lib \
+		-Wl,-rpath-link=$(__dir)/$(TARGET_DEFAULT_LIB_DESTDIR) \
 	))
 endif
 

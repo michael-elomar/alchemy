@@ -50,7 +50,11 @@ define qmake_gen_deps
 	@rm -f $(PRIVATE_ALCHEMY_PRI_FILE)
 	@mkdir -p $(dir $(PRIVATE_ALCHEMY_PRI_FILE))
 	@( \
-		echo "target.path = $(if $(__qmake_has_qt_sysroot),$(TARGET_OUT_STAGING))/$(PRIVATE_DESTDIR)"; \
+		echo "equals(TEMPLATE, lib) {"; \
+		echo "    target.path = $(if $(__qmake_has_qt_sysroot),$(TARGET_OUT_STAGING))/$(TARGET_DEFAULT_LIB_DESTDIR)"; \
+		echo "} else {"; \
+		echo "    target.path = $(if $(__qmake_has_qt_sysroot),$(TARGET_OUT_STAGING))/$(TARGET_DEFAULT_BIN_DESTDIR)"; \
+		echo "}"; \
 		echo "INSTALLS += target"; \
 		echo "INCLUDEPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
 		echo "DEPENDPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
@@ -76,7 +80,11 @@ define qmake_gen_deps
 	@rm -f $(PRIVATE_ALCHEMY_PRI_FILE)
 	@mkdir -p $(dir $(PRIVATE_ALCHEMY_PRI_FILE))
 	@( \
-		echo "target.path = $(if $(__qmake_has_qt_sysroot),$(TARGET_OUT_STAGING))/$(PRIVATE_DESTDIR)"; \
+		echo "equals(TEMPLATE, lib) {"; \
+		echo "    target.path = $(if $(__qmake_has_qt_sysroot),$(TARGET_OUT_STAGING))/$(TARGET_DEFAULT_LIB_DESTDIR)"; \
+		echo "} else {"; \
+		echo "    target.path = $(if $(__qmake_has_qt_sysroot),$(TARGET_OUT_STAGING))/$(TARGET_DEFAULT_BIN_DESTDIR)"; \
+		echo "}"; \
 		echo "INSTALLS += target"; \
 		echo "INCLUDEPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
 		echo "DEPENDPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
@@ -168,7 +176,6 @@ $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(installed_file)
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(built_file)
 
 $(LOCAL_TARGETS): PRIVATE_QMAKE_PRO_FILE := $(LOCAL_QMAKE_PRO_FILE)
-$(LOCAL_TARGETS): PRIVATE_DESTDIR := $(LOCAL_DESTDIR)
 $(LOCAL_TARGETS): PRIVATE_CFLAGS := $(LOCAL_CFLAGS)
 $(LOCAL_TARGETS): PRIVATE_C_INCLUDES := $(LOCAL_C_INCLUDES)
 $(LOCAL_TARGETS): PRIVATE_CXXFLAGS := $(LOCAL_CXXFLAGS)

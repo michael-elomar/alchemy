@@ -58,6 +58,20 @@ endif
 
 TARGET_CROSS = $(ANDROID_TOOLCHAIN_PATH)/bin/$(shell echo $(TARGET_ANDROID_TOOLCHAIN) | sed 's/\(.*\)-[0-9].[0-9]/\1/')-
 
+ifeq ("$(TARGET_ARCH)","arm")
+  TARGET_DEFAULT_LIB_DESTDIR := libs/armeabi-v7a
+else ifeq ("$(TARGET_ARCH)","arm64")
+  TARGET_DEFAULT_LIB_DESTDIR := libs/arm64-v8a
+else ifeq ("$(TARGET_ARCH)","x86")
+  TARGET_DEFAULT_LIB_DESTDIR := libs/x86
+else ifeq ("$(TARGET_ARCH)","x64")
+  TARGET_DEFAULT_LIB_DESTDIR := libs/x86-64
+else ifeq ("$(TARGET_ARCH)","mips")
+  TARGET_DEFAULT_LIB_DESTDIR := libs/mips
+else ifeq ("$(TARGET_ARCH)","mips64")
+  TARGET_DEFAULT_LIB_DESTDIR := libs/mips64
+endif
+
 else # USE_ALCHEMY_ANDROID_SDK
 
 # Flags shall be given through environment as they are very, very android
