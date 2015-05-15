@@ -72,6 +72,9 @@ else ifeq ("$(TARGET_ARCH)","mips64")
   TARGET_DEFAULT_LIB_DESTDIR := libs/mips64
 endif
 
+# Force adding lib prefix to libraries
+USE_AUTO_LIB_PREFIX := 1
+
 else # USE_ALCHEMY_ANDROID_SDK
 
 # Flags shall be given through environment as they are very, very android

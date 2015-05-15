@@ -37,7 +37,11 @@ LOCAL_DESTDIR := $(TARGET_DEFAULT_LIB_DESTDIR)
 endif
 
 ifeq ("$(LOCAL_MODULE_FILENAME)","")
-LOCAL_MODULE_FILENAME := $(LOCAL_MODULE)$(suffix)
+  ifeq ("$(USE_AUTO_LIB_PREFIX)","1")
+    LOCAL_MODULE_FILENAME := lib$(LOCAL_MODULE:lib%=%)$(suffix)
+  else
+    LOCAL_MODULE_FILENAME := $(LOCAL_MODULE)$(suffix)
+  endif
 endif
 
 $(module-add)
