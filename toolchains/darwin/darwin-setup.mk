@@ -19,6 +19,7 @@ APPLE_MINVERSION = -miphoneos-version-min=${TARGET_IPHONE_VERSION}
 TARGET_DEFAULT_ARM_MODE = arm
 TOOLCHAIN_TARGET_NAME = arm-apple-darwin
 TARGET_ARCH = arm
+TARGET_PBUILD_FORCE_STATIC := 1
 
 else ifeq ("${TARGET_OS_FLAVOUR}","iphonesimulator")
 
@@ -28,6 +29,7 @@ APPLE_ARCH = -arch x86_64
 APPLE_MINVERSION = -miphoneos-version-min=${TARGET_IPHONE_VERSION}
 TOOLCHAIN_TARGET_NAME = x86_64-apple-darwin
 TARGET_ARCH = x64
+TARGET_PBUILD_FORCE_STATIC := 1
 
 else ifeq ("${TARGET_OS_FLAVOUR}","native")
 
