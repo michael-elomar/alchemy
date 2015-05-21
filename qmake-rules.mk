@@ -67,6 +67,7 @@ define qmake_gen_deps
 		echo "LIBS += $(PRIVATE_LDLIBS)"; \
 		echo "LIBS += $(TARGET_GLOBAL_LDLIBS_SHARED)"; \
 		echo "CONFIG += $(APPLE_SDK)"; \
+		echo "macx:QMAKE_LFLAGS_SONAME = -Wl,-install_name,$(TARGET_OUT_STAGING)/$(TARGET_DEFAULT_LIB_DESTDIR)/"; \
 		echo "QMAKE_IOS_DEVICE_ARCHS = $(filter-out -arch,$(APPLE_ARCH))"; \
 		echo "QMAKE_IOS_SIMULATOR_ARCHS = $(filter-out -arch,$(APPLE_ARCH))"; \
 		echo "QMAKE_IOS_DEPLOYMENT_TARGET = $(TARGET_IPHONE_VERSION)"; \

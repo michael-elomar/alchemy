@@ -155,7 +155,7 @@ $(Q)$(PRIVATE_CXX) \
 	-Wl,-map -Wl,$(basename $@).map \
 	-shared \
 	-Wl,-dead_strip \
-	-Wl,-install_name -Wl,$(notdir $@) \
+	-Wl,-install_name,$(TARGET_OUT_STAGING)/$(TARGET_DEFAULT_LIB_DESTDIR)/$(notdir $@) \
 	$(PRIVATE_LDFLAGS) \
 	$(PRIVATE_ALL_OBJECTS) \
 	$(call link-hook,$(PRIVATE_MODULE),$@, \
