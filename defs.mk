@@ -234,7 +234,8 @@ module-add = \
 		$(foreach __local,$(macros-LOCAL), \
 			$(call macro-copy,__modules.$(__mod).$(__local),LOCAL_$(__local)) \
 		) \
-		$(if $(call streq,$(LOCAL_MODULE_CLASS),CUSTOM), \
+		$(if $(or $(call streq,$(LOCAL_MODULE_CLASS),CUSTOM), \
+				$(call streq,$(LOCAL_MODULE_CLASS),META_PACKAGE)), \
 			$(if $(LOCAL_MODULE_FILENAME), \
 				$(eval __modules.$(__mod).check-done-file-created := $(true)) \
 				, \
