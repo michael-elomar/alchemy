@@ -31,6 +31,7 @@ $(call print-banner2,"Gir",$(PRIVATE_MODULE),$(call path-from-top,$@))
 $(Q) mkdir -p $(PRIVATE_OBJ_DIR)
 $(Q) cd $(PRIVATE_OBJ_DIR) && \
 	GI_SCANNER_DISABLE_CACHE=1 \
+	XDG_DATA_DIRS=$($(PRIVATE_MODE)XDG_DATA_DIRS) \
 		$(g_ir_scanner_exe) \
 		--quiet \
 		--output $@ \

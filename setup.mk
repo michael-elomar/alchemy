@@ -423,4 +423,5 @@ unexport TARGET_ARCH
 ###############################################################################
 ## gobject-introspection setup.
 ###############################################################################
-XDG_DATA_DIRS := $(HOST_OUT_STAGING)/usr/share:$(TARGET_OUT_STAGING)/usr/share
+HOST_XDG_DATA_DIRS := $(HOST_OUT_STAGING)/usr/share
+TARGET_XDG_DATA_DIRS := $(TARGET_OUT_STAGING)/usr/share
