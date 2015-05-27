@@ -1251,6 +1251,32 @@ a dependency to <code>python</code> or <code>python3</code>.</p>
 <li><code>LOCAL_PYTHONEXT_SETUP_PY_ARGS</code> : Additional arguments to pass to <code>setup.py</code>.</li>
 </ul>
 
+<h3>Linux kernel modules</h3>
+
+<p>This class of modules is for the compilation of Linux kernel modules from
+one or several source files. Only <code>LOCAL_MODULE_FILENAME</code> (which is optional
+and should be a <code>.ko</code> filename), <code>LOCAL_SRC_FILES</code>, <code>LOCAL_C_INCLUDES</code> and
+<code>LOCAL_CFLAGS</code> are supported in addition to generic module description and
+dependency variables.</p>
+
+<h3>GObject introspection type library modules</h3>
+
+<p>This class of modules is for the compilation of gobject-introspection <code>.typelib</code>
+type libraries used by languages bindings to automatically use a library 
+without explicit wrappers. Only GObject introspection of libraries is currently
+supported.</p>
+
+<p>Pulsar gobject-introspection module shoud be present for this to work.</p>
+
+<h4>Customization variables</h4>
+
+<ul>
+<li><code>LOCAL_GI_NAMESPACE</code> : Mandatory namespace passed to g-ir-scanner.</li>
+<li><code>LOCAL_GI_LIBRARY</code> : Mandatory introspected library passed to g-ir-scanner.</li>
+<li><code>LOCAL_GI_ID_PREFIX</code> : Optional identifier prefix passed to g-ir-scanner.
+If not specified, the namespace is used.</li>
+</ul>
+
 <h3>Custom rules</h3>
 
 <p>You can add custom rules in you makefile, for example to generate files. However

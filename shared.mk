@@ -31,7 +31,7 @@ suffix := $(TARGET_SHARED_LIB_SUFFIX)
 endif
 
 ifeq ("$(LOCAL_DESTDIR)","")
-LOCAL_DESTDIR := usr/lib
+  LOCAL_DESTDIR := $(TARGET_DEFAULT_LIB_DESTDIR)
 endif
 
 ifeq ("$(LOCAL_MODULE_FILENAME)","")

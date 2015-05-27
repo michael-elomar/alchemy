@@ -30,6 +30,7 @@ else ifeq ("$(TARGET_OS)","parrot")
 else ifeq ("$(TARGET_OS)","iphone")
   override TARGET_OS = darwin
   override TARGET_OS_FLAVOUR = iphoneos
+  TARGET_ARCH ?= arm
 else ifeq ("$(TARGET_OS)","iphonesimulator")
   override TARGET_OS = darwin
   override TARGET_OS_FLAVOUR = iphonesimulator
@@ -361,12 +362,14 @@ __extra-target-ldflags := $(strip \
 	$(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
 		-L$(__dir)/lib \
 		-L$(__dir)/usr/lib \
+		-L$(__dir)/$(TARGET_DEFAULT_LIB_DESTDIR) \
 	))
 ifneq ("$(TARGET_OS)","darwin")
 __extra-target-ldflags += $(strip \
 	$(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
 		-Wl,-rpath-link=$(__dir)/lib \
 		-Wl,-rpath-link=$(__dir)/usr/lib \
+		-Wl,-rpath-link=$(__dir)/$(TARGET_DEFAULT_LIB_DESTDIR) \
 	))
 endif
 
@@ -416,3 +419,9 @@ ifeq ("$(HOST_OS)","darwin")
 MAKE += TARGET_ARCH=
 endif
 unexport TARGET_ARCH
+
+###############################################################################
+## gobject-introspection setup.
+###############################################################################
+HOST_XDG_DATA_DIRS := $(HOST_OUT_STAGING)/usr/share
+TARGET_XDG_DATA_DIRS := $(TARGET_OUT_STAGING)/usr/share

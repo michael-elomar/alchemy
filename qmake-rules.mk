@@ -38,26 +38,42 @@ ifeq ("$(V)","0")
   qmake_make_arg := -s --no-print-directory
 endif
 
-# Generate a .pri file to be included by the .pro file with dependencies found
-# by alchemy
+# Generate a .pri file to be included by the .pro file with dependencies found by alchemy
 ifeq ("$(TARGET_OS)","darwin")
+
+# Need to remove some flags which conflict with flags set by qmake
+qmake_global_cflags := $(filter-out -miphoneos-version-min=%,$(TARGET_GLOBAL_CFLAGS))
+qmake_global_ldflags := $(filter-out -miphoneos-version-min=%,$(TARGET_GLOBAL_LDFLAGS))
+qmake_global_ldflags := $(shell echo $(qmake_global_ldflags) | sed 's/-isysroot  *[^ ][^ ]*//g' | sed 's/-arch  *[^ ][^ ]*//g')
 
 define qmake_gen_deps
 	@rm -f $(PRIVATE_ALCHEMY_PRI_FILE)
 	@mkdir -p $(dir $(PRIVATE_ALCHEMY_PRI_FILE))
 	@( \
-		echo "target.path = $(if $(__qmake_has_qt_sysroot),$(TARGET_OUT_STAGING))/$(PRIVATE_DESTDIR)"; \
+		echo "equals(TEMPLATE, lib) {"; \
+		echo "    target.path = $(if $(__qmake_has_qt_sysroot),$(TARGET_OUT_STAGING))/$(TARGET_DEFAULT_LIB_DESTDIR)"; \
+		echo "} else {"; \
+		echo "    target.path = $(if $(__qmake_has_qt_sysroot),$(TARGET_OUT_STAGING))/$(TARGET_DEFAULT_BIN_DESTDIR)"; \
+		echo "}"; \
 		echo "INSTALLS += target"; \
 		echo "INCLUDEPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
 		echo "DEPENDPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
-		echo "QMAKE_CFLAGS += $(PRIVATE_CFLAGS $(TARGET_GLOBAL_CFLAGS))"; \
-		echo "QMAKE_CXXFLAGS += $(PRIVATE_CFLAGS) $(TARGET_GLOBAL_CFLAGS) $(PRIVATE_CXXFLAGS) $(TARGET_GLOBAL_CXXFLAGS)"; \
-		echo "LIBS += $(PRIVATE_LDFLAGS) $(TARGET_GLOBAL_LDFLAGS)"; \
+		echo "QMAKE_CFLAGS += $(PRIVATE_CFLAGS) $(qmake_global_cflags)"; \
+		echo "QMAKE_CXXFLAGS += $(PRIVATE_CFLAGS) $(qmake_global_cflags) $(PRIVATE_CXXFLAGS) $(TARGET_GLOBAL_CXXFLAGS)"; \
+		echo "LIBS += $(PRIVATE_LDFLAGS) $(qmake_global_ldflags)"; \
 		echo "LIBS += $(foreach __lib, $(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES), -force_load $(__lib))"; \
 		echo "LIBS += $(PRIVATE_ALL_STATIC_LIBRARIES)"; \
 		echo "LIBS += $(PRIVATE_ALL_SHARED_LIBRARIES)"; \
 		echo "LIBS += $(PRIVATE_LDLIBS)"; \
 		echo "LIBS += $(TARGET_GLOBAL_LDLIBS_SHARED)"; \
+		echo "CONFIG += $(APPLE_SDK)"; \
+		echo "QMAKE_IOS_DEVICE_ARCHS = $(filter-out -arch,$(APPLE_ARCH))"; \
+		echo "QMAKE_IOS_SIMULATOR_ARCHS = $(filter-out -arch,$(APPLE_ARCH))"; \
+		echo "QMAKE_IOS_DEPLOYMENT_TARGET = $(TARGET_IPHONE_VERSION)"; \
+		echo "QMAKE_MACOSX_DEPLOYMENT_TARGET = $(TARGET_MACOS_VERSION)"; \
+		echo "deployement.files = $(shell find $(TARGET_OUT_STAGING)/$(TARGET_DEFAULT_LIB_DESTDIR) -name '*.dylib' -type f -maxdepth 1)"; \
+		echo "deployement.path = Contents/Frameworks/"; \
+		echo "QMAKE_BUNDLE_DATA += deployement"; \
 	) >> $(PRIVATE_ALCHEMY_PRI_FILE)
 endef
 
@@ -67,11 +83,15 @@ define qmake_gen_deps
 	@rm -f $(PRIVATE_ALCHEMY_PRI_FILE)
 	@mkdir -p $(dir $(PRIVATE_ALCHEMY_PRI_FILE))
 	@( \
-		echo "target.path = $(if $(__qmake_has_qt_sysroot),$(TARGET_OUT_STAGING))/$(PRIVATE_DESTDIR)"; \
+		echo "equals(TEMPLATE, lib) {"; \
+		echo "    target.path = $(if $(__qmake_has_qt_sysroot),$(TARGET_OUT_STAGING))/$(TARGET_DEFAULT_LIB_DESTDIR)"; \
+		echo "} else {"; \
+		echo "    target.path = $(if $(__qmake_has_qt_sysroot),$(TARGET_OUT_STAGING))/$(TARGET_DEFAULT_BIN_DESTDIR)"; \
+		echo "}"; \
 		echo "INSTALLS += target"; \
 		echo "INCLUDEPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
 		echo "DEPENDPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
-		echo "QMAKE_CFLAGS += $(PRIVATE_CFLAGS $(TARGET_GLOBAL_CFLAGS))"; \
+		echo "QMAKE_CFLAGS += $(PRIVATE_CFLAGS) $(TARGET_GLOBAL_CFLAGS)"; \
 		echo "QMAKE_CXXFLAGS += $(PRIVATE_CFLAGS) $(TARGET_GLOBAL_CFLAGS) $(PRIVATE_CXXFLAGS) $(TARGET_GLOBAL_CXXFLAGS)"; \
 		echo "LIBS += $(PRIVATE_LDFLAGS) $(TARGET_GLOBAL_LDFLAGS)"; \
 		echo "LIBS += -Wl,--whole-archive $(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES) -Wl,--no-whole-archive"; \
@@ -79,6 +99,7 @@ define qmake_gen_deps
 		echo "LIBS += $(PRIVATE_ALL_SHARED_LIBRARIES)"; \
 		echo "LIBS += $(PRIVATE_LDLIBS)"; \
 		echo "LIBS += $(TARGET_GLOBAL_LDLIBS_SHARED)"; \
+		echo "ANDROID_EXTRA_LIBS = $(shell find $(TARGET_OUT_STAGING)/$(TARGET_DEFAULT_LIB_DESTDIR) -name 'lib*.so' -type f -maxdepth 1)"; \
 	) >> $(PRIVATE_ALCHEMY_PRI_FILE)
 endef
 
@@ -159,7 +180,6 @@ $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(installed_file)
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(built_file)
 
 $(LOCAL_TARGETS): PRIVATE_QMAKE_PRO_FILE := $(LOCAL_QMAKE_PRO_FILE)
-$(LOCAL_TARGETS): PRIVATE_DESTDIR := $(LOCAL_DESTDIR)
 $(LOCAL_TARGETS): PRIVATE_CFLAGS := $(LOCAL_CFLAGS)
 $(LOCAL_TARGETS): PRIVATE_C_INCLUDES := $(LOCAL_C_INCLUDES)
 $(LOCAL_TARGETS): PRIVATE_CXXFLAGS := $(LOCAL_CXXFLAGS)

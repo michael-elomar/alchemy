@@ -222,6 +222,9 @@ endif
 TOOLCHAIN_LIBC ?=
 TOOLCHAIN_GDBSERVER ?=
 
+TARGET_DEFAULT_BIN_DESTDIR ?= usr/bin
+TARGET_DEFAULT_LIB_DESTDIR ?= usr/lib
+
 # Determine compiler path
 TARGET_CC_PATH := $(shell which $(TARGET_CC))
 

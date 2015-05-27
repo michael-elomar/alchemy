@@ -192,6 +192,11 @@ vars-LOCAL += QMAKE_PRO_FILE
 vars-LOCAL += PYTHONEXT_SETUP_PY_ENV
 vars-LOCAL += PYTHONEXT_SETUP_PY_ARGS
 
+# GObject introspection customization
+vars-LOCAL += GI_NAMESPACE
+vars-LOCAL += GI_LIBRARY
+vars-LOCAL += GI_ID_PREFIX
+
 # Exported stuff (will be added in modules depending on this one)
 vars-LOCAL += EXPORT_C_INCLUDES
 vars-LOCAL += EXPORT_CFLAGS

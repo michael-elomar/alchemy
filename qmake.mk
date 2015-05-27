@@ -13,10 +13,6 @@ endif
 
 LOCAL_MODULE_CLASS := QMAKE
 
-ifeq ("$(LOCAL_DESTDIR)","")
-  LOCAL_DESTDIR := usr/bin
-endif
-
 ifeq ("$(LOCAL_QMAKE_PRO_FILE)","")
   LOCAL_QMAKE_PRO_FILE := $(LOCAL_MODULE).pro
 endif
