@@ -221,7 +221,7 @@ module-add = \
 			$(eval __path := $(__modules.$(__mod).PATH)) \
 			$(eval __class := $(__modules.$(__mod).MODULE_CLASS)) \
 			$(if $(call streq,$(__class),PREBUILT), \
-				$(warning $(LOCAL_PATH): module '$(__mod)' is already prebuilt), \
+				$(info $(LOCAL_PATH): module '$(__mod)' is already prebuilt), \
 				$(error $(LOCAL_PATH): module '$(__mod)' already registered at $(__path)) \
 			) \
 		) \
