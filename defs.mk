@@ -1463,17 +1463,14 @@ endef
 ###############################################################################
 
 # Define a rule to copy a file. For use via $(eval) so use $$@ and $$<.
-# use '-a' to preserve permissions/links and
-# use '--remove-destination' to overwrite any existing file to make sure
-# existing symlinks are correctly overwritten.
+# use '-a' to preserve permissions/links
 # $(1) : source file
 # $(2) : destination file
 define copy-one-file
 $(2): $(1)
 	@echo "Copy: $$(call path-from-top,$$<) => $$(call path-from-top,$$@)"
 	@mkdir -p $$(dir $$@)
-	@if [ -e $$@ ] ; then rm $$@; fi
-	$(Q)cp -a $$< $$@
+	$(Q)rm -f $$@ && cp -a $$< $$@
 endef
 
 ###############################################################################
@@ -1487,7 +1484,7 @@ define create-one-link
 $(1):
 	@echo "Link: $$(call path-from-top,$$@) => $(2)"
 	@mkdir -p $$(dir $$@)
-	$(Q)ln -s -f $(2) $$@
+	$(Q)rm -f $$@ && ln -s $(2) $$@
 endef
 
 ###############################################################################
