@@ -33,15 +33,20 @@ def getModuleSourceDirs(self, module, build_dir):
 #===============================================================================
 #===============================================================================
 class Project(object):
-	def __init__(self, name, modules):
+	def __init__(self, name, modules, options):
 		self.module = modules[name]
 		self.modules = modules
 		self.depends = [modules[dep] for dep in self.module.fields.get("depends", "").split()]
 		self.depends_all = [modules[dep] for dep in self.module.fields.get("depends.all", "").split()]
 		self.link_depends = {}
 
+		if options.linkdeps_full:
+			depends = self.depends_all
+		else:
+			depends = self.depends
+
 		# populate link dependencies only for direct dependencies
-		for dep in self.depends:
+		for dep in depends:
 			if "ARCHIVE" in dep.fields:
 				src_dir = modules.targetVars["OUT_BUILD"] + "/" + dep.name + "/" + dep.fields["ARCHIVE_SUBDIR"]
 			else:
@@ -321,7 +326,7 @@ def main():
 		if name not in modules:
 			sys.stderr.write("Error module '%s' not found:\n" % name)
 		else:
-			Project(name, modules).generate(options)
+			Project(name, modules, options).generate(options)
 
 #===============================================================================
 # Setup option parser and parse command line.
@@ -339,6 +344,13 @@ def parseArgs():
 		default=False,
 		help="Link direct dependencies sources in project.")
 
+	parser.add_option("-f",
+		"--link-dependencies-full",
+		dest="linkdeps_full",
+		action="store_true",
+		default=False,
+		help="Link all dependencies sources in project.")
+
 	parser.add_option("-b",
 		"--custom-build-args",
 		dest="custom_build_args",
@@ -349,6 +361,11 @@ def parseArgs():
 	(options, args) = parser.parse_args()
 	if len(args) < 2:
 		parser.error("Bad number of arguments")
+
+	# -f imply -d
+	if options.linkdeps_full:
+		options.linkdeps = True
+
 	return (options, args)
 
 #===============================================================================
