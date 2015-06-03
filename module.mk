@@ -469,6 +469,20 @@ ifeq ("$(patsubst %.done,1,$(LOCAL_MODULE_FILENAME))","1")
   LOCAL_DONE_FILES := $(sort $(LOCAL_DONE_FILES) $(LOCAL_MODULE_FILENAME))
 endif
 
+# Macro to create a module 'done' file
+define create-done-file
+@( \
+	done_file=$(call module-get-build-filename,$@); \
+	if [ ! -f "$${done_file}" ]; then \
+		if [ "$(__modules.$@.check-done-file-created)" != "" ]; then \
+			echo "warning: $(__modules.$@.MODULE_CLASS) module '$@' did not create $${done_file}"; \
+		fi; \
+		mkdir -p $$(dirname $${done_file}); \
+		touch $${done_file}; \
+	fi; \
+)
+endef
+
 # Macro to delete one 'done' file
 # $1 : file to delete
 delete-one-done-file = \
@@ -1149,16 +1163,7 @@ ifeq ("$(LOCAL_MODULE_CLASS)","CUSTOM")
 # a rebuilt of some modules in a new execution of the build because this rule
 # is executed at any time, and there is no build order associated.
 $(LOCAL_MODULE):
-	@( \
-		done_file=$(call module-get-build-filename,$@); \
-		if [ ! -f "$${done_file}" ]; then \
-			if [ "$(__modules.$@.check-done-file-created)" != "" ]; then \
-				echo "warning: custom module '$@' did not create $${done_file}"; \
-			fi; \
-			mkdir -p $$(dirname $${done_file}); \
-			touch $${done_file}; \
-		fi; \
-	)
+	$(create-done-file)
 
 endif
 
@@ -1167,6 +1172,12 @@ endif
 ###############################################################################
 
 ifeq ("$(LOCAL_MODULE_CLASS)","META_PACKAGE")
+
+# This makes sure that the done file will be created. However this may trigger
+# a rebuilt of some modules in a new execution of the build because this rule
+# is executed at any time, and there is no build order associated.
+$(LOCAL_MODULE):
+	$(create-done-file)
 
 # Add a meta package dependency
 # $1 : module name

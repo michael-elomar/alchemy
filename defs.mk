@@ -231,7 +231,7 @@ module-add = \
 			$(eval __path := $(__modules.$(__mod).PATH)) \
 			$(eval __class := $(__modules.$(__mod).MODULE_CLASS)) \
 			$(if $(call streq,$(__class),PREBUILT), \
-				$(warning $(LOCAL_PATH): module '$(__mod)' is already prebuilt), \
+				$(info $(LOCAL_PATH): module '$(__mod)' is already prebuilt), \
 				$(error $(LOCAL_PATH): module '$(__mod)' already registered at $(__path)) \
 			) \
 		) \
@@ -244,7 +244,8 @@ module-add = \
 		$(foreach __local,$(macros-LOCAL), \
 			$(call macro-copy,__modules.$(__mod).$(__local),LOCAL_$(__local)) \
 		) \
-		$(if $(call streq,$(LOCAL_MODULE_CLASS),CUSTOM), \
+		$(if $(or $(call streq,$(LOCAL_MODULE_CLASS),CUSTOM), \
+				$(call streq,$(LOCAL_MODULE_CLASS),META_PACKAGE)), \
 			$(if $(LOCAL_MODULE_FILENAME), \
 				$(eval __modules.$(__mod).check-done-file-created := $(true)) \
 				, \
@@ -961,11 +962,11 @@ module-compute-revision = \
 
 # Get revision of one module
 # $1 : module name.
-module-get-revision = $(module-compute-revision)$(__modules.$1.REVISION)
+module-get-revision = $(strip $(module-compute-revision)$(__modules.$1.REVISION))
 
 # Get revision (with git describe) of one module
 # $1 : module name.
-module-get-revision-describe = $(module-compute-revision)$(__modules.$1.REVISION_DESCRIBE)
+module-get-revision-describe = $(strip $(module-compute-revision)$(__modules.$1.REVISION_DESCRIBE))
 
 # Get last revision of one module. It is found in a generated file that may
 # not exist so the result can be empty.
@@ -1473,17 +1474,14 @@ endef
 ###############################################################################
 
 # Define a rule to copy a file. For use via $(eval) so use $$@ and $$<.
-# use '-a' to preserve permissions/links and
-# use '--remove-destination' to overwrite any existing file to make sure
-# existing symlinks are correctly overwritten.
+# use '-a' to preserve permissions/links
 # $(1) : source file
 # $(2) : destination file
 define copy-one-file
 $(2): $(1)
 	@echo "Copy: $$(call path-from-top,$$<) => $$(call path-from-top,$$@)"
 	@mkdir -p $$(dir $$@)
-	@if [ -e $$@ ] ; then rm $$@; fi
-	$(Q)cp -a $$< $$@
+	$(Q)rm -f $$@ && cp -a $$< $$@
 endef
 
 ###############################################################################

@@ -13,8 +13,4 @@ endif
 
 LOCAL_MODULE_CLASS := META_PACKAGE
 
-ifeq ("$(LOCAL_MODULE_FILENAME)","")
-LOCAL_MODULE_FILENAME := $(LOCAL_MODULE).done
-endif
-
 $(module-add)
