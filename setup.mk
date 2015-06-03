@@ -413,11 +413,8 @@ endif
 ## Default rules of makefile add TARGET_ARCH in CFLAGS.
 ## As it is not the way we use it, prevent export of this variable
 ###############################################################################
-ifeq ("$(HOST_OS)","darwin")
-# Unexport seems broken, force clearing it
-# FIXME: this can causes more troubles if submakefile wants to define it...
-MAKE += TARGET_ARCH=
-endif
+# Unexport does not work when TARGET_ARCH is set on command line, force clearing it
+MAKEOVERRIDES := $(filter-out TARGET_ARCH=%,$(MAKEOVERRIDES))
 unexport TARGET_ARCH
 
 ###############################################################################
