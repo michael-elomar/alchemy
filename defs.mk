@@ -952,11 +952,11 @@ module-compute-revision = \
 
 # Get revision of one module
 # $1 : module name.
-module-get-revision = $(module-compute-revision)$(__modules.$1.REVISION)
+module-get-revision = $(strip $(module-compute-revision)$(__modules.$1.REVISION))
 
 # Get revision (with git describe) of one module
 # $1 : module name.
-module-get-revision-describe = $(module-compute-revision)$(__modules.$1.REVISION_DESCRIBE)
+module-get-revision-describe = $(strip $(module-compute-revision)$(__modules.$1.REVISION_DESCRIBE))
 
 # Get last revision of one module. It is found in a generated file that may
 # not exist so the result can be empty.
