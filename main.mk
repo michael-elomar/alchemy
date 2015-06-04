@@ -192,11 +192,11 @@ ifeq ("$(call is-targets-in-make-goals,all)","")
 ifneq ("$(findstring -clean,$(MAKECMDGOALS))","")
   SKIP_DEPS_AND_CHECKS := 1
 endif
-ifneq ("$(findstring -dirclean,$(MAKECMDGOALS))","")
+ifneq ("$(filter %-dirclean %-path,$(MAKECMDGOALS))","")
   SKIP_DEPS_AND_CHECKS := 1
 endif
-ifneq ("$(findstring -path,$(MAKECMDGOALS))","")
-  SKIP_DEPS_AND_CHECKS := 1
+ifneq ("$(filter %-config %-xconfig %-menuconfig %-nconfig,$(MAKECMDGOALS))","")
+  SKIP_CONFIG_CHECK := 1
 endif
 endif
 
