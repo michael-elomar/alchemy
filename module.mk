@@ -343,7 +343,7 @@ LOCAL_CFLAGS += $(addprefix -include ,$(all_autoconf))
 # Notify that we build with dependencies
 # External modules only get internal ones. Mainly because we don't want to break
 # build of external modules that already handle external dependencies correctly.
-ifeq ("$(call is-module-external,$(LOCAL_MODULE))","")
+ifeq ("$(and $(call is-module-external,$(LOCAL_MODULE)),$(call strneq,$(LOCAL_MODULE_CLASS),QMAKE))","")
 LOCAL_CFLAGS += $(foreach __mod,$(all_depends), \
 	-DBUILD_$(call module-get-define,$(__mod)))
 LOCAL_VALAFLAGS += $(foreach __mod,$(call filter-get-internal-modules,$(all_depends)), \
@@ -357,7 +357,7 @@ endif
 $(call add-debug-flags)
 
 # Code coverage flags (for internal modules only)
-ifeq ("$(call is-module-external,$(LOCAL_MODULE))","")
+ifeq ("$(and $(call is-module-external,$(LOCAL_MODULE)),$(call strneq,$(LOCAL_MODULE_CLASS),QMAKE))","")
 ifeq ("$(USE_COVERAGE)","1")
   LOCAL_CFLAGS  += -fprofile-arcs -ftest-coverage -O0
   LOCAL_LDFLAGS += -fprofile-arcs -ftest-coverage
@@ -432,6 +432,11 @@ endif
 
 # If we are explicitely building this module, do not skip external checks
 ifneq ("$(call is-module-in-make-goals,$(LOCAL_MODULE))","")
+  skip_ext_checks := 0
+endif
+
+# To not skip dep checks of QMake modules
+ifeq ("$(LOCAL_MODULE_CLASS)","QMAKE")
   skip_ext_checks := 0
 endif
 
