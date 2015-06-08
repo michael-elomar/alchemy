@@ -17,8 +17,10 @@ ifeq ("$(TARGET_OS)-$(TARGET_OS_FLAVOUR)","$(HOST_OS)-native")
     TARGET_QT_PLATFORM ?= clang_64
   else ifeq ("$(TARGET_OS)-$(TARGET_ARCH)","linux-x64")
     TARGET_QT_PLATFORM ?= gcc_64
-  else ifeq ("$(TARGET_OS)-$(TARGET_ARCH)","linux-x86")
+  else ifeq ("$(TARGET_OS)-$(TARGET_ARCH)-$(HOST_ARCH)","linux-x86-x64")
     TARGET_QT_PLATFORM ?= gcc_32
+  else ifeq ("$(TARGET_OS)-$(TARGET_ARCH)-$(HOST_ARCH)","linux-x86-x86")
+    TARGET_QT_PLATFORM ?= gcc
   endif
 else ifeq ("$(TARGET_OS)","linux")
   ifeq ("$(TARGET_OS_FLAVOUR)","android")
@@ -37,7 +39,7 @@ else ifeq ("$(TARGET_OS)","darwin")
 endif
 
 # Try to auto-detect Qt SDK path
-QT_SDK_DEFAULT_PATHS = /opt/Qt* /Applications/Qt*
+QT_SDK_DEFAULT_PATHS = /opt/Qt* /opt/QT* /Applications/Qt*
 TARGET_QT_SDKROOT ?= $(shell shopt -s nullglob ;                       \
                              for path in $(QT_SDK_DEFAULT_PATHS) ; do  \
                                  if [ -e $$path/$(TARGET_QT_VERSION)/$(TARGET_QT_PLATFORM)/bin/qmake ]; then   \
