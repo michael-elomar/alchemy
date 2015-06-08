@@ -42,8 +42,10 @@ endif
 toolchain_libc_usrlib_files :=
 ifneq ("$(wildcard $(TOOLCHAIN_LIBC)/usr/lib/$(TOOLCHAIN_TARGET_NAME))","")
   toolchain_libc_usrlib_files += $(wildcard $(TOOLCHAIN_LIBC)/usr/lib/$(TOOLCHAIN_TARGET_NAME)/libstdc++*.so*)
+  toolchain_libc_usrlib_files += $(wildcard $(TOOLCHAIN_LIBC)/usr/lib/$(TOOLCHAIN_TARGET_NAME)/libgcc_s*.so*)
 else
   toolchain_libc_usrlib_files += $(wildcard $(TOOLCHAIN_LIBC)/usr/lib/libstdc++*.so*)
+  toolchain_libc_usrlib_files += $(wildcard $(TOOLCHAIN_LIBC)/usr/lib/libgcc_s*.so*)
 endif
 
 # Some toolchains, such as recent Linaro toolchains, store GCC support libraries
