@@ -986,6 +986,7 @@ include $(BUILD_SYSTEM)/binary-rules.mk
 $(LOCAL_BUILD_MODULE): $(all_objects)
 	$(transform-o-to-static-lib)
 	$(call copy-license-files,$(PRIVATE_PATH),$(PRIVATE_BUILD_DIR))
+	@touch $@.done
 
 copy_to_staging := 1
 
@@ -1010,6 +1011,7 @@ ifneq ("$(TARGET_ADD_BUILDID_SECTION)","0")
 	$(add-buildid-section)
 endif
 	$(call copy-license-files,$(PRIVATE_PATH),$(PRIVATE_BUILD_DIR))
+	@touch $@.done
 
 copy_to_staging := 1
 copy_to_final := 1
@@ -1029,6 +1031,7 @@ include $(BUILD_SYSTEM)/binary-rules.mk
 # Static version
 $(LOCAL_BUILD_MODULE:$(TARGET_SHARED_LIB_SUFFIX)=$(TARGET_STATIC_LIB_SUFFIX)): $(all_objects) $(all_link_libs_filenames)
 	$(transform-o-to-static-lib)
+	@touch $@.done
 
 # Shared version
 $(LOCAL_BUILD_MODULE): $(all_objects) $(all_link_libs_filenames)
@@ -1040,6 +1043,7 @@ ifneq ("$(TARGET_ADD_BUILDID_SECTION)","0")
 	$(add-buildid-section)
 endif
 	$(call copy-license-files,$(PRIVATE_PATH),$(PRIVATE_BUILD_DIR))
+	@touch $@.done
 
 copy_to_staging := 1
 copy_to_final := 1
@@ -1064,6 +1068,7 @@ ifneq ("$(TARGET_ADD_BUILDID_SECTION)","0")
 	$(add-buildid-section)
 endif
 	$(call copy-license-files,$(PRIVATE_PATH),$(PRIVATE_BUILD_DIR))
+	@touch $@.done
 
 copy_to_staging := 1
 copy_to_final := 1
