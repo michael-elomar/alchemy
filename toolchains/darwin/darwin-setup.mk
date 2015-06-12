@@ -14,7 +14,7 @@ ifeq ("${TARGET_OS_FLAVOUR}","iphoneos")
 
 # iPhone target
 APPLE_SDK = iphoneos
-APPLE_ARCH = -arch arm64
+APPLE_ARCH = -arch armv7 -arch arm64
 APPLE_MINVERSION = -miphoneos-version-min=${TARGET_IPHONE_VERSION}
 TARGET_DEFAULT_ARM_MODE = arm
 TOOLCHAIN_TARGET_NAME = arm-apple-darwin
@@ -60,7 +60,7 @@ ifeq ("$(shell uname)","Darwin")
 TARGET_CC ?= $(shell xcrun --find --sdk ${APPLE_SDK} clang)
 TARGET_CXX ?= $(shell xcrun --find --sdk ${APPLE_SDK} clang++)
 TARGET_AS ?= $(shell xcrun --find --sdk ${APPLE_SDK} as)
-TARGET_AR ?= $(shell xcrun --find --sdk ${APPLE_SDK} ar)#TODO: use libtool wrapper....
+TARGET_AR ?= $(ALCHEMY_HOME)/scripts/darwin-ar $(shell xcrun --find --sdk ${APPLE_SDK} ar)
 TARGET_LD ?= $(shell xcrun --find --sdk ${APPLE_SDK} ld)
 TARGET_NM ?= $(shell xcrun --find --sdk ${APPLE_SDK} nm)
 TARGET_STRIP ?= $(shell xcrun --find --sdk ${APPLE_SDK} strip)
@@ -71,7 +71,7 @@ TARGET_OBJDUMP ?= $(TARGET_CROSS)objdump	#TODO: use otool wrapper....
 
 else
 
-TARGET_AR ?= $(TARGET_CROSS)ar			#TODO: use libtool wrapper....
+TARGET_AR ?= $(TARGET_CROSS)ar  			#TODO: use libtool wrapper....
 TARGET_OBJCOPY ?= $(TARGET_CROSS)objcopy	#TODO: use lipo wrapper....
 TARGET_OBJDUMP ?= $(TARGET_CROSS)objdump	#TODO: use otool wrapper....
 
