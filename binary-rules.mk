@@ -282,6 +282,7 @@ $(all_objects): $(all_internal_depends)
 
 # Clean objects
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(build_dir)/$(LOCAL_MODULE).map
+$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(build_dir)/$(LOCAL_MODULE_FILENAME).done
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(all_objects)
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(all_objects:%.o=%.d)
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(vala_c_sources)
