@@ -401,7 +401,7 @@ def main():
 	# Also add a check in the atom.mk
 	# to make sure that the sdk is used in the correct environment
 	target_elements = [ "OS", "OS_FLAVOUR",
-		"ARCH", "CPU",
+		"ARCH", "CPU", "CROSS",
 		"LIBC", "DEFAULT_ARM_MODE" ]
 	for element_to_check in target_elements:
 		checkTargetVar(ctx, element_to_check)
