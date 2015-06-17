@@ -56,12 +56,12 @@ define cmake-gen-toolchain-file
 	echo "set(CMAKE_CXX_COMPILER \"$(TARGET_CXX)\")"; \
 	echo "set(CMAKE_AR \"$(TARGET_AR)\" CACHE FILEPATH "Archiver")"; \
 	echo "set(CMAKE_LINKER \"$(TARGET_LD)\")"; \
-	echo "set(CMAKE_C_FLAGS \
-		\"$(CMAKE_C_FLAGS) \$${ALCHEMY_EXTRA_C_FLAGS}\" \
-		CACHE STRING \"C_FLAGS\")"; \
-	echo "set(CMAKE_CXX_FLAGS \
-		\"$(CMAKE_CXX_FLAGS) \$${ALCHEMY_EXTRA_CXX_FLAGS}\" \
-		CACHE STRING \"CXX_FLAGS\")"; \
+	echo 'set(CMAKE_C_FLAGS \
+		"$(subst \,\\\,$(CMAKE_C_FLAGS)) $${ALCHEMY_EXTRA_C_FLAGS}" \
+		CACHE STRING "C_FLAGS")'; \
+	echo 'set(CMAKE_CXX_FLAGS \
+		"$(subst \,\\\,$(CMAKE_CXX_FLAGS)) $${ALCHEMY_EXTRA_CXX_FLAGS}" \
+		CACHE STRING "CXX_FLAGS")'; \
 	echo "set(CMAKE_EXE_LINKER_FLAGS \
 		\"$(CMAKE_EXE_LINKER_FLAGS) \$${ALCHEMY_EXTRA_EXE_LINKER_FLAGS}\" \
 		CACHE STRING \"EXE_LINKER_FLAGS\")"; \
