@@ -213,3 +213,10 @@ TARGET_GLOBAL_CXXFLAGS += \
 	-Wno-psabi
 endif
 endif
+
+# retrieve the path to the target's loader
+TARGET_LOADER := $(shell sh -c "echo 'int main;' | \
+	$(TARGET_CC) -xc -; readelf -l a.out | \
+	grep 'interpreter:' | \
+	sed 's/.*: \\(.*\\)\\]/\\1/g'")
+
