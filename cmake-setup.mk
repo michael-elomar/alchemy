@@ -49,6 +49,10 @@ else
   CMAKE_SEARCH_OPTION += ONLY
 endif
 
+$(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
+	$(eval __target_cmake_root_path := $(__target_cmake_root_path) \"$(__dir)\") \
+)
+
 define cmake-gen-toolchain-file
 	echo "set(CMAKE_SYSTEM_NAME Linux)"; \
 	echo "set(CMAKE_SYSTEM_PROCESSOR \"$(TARGET_ARCH)\")"; \
@@ -69,7 +73,7 @@ define cmake-gen-toolchain-file
 		\"$(CMAKE_SHARED_LINKER_FLAGS) \$${ALCHEMY_EXTRA_SHARED_LINKER_FLAGS}\" \
 		CACHE STRING \"SHARED_LINKER_FLAGS\")"; \
 	echo "set(CMAKE_INSTALL_SO_NO_EXE 0)"; \
-	echo "set(CMAKE_FIND_ROOT_PATH \"$(TARGET_OUT_STAGING)\")"; \
+	echo "set(CMAKE_FIND_ROOT_PATH $(__target_cmake_root_path))"; \
 	echo "set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)"; \
 	echo "set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY $(CMAKE_SEARCH_OPTION))"; \
 	echo "set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE $(CMAKE_SEARCH_OPTION))"; \
