@@ -8,7 +8,7 @@ import re
 SPACE_PATTERN = re.compile("\s+")
 
 DEFAULT_PERMISSIONS = [
-	r"/lib/ld-.*\.so  0755    root    root", # Linker shall be executable
+	r"/lib/ld-.*\.so.*  0755    root    root", # Linker shall be executable
 	r"/sbin/.*        0755    root    root",
 	r"/bin/.*         0755    root    root",
 	r"/usr/sbin/.*    0755    root    root",
