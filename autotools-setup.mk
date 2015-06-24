@@ -139,6 +139,8 @@ __target_pkg_config_path :=
 $(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
 	$(eval __target_pkg_config_path := $(__target_pkg_config_path):$(__dir)/usr/lib/pkgconfig) \
 	$(eval __target_pkg_config_path := $(__target_pkg_config_path):$(__dir)/lib/pkgconfig) \
+	$(eval __target_pkg_config_path := $(__target_pkg_config_path):$(__dir)/usr/share/pkgconfig) \
+	$(eval __target_pkg_config_path := $(__target_pkg_config_path):$(__dir)/usr/lib/$(TOOLCHAIN_TARGET_NAME)/pkgconfig) \
 )
 
 # Setup pkg-config

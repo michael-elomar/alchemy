@@ -78,8 +78,10 @@ define cmake-gen-toolchain-file
 	echo "set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY $(CMAKE_SEARCH_OPTION))"; \
 	echo "set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE $(CMAKE_SEARCH_OPTION))"; \
 	echo "set(CMAKE_COLOR_MAKEFILE OFF CACHE BOOL \"COLOR_MAKEFILE\")"; \
-	echo "set(CMAKE_SKIP_INSTALL_RPATH ON CACHE BOOL \"SKIP_INSTALL_RPATH\")";
+	echo "set(CMAKE_SKIP_INSTALL_RPATH ON CACHE BOOL \"SKIP_INSTALL_RPATH\")"; \
+	echo "set(CMAKE_LIBRARY_ARCHITECTURE $(TOOLCHAIN_TARGET_NAME))";
 endef
+
 
 # Regenerate the toolchain file if toolchain setup makefiles are updated
 $(CMAKE_TOOLCHAIN_FILE): $(BUILD_SYSTEM)/cmake-setup.mk

@@ -345,6 +345,7 @@ endif
 __extra-target-c-includes := $(strip \
 	$(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
 		$(__dir)/usr/include \
+		$(__dir)/usr/include/$(TOOLCHAIN_TARGET_NAME) \
 	))
 TARGET_GLOBAL_C_INCLUDES := $(__extra-target-c-includes) $(TARGET_GLOBAL_C_INCLUDES)
 
@@ -362,6 +363,8 @@ __extra-target-ldflags := $(strip \
 	$(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
 		-L$(__dir)/lib \
 		-L$(__dir)/usr/lib \
+		-L$(__dir)/lib/$(TOOLCHAIN_TARGET_NAME) \
+		-L$(__dir)/usr/lib/$(TOOLCHAIN_TARGET_NAME) \
 		-L$(__dir)/$(TARGET_DEFAULT_LIB_DESTDIR) \
 	))
 ifneq ("$(TARGET_OS)","darwin")
@@ -369,6 +372,8 @@ __extra-target-ldflags += $(strip \
 	$(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
 		-Wl,-rpath-link=$(__dir)/lib \
 		-Wl,-rpath-link=$(__dir)/usr/lib \
+		-Wl,-rpath-link=$(__dir)/lib/$(TOOLCHAIN_TARGET_NAME) \
+		-Wl,-rpath-link=$(__dir)/usr/lib/$(TOOLCHAIN_TARGET_NAME) \
 		-Wl,-rpath-link=$(__dir)/$(TARGET_DEFAULT_LIB_DESTDIR) \
 	))
 endif
