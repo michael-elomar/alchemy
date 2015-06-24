@@ -988,7 +988,9 @@ $(LOCAL_BUILD_MODULE): $(all_objects)
 	$(call copy-license-files,$(PRIVATE_PATH),$(PRIVATE_BUILD_DIR))
 	@touch $@.done
 
+ifneq ("$(LOCAL_NO_COPY_TO_STAGING)","1")
 copy_to_staging := 1
+endif
 
 endif
 endif
@@ -1013,8 +1015,10 @@ endif
 	$(call copy-license-files,$(PRIVATE_PATH),$(PRIVATE_BUILD_DIR))
 	@touch $@.done
 
+ifneq ("$(LOCAL_NO_COPY_TO_STAGING)","1")
 copy_to_staging := 1
 copy_to_final := 1
+endif
 
 endif
 endif
@@ -1045,8 +1049,10 @@ endif
 	$(call copy-license-files,$(PRIVATE_PATH),$(PRIVATE_BUILD_DIR))
 	@touch $@.done
 
+ifneq ("$(LOCAL_NO_COPY_TO_STAGING)","1")
 copy_to_staging := 1
 copy_to_final := 1
+endif
 
 endif
 endif
@@ -1070,8 +1076,10 @@ endif
 	$(call copy-license-files,$(PRIVATE_PATH),$(PRIVATE_BUILD_DIR))
 	@touch $@.done
 
+ifneq ("$(LOCAL_NO_COPY_TO_STAGING)","1")
 copy_to_staging := 1
 copy_to_final := 1
+endif
 
 endif
 
@@ -1144,8 +1152,10 @@ $(LOCAL_BUILD_MODULE:.typelib=.gir): $(all_link_libs_filenames) $(all_sources)
 $(LOCAL_BUILD_MODULE): $(LOCAL_BUILD_MODULE:.typelib=.gir)
 	$(transform-gir-to-typelib)
 
+ifneq ("$(LOCAL_NO_COPY_TO_STAGING)","1")
 copy_to_staging := 1
 copy_to_final := 1
+endif
 
 endif
 

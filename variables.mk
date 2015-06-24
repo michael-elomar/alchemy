@@ -133,6 +133,11 @@ vars-LOCAL += PBUILD_ALLOW_FORCE_STATIC
 # Force modules that depends on this one to use whole-static library
 vars-LOCAL += FORCE_WHOLE_STATIC_LIBRARY
 
+# If set to "1", generated object will not be copied to staging/final dirs
+# Object can still explicitly be copied to staging dir through the atom.mk
+# and will then be copied to the final dir through the makefinal process
+vars-LOCAL += NO_COPY_TO_STAGING
+
 # Files and directories to delete during a clean
 vars-LOCAL += CLEAN_FILES
 vars-LOCAL += CLEAN_DIRS
