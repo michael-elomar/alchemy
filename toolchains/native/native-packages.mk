@@ -53,9 +53,15 @@ LOCAL_EXPORT_LDLIBS := $(shell pkg-config --libs glib-2.0 gobject-2.0 gio-2.0)
 include $(BUILD_PREBUILT)
 
 include $(CLEAR_VARS)
-LOCAL_MODULE := opengl
+LOCAL_MODULE := opengles
 LOCAL_EXPORT_CFLAGS := $(shell pkg-config --cflags glesv2)
 LOCAL_EXPORT_LDLIBS := $(shell pkg-config --libs glesv2)
+include $(BUILD_PREBUILT)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := opengl
+LOCAL_EXPORT_CFLAGS := $(shell pkg-config --cflags gl)
+LOCAL_EXPORT_LDLIBS := $(shell pkg-config --libs gl)
 include $(BUILD_PREBUILT)
 
 include $(CLEAR_VARS)
@@ -82,6 +88,84 @@ LOCAL_EXPORT_LDLIBS := -lopencv_flann -lopencv_core -lopencv_imgproc    \
 	-lopencv_ocl -lopencv_photo -lopencv_stitching -lopencv_superres 	\
 	-lopencv_ts -lopencv_video -lopencv_videostab
 
+include $(CLEAR_VARS)
+LOCAL_MODULE := libboost-system
+LOCAL_EXPORT_LDLIBS := -lboost_system
+include $(BUILD_PREBUILT)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := libboost-atomic
+LOCAL_EXPORT_LDLIBS := -lboost_atomic
+include $(BUILD_PREBUILT)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := libboost-chrono
+LOCAL_EXPORT_LDLIBS := -lboost_chrono
+include $(BUILD_PREBUILT)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := libboost-date-time
+LOCAL_EXPORT_LDLIBS := -lboost_date_time
+include $(BUILD_PREBUILT)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := libboost-thread
+LOCAL_EXPORT_LDLIBS := -lboost_thread
+LOCAL_LIBRARIES := libboost-system libboost-atomic libboost-chrono libboost-date-time
+include $(BUILD_PREBUILT)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := libboost
+LOCAL_LIBRARIES := libboost-system libboost-thread
+include $(BUILD_PREBUILT)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := libblas
+LOCAL_EXPORT_LDLIBS := -lblas
+include $(BUILD_PREBUILT)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := liblapack
+LOCAL_EXPORT_LDLIBS := -llapack
+LOCAL_LIBRARIES := libblas
+include $(BUILD_PREBUILT)
+
+LOCAL_MODULE := flann
+LOCAL_EXPORT_CFLAGS := $(shell pkg-config --cflags flann)
+LOCAL_EXPORT_LDLIBS := $(shell pkg-config --libs flann)
+include $(BUILD_PREBUILT)
+
+LOCAL_MODULE := glew
+LOCAL_EXPORT_CFLAGS := $(shell pkg-config --cflags glew)
+LOCAL_EXPORT_LDLIBS := $(shell pkg-config --libs glew)
+include $(BUILD_PREBUILT)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := glu
+LOCAL_EXPORT_CFLAGS := $(shell pkg-config --cflags glu)
+LOCAL_EXPORT_LDLIBS := $(shell pkg-config --libs glu)
+include $(BUILD_PREBUILT)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := glm
+include $(BUILD_PREBUILT)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := sdl
+LOCAL_EXPORT_CFLAGS := $(shell pkg-config --cflags sdl)
+LOCAL_EXPORT_LDLIBS := $(shell pkg-config --libs sdl)
+include $(BUILD_PREBUILT)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := sdl-image
+LOCAL_EXPORT_CFLAGS := $(shell pkg-config --cflags SDL_image)
+LOCAL_EXPORT_LDLIBS := $(shell pkg-config --libs SDL_image)
+include $(BUILD_PREBUILT)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := freetype
+LOCAL_EXPORT_CFLAGS := $(shell pkg-config --cflags freetype2)
+LOCAL_EXPORT_LDLIBS := $(shell pkg-config --libs freetype2)
 include $(BUILD_PREBUILT)
 
 endif
