@@ -216,7 +216,8 @@ endif
 
 # retrieve the path to the target's loader
 TARGET_LOADER := $(shell sh -c "echo 'int main;' | \
-	$(TARGET_CC) -xc -; readelf -l a.out | \
+	$(TARGET_CC) -o $(TARGET_OUT_BUILD)/a.out -xc -; \
+	readelf -l $(TARGET_OUT_BUILD)/a.out | \
 	grep 'interpreter:' | \
-	sed 's/.*: \\(.*\\)\\]/\\1/g'")
-
+	sed 's/.*: \\(.*\\)\\]/\\1/g'; \
+	rm -f $(TARGET_OUT_BUILD)/a.out")
