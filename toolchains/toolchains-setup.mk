@@ -215,6 +215,7 @@ endif
 endif
 
 # retrieve the path to the target's loader
+$(shell rm -f a.out)
 TARGET_LOADER := $(shell sh -c " \
 	mkdir -p $(TARGET_OUT_BUILD); \
 	echo 'int main;' | \
