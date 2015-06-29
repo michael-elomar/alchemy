@@ -87,6 +87,7 @@ LOCAL_EXPORT_LDLIBS := -lopencv_flann -lopencv_core -lopencv_imgproc    \
 	-lopencv_highgui -lopencv_legacy -lopencv_ml -lopencv_objdetect     \
 	-lopencv_ocl -lopencv_photo -lopencv_stitching -lopencv_superres 	\
 	-lopencv_ts -lopencv_video -lopencv_videostab
+include $(BUILD_PREBUILT)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := libboost-system
@@ -134,11 +135,13 @@ LOCAL_EXPORT_LDLIBS := -llapack
 LOCAL_LIBRARIES := libblas
 include $(BUILD_PREBUILT)
 
+include $(CLEAR_VARS)
 LOCAL_MODULE := flann
 LOCAL_EXPORT_CFLAGS := $(shell pkg-config --cflags flann)
 LOCAL_EXPORT_LDLIBS := $(shell pkg-config --libs flann)
 include $(BUILD_PREBUILT)
 
+include $(CLEAR_VARS)
 LOCAL_MODULE := glew
 LOCAL_EXPORT_CFLAGS := $(shell pkg-config --cflags glew)
 LOCAL_EXPORT_LDLIBS := $(shell pkg-config --libs glew)
