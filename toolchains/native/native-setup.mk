@@ -32,3 +32,6 @@ else
   TOOLCHAIN_TARGET_NAME := i386-pc-linux-gnu
 endif
 
+TARGET_CPU_HAS_SSE2 := 1
+# -march=native seems better but this would most likely break distcc builds
+TARGET_GLOBAL_CFLAGS += -msse -msse2
