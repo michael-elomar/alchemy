@@ -404,11 +404,10 @@ endif
 # (it splits -Wl otions from -l options making encapsulation useless)
 # With -l: to force using the given path
 ifneq ("$(strip $(all_shared_libs_filename))","")
-__external-add_LDFLAGS += -Wl,--as-needed
+__external-add_LDFLAGS += -Wl
 $(foreach __lib,$(all_shared_libs_filename), \
 	$(eval __external-add_LDFLAGS := $(__external-add_LDFLAGS),-l:$(notdir $(__lib))) \
 )
-__external-add_LDFLAGS := $(__external-add_LDFLAGS),--no-as-needed
 endif
 
 # Add local defined flags and libs
