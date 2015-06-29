@@ -356,7 +356,7 @@ LOCAL_CFLAGS += $(addprefix -include ,$(all_autoconf))
 # Notify that we build with dependencies
 # External modules only get internal ones. Mainly because we don't want to break
 # build of external modules that already handle external dependencies correctly.
-ifeq ("$(call is-module-external,$(LOCAL_MODULE))","")
+ifeq ("$(and $(call is-module-external,$(LOCAL_MODULE)),$(call strneq,$(LOCAL_MODULE_CLASS),QMAKE))","")
 LOCAL_CFLAGS += $(foreach __mod,$(all_depends), \
 	-DBUILD_$(call module-get-define,$(__mod)))
 LOCAL_VALAFLAGS += $(foreach __mod,$(call filter-get-internal-modules,$(all_depends)), \
@@ -370,7 +370,7 @@ endif
 $(call add-debug-flags)
 
 # Code coverage flags (for internal modules only)
-ifeq ("$(call is-module-external,$(LOCAL_MODULE))","")
+ifeq ("$(and $(call is-module-external,$(LOCAL_MODULE)),$(call strneq,$(LOCAL_MODULE_CLASS),QMAKE))","")
 ifeq ("$(USE_COVERAGE)","1")
   LOCAL_CFLAGS  += -fprofile-arcs -ftest-coverage -O0
   LOCAL_LDFLAGS += -fprofile-arcs -ftest-coverage
@@ -445,6 +445,11 @@ endif
 
 # If we are explicitely building this module, do not skip external checks
 ifneq ("$(call is-module-in-make-goals,$(LOCAL_MODULE))","")
+  skip_ext_checks := 0
+endif
+
+# To not skip dep checks of QMake modules
+ifeq ("$(LOCAL_MODULE_CLASS)","QMAKE")
   skip_ext_checks := 0
 endif
 
@@ -994,8 +999,11 @@ include $(BUILD_SYSTEM)/binary-rules.mk
 $(LOCAL_BUILD_MODULE): $(all_objects)
 	$(transform-o-to-static-lib)
 	$(call copy-license-files,$(PRIVATE_PATH),$(PRIVATE_BUILD_DIR))
+	@touch $@.done
 
+ifneq ("$(LOCAL_NO_COPY_TO_STAGING)","1")
 copy_to_staging := 1
+endif
 
 endif
 endif
@@ -1018,9 +1026,12 @@ ifneq ("$(TARGET_ADD_BUILDID_SECTION)","0")
 	$(add-buildid-section)
 endif
 	$(call copy-license-files,$(PRIVATE_PATH),$(PRIVATE_BUILD_DIR))
+	@touch $@.done
 
+ifneq ("$(LOCAL_NO_COPY_TO_STAGING)","1")
 copy_to_staging := 1
 copy_to_final := 1
+endif
 
 endif
 endif
@@ -1037,6 +1048,7 @@ include $(BUILD_SYSTEM)/binary-rules.mk
 # Static version
 $(LOCAL_BUILD_MODULE_STATIC): $(all_objects) $(all_link_libs_filenames)
 	$(transform-o-to-static-lib)
+	@touch $@.done
 
 # Shared version
 $(LOCAL_BUILD_MODULE): $(all_objects) $(all_link_libs_filenames)
@@ -1048,9 +1060,12 @@ ifneq ("$(TARGET_ADD_BUILDID_SECTION)","0")
 	$(add-buildid-section)
 endif
 	$(call copy-license-files,$(PRIVATE_PATH),$(PRIVATE_BUILD_DIR))
+	@touch $@.done
 
+ifneq ("$(LOCAL_NO_COPY_TO_STAGING)","1")
 copy_to_staging := 1
 copy_to_final := 1
+endif
 
 endif
 endif
@@ -1072,9 +1087,12 @@ ifneq ("$(TARGET_ADD_BUILDID_SECTION)","0")
 	$(add-buildid-section)
 endif
 	$(call copy-license-files,$(PRIVATE_PATH),$(PRIVATE_BUILD_DIR))
+	@touch $@.done
 
+ifneq ("$(LOCAL_NO_COPY_TO_STAGING)","1")
 copy_to_staging := 1
 copy_to_final := 1
+endif
 
 endif
 
@@ -1147,8 +1165,10 @@ $(LOCAL_BUILD_MODULE:.typelib=.gir): $(all_link_libs_filenames) $(all_sources)
 $(LOCAL_BUILD_MODULE): $(LOCAL_BUILD_MODULE:.typelib=.gir)
 	$(transform-gir-to-typelib)
 
+ifneq ("$(LOCAL_NO_COPY_TO_STAGING)","1")
 copy_to_staging := 1
 copy_to_final := 1
+endif
 
 endif
 

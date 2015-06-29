@@ -42,7 +42,8 @@ _libc_lib_names := \
 
 # List of files to be put in /usr/lib
 _libc_usrlib_names := \
-	libstdc++
+	libstdc++ \
+	libgcc_s
 
 # 'lib' directory, try architecture dependent directory first
 _libc_lib_dir := $(wildcard $(_libc_sysroot)/lib/$(_libc_arch_subdir))

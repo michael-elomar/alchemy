@@ -565,7 +565,7 @@ class Extfs(object):
             ibm = self.getGroupIBM(i)
 
             # Non-filesystem blocks
-            for j in range(group.free_blocks_count + overheadPerGroup, Extfs.BLOCKSIZE):
+            for j in range(group.free_blocks_count + overheadPerGroup, Extfs.BLOCKSIZE * 8):
                 Extfs.allocate(bbm, j + 1)
 
             # System blocks

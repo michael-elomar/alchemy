@@ -733,7 +733,6 @@ def checkConfig(name, configPath, ignoreCommented):
 		logging.debug("Current %s config does not exist", name)
 		currentFile = None
 		currentContent = []
-		forceKO = True
 
 	# Compare content, we create a new list because unified_diff is a
 	# generator and so can only be iterated once
@@ -748,7 +747,9 @@ def checkConfig(name, configPath, ignoreCommented):
 				or line.startswith(" "):
 			continue
 		# Ignore added or removed lines that are commented
-		elif ignoreCommented and (line.startswith("+#") or line.startswith("-#")):
+		elif ignoreCommented and ( \
+				line.startswith("+#") or line.startswith("-#") or \
+				line == "+\n" or line == "-\n"):
 			continue
 		# Config is not up to date
 		else:

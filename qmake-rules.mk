@@ -44,7 +44,7 @@ ifeq ("$(TARGET_OS)","darwin")
 # Need to remove some flags which conflict with flags set by qmake
 qmake_global_cflags := $(filter-out -miphoneos-version-min=%,$(TARGET_GLOBAL_CFLAGS))
 qmake_global_ldflags := $(filter-out -miphoneos-version-min=%,$(TARGET_GLOBAL_LDFLAGS))
-qmake_global_ldflags := $(shell echo $(qmake_global_ldflags) | sed 's/-isysroot  *[^ ][^ ]*//g' | sed 's/-arch  *[^ ][^ ]*//g')
+qmake_global_ldflags := $(shell echo $(qmake_global_ldflags) | sed 's/-isysroot  *[^ ][^ ]*//g')
 
 define qmake_gen_deps
 	@rm -f $(PRIVATE_ALCHEMY_PRI_FILE)

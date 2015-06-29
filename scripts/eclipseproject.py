@@ -94,6 +94,10 @@ class Project(object):
 		if options.linkdeps and self.link_depends:
 			fd.write("\t<linkedResources>\n")
 			for src_dir, dep in self.link_depends.iteritems():
+				# exclude libboost
+				if dep.name == "libboost":
+					continue
+
 				fd.write("\t\t<link>\n")
 				fd.write("\t\t\t<name>%s</name>\n" % dep.name)
 				fd.write("\t\t\t<type>2</type>\n")			

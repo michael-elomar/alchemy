@@ -180,6 +180,9 @@ $(if $(wildcard $(call __get-orig-module-config,$1)), \
 		$(shell mkdir -p $(dir $(call __get-build-module-config,$1))) \
 		$(shell cp -af $(call __get-orig-module-config,$1) $(call __get-build-module-config,$1)) \
 	) \
+	, \
+	$(shell mkdir -p $(dir $(call __get-build-module-config,$1))) \
+	$(shell [ -e $(call __get-build-module-config,$1) ] || touch $(call __get-build-module-config,$1)) \
 )
 -include $(call __get-build-module-config,$1)
 $(eval __modules.$1.config-loaded := 1)

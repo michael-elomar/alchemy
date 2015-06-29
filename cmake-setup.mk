@@ -49,6 +49,10 @@ else
   CMAKE_SEARCH_OPTION += ONLY
 endif
 
+$(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
+	$(eval __target_cmake_root_path := $(__target_cmake_root_path) \"$(__dir)\") \
+)
+
 define cmake-gen-toolchain-file
 	echo "set(CMAKE_SYSTEM_NAME Linux)"; \
 	echo "set(CMAKE_SYSTEM_PROCESSOR \"$(TARGET_ARCH)\")"; \
@@ -56,26 +60,28 @@ define cmake-gen-toolchain-file
 	echo "set(CMAKE_CXX_COMPILER \"$(TARGET_CXX)\")"; \
 	echo "set(CMAKE_AR \"$(TARGET_AR)\" CACHE FILEPATH "Archiver")"; \
 	echo "set(CMAKE_LINKER \"$(TARGET_LD)\")"; \
-	echo "set(CMAKE_C_FLAGS \
-		\"$(CMAKE_C_FLAGS) \$${ALCHEMY_EXTRA_C_FLAGS}\" \
-		CACHE STRING \"C_FLAGS\" FORCE)"; \
-	echo "set(CMAKE_CXX_FLAGS \
-		\"$(CMAKE_CXX_FLAGS) \$${ALCHEMY_EXTRA_CXX_FLAGS}\" \
-		CACHE STRING \"CXX_FLAGS\" FORCE)"; \
+	echo 'set(CMAKE_C_FLAGS \
+		"$(subst \,\\\,$(CMAKE_C_FLAGS)) $${ALCHEMY_EXTRA_C_FLAGS}" \
+		CACHE STRING "C_FLAGS")'; \
+	echo 'set(CMAKE_CXX_FLAGS \
+		"$(subst \,\\\,$(CMAKE_CXX_FLAGS)) $${ALCHEMY_EXTRA_CXX_FLAGS}" \
+		CACHE STRING "CXX_FLAGS")'; \
 	echo "set(CMAKE_EXE_LINKER_FLAGS \
 		\"$(CMAKE_EXE_LINKER_FLAGS) \$${ALCHEMY_EXTRA_EXE_LINKER_FLAGS}\" \
-		CACHE STRING \"EXE_LINKER_FLAGS\" FORCE)"; \
+		CACHE STRING \"EXE_LINKER_FLAGS\")"; \
 	echo "set(CMAKE_SHARED_LINKER_FLAGS \
 		\"$(CMAKE_SHARED_LINKER_FLAGS) \$${ALCHEMY_EXTRA_SHARED_LINKER_FLAGS}\" \
-		CACHE STRING \"SHARED_LINKER_FLAGS\" FORCE)"; \
+		CACHE STRING \"SHARED_LINKER_FLAGS\")"; \
 	echo "set(CMAKE_INSTALL_SO_NO_EXE 0)"; \
-	echo "set(CMAKE_FIND_ROOT_PATH \"$(TARGET_OUT_STAGING)\")"; \
+	echo "set(CMAKE_FIND_ROOT_PATH $(__target_cmake_root_path))"; \
 	echo "set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)"; \
 	echo "set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY $(CMAKE_SEARCH_OPTION))"; \
 	echo "set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE $(CMAKE_SEARCH_OPTION))"; \
-	echo "set(CMAKE_COLOR_MAKEFILE OFF CACHE BOOL \"COLOR_MAKEFILE\" FORCE)"; \
-	echo "set(CMAKE_SKIP_INSTALL_RPATH ON CACHE BOOL \"SKIP_INSTALL_RPATH\" FORCE)";
+	echo "set(CMAKE_COLOR_MAKEFILE OFF CACHE BOOL \"COLOR_MAKEFILE\")"; \
+	echo "set(CMAKE_SKIP_INSTALL_RPATH ON CACHE BOOL \"SKIP_INSTALL_RPATH\")"; \
+	echo "set(CMAKE_LIBRARY_ARCHITECTURE $(TOOLCHAIN_TARGET_NAME))";
 endef
+
 
 # Regenerate the toolchain file if toolchain setup makefiles are updated
 $(CMAKE_TOOLCHAIN_FILE): $(BUILD_SYSTEM)/cmake-setup.mk
