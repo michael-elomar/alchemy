@@ -34,6 +34,13 @@ else
   TOOLCHAIN_TARGET_NAME := i386-linux-gnu
 endif
 
+# Let autotools detect full native builds
+ifeq ("$(TARGET_OS_FLAVOUR)","native")
+  ifeq ("$(TARGET_ARCH)","$(HOST_ARCH)")
+    GNU_TARGET_NAME := $(TOOLCHAIN_TARGET_NAME)
+  endif
+endif
+
 TARGET_CPU_HAS_SSE2 := 1
 # -march=native seems better but this would most likely break distcc builds
 TARGET_GLOBAL_CFLAGS += -msse -msse2
