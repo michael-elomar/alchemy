@@ -42,5 +42,6 @@ ifeq ("$(TARGET_OS_FLAVOUR)","native")
 endif
 
 TARGET_CPU_HAS_SSE2 := 1
+TARGET_CPU_HAS_SSSE3 := 1
 # -march=native seems better but this would most likely break distcc builds
-TARGET_GLOBAL_CFLAGS += -msse -msse2
+TARGET_GLOBAL_CFLAGS += -msse -msse2 -mssse3
