@@ -303,7 +303,9 @@ endif
 LOCAL_PRECOMPILED_FILE := $(strip $(LOCAL_PRECOMPILED_FILE))
 ifneq ("$(LOCAL_PRECOMPILED_FILE)","")
 
-gch_file := $(build_dir)/$(LOCAL_PRECOMPILED_FILE).gch
+gch_file := $(build_dir)/obj/$(LOCAL_PRECOMPILED_FILE).gch
+LOCAL_C_INCLUDES := $(build_dir)/obj $(LOCAL_C_INCLUDES)
+LOCAL_CFLAGS += -Winvalid-pch
 
 # All objects will depends on the precompiled file
 $(all_objects): $(gch_file)
@@ -358,6 +360,12 @@ $(LOCAL_TARGETS): PRIVATE_ALL_SHARED_LIBRARIES := $(all_shared_libs_filename)
 $(LOCAL_TARGETS): PRIVATE_ALL_STATIC_LIBRARIES := $(all_static_libs_filename)
 $(LOCAL_TARGETS): PRIVATE_ALL_WHOLE_STATIC_LIBRARIES := $(all_whole_static_libs_filename)
 $(LOCAL_TARGETS): PRIVATE_ALL_OBJECTS := $(all_objects)
+
+ifneq ("$(LOCAL_PRECOMPILED_FILE)","")
+$(LOCAL_TARGETS): PRIVATE_PCH_INCLUDE := -include $(LOCAL_PRECOMPILED_FILE)
+else
+$(LOCAL_TARGETS): PRIVATE_PCH_INCLUDE :=
+endif
 
 # Nvcc flags
 # Remove from standard CFLAGS unsuported flags

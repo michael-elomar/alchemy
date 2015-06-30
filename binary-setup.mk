@@ -21,10 +21,12 @@ $(Q)$(CCACHE) $(PRIVATE_CXX) \
 	$(TARGET_GLOBAL_CXXFLAGS_$(PRIVATE_COMPILER_FLAVOUR)) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_COMPILER_FLAVOUR)) \
 	$(WARNINGS_CXXFLAGS_$(PRIVATE_COMPILER_FLAVOUR)) \
+	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARCH)) \
+	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARCH)_$(PRIVATE_COMPILER_FLAVOUR)) \
 	$(PRIVATE_CFLAGS) $(PRIVATE_CXXFLAGS) \
-	$(TARGET_GLOBAL_PCH_FLAGS) -MMD -MP -MF $(@:.o=.d) -MT $@ -o $@ \
+	$(TARGET_GLOBAL_PCH_FLAGS) -MMD -MP -MF $(@:.gch=.d) -MT $@ -o $@ \
 	$(call path-from-top,$<)
-$(call fix-deps-file,$(@:.o=.d))
+$(call fix-deps-file,$(@:.gch=.d))
 endef
 
 ###############################################################################
@@ -44,6 +46,7 @@ $(Q)$(CCACHE) $(PRIVATE_CXX) \
 	$(WARNINGS_CXXFLAGS_$(PRIVATE_COMPILER_FLAVOUR)) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARCH)) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARCH)_$(PRIVATE_COMPILER_FLAVOUR)) \
+	$(PRIVATE_PCH_INCLUDE) \
 	$(PRIVATE_CFLAGS) $(PRIVATE_CXXFLAGS) \
 	-c -MMD -MP -MF $(@:.o=.d) -MT $@ -o $@ \
 	$(call path-from-top,$<)

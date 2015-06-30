@@ -26,11 +26,7 @@ TARGET_GLOBAL_LDFLAGS_SHARED_gcc ?=
 TARGET_GLOBAL_LDFLAGS_SHARED_clang ?=
 
 # Pre-compiled header generation flag
-ifneq ("$(USE_CLANG)","1")
-  TARGET_GLOBAL_PCH_FLAGS ?= -c
-else
-  TARGET_GLOBAL_PCH_FLAGS ?= -x c++-header
-endif
+TARGET_GLOBAL_PCH_FLAGS ?= -x c++-header
 
 ###############################################################################
 ## Generic setup.
