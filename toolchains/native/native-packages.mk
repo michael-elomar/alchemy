@@ -110,6 +110,11 @@ LOCAL_EXPORT_LDLIBS := -lboost_date_time
 include $(BUILD_PREBUILT)
 
 include $(CLEAR_VARS)
+LOCAL_MODULE := libboost-regex
+LOCAL_EXPORT_LDLIBS := -lboost_regex
+include $(BUILD_PREBUILT)
+
+include $(CLEAR_VARS)
 LOCAL_MODULE := libboost-thread
 LOCAL_LIBRARIES := libboost-system libboost-atomic libboost-chrono \
 	libboost-date-time
@@ -121,7 +126,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := libboost
 LOCAL_LIBRARIES := libboost-system libboost-thread
 LOCAL_EXPORT_LDLIBS := -lboost_system -lboost_atomic -lboost_chrono \
-	-lboost_date_time -lboost_thread
+	-lboost_date_time -lboost_thread -lboost_regex
 include $(BUILD_PREBUILT)
 
 include $(CLEAR_VARS)
