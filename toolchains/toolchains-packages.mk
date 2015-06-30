@@ -92,6 +92,7 @@ endif
 # use $(endl) to separate commands on separate lines
 $(toolchain_libc_installed_file):
 	@mkdir -p $(dir $@)
+	@mkdir -p $(TARGET_OUT_STAGING)/usr/include/$(TOOLCHAIN_TARGET_NAME)
 	@mkdir -p $(TARGET_OUT_STAGING)/lib
 	$(foreach __f,$(toolchain_libc_lib_files), \
 		$(Q) cp -af $(__f) $(TARGET_OUT_STAGING)/lib/$(notdir $(__f))$(endl) \
