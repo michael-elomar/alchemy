@@ -214,6 +214,7 @@ endif
 
 # retrieve the path to the target's loader
 $(shell rm -f a.out)
+ifeq ("$(TARGET_OS)","linux")
 TARGET_LOADER := $(shell sh -c " \
 	mkdir -p $(TARGET_OUT_BUILD); \
 	echo 'int main;' | \
@@ -222,3 +223,6 @@ TARGET_LOADER := $(shell sh -c " \
 	grep 'interpreter:' | \
 	sed 's/.*: \\(.*\\)\\]/\\1/g'; \
 	rm -f $(TARGET_OUT_BUILD)/a.out")
+else
+TARGET_LOADER :=
+endif
