@@ -325,7 +325,8 @@ files and directories when generating the image (plf) from the final directory.
 The format of those permissions files is : <code>pattern mode user group</code>.
 <ul>
 <li><code>pattern</code> : file or directory pattern (regex) to test. Patterns for
-directories ends with a <code>/</code>.</li>
+directories ends with a <code>/</code>. Pattern can also be a real path, it should then
+be enclosed by double quotes (ex: "/etc/hosts" 0644 root root).</li>
 <li><code>mode</code> : unix mode to apply, in octal notation.</li>
 <li><code>user</code>, <code>group</code> : name of user and group to apply. The uid and gid is
 extracted automatically from <code>/etc/passwd</code> and <code>/etc/group</code> files found in
