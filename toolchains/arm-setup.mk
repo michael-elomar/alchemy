@@ -62,6 +62,7 @@ ifeq ("$(TARGET_CPU)","p7")
   TARGET_GLOBAL_CFLAGS += $(cflags_armv7a_neon)
   TARGET_GLOBAL_CFLAGS += -mtune=cortex-a9 -mcpu=cortex-a9
   TARGET_CPU_ARMV7A_NEON := 1
+  TARGET_CPU_HAS_NEON := 1
 endif
 
 ifeq ("$(TARGET_CPU)","o3")
@@ -74,12 +75,14 @@ ifeq ("$(TARGET_CPU)","omap3")
   TARGET_GLOBAL_CFLAGS += $(cflags_armv7a_neon)
   TARGET_GLOBAL_LDFLAGS += -Wl,--fix-cortex-a8
   TARGET_CPU_ARMV7A_NEON := 1
+  TARGET_CPU_HAS_NEON := 1
 endif
 
 ifeq ("$(TARGET_CPU)","omap4")
   TARGET_GLOBAL_CFLAGS += $(cflags_armv7a_neon)
   TARGET_GLOBAL_CFLAGS += -mtune=cortex-a9 -mcpu=cortex-a9
   TARGET_CPU_ARMV7A_NEON := 1
+  TARGET_CPU_HAS_NEON := 1
 endif
 
 # generic armv7a-neon
@@ -87,6 +90,7 @@ ifeq ("$(TARGET_CPU)","armv7a-neon")
   TARGET_GLOBAL_CFLAGS += $(cflags_armv7a_neon)
   TARGET_GLOBAL_LDFLAGS += -Wl,--fix-cortex-a8
   TARGET_CPU_ARMV7A_NEON := 1
+  TARGET_CPU_HAS_NEON := 1
 endif
 
 ifeq ("$(TARGET_CPU)","tegrak1")
@@ -97,11 +101,13 @@ else
   TARGET_GLOBAL_CFLAGS += -march=armv7-a
 endif
   TARGET_GLOBAL_CFLAGS += -mtune=cortex-a15 -mfloat-abi=hard -mfpu=neon-vfpv4
+  TARGET_CPU_HAS_NEON := 1
 endif
 
 ifeq ("$(TARGET_CPU)","tegrax1")
   TARGET_GLOBAL_CFLAGS += -march=armv8-a+crc -mtune=cortex-a57.cortex-a53 -mcpu=cortex-a57.cortex-a53
   TARGET_GLOBAL_CFLAGS += -mfloat-abi=hard -mfpu=crypto-neon-fp-armv8
+  TARGET_CPU_HAS_NEON := 1
 endif
 
 ###############################################################################

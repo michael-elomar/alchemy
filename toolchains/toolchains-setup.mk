@@ -26,11 +26,7 @@ TARGET_GLOBAL_LDFLAGS_SHARED_gcc ?=
 TARGET_GLOBAL_LDFLAGS_SHARED_clang ?=
 
 # Pre-compiled header generation flag
-ifneq ("$(USE_CLANG)","1")
-  TARGET_GLOBAL_PCH_FLAGS ?= -c
-else
-  TARGET_GLOBAL_PCH_FLAGS ?= -x c++-header
-endif
+TARGET_GLOBAL_PCH_FLAGS ?= -x c++-header
 
 ###############################################################################
 ## Generic setup.
@@ -269,6 +265,7 @@ endif
 
 # retrieve the path to the target's loader
 $(shell rm -f a.out)
+ifeq ("$(TARGET_OS)","linux")
 TARGET_LOADER := $(shell sh -c " \
 	mkdir -p $(TARGET_OUT_BUILD); \
 	echo 'int main;' | \
@@ -277,3 +274,6 @@ TARGET_LOADER := $(shell sh -c " \
 	grep 'interpreter:' | \
 	sed 's/.*: \\(.*\\)\\]/\\1/g'; \
 	rm -f $(TARGET_OUT_BUILD)/a.out")
+else
+TARGET_LOADER :=
+endif

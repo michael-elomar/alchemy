@@ -15,6 +15,21 @@ $(error Top directory contains space characters)
 endif
 
 ###############################################################################
+## Host preliminary setup.
+###############################################################################
+HOST_OS := $(shell uname -s | awk '{print tolower($$0)}')
+HOST_CC ?= gcc
+
+# Architecture
+ifndef HOST_ARCH
+  ifneq ("$(shell $(HOST_CC) -dumpmachine | grep 64)","")
+    HOST_ARCH := x64
+  else
+    HOST_ARCH := x86
+  endif
+endif
+
+###############################################################################
 ## Target OS aliases.
 ###############################################################################
 
@@ -40,11 +55,7 @@ endif
 ## Target configuration.
 ###############################################################################
 
-ifneq ("$(shell gcc -dumpmachine | grep 64)","")
-  TARGET_ARCH ?= x64
-else
-  TARGET_ARCH ?= x86
-endif
+TARGET_ARCH ?= $(HOST_ARCH)
 TARGET_CPU ?=
 TARGET_OS ?= $(shell uname -s | awk '{print tolower($$0)}')
 TARGET_OS_FLAVOUR ?= native
@@ -193,12 +204,9 @@ include $(BUILD_SYSTEM)/toolchains/toolchains-setup.mk
 ###############################################################################
 ## Host setup.
 ###############################################################################
-
-HOST_OS := $(shell uname -s | awk '{print tolower($$0)}')
 HOST_OUT_BUILD ?= $(TARGET_OUT)/build-host
 HOST_OUT_STAGING ?= $(TARGET_OUT)/staging-host
 
-HOST_CC ?= gcc
 HOST_CXX ?= g++
 HOST_AS ?= as
 HOST_AR ?= ar
@@ -209,15 +217,6 @@ HOST_CPP ?= cpp
 HOST_RANLIB ?= ranlib
 HOST_OBJCOPY ?= objcopy
 HOST_OBJDUMP ?= objdump
-
-# Architecture
-ifndef HOST_ARCH
-  ifneq ("$(shell $(HOST_CC) -dumpmachine | grep 64)","")
-    HOST_ARCH := x64
-  else
-    HOST_ARCH := x86
-  endif
-endif
 
 # Setup flags
 HOST_GLOBAL_C_INCLUDES ?=

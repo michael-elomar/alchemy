@@ -42,7 +42,8 @@ class Context(object):
 	def __init__(self):
 		self.users = {}
 		self.groups = {}
-		self.permissions = []
+		self.path_permissions = {}
+		self.regex_permissions = []
 
 #===============================================================================
 # Parse a /etc/passwd or /etc/group file to extract a name <-> id mapping.
@@ -88,15 +89,19 @@ def parsePermissionLine(ctx, filePath, lineNum, line, isDefault=False):
 		try:
 			logging.info("permission %s %s %s %s",
 					fields[0], fields[1], fields[2], fields[3])
-			# Compile pattern in a regex (remove leading '/' so that
-			# pattern matching is OK when listing a local dir, trailing '/'
-			# is only used to try match on directory only)
 			pattern = fields[0]
-			rePattern = re.compile(pattern.strip("/") + "$")
+			# Real paths are enclosed by double quotes, else this
+			# is a regex.
+			isPath = pattern[0] == '"' and pattern[-1] == '"'
 			perm = Permission()
 			perm.isDefault = isDefault
-			perm.pattern = pattern
-			perm.rePattern = rePattern
+			if not isPath:
+				# Compile pattern in a regex (remove leading
+				# '/' so that pattern matching is OK when
+				# listing a local dir, trailing '/' is only
+				# used to try match on directory only)
+				perm.pattern = pattern
+				perm.rePattern = re.compile(pattern.strip("/") + "$")
 			# Decode mode
 			perm.mode = int(fields[1], base=8)
 			# Decode user
@@ -107,7 +112,10 @@ def parsePermissionLine(ctx, filePath, lineNum, line, isDefault=False):
 			if fields[3] not in ctx.groups:
 				raise ValueError("Unknown group %s" % fields[3])
 			perm.gid = ctx.groups[fields[3]]
-			ctx.permissions.append(perm)
+			if isPath:
+				ctx.path_permissions[pattern[1:-1].strip("/")] = perm
+			else:
+				ctx.regex_permissions.append(perm)
 		except (ValueError, re.error) as ex:
 			logging.error("%s:%d: %s", filePath, lineNum, ex)
 	else:
@@ -139,8 +147,15 @@ def fixstat(ctx, filePath, st):
 	# At least root by default...
 	st.uid = 0
 	st.gid = 0
-	# Search for the first matching
-	for perm in ctx.permissions:
+	# Search in paths dict
+	if filePath in ctx.path_permissions:
+		perm = ctx.path_permissions[filePath]
+		st.mode = stat.S_IFMT(st.mode) | stat.S_IMODE(perm.mode)
+		st.uid = perm.uid
+		st.gid = perm.gid
+		return st
+	# Else, search for the first matching pattern
+	for perm in ctx.regex_permissions:
 		# Make sure pattern for directories are done on directories
 		if perm.pattern.endswith("/") and not stat.S_ISDIR(st.mode):
 			continue

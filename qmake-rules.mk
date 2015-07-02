@@ -135,7 +135,9 @@ $(built_file):
 	$(call print-banner2,QMake,$(PRIVATE_MODULE),Building)
 	@mkdir -p $(dir $@)
 	$(Q) cd $(PRIVATE_BUILD_DIR) \
-		&& $(QMAKE) $(PRIVATE_PATH)/$(PRIVATE_QMAKE_PRO_FILE) \
+		&& $(QMAKE) $(if $(call is-path-absolute,$(PRIVATE_QMAKE_PRO_FILE)), \
+						$(PRIVATE_QMAKE_PRO_FILE), \
+						$(PRIVATE_PATH)/$(PRIVATE_QMAKE_PRO_FILE)) \
 		&& $(MAKE) $(qmake_make_arg)
 	@touch $@
 

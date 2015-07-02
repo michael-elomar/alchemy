@@ -132,6 +132,7 @@ _libc_ldd := $(wildcard $(_libc_sysroot)/usr/bin/ldd)
 # use $(endl) to separate commands on separate lines
 $(_libc_installed_file):
 	@mkdir -p $(dir $@)
+	@mkdir -p $(TARGET_OUT_STAGING)/usr/include/$(TOOLCHAIN_TARGET_NAME)
 	$(if $(_libc_lib_files), \
 		@mkdir -p $(TARGET_OUT_STAGING)/lib$(endl) \
 		$(foreach __f,$(_libc_lib_files), \

@@ -21,10 +21,22 @@ else ifeq ("$(TARGET_ARCH)","x86")
   GNU_TARGET_NAME := i686-pc-linux-gnu
 endif
 
+# Let autotools detect full native builds
+ifeq ("$(TARGET_OS_FLAVOUR)","native")
+  ifeq ("$(TARGET_ARCH)","$(HOST_ARCH)")
+    GNU_TARGET_NAME := $(TOOLCHAIN_TARGET_NAME)
+  endif
+endif
+
 # Copy host libc
 ifeq ("$(TARGET_OS_FLAVOUR)","native-chroot")
   TOOLCHAIN_LIBC := /
 endif
+
+TARGET_CPU_HAS_SSE2 := 1
+TARGET_CPU_HAS_SSSE3 := 1
+# -march=native seems better but this would most likely break distcc builds
+TARGET_GLOBAL_CFLAGS += -msse -msse2 -mssse3
 
 # Get gdbserver path if available
 TOOLCHAIN_GDBSERVER := $(wildcard /usr/bin/gdbserver)
