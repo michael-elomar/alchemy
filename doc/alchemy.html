@@ -106,21 +106,23 @@ settings. Mainly to be used in <code>atom.mk</code> files to select different be
 <li><code>TARGET_ARCH</code> : Architecture of the target. Useful to select prebuilt binaries
 based on architecture. Possible values are :
 <ul>
-<li><code>arm</code>.</li>
-<li><code>x86</code>.</li>
-<li><code>x64</code>.
+<li><code>arm</code></li>
+<li><code>x86</code></li>
+<li><code>x64</code>
 </br>Default is <code>x86</code> or <code>x64</code>, depending on the host system.</li>
 </ul></li>
 <li><code>TARGET_CPU</code> : Cpu of the target. This value is typically used to select
 optimization and select some module (for ex: linux). Possible values are :
 <ul>
-<li><code>p6</code>.</li>
-<li><code>p6i</code>.</li>
-<li><code>p7</code>.</li>
-<li><code>o3</code>.</li>
-<li><code>omap3</code>.</li>
-<li><code>omap4</code>.</li>
-<li><code>armv7a-neon</code>.
+<li><code>p6</code></li>
+<li><code>p6i</code></li>
+<li><code>p7</code></li>
+<li><code>o3</code></li>
+<li><code>omap3</code></li>
+<li><code>omap4</code></li>
+<li><code>armv7a-neon</code></li>
+<li><code>tegrak1</code></li>
+<li><code>tegrax1</code>
 </br>Default is empty (no specific optimization activated).</li>
 </ul></li>
 <li><code>TARGET_PRODUCT</code>: Name of the product. Mainly used for determining some other
@@ -1331,28 +1333,41 @@ customized before invoking <code>alchemy</code>. For the meaning, see the corres
 <li><code>HOST_OUT_STAGING</code> : <code>$(TARGET_OUT)/staging-host</code></li>
 <li><code>HOST_GLOBAL_C_INCLUDES</code> :</li>
 <li><code>HOST_GLOBAL_CFLAGS</code> : <code>-pipe -O2 -g0</code></li>
-<li><code>HOST_GLOBAL_CXXFLAGS</code> : empty.</li>
+<li><code>HOST_GLOBAL_CXXFLAGS</code> : empty</li>
 <li><code>HOST_GLOBAL_ARFLAGS</code> : <code>rcs</code></li>
-<li><code>HOST_GLOBAL_LDFLAGS</code> : empty.</li>
-<li><code>HOST_GLOBAL_LDFLAGS_SHARED</code> : empty.</li>
-<li><code>HOST_GLOBAL_LDLIBS</code> : empty.</li>
-<li><code>HOST_GLOBAL_LDLIBS_SHARED</code> : empty.</li>
-<li><code>HOST_GLOBAL_PCH_FLAGS</code> : empty.</li>
-<li><code>HOST_CC</code> : <code>gcc</code>.</li>
-<li><code>HOST_CXX</code> : <code>g++</code>.</li>
-<li><code>HOST_AS</code> : <code>as</code>.</li>
-<li><code>HOST_AR</code> : <code>ar</code>.</li>
-<li><code>HOST_LD</code> : <code>ld</code>.</li>
-<li><code>HOST_NM</code> : <code>nm</code>.</li>
-<li><code>HOST_STRIP</code> : <code>strip</code>.</li>
-<li><code>HOST_CPP</code> : <code>cpp</code>.</li>
-<li><code>HOST_RANLIB</code> : <code>ranlib</code>.</li>
-<li><code>HOST_OBJCOPY</code> : <code>objcopy</code>.</li>
-<li><code>HOST_OBJDUMP</code> : <code>objdump</code>.</li>
+<li><code>HOST_GLOBAL_LDFLAGS</code> : empty</li>
+<li><code>HOST_GLOBAL_LDFLAGS_SHARED</code> : empty</li>
+<li><code>HOST_GLOBAL_LDLIBS</code> : empty</li>
+<li><code>HOST_GLOBAL_LDLIBS_SHARED</code> : empty</li>
+<li><code>HOST_GLOBAL_PCH_FLAGS</code> : empty</li>
+<li><code>HOST_CC</code> : <code>gcc</code></li>
+<li><code>HOST_CXX</code> : <code>g++</code></li>
+<li><code>HOST_AS</code> : <code>as</code></li>
+<li><code>HOST_AR</code> : <code>ar</code></li>
+<li><code>HOST_LD</code> : <code>ld</code></li>
+<li><code>HOST_NM</code> : <code>nm</code></li>
+<li><code>HOST_STRIP</code> : <code>strip</code></li>
+<li><code>HOST_CPP</code> : <code>cpp</code></li>
+<li><code>HOST_RANLIB</code> : <code>ranlib</code></li>
+<li><code>HOST_OBJCOPY</code> : <code>objcopy</code></li>
+<li><code>HOST_OBJDUMP</code> : <code>objdump</code></li>
 </ul>
 
 <p><strong>Note</strong> : <code>include</code>, <code>lib</code> and <code>usr/lib</code> folders under <code>HOST_OUT_STAGING</code> are
 automatically added to corresponding flags.</p>
+
+<h3>CPU features</h3>
+
+<p><code>Alchemy</code> automatically sets some variables that can be used by user <code>atom.mk</code>
+to build specific source files based on available CPU features.</p>
+
+<p>Currently, the following variables are available:</p>
+
+<ul>
+<li><code>TARGET_CPU_HAS_NEON</code> : Neon instructions are available on target.</li>
+<li><code>TARGET_CPU_HAS_SSE2</code> : SSE2 instructions are available on target.</li>
+<li><code>TARGET_CPU_HAS_SSSE3</code> : SSSE3 instructions are available on target.</li>
+</ul>
 
 <h2>A closer look to dependencies</h2>
 

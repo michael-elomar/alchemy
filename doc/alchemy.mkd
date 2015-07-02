@@ -92,19 +92,21 @@ conflict with other build systems (android for example).
      * `darwin` if `TARGET_OS` is `darwin`.
 * `TARGET_ARCH` : Architecture of the target. Useful to select prebuilt binaries
   based on architecture. Possible values are :
-  * `arm`.
-  * `x86`.
-  * `x64`.
+  * `arm`
+  * `x86`
+  * `x64`
   </br>Default is `x86` or `x64`, depending on the host system.
 * `TARGET_CPU` : Cpu of the target. This value is typically used to select
   optimization and select some module (for ex: linux). Possible values are :
-  * `p6`.
-  * `p6i`.
-  * `p7`.
-  * `o3`.
-  * `omap3`.
-  * `omap4`.
-  * `armv7a-neon`.
+  * `p6`
+  * `p6i`
+  * `p7`
+  * `o3`
+  * `omap3`
+  * `omap4`
+  * `armv7a-neon`
+  * `tegrak1`
+  * `tegrax1`
   </br>Default is empty (no specific optimization activated).
 * `TARGET_PRODUCT`: Name of the product. Mainly used for determining some other
   default values.
@@ -1237,27 +1239,38 @@ customized before invoking `alchemy`. For the meaning, see the corresponding
 * `HOST_OUT_STAGING` : `$(TARGET_OUT)/staging-host`
 * `HOST_GLOBAL_C_INCLUDES` :
 * `HOST_GLOBAL_CFLAGS` : `-pipe -O2 -g0`
-* `HOST_GLOBAL_CXXFLAGS` : empty.
+* `HOST_GLOBAL_CXXFLAGS` : empty
 * `HOST_GLOBAL_ARFLAGS` : `rcs`
-* `HOST_GLOBAL_LDFLAGS` : empty.
-* `HOST_GLOBAL_LDFLAGS_SHARED` : empty.
-* `HOST_GLOBAL_LDLIBS` : empty.
-* `HOST_GLOBAL_LDLIBS_SHARED` : empty.
-* `HOST_GLOBAL_PCH_FLAGS` : empty.
-* `HOST_CC` : `gcc`.
-* `HOST_CXX` : `g++`.
-* `HOST_AS` : `as`.
-* `HOST_AR` : `ar`.
-* `HOST_LD` : `ld`.
-* `HOST_NM` : `nm`.
-* `HOST_STRIP` : `strip`.
-* `HOST_CPP` : `cpp`.
-* `HOST_RANLIB` : `ranlib`.
-* `HOST_OBJCOPY` : `objcopy`.
-* `HOST_OBJDUMP` : `objdump`.
+* `HOST_GLOBAL_LDFLAGS` : empty
+* `HOST_GLOBAL_LDFLAGS_SHARED` : empty
+* `HOST_GLOBAL_LDLIBS` : empty
+* `HOST_GLOBAL_LDLIBS_SHARED` : empty
+* `HOST_GLOBAL_PCH_FLAGS` : empty
+* `HOST_CC` : `gcc`
+* `HOST_CXX` : `g++`
+* `HOST_AS` : `as`
+* `HOST_AR` : `ar`
+* `HOST_LD` : `ld`
+* `HOST_NM` : `nm`
+* `HOST_STRIP` : `strip`
+* `HOST_CPP` : `cpp`
+* `HOST_RANLIB` : `ranlib`
+* `HOST_OBJCOPY` : `objcopy`
+* `HOST_OBJDUMP` : `objdump`
 
 **Note** : `include`, `lib` and `usr/lib` folders under `HOST_OUT_STAGING` are
 automatically added to corresponding flags.
+
+### CPU features
+
+`Alchemy` automatically sets some variables that can be used by user `atom.mk`
+to build specific source files based on available CPU features.
+
+Currently, the following variables are available:
+
+* `TARGET_CPU_HAS_NEON` : Neon instructions are available on target.
+* `TARGET_CPU_HAS_SSE2` : SSE2 instructions are available on target.
+* `TARGET_CPU_HAS_SSSE3` : SSSE3 instructions are available on target.
 
 ## A closer look to dependencies
 
