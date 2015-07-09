@@ -62,6 +62,8 @@ ifneq ("$(gcc-sysroot)","")
     TOOLCHAIN_LIBC := $(gcc-sysroot)
     ifneq ("$(wildcard $(gcc-sysroot)/usr/bin/gdbserver)","")
       TOOLCHAIN_GDBSERVER := $(gcc-sysroot)/usr/bin/gdbserver
+    else ifneq ("$(wildcard $(gcc-sysroot)/../bin/gdbserver)","")
+      TOOLCHAIN_GDBSERVER := $(gcc-sysroot)/../bin/gdbserver
     else ifneq ("$(wildcard $(gcc-sysroot)/../debug-root/usr/bin/gdbserver)","")
       TOOLCHAIN_GDBSERVER := $(gcc-sysroot)/../debug-root/usr/bin/gdbserver
     endif
