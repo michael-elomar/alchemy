@@ -111,6 +111,7 @@ $(LOCAL_BUILD_MODULE): $(post_installed_file)
 ifneq ("$(src_dir)","$(obj_dir)")
 	$(call copy-license-files,$(PRIVATE_PATH),$(PRIVATE_OBJ_DIR))
 endif
+	@$(call generate-last-revision-file,$(PRIVATE_MODULE),$(PRIVATE_REV_FILE))
 	@touch $@
 
 # Clean targets additional commands

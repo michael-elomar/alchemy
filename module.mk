@@ -561,7 +561,6 @@ $(LOCAL_MODULE)-gen-last-rev: PRIVATE_REV_FILE := $(revision_file)
 $(LOCAL_MODULE)-gen-last-rev: $(LOCAL_BUILD_MODULE)
 	@$(call generate-last-revision-file,$(PRIVATE_MODULE),$(PRIVATE_REV_FILE))
 
-
 # Header to also generate, but as it can be included by source files, it shall
 # be in prerequisites
 revision_file_h := $(build_dir)/$(LOCAL_MODULE)-revision.h
@@ -627,6 +626,8 @@ $(LOCAL_TARGETS): PRIVATE_BUILD_DIR := $(build_dir)
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES := $(LOCAL_CLEAN_FILES) $(LOCAL_BUILD_MODULE)
 $(LOCAL_TARGETS): PRIVATE_CLEAN_DIRS := $(LOCAL_CLEAN_DIRS)
 $(LOCAL_TARGETS): PRIVATE_MODE := $(mode_prefix)
+$(LOCAL_TARGETS): PRIVATE_REV_FILE := $(revision_file)
+$(LOCAL_TARGETS): PRIVATE_REV_FILE_H := $(revision_file_h)
 
 # This is for police hooks
 $(LOCAL_TARGETS): export MODULE_NAME := $(LOCAL_MODULE)
@@ -714,6 +715,16 @@ $(LOCAL_TARGETS): PRIVATE_ARCHIVE := $(archive_file)
 $(LOCAL_TARGETS): PRIVATE_ARCHIVE_UNPACK_DIR := $(unpack_dir)
 $(LOCAL_TARGETS): PRIVATE_ARCHIVE_SUBDIR := $(LOCAL_ARCHIVE_SUBDIR)
 $(LOCAL_TARGETS): PRIVATE_ARCHIVE_PATCHES := $(patches)
+
+# With no archive file, force the post unpack step when sha1 is changed.
+# This allows autotools bootstrap hacks to work better
+ifeq ("$(archive_file)","")
+ifneq ("$(USE_GIT_REV)","0")
+ifneq ("$(call module-check-revision-changed,$(LOCAL_MODULE))","")
+$(call delete-one-done-file,$(unpacked_file))
+endif
+endif
+endif
 
 endif
 
