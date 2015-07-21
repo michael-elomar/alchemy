@@ -1016,6 +1016,12 @@ commands between steps.
 Additional variables to be given as environment or parameters to the configure
 script.
 
+#### `LOCAL_AUTOTOOLS_CONFIGURE_SCRIPT`
+
+Alchemy will assume that the configure script is named `configure` and located
+at either `LOCAL_PATH` or `LOCAL_ARCHIVE_SUBDIR` or `LOCAL_AUTOTOOLS_ARCHIVE_SUBDIR`.
+If the script is somewhere else specify new relative path in `LOCAL_AUTOTOOLS_CONFIGURE_SCRIPT`.
+
 #### `LOCAL_AUTOTOOLS_MAKE_BUILD_ENV`, `LOCAL_AUTOTOOLS_MAKE_BUILD_ARGS`
 
 Additional variables to be given as environment or parameters to the build

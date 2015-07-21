@@ -9,6 +9,10 @@
 ###############################################################################
 ###############################################################################
 
+ifeq ("$(strip $(LOCAL_AUTOTOOLS_CONFIGURE_SCRIPT))","")
+  LOCAL_AUTOTOOLS_CONFIGURE_SCRIPT := configure
+endif
+
 # This file is included several times, define macros only once
 # (mainly to improve perf)
 ifndef __autotools-macros
@@ -91,7 +95,7 @@ define __autotools-default-cmd-configure
 	$(if $(call streq,$(PRIVATE_MODE),TARGET_),$(__autotools-target-copy-cache))
 	$(Q) cd $(PRIVATE_OBJ_DIR) && \
 		$($(PRIVATE_MODE)AUTOTOOLS_CONFIGURE_ENV) $(PRIVATE_CONFIGURE_ENV) \
-		$(PRIVATE_SRC_DIR)/configure \
+		$(PRIVATE_SRC_DIR)/$(PRIVATE_CONFIGURE_SCRIPT) \
 		$($(PRIVATE_MODE)AUTOTOOLS_CONFIGURE_ARGS) $(PRIVATE_CONFIGURE_ARGS)
 endef
 
@@ -137,14 +141,14 @@ include $(BUILD_SYSTEM)/generic-rules.mk
 # Note: if configure file is in an archive the wildcard test will fail the
 # first time, but it is not a problem. The important thing is to detect by
 # ourself that the configure file is newer.
-ifneq ("$(wildcard $(src_dir)/configure)","")
-$(configured_file): $(src_dir)/configure
+ifneq ("$(wildcard $(src_dir)/$(LOCAL_AUTOTOOLS_CONFIGURE_SCRIPT))","")
+$(configured_file): $(src_dir)/$(LOCAL_AUTOTOOLS_CONFIGURE_SCRIPT)
 endif
 
 # Force unpack/configure if configure file is missing
 # Assume it is a real autottols if LOCAL_AUTOTOOLS_CMD_CONFIGURE is not redefined
 ifeq ("$(value LOCAL_AUTOTOOLS_CMD_CONFIGURE)","")
-ifeq ("$(wildcard $(src_dir)/configure)","")
+ifeq ("$(wildcard $(src_dir)/$(LOCAL_AUTOTOOLS_CONFIGURE_SCRIPT))","")
 $(call delete-one-done-file,$(unpacked_file))
 $(call delete-one-done-file,$(configured_file))
 endif
@@ -172,6 +176,7 @@ $(LOCAL_TARGETS): PRIVATE_HOOK_PRE_CLEAN := __autotools-hook-pre-clean
 # Variables needed by default commands
 $(LOCAL_TARGETS): PRIVATE_CONFIGURE_ENV := $(LOCAL_AUTOTOOLS_CONFIGURE_ENV)
 $(LOCAL_TARGETS): PRIVATE_CONFIGURE_ARGS := $(LOCAL_AUTOTOOLS_CONFIGURE_ARGS)
+$(LOCAL_TARGETS): PRIVATE_CONFIGURE_SCRIPT := $(LOCAL_AUTOTOOLS_CONFIGURE_SCRIPT)
 $(LOCAL_TARGETS): PRIVATE_MAKE_BUILD_ENV := $(LOCAL_AUTOTOOLS_MAKE_BUILD_ENV)
 $(LOCAL_TARGETS): PRIVATE_MAKE_BUILD_ARGS := $(LOCAL_AUTOTOOLS_MAKE_BUILD_ARGS)
 $(LOCAL_TARGETS): PRIVATE_MAKE_INSTALL_ENV := $(LOCAL_AUTOTOOLS_MAKE_INSTALL_ENV)
