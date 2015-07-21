@@ -138,6 +138,9 @@ vars-LOCAL += FORCE_WHOLE_STATIC_LIBRARY
 # and will then be copied to the final dir through the makefinal process
 vars-LOCAL += NO_COPY_TO_STAGING
 
+# Copy everything under LOCAL_PATH in build directory first.
+vars-LOCAL += COPY_TO_BUILD_DIR
+
 # Files and directories to delete during a clean
 vars-LOCAL += CLEAN_FILES
 vars-LOCAL += CLEAN_DIRS
@@ -167,7 +170,6 @@ vars-LOCAL += AUTOTOOLS_MAKE_BUILD_ENV
 vars-LOCAL += AUTOTOOLS_MAKE_BUILD_ARGS
 vars-LOCAL += AUTOTOOLS_MAKE_INSTALL_ENV
 vars-LOCAL += AUTOTOOLS_MAKE_INSTALL_ARGS
-vars-LOCAL += AUTOTOOLS_COPY_TO_BUILD_DIR
 macros-LOCAL += AUTOTOOLS_CMD_CONFIGURE
 macros-LOCAL += AUTOTOOLS_CMD_BUILD
 macros-LOCAL += AUTOTOOLS_CMD_INSTALL

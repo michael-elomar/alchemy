@@ -20,10 +20,10 @@ else
   post_installed_file := $(build_dir)/$(LOCAL_MODULE).post-installed
 endif
 
-# Where the source will actually be found once unpacked
+# Where the source will actually be found once unpacked (or copied)
 ifneq ("$(LOCAL_ARCHIVE)","")
   src_dir := $(unpack_dir)/$(LOCAL_ARCHIVE_SUBDIR)
-else ifeq ("$(LOCAL_AUTOTOOLS_COPY_TO_BUILD_DIR)","1")
+else ifeq ("$(LOCAL_COPY_TO_BUILD_DIR)","1")
   src_dir := $(build_dir)/src
 else
   src_dir := $(LOCAL_PATH)

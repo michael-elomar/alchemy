@@ -650,6 +650,38 @@ $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(autoconf_file)
 endif # ifneq ("$(autoconf_file)","")
 
 ###############################################################################
+## Copy everything under LOCAL_PATH in build directory first.
+###############################################################################
+
+ifeq ("$(LOCAL_COPY_TO_BUILD_DIR)","1")
+
+# All files under LOCAL_PATH
+__copy-to-build-dir-src-files := $(shell find $(LOCAL_PATH) \
+	-name '.git' -prune -o \
+	-name '$(USER_MAKEFILE_NAME)' -prune \
+	-o -not -type d -print)
+
+# Where they wil be copied
+__copy-to-build-dir-dst-dir := $(build_dir)/src
+__copy-to-build-dir-dst-files := $(patsubst $(LOCAL_PATH)/%,$(__copy-to-build-dir-dst-dir)/%,$(__copy-to-build-dir-src-files))
+
+# Add rule to copy them
+$(foreach __f,$(__copy-to-build-dir-src-files), \
+	$(eval $(call copy-one-file,$(__f),$(patsubst $(LOCAL_PATH)/%,$(__copy-to-build-dir-dst-dir)/%,$(__f)))) \
+)
+
+all_prerequisites += $(__copy-to-build-dir-dst-files)
+
+# Make sure they will be copied before the unpack or configure step
+#ifneq ("$(value LOCAL_ARCHIVE_CMD_POST_UNPACK)","")
+#$(unpacked_file): $(__autotools-dst-files)
+#else
+#$(configured_file): $(__autotools-dst-files)
+#endif
+
+endif
+
+###############################################################################
 ## Archive extraction + patches.
 ## Do this step if there is no archive but there is a post unpack command.
 ## This is to handle cases where a pre-configure step is needed but no
