@@ -662,7 +662,7 @@ __copy-to-build-dir-src-files := $(shell find $(LOCAL_PATH) \
 	-o -not -type d -print)
 
 # Where they wil be copied
-__copy-to-build-dir-dst-dir := $(build_dir)/src
+__copy-to-build-dir-dst-dir := $(build_dir)
 __copy-to-build-dir-dst-files := $(patsubst $(LOCAL_PATH)/%,$(__copy-to-build-dir-dst-dir)/%,$(__copy-to-build-dir-src-files))
 
 # Add rule to copy them

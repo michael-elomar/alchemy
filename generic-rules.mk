@@ -24,7 +24,7 @@ endif
 ifneq ("$(LOCAL_ARCHIVE)","")
   src_dir := $(unpack_dir)/$(LOCAL_ARCHIVE_SUBDIR)
 else ifeq ("$(LOCAL_COPY_TO_BUILD_DIR)","1")
-  src_dir := $(build_dir)/src
+  src_dir := $(build_dir)
 else
   src_dir := $(LOCAL_PATH)
 endif
