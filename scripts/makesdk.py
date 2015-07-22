@@ -36,7 +36,7 @@ def escapeStr(s):
 # Similar to shutil.copytree but does not fail if destination exists
 # Also, the ignore argument is removed
 #===============================================================================
-def copyTree(src, dst, symlinks=False):
+def copyTree(src, dst, symlinks=False, exclude=None):
 	names = os.listdir(src)
 	if not os.path.exists(dst):
 		os.makedirs(dst, mode=0755)
@@ -50,10 +50,13 @@ def copyTree(src, dst, symlinks=False):
 					linkto = os.readlink(srcname)
 					os.symlink(linkto, dstname)
 			elif os.path.isdir(srcname):
-				copyTree(srcname, dstname, symlinks)
+				copyTree(srcname, dstname, symlinks, exclude)
 			else:
 				# Will raise a SpecialFileError for unsupported file types
-				if not os.path.lexists(dstname):
+				if exclude and any([fnmatch.fnmatch(os.path.basename(srcname), ext) for ext in exclude]):
+					# Ignore this file
+					pass
+				elif not os.path.lexists(dstname):
 					shutil.copy2(srcname, dstname)
 		# catch the Error from the recursive copyTree so that we can
 		# continue with other files
@@ -75,7 +78,8 @@ def copyTree(src, dst, symlinks=False):
 #===============================================================================
 #===============================================================================
 def copyHostStaging(srcDir, dstDir):
-	copyTree(srcDir, dstDir, symlinks=True)
+	exclude = ["*.la"]
+	copyTree(srcDir, dstDir, symlinks=True, exclude=exclude)
 
 #===============================================================================
 #===============================================================================
@@ -86,11 +90,12 @@ def copyStaging(srcDir, dstDir):
 		os.path.join("usr", "share", "vala"),
 		os.path.join("usr", "src", "linux-sdk")
 	]
+	exclude = ["*.la"]
 	for dirName in dirs_to_keep:
 		if os.path.exists(os.path.join(srcDir, dirName)):
 			srcDirPath=os.path.normpath(os.path.join(srcDir, dirName))
 			dstDirPath=os.path.normpath(os.path.join(dstDir, dirName))
-			copyTree(srcDirPath, dstDirPath, symlinks=True)
+			copyTree(srcDirPath, dstDirPath, symlinks=True, exclude=exclude)
 
 #===============================================================================
 #===============================================================================
