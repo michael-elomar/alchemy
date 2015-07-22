@@ -28,7 +28,6 @@ endif
 ifneq ("$(TARGET_OS)","ecos")
 cflags_armv5te := \
 	-march=armv5te \
-	-mfloat-abi=soft \
 	-D__ARM_ARCH_5__ \
 	-D__ARM_ARCH_5T__ \
 	-D__ARM_ARCH_5TE__
@@ -39,7 +38,6 @@ endif
 # armv7-a neon flags (to be used in cpu flags below)
 cflags_armv7a_neon := \
 	-march=armv7-a \
-	-mfloat-abi=softfp \
 	-mfpu=neon
 
 ###############################################################################
@@ -49,11 +47,13 @@ cflags_armv7a_neon := \
 ifeq ("$(TARGET_CPU)","p6")
   TARGET_GLOBAL_CFLAGS += $(cflags_armv5te)
   TARGET_GLOBAL_CFLAGS += -mtune=arm926ej-s -mcpu=arm926ej-s
+  TARGET_FLOAT_ABI ?= soft
 endif
 
 ifeq ("$(TARGET_CPU)","p6i")
   TARGET_GLOBAL_CFLAGS += $(cflags_armv5te)
   TARGET_GLOBAL_CFLAGS += -mtune=arm926ej-s -mcpu=arm926ej-s
+  TARGET_FLOAT_ABI ?= soft
 endif
 
 # If compiler does not support this -mcpu option a warning will be generated
@@ -63,11 +63,13 @@ ifeq ("$(TARGET_CPU)","p7")
   TARGET_GLOBAL_CFLAGS += -mtune=cortex-a9 -mcpu=cortex-a9
   TARGET_CPU_ARMV7A_NEON := 1
   TARGET_CPU_HAS_NEON := 1
+  TARGET_FLOAT_ABI ?= softfp
 endif
 
 ifeq ("$(TARGET_CPU)","o3")
-  TARGET_GLOBAL_CFLAGS += -march=armv7-a -mfloat-abi=soft
+  TARGET_GLOBAL_CFLAGS += -march=armv7-a
   TARGET_GLOBAL_CFLAGS += -mtune=cortex-a5 -mcpu=cortex-a5
+  TARGET_FLOAT_ABI ?= soft
 endif
 
 # TODO: see if interresting to put -mtune=cortex-a8 -mcpu=cortex-a8
@@ -76,6 +78,7 @@ ifeq ("$(TARGET_CPU)","omap3")
   TARGET_GLOBAL_LDFLAGS += -Wl,--fix-cortex-a8
   TARGET_CPU_ARMV7A_NEON := 1
   TARGET_CPU_HAS_NEON := 1
+  TARGET_FLOAT_ABI ?= softfp
 endif
 
 ifeq ("$(TARGET_CPU)","omap4")
@@ -83,6 +86,7 @@ ifeq ("$(TARGET_CPU)","omap4")
   TARGET_GLOBAL_CFLAGS += -mtune=cortex-a9 -mcpu=cortex-a9
   TARGET_CPU_ARMV7A_NEON := 1
   TARGET_CPU_HAS_NEON := 1
+  TARGET_FLOAT_ABI ?= softfp
 endif
 
 # generic armv7a-neon
@@ -91,6 +95,7 @@ ifeq ("$(TARGET_CPU)","armv7a-neon")
   TARGET_GLOBAL_LDFLAGS += -Wl,--fix-cortex-a8
   TARGET_CPU_ARMV7A_NEON := 1
   TARGET_CPU_HAS_NEON := 1
+  TARGET_FLOAT_ABI ?= softfp
 endif
 
 ifeq ("$(TARGET_CPU)","tegrak1")
@@ -100,14 +105,21 @@ ifneq ("$(call check-version,$(shell $(TARGET_CROSS)gcc -dumpversion),4.9.0)",""
 else
   TARGET_GLOBAL_CFLAGS += -march=armv7-a
 endif
-  TARGET_GLOBAL_CFLAGS += -mtune=cortex-a15 -mfloat-abi=hard -mfpu=neon-vfpv4
+  TARGET_GLOBAL_CFLAGS += -mtune=cortex-a15 -mfpu=neon-vfpv4
   TARGET_CPU_HAS_NEON := 1
+  TARGET_FLOAT_ABI ?= hard
 endif
 
 ifeq ("$(TARGET_CPU)","tegrax1")
   TARGET_GLOBAL_CFLAGS += -march=armv8-a+crc -mtune=cortex-a57.cortex-a53 -mcpu=cortex-a57.cortex-a53
-  TARGET_GLOBAL_CFLAGS += -mfloat-abi=hard -mfpu=crypto-neon-fp-armv8
+  TARGET_GLOBAL_CFLAGS += -mfpu=crypto-neon-fp-armv8
   TARGET_CPU_HAS_NEON := 1
+  TARGET_FLOAT_ABI ?= hard
+endif
+
+# set float abi
+ifdef TARGET_FLOAT_ABI
+  TARGET_GLOBAL_CFLAGS += -mfloat-abi=$(TARGET_FLOAT_ABI)
 endif
 
 ###############################################################################

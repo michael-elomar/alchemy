@@ -305,7 +305,6 @@ ifneq ("$(LOCAL_PRECOMPILED_FILE)","")
 
 gch_file := $(build_dir)/obj/$(LOCAL_PRECOMPILED_FILE).gch
 LOCAL_C_INCLUDES := $(build_dir)/obj $(LOCAL_C_INCLUDES)
-LOCAL_CFLAGS += -Winvalid-pch
 
 # All objects will depends on the precompiled file
 $(all_objects): $(gch_file)
