@@ -300,11 +300,9 @@ def doCopy(dstFileName, srcFileName, options, forceCopy=False):
 	addPathInFileList(relPath, False, options)
 
 	# do we need to strip ?
-	# FIXME: stripping kernel modules under android causes issues
 	doStrip = False
 	if options.strip != None \
 		and not os.path.islink(srcFileName) \
-		and not srcFileName.endswith(".ko") \
 		and isExec(srcFileName) \
 		and canStrip(srcFileName):
 		doStrip = True
