@@ -868,6 +868,7 @@ cppcheck_files += $(foreach __inc,$(data_c_includes),$(wildcard $(__inc)/*.hxx))
 cloc_files := $(data_src_files)
 cloc_files += $(foreach __inc,$(data_c_includes),$(wildcard $(__inc)/*.h))
 cloc_files += $(foreach __inc,$(data_c_includes),$(wildcard $(__inc)/*.hpp))
+cloc_files += $(foreach __inc,$(data_c_includes),$(wildcard $(__inc)/*.hh))
 cloc_files += $(foreach __inc,$(data_c_includes),$(wildcard $(__inc)/*.hxx))
 
 # Sort to have unique names
