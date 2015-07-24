@@ -240,6 +240,8 @@ ifneq ("$(TARGET_LINUX_DEVICE_TREE)","")
 	$(Q)cat $(TARGET_OUT_STAGING)/boot/zImage \
 		$(LINUX_BUILD_DIR)/arch/$(LINUX_SRCARCH)/boot/dts/$(TARGET_LINUX_DEVICE_TREE) \
 		> $(TARGET_OUT_STAGING)/boot/zImage_$(TARGET_LINUX_DEVICE_TREE)
+	$(Q)cp -af $(LINUX_BUILD_DIR)/arch/$(LINUX_SRCARCH)/boot/dts/$(TARGET_LINUX_DEVICE_TREE) \
+		$(TARGET_OUT_STAGING)/boot/
 endif
 	$(Q)cp -af $(LINUX_BUILD_DIR)/vmlinux $(TARGET_OUT_STAGING)/boot
 	$(call linux-gen-sdk)
