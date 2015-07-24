@@ -222,6 +222,9 @@ it when targetting Android.</li>
 </br>Default tries to auto-detect the SDK from a few somewhat standard location (<code>/opt/android-sdk*</code>, <code>~/android-sdk*</code>, ...)</li>
 <li><code>TARGET_ANDROID_TOOLCHAIN</code> : name of the android toolchain, e.g. arm-linux-androideabi-4.7.
 </br>Default is the default toolchain for the current target architecture (<code>TARGET_ARCH</code>).</li>
+<li><code>TARGET_ANDROID_STL</code> : specify the C++ Standard Template Library implementation to use. The NDK supports multiple STL implementations, which can be selected with this variable. Supported values are : <code>gnustl</code>, the GNU libstdc++; <code>libc++</code>, LLVM's libc++; and <code>stlport</code>.
+</br>Default is the GNU libstdc++.</li>
+<li><code>TARGET_ANDROID_SHARED_STL</code> : by default, Android NDK uses a static version of the C++ Standard library, which works only when generating a single shared library or executable. Setting this variable to <code>1</code> switches to a shared library version of the STL, which is needed if the project contains multiple shared libraries or executables. In that case, the shared library must be copied to the target device.</li>
 </ul></li>
 </ul>
 
