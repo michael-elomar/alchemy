@@ -13,9 +13,10 @@
 MAKEFINAL_SCRIPT := $(BUILD_SYSTEM)/scripts/makefinal.py
 MAKEFINAL_ARGS :=
 
+# Stripping kernel modules requires --strip-debug option
 ifneq ("$(TARGET_STRIP)","")
 ifeq ("$(TARGET_NOSTRIP_FINAL)","0")
-  MAKEFINAL_ARGS += --strip="$(TARGET_STRIP)"
+  MAKEFINAL_ARGS += --strip="$(TARGET_STRIP) --strip-debug"
 endif
 endif
 
