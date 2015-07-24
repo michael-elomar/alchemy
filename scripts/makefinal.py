@@ -224,7 +224,10 @@ def getRealPath(finalDir, path):
 def addBuildId(filePath, options):
 	class AddBuildIdOptions(object):
 		def __init__(self):
-			self.objcopy = options.buildIdObjcopy
+			if filePath.endswith(".ko") and options.buildIdObjcopyKernel != None:
+				self.objcopy = options.buildIdObjcopyKernel
+			else:
+				self.objcopy = options.buildIdObjcopy
 			self.sectionName = options.buildIdSectionName
 			self.dryRun = False
 	# Only if really required by options
@@ -244,8 +247,12 @@ def getCopyCmds(dstFileName, srcFileName, options, doStrip=False):
 		cmds.append("cp -af \"%s\" \"%s\"" % (srcFileName, dstFileName))
 	else:
 		if doStrip:
-			cmds.append("%s -o \"%s\" \"%s\"" % \
-				(options.strip, dstFileName, srcFileName))
+			if srcFileName.endswith(".ko") and options.stripKernel != None:
+				cmds.append("%s -o \"%s\" \"%s\"" % \
+					(options.stripKernel, dstFileName, srcFileName))
+			else:
+				cmds.append("%s -o \"%s\" \"%s\"" % \
+					(options.strip, dstFileName, srcFileName))
 		# Restore mode and timestamp
 		cmds.append("chmod $(stat --printf '%%a' \"%s\") \"%s\"" % \
 			(srcFileName, dstFileName))
@@ -492,6 +499,10 @@ def parseArgs():
 		dest="strip",
 		default=None,
 		help="strip program to use to remove symbols")
+	parser.add_option("--strip-kernel",
+		dest="stripKernel",
+		default=None,
+		help="strip program to use to remove symbols from kernel modules")
 	parser.add_option("--skel",
 		dest="skelDirs",
 		default=[],
@@ -521,6 +532,10 @@ def parseArgs():
 		dest="buildIdObjcopy",
 		default=None,
 		help="objcopy program to use to add build id section")
+	parser.add_option("--build-id-objcopy-kernel",
+		dest="buildIdObjcopyKernel",
+		default=None,
+		help="objcopy program to use to add build id section in kernel modules")
 	parser.add_option("--build-id-section-name",
 		dest="buildIdSectionName",
 		default=None,
