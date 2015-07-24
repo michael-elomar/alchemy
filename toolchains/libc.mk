@@ -23,7 +23,7 @@ _libc_sysroot := $(patsubst %/,%,$(TOOLCHAIN_LIBC))
 # architecture dependent sub-directory
 _libc_arch_subdir := $(TOOLCHAIN_TARGET_NAME)
 
-# List of files to be put in /lib
+# List of files to be put in /lib or /lib/<arch>
 _libc_lib_names := \
 	ld \
 	libc \
@@ -40,22 +40,21 @@ _libc_lib_names := \
 	libthread_db \
 	libutil \
 
-# List of files to be put in /usr/lib
+# List of files to be put in /usr/lib or </usr/lib>
 _libc_usrlib_names := \
 	libstdc++ \
 	libgcc_s
 
-# 'lib' directory, try architecture dependent directory first
-_libc_lib_dir := $(wildcard $(_libc_sysroot)/lib/$(_libc_arch_subdir))
-ifeq ("$(_libc_lib_dir)","")
-  _libc_lib_dir := $(wildcard $(_libc_sysroot)/lib)
+# 'lib' directory
+_libc_lib_dir := $(_libc_sysroot)/lib
+_libc_lib_arch_dir := $(_libc_sysroot)/lib/$(_libc_arch_subdir)
+ifeq ("$(TARGET_ARCH)","x64")
+_libc_lib64_dir := $(_libc_sysroot)/lib64
 endif
 
-# 'usr/lib' directory, try architecture dependent directory first
-_libc_usrlib_dir := $(wildcard $(_libc_sysroot)/usr/lib/$(_libc_arch_subdir))
-ifeq ("$(_libc_usrlib_dir)","")
-  _libc_usrlib_dir := $(wildcard $(_libc_sysroot)/usr/lib)
-endif
+# 'usr/lib' directory
+_libc_usrlib_dir := $(_libc_sysroot)/usr/lib
+_libc_usrlib_arch_dir := $(_libc_sysroot)/usr/lib/$(_libc_arch_subdir)
 
 # 'usr/lib/debug/lib' directory, try architecture dependent directory first
 _libc_lib_dbg_dir := $(wildcard $(_libc_sysroot)/usr/lib/debug/lib/$(_libc_arch_subdir))
@@ -63,24 +62,38 @@ ifeq ("$(_libc_lib_dbg_dir)","")
   _libc_lib_dbg_dir := $(wildcard $(_libc_sysroot)/usr/lib/debug/lib)
 endif
 
-# List of files to be put in /lib
+# List of files to be put in /lib and /lib/<arch>
 _libc_lib_files :=
+_libc_lib_arch_files :=
 $(foreach __f,$(_libc_lib_names), \
 	$(eval _libc_lib_files += \
 		$(wildcard $(_libc_lib_dir)/$(__f).so*) \
 		$(wildcard $(_libc_lib_dir)/$(__f)-*.so) \
 	) \
+	$(eval _libc_lib_arch_files += \
+		$(wildcard $(_libc_lib_arch_dir)/$(__f).so*) \
+		$(wildcard $(_libc_lib_arch_dir)/$(__f)-*.so) \
+	) \
 )
 
 # Linker links
-_libc_lib_files += $(wildcard $(_libc_lib_dir)/ld-linux*.so*)
+_libc_lib_files += $(wildcard $(_libc_lib_dir)/$(notdir $(TARGET_LOADER)))
+_libc_lib_arch_files += $(wildcard $(_libc_lib_arch_dir)/$(notdir $(TARGET_LOADER)))
+ifeq ("$(TARGET_ARCH)","x64")
+  _libc_lib_files += $(wildcard $(_libc_lib64_dir)/$(notdir $(TARGET_LOADER)))
+endif
 
-# List of files to be put in /usr/lib
+# List of files to be put in /usr/lib and /usr/lib/<arch>
 _libc_usrlib_files +=
+_libc_usrlib_arch_files +=
 $(foreach __f,$(_libc_usrlib_names), \
 	$(eval _libc_usrlib_files += \
 		$(wildcard $(_libc_usrlib_dir)/$(__f).so*) \
 		$(wildcard $(_libc_usrlib_dir)/$(__f)-*.so) \
+	) \
+	$(eval _libc_usrlib_arch_files += \
+		$(wildcard $(_libc_usrlib_arch_dir)/$(__f).so*) \
+		$(wildcard $(_libc_usrlib_arch_dir)/$(__f)-*.so) \
 	) \
 )
 
@@ -94,7 +107,7 @@ $(foreach __f,$(_libc_lib_names), \
 
 # Some toolchains, such as recent Linaro toolchains, store GCC support libraries
 # (libstdc++, libgcc_s, etc.) outside of the sysroot
-ifeq ("$(findstring libstdc++,$(_libc_usrlib_files))","")
+ifeq ("$(findstring libstdc++,$(_libc_usrlib_files) $(_libc_usrlib_arch_files))","")
   _libc_support_dir_cmd := $(TARGET_CC) $(TARGET_GLOBAL_CFLAGS)
   ifeq ("$(TARGET_ARCH)","arm")
     _libc_support_dir_cmd += $(TARGET_GLOBAL_CFLAGS_$(TARGET_DEFAULT_ARM_MODE))
@@ -107,7 +120,9 @@ endif
 
 # Remove gdb python file
 _libc_lib_files := $(filter-out %.py,$(_libc_lib_files))
+_libc_lib_arch_files := $(filter-out %.py,$(_libc_lib_arch_files))
 _libc_usrlib_files := $(filter-out %.py,$(_libc_usrlib_files))
+_libc_usrlib_arch_files := $(filter-out %.py,$(_libc_usrlib_arch_files))
 _libc_lib_dbg_files := $(filter-out %.py,$(_libc_lib_dbg_files))
 
 # Timezone data
@@ -128,29 +143,27 @@ endif
 # ldd
 _libc_ldd := $(wildcard $(_libc_sysroot)/usr/bin/ldd)
 
+# Copy a list of files
+# $1: list of files
+# $2: destination directory (relative to $(TARGET_OUT_STAGING))
+_libc_copy_files = \
+	$(if $1, \
+		@mkdir -p $(TARGET_OUT_STAGING)/$2$(endl) \
+		$(foreach __f,$1, \
+			$(Q) cp -af $(__f) $(TARGET_OUT_STAGING)/$2/$(notdir $(__f))$(endl) \
+		) \
+	)
+
 # Install rule
 # use $(endl) to separate commands on separate lines
 $(_libc_installed_file):
 	@mkdir -p $(dir $@)
-	@mkdir -p $(TARGET_OUT_STAGING)/usr/include/$(TOOLCHAIN_TARGET_NAME)
-	$(if $(_libc_lib_files), \
-		@mkdir -p $(TARGET_OUT_STAGING)/lib$(endl) \
-		$(foreach __f,$(_libc_lib_files), \
-			$(Q) cp -af $(__f) $(TARGET_OUT_STAGING)/lib/$(notdir $(__f))$(endl) \
-		) \
-	)
-	$(if $(_libc_usrlib_files), \
-		@mkdir -p $(TARGET_OUT_STAGING)/usr/lib$(endl) \
-		$(foreach __f,$(_libc_usrlib_files), \
-			$(Q) cp -af $(__f) $(TARGET_OUT_STAGING)/usr/lib/$(notdir $(__f))$(endl) \
-		) \
-	)
-	$(if $(_libc_lib_dbg_files), \
-		@mkdir -p $(TARGET_OUT_STAGING)/usr/lib/debug/lib$(endl) \
-		$(foreach __f,$(_libc_lib_dbg_files), \
-			$(Q) cp -af $(__f) $(TARGET_OUT_STAGING)/usr/lib/debug/lib/$(notdir $(__f))$(endl) \
-		) \
-	)
+	@mkdir -p $(TARGET_OUT_STAGING)/usr/include/$(_libc_arch_subdir)
+	$(call _libc_copy_files,$(_libc_lib_files),lib)
+	$(call _libc_copy_files,$(_libc_lib_arch_files),lib/$(_libc_arch_subdir))
+	$(call _libc_copy_files,$(_libc_usrlib_files),usr/lib)
+	$(call _libc_copy_files,$(_libc_usrlib_arch_files),usr/lib/$(_libc_arch_subdir))
+	$(call _libc_copy_files,$(_libc_lib_dbg_files),usr/lib/debug/lib)
 	$(if $(_libc_tzdata), \
 		@mkdir -p $(TARGET_OUT_STAGING)/usr/share/zoneinfo$(endl) \
 		$(Q) cp -Raf $(_libc_tzdata)/* $(TARGET_OUT_STAGING)/usr/share/zoneinfo$(endl) \
