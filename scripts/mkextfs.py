@@ -856,7 +856,7 @@ class Extfs(object):
     def addSymlinkNode(self, parent_inum, entry):
         inum = self.addNode(parent_inum, entry)
         inode = self.getInode(inum)
-        if entry.st.st_size <= 4 * EXTFS_N_BLOCKS:
+        if entry.st.st_size < 4 * EXTFS_N_BLOCKS:
             inode.size = entry.st.st_size
             ctypes.memmove(inode.block,
                     (ctypes.c_uint8 * entry.st.st_size).from_buffer_copy(entry.getData()),
