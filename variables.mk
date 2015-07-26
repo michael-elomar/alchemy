@@ -395,3 +395,59 @@ vars-TARGET += PKG_CONFIG_ENV
 # headers prior to start anything)
 #vars-TARGET += GLOBAL_PREREQUISITES
 #vars-TARGET += TARGET_LINUX_CROSS
+
+###############################################################################
+## List of TARGET_SETUP_XXX variables that will be set to values after external
+## setup and before internal one.
+## They will the be used as initial TARGET_XXX variables in generated sdk.
+###############################################################################
+vars-TARGET_SETUP :=
+
+# Global settings
+vars-TARGET_SETUP += OS
+vars-TARGET_SETUP += OS_FLAVOUR
+vars-TARGET_SETUP += ARCH
+vars-TARGET_SETUP += CPU
+vars-TARGET_SETUP += LIBC
+vars-TARGET_SETUP += DEFAULT_ARM_MODE
+vars-TARGET_SETUP += USE_CXX_EXCEPTIONS
+
+# Tools
+vars-TARGET_SETUP += CROSS
+vars-TARGET_SETUP += CC
+vars-TARGET_SETUP += CXX
+vars-TARGET_SETUP += CPP
+vars-TARGET_SETUP += AR
+vars-TARGET_SETUP += AS
+vars-TARGET_SETUP += LD
+vars-TARGET_SETUP += NM
+vars-TARGET_SETUP += STRIP
+vars-TARGET_SETUP += OBJCOPY
+vars-TARGET_SETUP += OBJDUMP
+vars-TARGET_SETUP += RANLIB
+
+# Flags for tools
+vars-TARGET_SETUP += GLOBAL_C_INCLUDES
+vars-TARGET_SETUP += GLOBAL_CFLAGS
+vars-TARGET_SETUP += GLOBAL_CXXFLAGS
+vars-TARGET_SETUP += GLOBAL_CFLAGS_arm
+vars-TARGET_SETUP += GLOBAL_CFLAGS_arm_gcc
+vars-TARGET_SETUP += GLOBAL_CFLAGS_thumb
+vars-TARGET_SETUP += GLOBAL_CFLAGS_thumb_gcc
+vars-TARGET_SETUP += GLOBAL_CFLAGS_gcc
+vars-TARGET_SETUP += GLOBAL_CFLAGS_clang
+vars-TARGET_SETUP += GLOBAL_LDFLAGS
+vars-TARGET_SETUP += GLOBAL_LDFLAGS_gcc
+vars-TARGET_SETUP += GLOBAL_LDFLAGS_clang
+vars-TARGET_SETUP += GLOBAL_LDLIBS
+vars-TARGET_SETUP += GLOBAL_LDFLAGS_SHARED
+vars-TARGET_SETUP += GLOBAL_LDFLAGS_SHARED_gcc
+vars-TARGET_SETUP += GLOBAL_LDFLAGS_SHARED_clang
+vars-TARGET_SETUP += GLOBAL_LDLIBS_SHARED
+vars-TARGET_SETUP += GLOBAL_ARFLAGS
+vars-TARGET_SETUP += GLOBAL_PCH_FLAGS
+vars-TARGET_SETUP += GLOBAL_VALAFLAGS
+
+# Cuda
+vars-TARGET_SETUP += NVCC
+vars-TARGET_SETUP += GLOBAL_NVCFLAGS

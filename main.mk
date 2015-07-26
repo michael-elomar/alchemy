@@ -169,6 +169,23 @@ $(foreach __dir,$(TARGET_SDK_DIRS), \
 	$(eval -include $(__dir)/setup.mk) \
 )
 
+# Remember all TARGET_XXX variables from external setup
+# FIXME: using := causes trouble if one of the sdk setup file has done a +=
+# on a TARGET variable and used a not yet defined variable
+#
+# For example:
+# TARGET_GLOBAL_LDFLAGS += \
+#     -L$(TARGET_OUT_STAGING)/usr/lib/arm-linux-gnueabihf/tegra
+# TARGET_OUT_STAGING is NOT yet defined, it will be below
+#
+# It works because the var will be recursive and not immediate
+# So we use macro-copy and after full setup value will be correct.
+$(foreach __var,$(vars-TARGET_SETUP), \
+	$(if $(call is-var-defined,TARGET_$(__var)), \
+		$(call macro-copy,TARGET_SETUP_$(__var),TARGET_$(__var)) \
+	) \
+)
+
 # Setup configuration
 include $(BUILD_SYSTEM)/setup.mk
 
