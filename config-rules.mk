@@ -49,6 +49,7 @@ config-force-all:
 ifeq ("$(CONFIG_GLOBAL_FILE_AVAILABLE)","1")
 	@echo "Ignoring 'config-force-all', '$(CONFIG_GLOBAL_FILE)' exists"
 else
+	@mkdir -p $(dir $(CONFIG_GLOBAL_FILE))
 	@:>$(CONFIG_GLOBAL_FILE)
 	$(foreach __mod,$(ALL_BUILD_MODULES), \
 		@echo "CONFIG_ALCHEMY_BUILD_$(call module-get-define,$(__mod))=y" \
