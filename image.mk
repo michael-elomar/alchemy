@@ -6,6 +6,12 @@
 ## Image generation.
 ###############################################################################
 
+MKFS_SCRIPT := $(BUILD_SYSTEM)/scripts/mkfs.py
+
+ifeq ("$(V)","1")
+  MKFS_SCRIPT += -v
+endif
+
 # Script that will modify mode/uid/gid of files while generating the image
 FIXSTAT := $(BUILD_SYSTEM)/scripts/fixstat.py \
 	--user-file=$(TARGET_OUT_FINAL)/etc/passwd \
@@ -28,7 +34,7 @@ endif
 define gen-image
 	$(Q) cd $(TARGET_OUT_FINAL); \
 		find . ! -name '.' -printf '%P\n' | $(FIXSTAT) | \
-			$(BUILD_SYSTEM)/scripts/mkfs.py --fstype $1 $3 $2
+			$(MKFS_SCRIPT) --fstype $1 $3 $2
 endef
 
 ###############################################################################

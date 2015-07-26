@@ -11,6 +11,11 @@
 ###############################################################################
 
 MAKEFINAL_SCRIPT := $(BUILD_SYSTEM)/scripts/makefinal.py
+
+ifeq ("$(V)","1")
+  MAKEFINAL_SCRIPT += -v
+endif
+
 MAKEFINAL_ARGS :=
 
 # Stripping kernel modules requires --strip-debug option
