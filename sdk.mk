@@ -10,6 +10,10 @@ SDK_DIR := $(TARGET_OUT)/sdk
 SDK_TGZ := $(TARGET_OUT)/sdk-$(TARGET_PRODUCT_FULL_NAME).tar.gz
 MAKESDK_SCRIPT := $(BUILD_SYSTEM)/scripts/makesdk.py
 
+ifeq ("$(V)","1")
+  MAKESDK_SCRIPT += -v
+endif
+
 .PHONY: sdk
 sdk: dump-xml
 	@echo "Sdk: start"

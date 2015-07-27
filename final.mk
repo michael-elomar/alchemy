@@ -11,12 +11,21 @@
 ###############################################################################
 
 MAKEFINAL_SCRIPT := $(BUILD_SYSTEM)/scripts/makefinal.py
+
+ifeq ("$(V)","1")
+  MAKEFINAL_SCRIPT += -v
+endif
+
 MAKEFINAL_ARGS :=
 
-# Stripping kernel modules requires --strip-debug option
+# Stripping kernel modules requires --strip-debug option and its
+# specific strip program
 ifneq ("$(TARGET_STRIP)","")
 ifeq ("$(TARGET_NOSTRIP_FINAL)","0")
-  MAKEFINAL_ARGS += --strip="$(TARGET_STRIP) --strip-debug"
+  MAKEFINAL_ARGS += --strip="$(TARGET_STRIP)"
+  ifneq ("$(TARGET_LINUX_CROSS)","")
+    MAKEFINAL_ARGS += --strip-kernel="$(TARGET_LINUX_CROSS)strip --strip-debug"
+  endif
 endif
 endif
 
@@ -76,6 +85,12 @@ MAKEFINAL_ARGS += \
 	--build-id \
 	--build-id-objcopy="$(TARGET_CROSS)objcopy" \
 	--build-id-section-name="$(TARGET_BUILDID_SECTION_NAME)"
+ifneq ("$(TARGET_LINUX_CROSS)","")
+ifneq ("$(TARGET_LINUX_CROSS)","$(TARGET_CROSS)")
+MAKEFINAL_ARGS += \
+	--build-id-objcopy-kernel="$(TARGET_LINUX_CROSS)objcopy"
+endif
+endif
 endif
 
 ###############################################################################

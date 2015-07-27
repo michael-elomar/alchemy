@@ -38,6 +38,25 @@ ifeq ("$(TARGET_ANDROID_TOOLCHAIN)","")
 $(error Failed to detect Android toolchain, set the name of the toolchain in the TARGET_ANDROID_TOOLCHAIN variable)
 endif
 
+# Allow specify the STL implementation to use. Default to GNU libstdc++.
+TARGET_ANDROID_STL ?= gnustl
+
+# Handle STL link issues: either force static or link with STL's dynamic library
+ifneq ("$(TARGET_ANDROID_SHARED_STL)","1")
+  TARGET_PBUILD_FORCE_STATIC := 1
+else ifeq ("$(TARGET_ANDROID_STL)","gnustl")
+  TARGET_GLOBAL_LDFLAGS += -lgnustl_shared
+  TARGET_GLOBAL_LDFLAGS_SHARED += -lgnustl_shared
+else ifeq ("$(TARGET_ANDROID_STL)","libc++")
+  TARGET_GLOBAL_LDFLAGS += -lc++_shared
+  TARGET_GLOBAL_LDFLAGS_SHARED += -lc++_shared
+else ifeq ("$(TARGET_ANDROID_STL)","stlport")
+  TARGET_GLOBAL_LDFLAGS += -lstlport_shared
+  TARGET_GLOBAL_LDFLAGS_SHARED += -lstlport_shared
+else
+  $(error Unsupported Android STL version. Supported STL versions are: libgnustl, libc++, stlport.)
+endif
+
 # Install the android toolchain in output folder
 # NOTE: We must copy the toolchain here, before toolchains-setup.mk verifies the compiler is properly setup
 ANDROID_TOOLCHAIN_PATH=$(TARGET_OUT)/toolchain
@@ -46,7 +65,7 @@ ANDROID_TOOLCHAIN_OPTIONS =                         \
 	--arch=$(TARGET_ARCH)                           \
 	--install-dir=$(ANDROID_TOOLCHAIN_PATH)	        \
 	--toolchain=$(TARGET_ANDROID_TOOLCHAIN)	        \
-#	-–stl=libcxx
+    --stl=$(TARGET_ANDROID_STL)
 
 ANDROID_TOOLCHAIN_TOKEN = $(ANDROID_TOOLCHAIN_PATH)/$(TARGET_ANDROID_TOOLCHAIN).android-$(TARGET_ANDROID_APILEVEL)
 ifeq ("$(wildcard $(ANDROID_TOOLCHAIN_TOKEN))","")
