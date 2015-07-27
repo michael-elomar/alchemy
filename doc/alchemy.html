@@ -372,8 +372,11 @@ final release packages.
 </br>Default is <code>0</code>.</li>
 <li><code>TARGET_INCLUDE_GCONV</code> : include gconv libraries from libc.
 </br>Default is <code>0</code>.</li>
-<li><p><code>TARGET_USE_CXX_EXCEPTIONS</code> : enable c++ exceptions.
-</br>Default is <code>1</code>.</p></li>
+<li><code>TARGET_USE_CXX_EXCEPTIONS</code> : enable c++ exceptions.
+</br>Default is <code>1</code>.</li>
+<li><p><code>TARGET_LDCONFIG_DIRS</code> : list of directories to add in ldconfig cache. Path
+should be absolute and for the target. Standard path are already included
+by <code>Alchemy</code> (/lib/<arch>, /lib, /usr/lib/<arch>, /usr/lib).</p></li>
 <li><p><code>USE_CLANG</code> : Use clang instead of gcc for compilation.
 </br>Default is <code>0</code>.</p></li>
 <li><code>USE_CCACHE</code> : Use ccache to speed up compilation.

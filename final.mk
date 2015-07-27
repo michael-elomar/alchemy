@@ -117,7 +117,15 @@ endif
 	$(Q) $(MAKE) -f $(TARGET_OUT)/final.mk
 	@mkdir -p $(TARGET_OUT_FINAL)/etc
 ifeq ("$(TARGET_LIBC)","eglibc")
-	$(Q) touch $(TARGET_OUT_FINAL)/etc/ld.so.conf
+	@if [ ! -e $(TARGET_OUT_FINAL)/etc/ld.so.conf ]; then \
+		( \
+			echo "/lib/$(TOOLCHAIN_TARGET_NAME)"; \
+			echo "/lib"; \
+			echo "/usr/lib/$(TOOLCHAIN_TARGET_NAME)"; \
+			echo "/usr/lib"; \
+			$(foreach __d,$(TARGET_LDCONFIG_DIRS),echo "$(__d)";) \
+		) >> $(TARGET_OUT_FINAL)/etc/ld.so.conf; \
+	fi
 	$(Q) $(LDCONFIG) -X -r $(TARGET_OUT_FINAL)
 endif
 ifeq ("$(TARGET_SKEL_DIRS)","")
