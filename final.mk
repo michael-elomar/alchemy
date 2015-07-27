@@ -11,6 +11,7 @@
 ###############################################################################
 
 MAKEFINAL_SCRIPT := $(BUILD_SYSTEM)/scripts/makefinal.py
+LDCONFIG := $(BUILD_SYSTEM)/ldconfig/ldconfig
 
 ifeq ("$(V)","1")
   MAKEFINAL_SCRIPT += -v
@@ -117,7 +118,7 @@ endif
 	@mkdir -p $(TARGET_OUT_FINAL)/etc
 ifeq ("$(TARGET_LIBC)","eglibc")
 	$(Q) touch $(TARGET_OUT_FINAL)/etc/ld.so.conf
-	$(Q) /sbin/ldconfig -X -r $(TARGET_OUT_FINAL)
+	$(Q) $(LDCONFIG) -X -r $(TARGET_OUT_FINAL)
 endif
 ifeq ("$(TARGET_SKEL_DIRS)","")
 ifeq ("$(TARGET_OS)","linux")
