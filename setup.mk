@@ -93,12 +93,6 @@ TARGET_OUT_FINAL ?= $(TARGET_OUT)/final
 TARGET_SKEL_DIRS ?=
 TARGET_NOSTRIP_FINAL ?= 0
 
-# TODO: remove completely in next version (first step is error).
-TARGET_SKEL ?=
-ifneq ("$(TARGET_SKEL)","")
-$(error Please use TARGET_SKEL_DIRS instead of TARGET_SKEL)
-endif
-
 TARGET_CONFIG_PREFIX ?= Alchemy-config/
 TARGET_CONFIG_DIR ?= $(TOP_DIR)/$(TARGET_CONFIG_PREFIX)$(TARGET_PRODUCT)-$(TARGET_PRODUCT_VARIANT)
 
