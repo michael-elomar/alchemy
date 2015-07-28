@@ -69,6 +69,21 @@ else
   TARGET_PRODUCT_FULL_NAME := $(TARGET_PRODUCT)-$(TARGET_PRODUCT_VARIANT)
 endif
 
+# Only TARGET_OUT should be specified, other will be impossible to override in
+# future versions
+ifneq ("$(TARGET_OUT_BUILD)","")
+$(warning TARGET_OUT_BUILD is set, only TARGET_OUT should be specified)
+endif
+ifneq ("$(TARGET_OUT_STAGING)","")
+$(warning TARGET_OUT_STAGING, only TARGET_OUT should be specified)
+endif
+ifneq ("$(TARGET_OUT_FINAL)","")
+$(warning TARGET_OUT_FINAL, only TARGET_OUT should be specified)
+endif
+ifneq ("$(TARGET_OUT_DOC)","")
+$(warning TARGET_OUT_DOC, only TARGET_OUT should be specified)
+endif
+
 TARGET_OUT_PREFIX ?= Alchemy-out/
 TARGET_OUT ?= $(TOP_DIR)/$(TARGET_OUT_PREFIX)$(TARGET_PRODUCT_FULL_NAME)
 TARGET_OUT_BUILD ?= $(TARGET_OUT)/build
