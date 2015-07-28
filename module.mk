@@ -689,6 +689,7 @@ endif
 ## moment.
 ###############################################################################
 archive_file :=
+unpacked_file :=
 ifneq ("$(or $(LOCAL_ARCHIVE),$(value LOCAL_ARCHIVE_CMD_POST_UNPACK))","")
 
 # Full path to archive file (can be empty if we only want post unpack command)
