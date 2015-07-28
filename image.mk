@@ -43,12 +43,11 @@ endef
 ###############################################################################
 PLFTOOL ?= plftool
 MK_KERNEL_PLF ?= mk_kernel_plf
-KERNEL_ZIMAGE := $(TARGET_OUT_STAGING)/boot/zImage
 define gen-image-plf
-	$(Q) if [ -f "$(KERNEL_ZIMAGE)" ]; then \
+	$(Q) if [ -f "$(TARGET_OUT_FINAL)/boot/zImage" ]; then \
 		$(MK_KERNEL_PLF) \
 			"ignore-boot.cfg" \
-			$(KERNEL_ZIMAGE) \
+			$(TARGET_OUT_FINAL)/boot/zImage \
 			$(TARGET_OUT_BUILD)/linux/.config \
 			$(TARGET_OUT)/kernel.plf; \
 		$(PLFTOOL) -a u_data=$(TARGET_OUT)/kernel.plf $1; \
