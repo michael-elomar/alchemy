@@ -215,6 +215,9 @@ module-add = \
 	) \
 	$(eval __mod := $(LOCAL_MODULE)) \
 	$(eval __add := 1) \
+	$(if $(__clear-vars-called),$(empty), \
+		$(error $(LOCAL_PATH): $(__mod): missing include $$(CLEAR_VARS)) \
+	) \
 	$(if $(call is-module-registered,$(__mod)), \
 		$(if $(__modules.$(__mod).SDK), \
 			$(if $(patsubst $(BUILD_SYSTEM)/%,,$(LOCAL_PATH)), \
@@ -259,7 +262,8 @@ module-add = \
 	$(if $(call macro-compare,TARGET_$(__var),saved-TARGET_$(__var)),$(empty), \
 		$(eval __modules-with-global-prerequisites += $(__mod)) \
 		$(call macro-copy,saved-TARGET_$(__var),TARGET_$(__var)) \
-	)
+	) \
+	$(eval __clear-vars-called :=)
 
 ###############################################################################
 ## Get the module name as a 'define' value to be used in kconfig and CFLAGS.
