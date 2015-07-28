@@ -107,6 +107,7 @@ settings. Mainly to be used in <code>atom.mk</code> files to select different be
 based on architecture. Possible values are :
 <ul>
 <li><code>arm</code></li>
+<li><code>aarch64</code></li>
 <li><code>x86</code></li>
 <li><code>x64</code>
 </br>Default is <code>x86</code> or <code>x64</code>, depending on the host system.</li>
@@ -133,19 +134,22 @@ some other default values.</li>
 </br>Default is <code>Alchemy-out</code>.</li>
 <li><code>TARGET_OUT_BUILD</code> : Full path to folder where intermediate objects will be
 stored. Each module will have its own sub-folder inside.
-</br>Default is <code>$(TARGET_OUT)/build</code>.</li>
+</br>Default is <code>$(TARGET_OUT)/build</code>.
+</br>Note: setting this variable is deprecated</li>
 <li><code>TARGET_OUT_STAGING</code> : Full path to folder where modules built will be copied
 or installed. This folder will also contain include files needed to build
 intermediates modules (<code>alchemy</code> also supports using include files from the
 source tree). Binaries in this folder will always contain symbols.
-</br>Default is <code>$(TARGET_OUT)/staging</code>.</li>
+</br>Default is <code>$(TARGET_OUT)/staging</code>.
+</br>Note: setting this variable is deprecated</li>
 <li><code>TARGET_OUT_FINAL</code> : Full path to folder where the final image will be
 created. A script generates this by copying from staging folder required files
 for execution (based on some exclusion pattern to skip documentation and
 include files for examples). It also strips binaries, includes libc files from
 the toolchain and merges an external skeleton with other essential files
 provided by the product.
-</br>Default is <code>$(TARGET_OUT)/final</code>.</li>
+</br>Default is <code>$(TARGET_OUT)/final</code>.
+</br>Note: setting this variable is deprecated</li>
 <li><code>TARGET_CONFIG_DIR</code> : Full path to folder where the configuration files are
 stored. If not set, it is assumed that there will be no configurable module
 and everything will be built.
@@ -206,7 +210,7 @@ allows specifying the minimum supported version of OSX.
 
 <h3>Android specific</h3>
 
-<p>Alchemy supports targetting Android in two configurations: either using an 
+<p>Alchemy supports targetting Android in two configurations: either using an
 official Android NDK, or using a custom-built Android system.</p>
 
 <ul>
@@ -374,9 +378,20 @@ final release packages.
 </br>Default is <code>0</code>.</li>
 <li><code>TARGET_USE_CXX_EXCEPTIONS</code> : enable c++ exceptions.
 </br>Default is <code>1</code>.</li>
-<li><p><code>TARGET_LDCONFIG_DIRS</code> : list of directories to add in ldconfig cache. Path
+<li><code>TARGET_LDCONFIG_DIRS</code> : list of directories to add in ldconfig cache. Path
 should be absolute and for the target. Standard path are already included
-by <code>Alchemy</code> (/lib/<arch>, /lib, /usr/lib/<arch>, /usr/lib).</p></li>
+by <code>Alchemy</code> (/lib/<arch>, /lib, /usr/lib/<arch>, /usr/lib).</li>
+<li><code>TARGET_IMAGE_FORMAT</code> : format of the image file to generate wilth <code>image</code> command.
+Supported value: <code>tar</code>, <code>cpio</code>, <code>ext2</code>, <code>ext3</code>, <code>ext4</code>, <code>plf</code> and the compressed
+forms <code>tar.gz</code>, <code>cpio.gz</code>, <code>ext2.gz</code>, <code>ext3.gz</code>, <code>ext4.gz</code>,
+<code>tar.bz2</code>, <code>cpio.bz2</code>, <code>ext2.bz2</code>, <code>ext3.bz2</code>, <code>ext4.bz2</code>
+</br>Default is <code>tar.gz</code>.</li>
+<li><p><code>TARGET_IMAGE_OPTIONS</code> : additional options to give during image generation:</p>
+
+<ul>
+<li><code>--size &lt;val&gt; [&lt;unit&gt;]</code> : size of image (for <code>ext</code> format), unit is <code>K</code>, <code>M</code>, <code>G</code>
+</br Default is empty.</li>
+</ul></li>
 <li><p><code>USE_CLANG</code> : Use clang instead of gcc for compilation.
 </br>Default is <code>0</code>.</p></li>
 <li><code>USE_CCACHE</code> : Use ccache to speed up compilation.
@@ -678,9 +693,6 @@ prerequisites to be sure they are generated at the correct time. An example will
 be headers installed in staging directories. If they are not explicitly
 specified in prerequisites export, it will not work in a parallel build.</p>
 
-<p><strong>Note</strong> : specifying an <code>internal</code> module as a dependency of an <code>external</code>
-module is not really supported. It may works but it is not guaranteed.</p>
-
 <h4><code>LOCAL_CONDITIONAL_LIBRARIES</code></h4>
 
 <p>This is a list of pair <code>variable:module</code> to indicate that a module is needed
@@ -902,6 +914,12 @@ all the languages supported by doxygen and for all the symbols.</p>
 <p>Additional path to files or directories to add to doxygen generation. It
 accepts either full path or relative path to LOCAL_PATH.</p>
 
+<h4><code>LOCAL_COPY_TO_BUILD_DIR</code></h4>
+
+<p>If set to 1, all files under LOCAL_PATH will be copied to the build directory
+before the configure step. This allows modules to execute autoreconf out of the
+original source tree.</p>
+
 <h3>Internal modules</h3>
 
 <p>Defining an <code>internal</code> module is the preferred way of registering a module. It
@@ -992,6 +1010,11 @@ variables to declare them in an extra source file compiled and linked).</p>
 variable <code>TARGET_PBUILD_FORCE_STATIC</code> is set. This is a ParrotBuild
 compatibility mode that allows to specify module as shared and have a fallback
 when needed.</p>
+
+<h4><code>NO_COPY_TO_STAGING</code></h4>
+
+<p>If set to <code>1</code>, the module output file will not be copied in staging directory.
+This allow customization of this step by the <code>atom.mk</code>.</p>
 
 <h3>Autotools modules</h3>
 
@@ -1179,12 +1202,6 @@ otherwise it will be under the directory <code>obj</code> inside the build direc
 <li><code>AUTOTOOLS_MAKE_ENV</code></li>
 <li><code>AUTOTOOLS_MAKE_ARGS</code></li>
 </ul>
-
-<h4><code>LOCAL_AUTOTOOLS_COPY_TO_BUILD_DIR</code></h4>
-
-<p>If set to 1, all files under LOCAL_PATH will be copied to the build directory
-before the configure step. This allows modules to execute autoreconf out of the
-original source tree.</p>
 
 <h3>CMake modules</h3>
 
