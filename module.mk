@@ -688,13 +688,12 @@ endif
 ## real archive to unpack. And because there is no pre-cmd variables at the
 ## moment.
 ###############################################################################
+archive_file :=
 ifneq ("$(or $(LOCAL_ARCHIVE),$(value LOCAL_ARCHIVE_CMD_POST_UNPACK))","")
 
 # Full path to archive file (can be empty if we only want post unpack command)
 ifneq ("$(strip $(LOCAL_ARCHIVE))","")
   archive_file := $(LOCAL_PATH)/$(LOCAL_ARCHIVE)
-else
-  archive_file :=
 endif
 
 # Name of files indicating steps done

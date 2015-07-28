@@ -70,7 +70,7 @@ $(built_file): $(all_depends_build_filename) $(all_link_libs_filenames)
 
 # Configuration
 # If the user makefile is changed, restart at the configure step
-$(configured_file): $(LOCAL_PATH)/$(USER_MAKEFILE_NAME)
+$(configured_file): $(LOCAL_PATH)/$(USER_MAKEFILE_NAME) $(unpacked_file)
 	$(call __generic-msg,Configuring)
 	@mkdir -p $(PRIVATE_OBJ_DIR)
 	+$(if $(PRIVATE_HOOK_PRE_CONFIGURE),$(call $(PRIVATE_HOOK_PRE_CONFIGURE)))
