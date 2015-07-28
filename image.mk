@@ -56,7 +56,7 @@ define gen-image-plf
 		echo "Image plf: no kernel image found"; \
 	fi
 	$(Q) cd $(TARGET_OUT_FINAL); \
-		find . ! -name '.' -printf '%P\n' | $(FIXSTAT) | \
+		find . -name 'boot' -prune -o ! -name '.' -printf '%P\n' | $(FIXSTAT) | \
 			plfbatch '-a u_unixfile="&"' $1
 ifneq ("$(TARGET_IMAGE_PATH_MAP_FILE)","")
 	$(Q) PLFTOOL=$(PLFTOOL) $(BUILD_SYSTEM)/scripts/plfremap.py \
