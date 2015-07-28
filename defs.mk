@@ -1069,15 +1069,12 @@ all-cc-files-in = $(call all-files-in,$1,.cc)
 ###############################################################################
 ## Check compilation flags for some forbidden stuff.
 ## $1 : variable to check (its name, not its value).
-## $2 : list of flags to check for their presence in $1.
+## $2 : list of flags to check for their presence in $1 (can be a pattern).
 ## $3 : message to display in case of error.
 ###############################################################################
 check-flags = \
-	$(foreach __flag,$2, \
-		$(if $(findstring $(__flag),$($1)), \
-			$(error $(LOCAL_PATH): $1 contains $(__flag) : $3) \
-		) \
-	)
+	$(eval __r := $(filter $2,$($1))) \
+	$(if $(__r),$(error $(LOCAL_PATH): $1 contains $(__r) : $3))
 
 ###############################################################################
 ## Add debug flags to current LOCAL_xxx macros.
@@ -1392,7 +1389,8 @@ user-makefile-after-include = \
 				$(call macro-copy,TARGET_$(__var),saved-TARGET_$(__var)) \
 			) \
 		) \
-	)
+	) \
+	$(call __check-local-vars,$1)
 
 ###############################################################################
 ## Print some banners.
