@@ -1335,6 +1335,38 @@ check-custom-macro = \
 ## message displayed when used while TARGET_DEFAULT_ARM_MODE is 'arm'.
 ###############################################################################
 
+# Old variables still suported but no more in vars-LOCAL or macros-LOCAL
+__compat-vars-LOCAL := \
+	AUTOTOOLS_ARCHIVE \
+	AUTOTOOLS_VERSION \
+	AUTOTOOLS_SUBDIR \
+	AUTOTOOLS_PATCHES \
+	AUTOTOOLS_CMD_UNPACK \
+	AUTOTOOLS_CMD_POST_UNPACK \
+	AUTOTOOLS_COPY_TO_BUILD_DIR \
+
+# All allowed variables
+__all-vars-LOCAL := \
+	$(vars-LOCAL) \
+	$(macros-LOCAL) \
+	$(__compat-vars-LOCAL)
+
+# Get all defined LOCAL_XXX variables
+__get-defined-local-vars = $(filter LOCAL_%,$(.VARIABLES))
+
+# Check all defined LOCAL_XXX variables
+__check-local-vars = \
+	$(foreach __v,$(__get-defined-local-vars), \
+		$(call __check-local-var,$1,$(__v)) \
+	)
+
+# Check a LOCAL_XXX variable for validity, clear it if unknown to the system
+__check-local-var = $(if $($2), \
+	$(if $(filter $(patsubst LOCAL_%,%,$2),$(__all-vars-LOCAL)),$(empty), \
+		$(info $1: defining unknown LOCAL variable $2) \
+		$(eval $2 :=) \
+	))
+
 # This variable will hold the list of modules with global prerequisites
 # Those module will always have their rule loaded in case the global
 # prerequisites need to be updated
