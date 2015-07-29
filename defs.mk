@@ -1358,7 +1358,7 @@ __check-local-vars = \
 	)
 
 # Check a LOCAL_XXX variable for validity, clear it if unknown to the system
-__check-local-var = $(if $($2), \
+__check-local-var = $(if $(value $2), \
 	$(if $(filter $(patsubst LOCAL_%,%,$2),$(__all-vars-LOCAL)),$(empty), \
 		$(info $1: defining unknown LOCAL variable $2) \
 		$(eval $2 :=) \
