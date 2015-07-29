@@ -369,9 +369,9 @@ endif
 # Nvcc flags
 # Remove from standard CFLAGS unsuported flags
 # Give filtered flags directly to compiler (with -Xcompiler prefix)
-__nvcflags-all := $(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARCH)) $(LOCAL_CFLAGS)
-__nvcflags-1 := $(filter-out -pipe -f% -m%, $(__nvcflags-all))
-__nvcflags-2 := $(addprefix -Xcompiler ,$(filter -pipe -f% -m%, $(__nvcflags-all)))
+__nvcflags-all := $(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CFLAGS_$(TARGET_ARCH)) $(LOCAL_CFLAGS)
+__nvcflags-1 := $(filter-out -pipe -f% -m% -O%, $(__nvcflags-all))
+__nvcflags-2 := $(addprefix -Xcompiler ,$(filter -pipe -f% -m% -O%, $(__nvcflags-all)))
 $(LOCAL_TARGETS): PRIVATE_NVCFLAGS := $(__nvcflags-1) $(__nvcflags-2)
 
 ifeq ("$(W)","0")

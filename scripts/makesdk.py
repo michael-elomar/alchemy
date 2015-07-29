@@ -48,6 +48,7 @@ def copyTree(src, dst, symlinks=False, exclude=None):
 			if symlinks and os.path.islink(srcname):
 				if not os.path.lexists(dstname):
 					linkto = os.readlink(srcname)
+					logging.debug("Link: '%s' -> '%s'", srcname, dstname)
 					os.symlink(linkto, dstname)
 			elif os.path.isdir(srcname):
 				copyTree(srcname, dstname, symlinks, exclude)
@@ -57,6 +58,7 @@ def copyTree(src, dst, symlinks=False, exclude=None):
 					# Ignore this file
 					pass
 				elif not os.path.lexists(dstname):
+					logging.debug("Copy: '%s' -> '%s'", srcname, dstname)
 					shutil.copy2(srcname, dstname)
 		# catch the Error from the recursive copyTree so that we can
 		# continue with other files
@@ -78,17 +80,22 @@ def copyTree(src, dst, symlinks=False, exclude=None):
 #===============================================================================
 #===============================================================================
 def copyHostStaging(srcDir, dstDir):
+	logging.debug("Copy host staging: '%s' -> '%s'", srcDir, dstDir)
 	exclude = ["*.la"]
 	copyTree(srcDir, dstDir, symlinks=True, exclude=exclude)
 
 #===============================================================================
 #===============================================================================
 def copyStaging(srcDir, dstDir):
+	logging.debug("Copy staging: '%s' -> '%s'", srcDir, dstDir)
 	dirs_to_keep = ["lib" ,
+		os.path.join("etc", "alternatives"),
 		os.path.join("usr", "lib"),
 		os.path.join("usr", "include"),
 		os.path.join("usr", "share", "vala"),
-		os.path.join("usr", "src", "linux-sdk")
+		os.path.join("usr", "src", "linux-sdk"),
+		os.path.join("usr", "local", "cuda-6.5"),
+		"android", "toolchain",
 	]
 	exclude = ["*.la"]
 	for dirName in dirs_to_keep:
@@ -100,17 +107,20 @@ def copyStaging(srcDir, dstDir):
 #===============================================================================
 #===============================================================================
 def copySdk(srcDir, dstDir):
-	copyTree(srcDir, dstDir, symlinks=True)
+	logging.debug("Copy sdk: '%s' -> '%s'", srcDir, dstDir)
+	copyStaging(srcDir, dstDir)
 
 #===============================================================================
 #===============================================================================
 def copyHeaders(srcDir, dstDir):
-	extensions = ["*.h", "*.hpp", "*.hxx", "*.doxygen", "*.inl"]
+	logging.debug("Copy headers: '%s' -> '%s'", srcDir, dstDir)
+	extensions = ["*.h", "*.hpp", "*.hh", "*.hxx", "*.doxygen", "*.inl"]
 	copyElements(srcDir, dstDir, extensions)
 
 #===============================================================================
 #===============================================================================
 def copyLibs(srcDir, dstDir):
+	logging.debug("Copy libs: '%s' -> '%s'", srcDir, dstDir)
 	extensions = ["*.a"]
 	# Limit the copy to the base of the module
 	copyElements(srcDir, dstDir, extensions, depth=1)
@@ -139,7 +149,7 @@ def copyElement(srcPath, dstPath, keepLinks=False):
 			copy_func = { "function":os.symlink, "description":"Link"}
 	# Do the copy/symlink
 	if not os.path.lexists(dstPath):
-		logging.debug("%s: %s -> %s", copy_func["description"], srcPath, dstPath)
+		logging.debug("%s: '%s' -> '%s'", copy_func["description"], srcPath, dstPath)
 		copy_func["function"](srcPath, dstPath)
 
 #===============================================================================
@@ -147,7 +157,7 @@ def copyElement(srcPath, dstPath, keepLinks=False):
 def copyElements(srcDir, dstDir, extensions=["*"], depth=0,
 		keepLinks=False, keepInclude=False, scanDirs=False):
 	if not os.path.exists(srcDir):
-		logging.warning("Missing directory: %s", srcDir)
+		logging.warning("Missing directory: '%s'", srcDir)
 
 	# Manage depth only if provided or different than 0
 	if depth is None or depth == 0:
@@ -173,27 +183,21 @@ def copyElements(srcDir, dstDir, extensions=["*"], depth=0,
 				copyElement(srcFilePath, dstFilePath, keepLinks=keepLinks)
 
 #===============================================================================
+# Remove symlinks whose target does not exists or is an absolute path.
 #===============================================================================
-def processModuleSdk(ctx, module):
-	# Only once per sdk
-	sdkDir = module.fields["SDK"]
-	if sdkDir in ctx.sdkDirs:
-		return
-	ctx.sdkDirs.append(sdkDir)
-
-	# Copy content of atom.mk of sdk in current context
-	sdkAtomFile = open(os.path.join(sdkDir, "atom.mk"))
-	for line in sdkAtomFile:
-		# Skip header
-		if line.startswith("# GENERATED FILE, DO NOT EDIT"):
-			continue
-		if line.startswith("LOCAL_PATH :="):
-			continue
-		ctx.atom.write(line)
-	sdkAtomFile.close()
-
-	# Copy content of sdk
-	copySdk(sdkDir, ctx.outDir)
+def checkSymlinks(srcDir):
+	logging.info("Checking symlinks")
+	for (dirPath, dirNames, fileNames) in os.walk(srcDir):
+		for fileName in fileNames:
+			srcFilePath = os.path.join(dirPath, fileName)
+			if not os.path.islink(srcFilePath):
+				continue
+			if not os.path.exists(srcFilePath):
+				logging.info("Removing dangling symlink: '%s'", srcFilePath)
+				os.unlink(srcFilePath)
+			elif os.path.isabs(os.readlink(srcFilePath)):
+				logging.info("Removing absolute symlink: '%s'", srcFilePath)
+				os.unlink(srcFilePath)
 
 #===============================================================================
 #===============================================================================
@@ -202,11 +206,6 @@ def processModule(ctx, module, headersOnly=False):
 	if not module.build and not headersOnly:
 		return
 	logging.info("Processing module %s", module.name)
-
-	# Handle module from a previous sdk separately
-	if "SDK" in module.fields:
-		processModuleSdk(ctx, module)
-		return
 
 	# Remember modules not built but whose headers are required
 	if not headersOnly and "DEPENDS_HEADERS" in module.fields:
@@ -311,8 +310,11 @@ def processModule(ctx, module, headersOnly=False):
 				# Only add existing directory that is not in a standard place
 				if relPath != "usr/include" and os.path.exists(includeDir):
 					newIncludeDirs.append("$(LOCAL_PATH)/host/" + relPath)
+			elif includeDir.startswith("/opt/"):
+				# Assume it is a required host package installed externally
+				newIncludeDirs.append(includeDir)
 			else:
-				logging.warning("Ignoring include dir: %s", includeDir)
+				logging.warning("Ignoring include dir: '%s'", includeDir)
 		# Write path in a readable way
 		ctx.atom.write("LOCAL_EXPORT_C_INCLUDES :=")
 		for includeDir in newIncludeDirs:
@@ -363,10 +365,20 @@ def checkTargetVar(ctx, name):
 
 #===============================================================================
 #===============================================================================
-def setupTargetEnvironment(ctx, name):
-	val = ctx.moduledb.targetVars.get(name, "")
+def writeTargetSetupVars(ctx, name):
+	val = ctx.moduledb.targetSetupVars.get(name, "")
 	if val:
-		ctx.setup.write("TARGET_%s := %s\n" % (name, val))
+		# Replace directory path referencing previous sdk or staging directory
+		for dirPath in ctx.sdkDirs:
+			val = val.replace(dirPath, "$(LOCAL_PATH)")
+		val = val.replace(ctx.stagingDir, "$(LOCAL_PATH)")
+		ctx.setup.write("TARGET_%s :=" % name)
+		for field in val.split():
+			if field.startswith("-"):
+				ctx.setup.write(" \\\n\t%s" % field)
+			else:
+				ctx.setup.write(" %s" % field)
+		ctx.setup.write("\n\n")
 
 #===============================================================================
 # Main function.
@@ -387,6 +399,9 @@ def main():
 		sys.stderr.write("  %s\n" % ex)
 		sys.exit(1)
 
+	# List of previous sdk to merge with the new one
+	ctx.sdkDirs = ctx.moduledb.targetVars.get("SDK_DIRS", "").split()
+
 	# Setup output directory
 	logging.info("Initializing output directory '%s'", ctx.outDir)
 	if os.path.exists(ctx.outDir):
@@ -402,15 +417,22 @@ def main():
 	logging.info("Copying staging directory")
 	copyStaging(ctx.stagingDir, ctx.outDir)
 
-	# Save specific sdk target components in a setup.mk file for future usage,
-	# Also add a check in the atom.mk
-	# to make sure that the sdk is used in the correct environment
-	target_elements = [ "OS", "OS_FLAVOUR",
+	# Copy content of previous sdk
+	for srcDir in ctx.sdkDirs:
+		copySdk(srcDir, ctx.outDir)
+
+	# Add some TARGET_XXX variables checks to make sure that the sdk is used
+	# in the correct environment
+	target_elements = [
+		 "OS", "OS_FLAVOUR",
 		"ARCH", "CPU", "CROSS",
 		"LIBC", "DEFAULT_ARM_MODE" ]
 	for element_to_check in target_elements:
 		checkTargetVar(ctx, element_to_check)
-		setupTargetEnvironment(ctx, element_to_check)
+
+	# Save initial TARGET_SETUP_XXX variables as TARGET_XXX
+	for var in ctx.moduledb.targetSetupVars.keys():
+		writeTargetSetupVars(ctx, var)
 
 	# Process modules
 	for module in ctx.moduledb:
@@ -419,6 +441,9 @@ def main():
 	# Process modules not built but whose headers are required
 	for lib in ctx.headerLibs:
 		processModule(ctx, ctx.moduledb[lib], headersOnly=True)
+
+	# Check  symlinks
+	checkSymlinks(ctx.outDir)
 
 	# Process custom macros
 	for macro in ctx.moduledb.customMacros.values():
@@ -435,6 +460,7 @@ def main():
 	# Write the setup.mk
 	with open(os.path.join(ctx.outDir, "setup.mk"), "w") as setupFile:
 		setupFile.write("# GENERATED FILE, DO NOT EDIT\n\n")
+		setupFile.write("LOCAL_PATH := $(call my-dir)\n\n")
 		setupFile.write(ctx.setup.getvalue())
 		setupFile.write("\n")
 

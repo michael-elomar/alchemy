@@ -182,6 +182,12 @@ TARGET_AUTOTOOLS_CONFIGURE_ENV := \
 	XDG_DATA_DIRS=$(TARGET_XDG_DATA_DIRS) \
 	$(TARGET_PKG_CONFIG_ENV)
 
+ifeq ("$(TARGET_OS)","mingw32")
+  TARGET_AUTOTOOLS_CONFIGURE_ENV += \
+      WINDRES="$(TARGET_CROSS)windres" \
+      RC="$(TARGET_CROSS)windres"
+endif
+
 # Build triplet
 ifndef GNU_BUILD_NAME
   GNU_BUILD_NAME := $(shell $(HOST_CC) -dumpmachine)

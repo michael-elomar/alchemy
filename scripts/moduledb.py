@@ -45,7 +45,24 @@ class ModuleDb(object):
 	def __init__(self):
 		self._modules = {}
 		self.targetVars = {}
+		self.targetSetupVars = {}
 		self.customMacros = {}
+
+	def _addVars(self, dst, varNodes):
+		for varNode in varNodes:
+			varName = varNode.getAttribute("name")
+			valueNodes = varNode.getElementsByTagName("value")
+			# Normally only one 'value' node
+			if valueNodes is not None and len(valueNodes) == 1:
+				# Get value in the first child of the 'value' node
+				varValue = getNodeContent(valueNodes[0])
+				dst[varName] = varValue
+
+	def addTargetVars(self, varNodes):
+		self._addVars(self.targetVars, varNodes)
+
+	def addTargetSetupVars(self, varNodes):
+		self._addVars(self.targetSetupVars, varNodes)
 
 	def append(self, module):
 		self._modules[module.name] = module
@@ -70,18 +87,15 @@ def loadXml(xmlPath):
 
 	modules = ModuleDb()
 
-	# Load TARGET_xxx variables
+	# Load TARGET_xxx and TARGET_SETUP_xxx variables
 	targetNodes = xmlDom.documentElement.getElementsByTagName("target")
 	if targetNodes is not None and len(targetNodes) == 1:
 		varNodes = targetNodes[0].getElementsByTagName("var")
-		for varNode in varNodes:
-			varName = varNode.getAttribute("name")
-			valueNodes = varNode.getElementsByTagName("value")
-			# Normally only one 'value' node
-			if valueNodes is not None and len(valueNodes) == 1:
-				# Get value in the first child of the 'value' node
-				varValue = getNodeContent(valueNodes[0])
-				modules.targetVars[varName] = varValue
+		modules.addTargetVars(varNodes)
+	targetSetupNodes = xmlDom.documentElement.getElementsByTagName("target-setup")
+	if targetSetupNodes is not None and len(targetSetupNodes) == 1:
+		varNodes = targetSetupNodes[0].getElementsByTagName("var")
+		modules.addTargetSetupVars(varNodes)
 
 	# Load modules
 	moduleNodes = xmlDom.documentElement.getElementsByTagName("module")

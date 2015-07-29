@@ -92,6 +92,11 @@ __dump-database-xml = \
 		$(call __dump-database-var-xml,$(__var),$(strip $(TARGET_$(__var)))) \
 	) \
 	$(call __write-xml,</target>) \
+	$(call __write-xml,<target-setup>) \
+	$(foreach __var,$(vars-TARGET_SETUP), \
+		$(call __dump-database-var-xml,$(__var),$(strip $(TARGET_SETUP_$(__var)))) \
+	) \
+	$(call __write-xml,</target-setup>) \
 	$(call __write-xml,<modules>) \
 	$(foreach __mod,$(__modules), \
 		$(eval __build := $(if $(call is-module-in-build-config,$(__mod)),yes,no)) \

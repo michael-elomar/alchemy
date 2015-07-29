@@ -69,6 +69,21 @@ else
   TARGET_PRODUCT_FULL_NAME := $(TARGET_PRODUCT)-$(TARGET_PRODUCT_VARIANT)
 endif
 
+# Only TARGET_OUT should be specified, other will be impossible to override in
+# future versions
+ifneq ("$(TARGET_OUT_BUILD)","")
+$(warning TARGET_OUT_BUILD is set, only TARGET_OUT should be specified)
+endif
+ifneq ("$(TARGET_OUT_STAGING)","")
+$(warning TARGET_OUT_STAGING, only TARGET_OUT should be specified)
+endif
+ifneq ("$(TARGET_OUT_FINAL)","")
+$(warning TARGET_OUT_FINAL, only TARGET_OUT should be specified)
+endif
+ifneq ("$(TARGET_OUT_DOC)","")
+$(warning TARGET_OUT_DOC, only TARGET_OUT should be specified)
+endif
+
 TARGET_OUT_PREFIX ?= Alchemy-out/
 TARGET_OUT ?= $(TOP_DIR)/$(TARGET_OUT_PREFIX)$(TARGET_PRODUCT_FULL_NAME)
 TARGET_OUT_BUILD ?= $(TARGET_OUT)/build
@@ -78,16 +93,10 @@ TARGET_OUT_FINAL ?= $(TARGET_OUT)/final
 TARGET_SKEL_DIRS ?=
 TARGET_NOSTRIP_FINAL ?= 0
 
-# TODO: remove completely in next version (first step is error).
-TARGET_SKEL ?=
-ifneq ("$(TARGET_SKEL)","")
-$(error Please use TARGET_SKEL_DIRS instead of TARGET_SKEL)
-endif
-
 TARGET_CONFIG_PREFIX ?= Alchemy-config/
 TARGET_CONFIG_DIR ?= $(TOP_DIR)/$(TARGET_CONFIG_PREFIX)$(TARGET_PRODUCT)-$(TARGET_PRODUCT_VARIANT)
 
-# Force usind static libraries instead of shared for module that specifies they support it
+# Force using static libraries instead of shared for module that specifies they support it
 TARGET_PBUILD_FORCE_STATIC ?= 0
 
 # Register list of tags used by a module. It can be retrieved at run time with

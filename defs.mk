@@ -123,6 +123,16 @@ is-item-in-list = $(strip $(foreach __it,$2,$(call streq,$(__it),$1)))
 # $2 : list.
 is-not-item-in-list = $(call not,$(call is-item-in-list,$1,$2))
 
+# Determine if a string starts with a given prefix
+# $1 : input string
+# $2 : prefix to check
+str-starts-with = $(strip $(call not,$(patsubst $2%,,$1)))
+
+# Determine if a string ends with a given suffix
+# $1 : input string
+# $2 : suffix to check
+str-ends-with = $(strip $(call not,$(patsubst %$2,,$1)))
+
 ###############################################################################
 ## Use some colors if requested.
 ###############################################################################
@@ -205,6 +215,9 @@ module-add = \
 	) \
 	$(eval __mod := $(LOCAL_MODULE)) \
 	$(eval __add := 1) \
+	$(if $(__clear-vars-called),$(empty), \
+		$(error $(LOCAL_PATH): $(__mod): missing include $$(CLEAR_VARS)) \
+	) \
 	$(if $(call is-module-registered,$(__mod)), \
 		$(if $(__modules.$(__mod).SDK), \
 			$(if $(patsubst $(BUILD_SYSTEM)/%,,$(LOCAL_PATH)), \
@@ -249,7 +262,8 @@ module-add = \
 	$(if $(call macro-compare,TARGET_$(__var),saved-TARGET_$(__var)),$(empty), \
 		$(eval __modules-with-global-prerequisites += $(__mod)) \
 		$(call macro-copy,saved-TARGET_$(__var),TARGET_$(__var)) \
-	)
+	) \
+	$(eval __clear-vars-called :=)
 
 ###############################################################################
 ## Get the module name as a 'define' value to be used in kconfig and CFLAGS.
@@ -371,7 +385,7 @@ is-module-in-build-config = $(strip \
 					$(false) \
 				) \
 				, \
-				$(call not $(call is-var-defined,__modules.$(__mod).force-disabled)) \
+				$(call not,$(call is-var-defined,__modules.$(__mod).force-disabled)) \
 			) \
 		) \
 	))
@@ -1055,15 +1069,12 @@ all-cc-files-in = $(call all-files-in,$1,.cc)
 ###############################################################################
 ## Check compilation flags for some forbidden stuff.
 ## $1 : variable to check (its name, not its value).
-## $2 : list of flags to check for their presence in $1.
+## $2 : list of flags to check for their presence in $1 (can be a pattern).
 ## $3 : message to display in case of error.
 ###############################################################################
 check-flags = \
-	$(foreach __flag,$2, \
-		$(if $(findstring $(__flag),$($1)), \
-			$(error $(LOCAL_PATH): $1 contains $(__flag) : $3) \
-		) \
-	)
+	$(eval __r := $(filter $2,$($1))) \
+	$(if $(__r),$(error $(LOCAL_PATH): $1 contains $(__r) : $3))
 
 ###############################################################################
 ## Add debug flags to current LOCAL_xxx macros.
@@ -1321,6 +1332,38 @@ check-custom-macro = \
 ## message displayed when used while TARGET_DEFAULT_ARM_MODE is 'arm'.
 ###############################################################################
 
+# Old variables still suported but no more in vars-LOCAL or macros-LOCAL
+__compat-vars-LOCAL := \
+	AUTOTOOLS_ARCHIVE \
+	AUTOTOOLS_VERSION \
+	AUTOTOOLS_SUBDIR \
+	AUTOTOOLS_PATCHES \
+	AUTOTOOLS_CMD_UNPACK \
+	AUTOTOOLS_CMD_POST_UNPACK \
+	AUTOTOOLS_COPY_TO_BUILD_DIR \
+
+# All allowed variables
+__all-vars-LOCAL := \
+	$(vars-LOCAL) \
+	$(macros-LOCAL) \
+	$(__compat-vars-LOCAL)
+
+# Get all defined LOCAL_XXX variables
+__get-defined-local-vars = $(filter LOCAL_%,$(.VARIABLES))
+
+# Check all defined LOCAL_XXX variables
+__check-local-vars = \
+	$(foreach __v,$(__get-defined-local-vars), \
+		$(call __check-local-var,$1,$(__v)) \
+	)
+
+# Check a LOCAL_XXX variable for validity, clear it if unknown to the system
+__check-local-var = $(if $(value $2), \
+	$(if $(filter $(patsubst LOCAL_%,%,$2),$(__all-vars-LOCAL)),$(empty), \
+		$(info $1: defining unknown LOCAL variable $2) \
+		$(eval $2 :=) \
+	))
+
 # This variable will hold the list of modules with global prerequisites
 # Those module will always have their rule loaded in case the global
 # prerequisites need to be updated
@@ -1346,7 +1389,8 @@ user-makefile-after-include = \
 				$(call macro-copy,TARGET_$(__var),saved-TARGET_$(__var)) \
 			) \
 		) \
-	)
+	) \
+	$(call __check-local-vars,$1)
 
 ###############################################################################
 ## Print some banners.

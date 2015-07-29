@@ -38,8 +38,12 @@ EXCLUDE_FILTERS_PYTHON = [".py", ".pyc", ".pyo"]
 # Files to exclude
 EXCLUDE_FILES = [
 	".gitignore",
-	"Image", "zImage*", "bzImage", "uImage", "kernel.plf", "vmlinux",
 	"THIS_IS_NOT_THE_DIRECTORY_FOR_NATIVE_CHROOT"]
+
+# Files to keep in boot directory
+BOOT_FILES = [
+	"zImage", "*.dtb", "*.conf",
+]
 
 # Linux folders/links
 LINUX_BASIC_SKEL = [
@@ -304,8 +308,6 @@ def addPathInFileList(relPath, isDir, options):
 def doCopy(dstFileName, srcFileName, options, forceCopy=False):
 	relPath = os.path.relpath(dstFileName, options.finalDir)
 
-	addPathInFileList(relPath, False, options)
-
 	# do we need to strip ?
 	doStrip = False
 	if options.strip != None \
@@ -313,6 +315,12 @@ def doCopy(dstFileName, srcFileName, options, forceCopy=False):
 		and isExec(srcFileName) \
 		and canStrip(srcFileName):
 		doStrip = True
+
+	# If the file to be stripped is in usr/lib/debug, simply skip it
+	if doStrip and relPath.startswith("usr/lib/debug"):
+		return
+
+	addPathInFileList(relPath, False, options)
 
 	# check strip filter
 	if doStrip and options.reStripFilters:
@@ -395,8 +403,16 @@ def processDir(rootDir, options, withEmptyDir, copyType, forceCopy=False):
 			srcFileName = os.path.join(dirPath, fileName)
 			relPath = os.path.relpath(srcFileName, rootDir)
 			if os.path.splitext(srcFileName)[1] in EXCLUDE_FILTERS:
-				logging.debug("Exclude file : %s", relPath) 
+				logging.debug("Exclude file : %s", relPath)
 				continue
+
+			# Only keep some files in boot dir
+			if relPath.startswith("boot"):
+				baseName = os.path.basename(relPath)
+				if not any([fnmatch.fnmatch(baseName, pattern) for pattern in BOOT_FILES]):
+					logging.debug("Exclude file : %s", relPath)
+					continue
+
 			# go
 			if copyType == CopyType.ALL \
 				or (copyType == CopyType.NO_LINKS and not os.path.islink(srcFileName)) \

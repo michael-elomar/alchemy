@@ -43,12 +43,11 @@ endef
 ###############################################################################
 PLFTOOL ?= plftool
 MK_KERNEL_PLF ?= mk_kernel_plf
-KERNEL_ZIMAGE := $(TARGET_OUT_STAGING)/boot/zImage
 define gen-image-plf
-	$(Q) if [ -f "$(KERNEL_ZIMAGE)" ]; then \
+	$(Q) if [ -f "$(TARGET_OUT_FINAL)/boot/zImage" ]; then \
 		$(MK_KERNEL_PLF) \
 			"ignore-boot.cfg" \
-			$(KERNEL_ZIMAGE) \
+			$(TARGET_OUT_FINAL)/boot/zImage \
 			$(TARGET_OUT_BUILD)/linux/.config \
 			$(TARGET_OUT)/kernel.plf; \
 		$(PLFTOOL) -a u_data=$(TARGET_OUT)/kernel.plf $1; \
@@ -56,7 +55,7 @@ define gen-image-plf
 		echo "Image plf: no kernel image found"; \
 	fi
 	$(Q) cd $(TARGET_OUT_FINAL); \
-		find . ! -name '.' -printf '%P\n' | $(FIXSTAT) | \
+		find . -name 'boot' -prune -o ! -name '.' -printf '%P\n' | $(FIXSTAT) | \
 			plfbatch '-a u_unixfile="&"' $1
 ifneq ("$(TARGET_IMAGE_PATH_MAP_FILE)","")
 	$(Q) PLFTOOL=$(PLFTOOL) $(BUILD_SYSTEM)/scripts/plfremap.py \
@@ -118,7 +117,7 @@ $(eval $(call image-rules,ext4))
 .PHONY: image-all-clean
 image-all-clean:
 
-# SHortcut when TARGET_IMAGE_FORMAT is defined
+# Shortcut when TARGET_IMAGE_FORMAT is defined
 .PHONY: image image-clean
 image: image-$(subst .,-,$(TARGET_IMAGE_FORMAT))
 image-clean: image-$(subst .,-,$(TARGET_IMAGE_FORMAT))-clean
@@ -158,7 +157,7 @@ endif
 fixstat-script:
 	@( \
 		echo "#!/bin/sh"; \
-		echo "$(FIXSTAT)"; \
+		echo "$(FIXSTAT) \"\$$@\""; \
 	) > $(TARGET_OUT)/fixstat.sh
 	@chmod +x $(TARGET_OUT)/fixstat.sh
 
@@ -167,23 +166,7 @@ fixstat-script-clean:
 	@rm -f $(TARGET_OUT)/fixstat.sh
 
 ###############################################################################
-## Script for fixing permissions on-the-fly in native final tree.
+## Setup dependencies
 ###############################################################################
-.PHONY: native-fix-script
-native-fix-script:
-	$(Q) if [ -f $(TARGET_OUT)/filelist.txt ]; then \
-		cd $(TARGET_OUT_FINAL); \
-			cat $(TARGET_OUT)/filelist.txt | \
-			$(FIXSTAT) --generate-fix-script > \
-			$(TARGET_OUT_FINAL)/native-fixperms.sh; \
-	fi
-	@chmod +x $(TARGET_OUT_FINAL)/native-fixperms.sh
-
-.PHONY: native-fix-script-clean
-native-fix-script-clean:
-	$(Q) rm -f $(TARGET_OUT_FINAL)/native-fixperms.sh
-
-# Setup dependencies
 post-build: fixstat-script
-native-fix-script: final
-image-all-clean: native-fix-script-clean fixstat-script-clean
+image-all-clean: fixstat-script-clean

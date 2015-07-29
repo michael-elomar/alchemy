@@ -21,6 +21,8 @@ ifeq ("$(TARGET_OS)-$(TARGET_OS_FLAVOUR)","$(HOST_OS)-native")
     TARGET_QT_PLATFORM ?= gcc_32
   else ifeq ("$(TARGET_OS)-$(TARGET_ARCH)-$(HOST_ARCH)","linux-x86-x86")
     TARGET_QT_PLATFORM ?= gcc
+  else
+    TARGET_QT_PLATFORM ?= unknown
   endif
 else ifeq ("$(TARGET_OS)","linux")
   ifeq ("$(TARGET_OS_FLAVOUR)","android")
@@ -29,6 +31,8 @@ else ifeq ("$(TARGET_OS)","linux")
     TARGET_QT_PLATFORM ?= linux_64
   else ifeq ("$(TARGET_OS_FLAVOUR)-$(TARGET_ARCH)","native-x86")
     TARGET_QT_PLATFORM ?= linux_32
+  else
+    TARGET_QT_PLATFORM ?= unknown
   endif
 else ifeq ("$(TARGET_OS)","darwin")
   ifeq ("$(TARGET_OS_FLAVOUR)","native")
@@ -36,6 +40,8 @@ else ifeq ("$(TARGET_OS)","darwin")
   else
     TARGET_QT_PLATFORM ?= ios
   endif
+else
+  TARGET_QT_PLATFORM ?= unknown
 endif
 
 # Try to auto-detect Qt SDK path

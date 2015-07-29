@@ -1,5 +1,5 @@
 ###############################################################################
-## @file native-setup.mk
+## @file linux/native/setup.mk
 ## @author Y.M. Morgan
 ## @date 2012/10/18
 ##
@@ -9,29 +9,16 @@
 # Use empty cross compilation flag by default
 TARGET_CROSS ?=
 
-# Update flags based on architecture
-# 64-bit requires -fPIC to build shared libraries
-ifeq ("$(TARGET_ARCH)","x64")
-  TARGET_GLOBAL_CFLAGS += -m64 -fPIC
-  TARGET_GLOBAL_LDFLAGS += -m64
-  TARGET_GLOBAL_LDFLAGS_SHARED += -m64
-else
-  TARGET_GLOBAL_CFLAGS += -m32
-  TARGET_GLOBAL_LDFLAGS += -m32
-  TARGET_GLOBAL_LDFLAGS_SHARED += -m32
-endif
-
 # Assume everybody will want this
 TARGET_GLOBAL_LDLIBS += -pthread -lrt
 TARGET_GLOBAL_LDLIBS_SHARED += -pthread -lrt
 
 # Machine targetted by toolchain to be used by autotools
+# Use a name that will force autotools to believe we are cross-compiling
 ifeq ("$(TARGET_ARCH)","x64")
   GNU_TARGET_NAME := x86_64-pc-linux-gnu
-  TOOLCHAIN_TARGET_NAME := x86_64-linux-gnu
-else
-  GNU_TARGET_NAME := i386-pc-linux-gnu
-  TOOLCHAIN_TARGET_NAME := i386-linux-gnu
+else ifeq ("$(TARGET_ARCH)","x86")
+  GNU_TARGET_NAME := i686-pc-linux-gnu
 endif
 
 # Let autotools detect full native builds
@@ -41,7 +28,15 @@ ifeq ("$(TARGET_OS_FLAVOUR)","native")
   endif
 endif
 
+# Copy host libc
+ifeq ("$(TARGET_OS_FLAVOUR)","native-chroot")
+  TOOLCHAIN_LIBC := /
+endif
+
 TARGET_CPU_HAS_SSE2 := 1
 TARGET_CPU_HAS_SSSE3 := 1
 # -march=native seems better but this would most likely break distcc builds
 TARGET_GLOBAL_CFLAGS += -msse -msse2 -mssse3
+
+# Get gdbserver path if available
+TOOLCHAIN_GDBSERVER := $(wildcard /usr/bin/gdbserver)

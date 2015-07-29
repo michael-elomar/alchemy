@@ -1,5 +1,5 @@
 ###############################################################################
-## @file bionic-setup.mk
+## @file linux/bionic/setup.mk
 ## @author Y.M. Morgan
 ## @date 2012/10/18
 ##

@@ -25,3 +25,6 @@ LOCAL_AUTOTOOLS_PATCHES :=
 LOCAL_AUTOTOOLS_CMD_UNPACK :=
 LOCAL_AUTOTOOLS_CMD_POST_UNPACK :=
 LOCAL_AUTOTOOLS_COPY_TO_BUILD_DIR :=
+
+# This will be cleared after module is added and checked before adding it
+__clear-vars-called := 1

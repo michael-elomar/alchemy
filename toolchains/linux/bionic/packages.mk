@@ -1,5 +1,5 @@
 ###############################################################################
-## @file bionic-packages.mk
+## @file linux/bionic/packages.mk
 ## @author Y.M. Morgan
 ## @date 2012/10/18
 ##

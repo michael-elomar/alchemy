@@ -61,14 +61,27 @@ endif
 TARGET_GLOBAL_ARFLAGS += rcs
 
 ###############################################################################
-## Arm setup.
+## Architecture specific setup.
 ###############################################################################
+
 ifeq ("$(TARGET_ARCH)","arm")
    include $(BUILD_SYSTEM)/toolchains/arm-setup.mk
 endif
 
 ifeq ("$(TARGET_ARCH)","aarch64")
   TARGET_GLOBAL_CFLAGS += -fPIC
+endif
+
+ifeq ("$(TARGET_ARCH)","x64")
+  TARGET_GLOBAL_CFLAGS += -m64 -fPIC
+  TARGET_GLOBAL_LDFLAGS += -m64
+  TARGET_GLOBAL_LDFLAGS_SHARED += -m64
+endif
+
+ifeq ("$(TARGET_ARCH)","x86")
+  TARGET_GLOBAL_CFLAGS += -m32
+  TARGET_GLOBAL_LDFLAGS += -m32
+  TARGET_GLOBAL_LDFLAGS_SHARED += -m32
 endif
 
 ###############################################################################
@@ -89,7 +102,7 @@ ifeq ("$(TARGET_LIBC)","")
   endif
 endif
 
-# Prefix of output
+# Suffix of output
 TARGET_STATIC_LIB_SUFFIX := .a
 TARGET_SHARED_LIB_SUFFIX := .so
 TARGET_EXE_SUFFIX :=
@@ -104,7 +117,7 @@ ifeq ("$(TARGET_OS)","ecos")
 # Force libc
 TARGET_LIBC := ecos
 
-# Prefix of output
+# Suffix of output
 TARGET_STATIC_LIB_SUFFIX := .a
 TARGET_SHARED_LIB_SUFFIX := .so.a
 TARGET_EXE_SUFFIX := .elf
@@ -130,14 +143,34 @@ TARGET_GLOBAL_PCH_FLAGS := -x c++-header
 endif
 
 ###############################################################################
-## Include specific libc setup.
+## mingw32 setup.
+###############################################################################
+ifeq ("$(TARGET_OS)","mingw32")
+
+# Force libc
+TARGET_LIBC := mingw32
+
+# Suffix of output
+TARGET_STATIC_LIB_SUFFIX := .a
+TARGET_SHARED_LIB_SUFFIX := .dll
+TARGET_EXE_SUFFIX := .exe
+
+endif
+
+###############################################################################
+## Include os specific setup.
 ###############################################################################
 
-include $(BUILD_SYSTEM)/toolchains/$(TARGET_LIBC)/$(TARGET_LIBC)-setup.mk
+include $(BUILD_SYSTEM)/toolchains/$(TARGET_OS)/setup.mk
 
 ###############################################################################
 ## Tools for target.
 ###############################################################################
+
+# Make sure TARGET_CROSS is defined (empty by default)
+ifndef TARGET_CROSS
+  TARGET_CROSS :=
+endif
 
 ifneq ("$(USE_CLANG)","1")
 
@@ -196,9 +229,30 @@ ifeq ("$(TARGET_CC_PATH)","")
 $(error Unable to find compiler: $(TARGET_CC))
 endif
 
+# TODO: remove when not used anymore
+TARGET_COMPILER_PATH := $(shell PARAM=$(TARGET_CC);echo $${PARAM%/bin*})
+
 # Machine targetted by toolchain to be used by autotools and libc installation
 ifndef TOOLCHAIN_TARGET_NAME
-  TOOLCHAIN_TARGET_NAME := $(shell $(TARGET_CC) -dumpmachine)
+  TOOLCHAIN_TARGET_NAME := $(shell $(TARGET_CC) $(TARGET_GLOBAL_CFLAGS) -print-multiarch 2>&1)
+  ifeq ("$(TOOLCHAIN_TARGET_NAME)","")
+    TOOLCHAIN_TARGET_NAME := $(shell $(TARGET_CC) $(TARGET_GLOBAL_CFLAGS) -dumpmachine)
+  else ifneq ("$(findstring -print-multiarch,$(TOOLCHAIN_TARGET_NAME))","")
+    TOOLCHAIN_TARGET_NAME := $(shell $(TARGET_CC) $(TARGET_GLOBAL_CFLAGS) -dumpmachine)
+  endif
+endif
+
+# Clang uses gcc toochain(libc&binutils) to cross-compile
+# The sysroot is the top level one (without subarch like thumb2 for arm)
+ifeq ("$(TARGET_OS)","linux")
+__toolchain_sysroot := $(shell $(TARGET_CROSS)gcc $(TARGET_GLOBAL_CFLAGS) -print-sysroot)
+__toolchain_root := $(shell PARAM=$(TARGET_CC_PATH); echo $${PARAM%/bin*})
+TARGET_GLOBAL_CFLAGS_clang += --sysroot=$(__toolchain_sysroot) \
+	-target $(TOOLCHAIN_TARGET_NAME) -B $(__toolchain_root)
+TARGET_GLOBAL_LDFLAGS_clang += --sysroot=$(__toolchain_sysroot) \
+	-target $(TOOLCHAIN_TARGET_NAME) -B $(__toolchain_root)
+TARGET_GLOBAL_LDFLAGS_SHARED_clang += --sysroot=$(__toolchain_sysroot) \
+	-target $(TOOLCHAIN_TARGET_NAME) -B $(__toolchain_root)
 endif
 
 # Determine compiler version
@@ -215,6 +269,7 @@ endif
 # retrieve the path to the target's loader
 $(shell rm -f a.out)
 ifeq ("$(TARGET_OS)","linux")
+ifneq ("$(TARGET_OS_FLAVOUR)","android")
 TARGET_LOADER := $(shell sh -c " \
 	mkdir -p $(TARGET_OUT_BUILD); \
 	echo 'int main;' | \
@@ -223,6 +278,6 @@ TARGET_LOADER := $(shell sh -c " \
 	grep 'interpreter:' | \
 	sed 's/.*: \\(.*\\)\\]/\\1/g'; \
 	rm -f $(TARGET_OUT_BUILD)/a.out")
-else
-TARGET_LOADER :=
 endif
+endif
+TARGET_LOADER ?=

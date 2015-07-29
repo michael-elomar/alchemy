@@ -49,6 +49,7 @@ else
   CMAKE_SEARCH_OPTION += ONLY
 endif
 
+__target_cmake_root_path :=
 $(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
 	$(eval __target_cmake_root_path := $(__target_cmake_root_path) \"$(__dir)\") \
 )
