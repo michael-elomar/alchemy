@@ -229,6 +229,9 @@ ifeq ("$(TARGET_CC_PATH)","")
 $(error Unable to find compiler: $(TARGET_CC))
 endif
 
+# TODO: remove when not used anymore
+TARGET_COMPILER_PATH := $(shell PARAM=$(TARGET_CC);echo $${PARAM%/bin*})
+
 # Machine targetted by toolchain to be used by autotools and libc installation
 ifndef TOOLCHAIN_TARGET_NAME
   TOOLCHAIN_TARGET_NAME := $(shell $(TARGET_CC) $(TARGET_GLOBAL_CFLAGS) -print-multiarch 2>&1)
