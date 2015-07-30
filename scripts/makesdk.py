@@ -95,7 +95,9 @@ def copyStaging(srcDir, dstDir):
 		os.path.join("usr", "share", "vala"),
 		os.path.join("usr", "src", "linux-sdk"),
 		os.path.join("usr", "local", "cuda-6.5"),
-		"android", "toolchain",
+		"host",
+		"android",
+		"toolchain",
 	]
 	exclude = ["*.la"]
 	for dirName in dirs_to_keep:
