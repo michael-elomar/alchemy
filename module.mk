@@ -701,13 +701,6 @@ $(foreach __f,$(__copy-to-build-dir-src-files), \
 
 all_prerequisites += $(__copy-to-build-dir-dst-files)
 
-# Make sure they will be copied before the unpack or configure step
-#ifneq ("$(value LOCAL_ARCHIVE_CMD_POST_UNPACK)","")
-#$(unpacked_file): $(__autotools-dst-files)
-#else
-#$(configured_file): $(__autotools-dst-files)
-#endif
-
 endif
 
 ###############################################################################
@@ -759,6 +752,11 @@ define __archive-apply-patches
 		$(PRIVATE_PATH) \
 		$(PRIVATE_ARCHIVE_PATCHES)
 endef
+
+# Copy in build dir shall be done first
+ifeq ("$(LOCAL_COPY_TO_BUILD_DIR)","1")
+$(unpacked_file): $(__copy-to-build-dir-dst-files)
+endif
 
 $(unpacked_file): $(archive_file) $(addprefix $(LOCAL_PATH)/,$(patches))
 ifneq ("$(archive_file)","")
