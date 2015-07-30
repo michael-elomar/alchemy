@@ -755,7 +755,7 @@ endef
 
 # Copy in build dir shall be done first
 ifeq ("$(LOCAL_COPY_TO_BUILD_DIR)","1")
-$(unpacked_file): $(__copy-to-build-dir-dst-files)
+$(unpacked_file): | $(__copy-to-build-dir-dst-files)
 endif
 
 $(unpacked_file): $(archive_file) $(addprefix $(LOCAL_PATH)/,$(patches))
