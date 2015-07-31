@@ -32,8 +32,13 @@ _libc_lib_names := \
 	libgcc_s \
 	libm \
 	libnsl \
+	libnss_compat \
+	libnss_db \
 	libnss_dns \
 	libnss_files \
+	libnss_hesiod \
+	libnss_nis \
+	libnss_nisplus \
 	libpthread \
 	libresolv \
 	librt \
@@ -156,7 +161,7 @@ _libc_copy_files = \
 
 # Install rule
 # use $(endl) to separate commands on separate lines
-$(_libc_installed_file):
+$(_libc_installed_file): $(BUILD_SYSTEM)/toolchains/libc.mk
 	@mkdir -p $(dir $@)
 	@mkdir -p $(TARGET_OUT_STAGING)/usr/include/$(_libc_arch_subdir)
 	$(call _libc_copy_files,$(_libc_lib_files),lib)
