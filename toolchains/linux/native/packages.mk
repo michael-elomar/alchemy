@@ -193,4 +193,11 @@ LOCAL_EXPORT_CFLAGS := $(shell pkg-config --cflags freetype2)
 LOCAL_EXPORT_LDLIBS := $(shell pkg-config --libs freetype2)
 include $(BUILD_PREBUILT)
 
+ifeq ("$(shell pkg-config --exists libcrypto; echo $$?)","0")
+include $(CLEAR_VARS)
+LOCAL_MODULE := libcrypto
+LOCAL_EXPORT_LDLIBS := $(shell pkg-config --libs libcrypto)
+include $(BUILD_PREBUILT)
+endif
+
 endif
