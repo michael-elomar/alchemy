@@ -374,6 +374,9 @@ def writeTargetSetupVars(ctx, name):
 		for dirPath in ctx.sdkDirs:
 			val = val.replace(dirPath, "$(LOCAL_PATH)")
 		val = val.replace(ctx.stagingDir, "$(LOCAL_PATH)")
+		# Escape quotes
+		if name == "GLOBAL_CFLAGS" or name == "GLOBAL_CXXFLAGS":
+			val = val.replace("\"", "\\\"")
 		ctx.setup.write("TARGET_%s :=" % name)
 		for field in val.split():
 			if field.startswith("-"):
