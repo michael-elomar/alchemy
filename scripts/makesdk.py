@@ -455,6 +455,7 @@ def main():
 		ctx.atom.write("define %s\n" % macro.name)
 		ctx.atom.write(macro.value)
 		ctx.atom.write("\nendef\n")
+		ctx.atom.write("$(call local-register-custom-macro,%s)\n" % macro.name)
 
 	# Write the atom.mk
 	with open(os.path.join(ctx.outDir, "atom.mk"), "w") as atomFile:
