@@ -770,6 +770,11 @@ endif
 	@mkdir -p $(dir $@)
 	@touch $@
 
+# Make sure unpack is done after copying files in build directory
+ifeq ("$(LOCAL_COPY_TO_BUILD_DIR)","1")
+$(unpacked_file): $(__copy-to-build-dir-dst-files)
+endif
+
 $(LOCAL_TARGETS): PRIVATE_ARCHIVE := $(archive_file)
 $(LOCAL_TARGETS): PRIVATE_ARCHIVE_UNPACK_DIR := $(unpack_dir)
 $(LOCAL_TARGETS): PRIVATE_ARCHIVE_SUBDIR := $(LOCAL_ARCHIVE_SUBDIR)
