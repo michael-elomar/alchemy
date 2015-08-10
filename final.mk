@@ -128,7 +128,7 @@ ifeq ("$(TARGET_LIBC)","eglibc")
 	fi
 	$(Q) $(LDCONFIG) -X -r $(TARGET_OUT_FINAL)
 endif
-ifeq ("$(TARGET_SKEL_DIRS)","")
+ifeq ("$(TARGET_SDK_DIRS)","")
 ifeq ("$(TARGET_OS)","linux")
 ifneq ("$(TARGET_OS_FLAVOUR)","native")
 	$(Q) $(BUILD_SYSTEM)/scripts/checkdyndeps.py $(TARGET_OUT_FINAL)
