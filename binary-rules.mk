@@ -17,56 +17,78 @@ ifneq ("$(strip $(LOCAL_PBUILD_HOOK))","")
   LOCAL_CFLAGS += -funsigned-char
 endif
 
+# Sub-directory inside module build directory where object files will be put
+obj_subdir := obj
+
+# Handle atom.mk that declare source files in a directory that is not a direct
+# child of LOCAL_PATH
+#
+# Using additional level in obj_subdir makes sure that object files will stay
+# in 'obj' subdir...
+#
+# Up until now ../ was working BUT ../../ was definitely WRONG so print a
+# message for them.
+# ../../.. are not checked (will be treated as ../../)
+#
+$(if $(filter ../%,$(LOCAL_SRC_FILES)), \
+	$(if $(filter ../../%,$(LOCAL_SRC_FILES)), \
+		$(info $(LOCAL_PATH): $(LOCAL_MODULE) uses ../../ in sources files) \
+		$(eval obj_subdir := $(obj_subdir)/dotdot/dotdot) \
+		, \
+		$(eval obj_subdir := $(obj_subdir)/dotdot) \
+	) \
+)
+
 ###############################################################################
 ## List of sources, objects and libraries.
 ###############################################################################
 
 cpp_sources := $(filter %.cpp,$(LOCAL_SRC_FILES))
-cpp_objects := $(addprefix $(build_dir)/obj/,$(cpp_sources:.cpp=.cpp.o))
+cpp_objects := $(addprefix $(build_dir)/$(obj_subdir)/,$(cpp_sources:.cpp=.cpp.o))
 
 cxx_sources := $(filter %.cxx,$(LOCAL_SRC_FILES))
-cxx_objects := $(addprefix $(build_dir)/obj/,$(cxx_sources:.cxx=.cxx.o))
+cxx_objects := $(addprefix $(build_dir)/$(obj_subdir)/,$(cxx_sources:.cxx=.cxx.o))
 
 cc_sources := $(filter %.cc,$(LOCAL_SRC_FILES))
-cc_objects := $(addprefix $(build_dir)/obj/,$(cc_sources:.cc=.cc.o))
+cc_objects := $(addprefix $(build_dir)/$(obj_subdir)/,$(cc_sources:.cc=.cc.o))
 
 c_sources := $(filter %.c,$(LOCAL_SRC_FILES))
-c_objects := $(addprefix $(build_dir)/obj/,$(c_sources:.c=.c.o))
+c_objects := $(addprefix $(build_dir)/$(obj_subdir)/,$(c_sources:.c=.c.o))
 
 cu_sources := $(filter %.cu,$(LOCAL_SRC_FILES))
-cu_objects := $(addprefix $(build_dir)/obj/,$(cu_sources:.cu=.cu.o))
+cu_objects := $(addprefix $(build_dir)/$(obj_subdir)/,$(cu_sources:.cu=.cu.o))
 
 s_sources := $(filter %.s,$(LOCAL_SRC_FILES))
-s_objects := $(addprefix $(build_dir)/obj/,$(s_sources:.s=.s.o))
+s_objects := $(addprefix $(build_dir)/$(obj_subdir)/,$(s_sources:.s=.s.o))
 
 S_sources := $(filter %.S,$(LOCAL_SRC_FILES))
-S_objects := $(addprefix $(build_dir)/obj/,$(S_sources:.S=.S.o))
+S_objects := $(addprefix $(build_dir)/$(obj_subdir)/,$(S_sources:.S=.S.o))
 
 gen_cpp_sources := $(filter %.cpp,$(LOCAL_GENERATED_SRC_FILES))
-gen_cpp_objects := $(addprefix $(build_dir)/obj/,$(gen_cpp_sources:.cpp=.cpp.o))
+gen_cpp_objects := $(addprefix $(build_dir)/$(obj_subdir)/,$(gen_cpp_sources:.cpp=.cpp.o))
 
 gen_cxx_sources := $(filter %.cxx,$(LOCAL_GENERATED_SRC_FILES))
-gen_cxx_objects := $(addprefix $(build_dir)/obj/,$(gen_cxx_sources:.cxx=.cxx.o))
+gen_cxx_objects := $(addprefix $(build_dir)/$(obj_subdir)/,$(gen_cxx_sources:.cxx=.cxx.o))
 
 gen_cc_sources := $(filter %.cc,$(LOCAL_GENERATED_SRC_FILES))
-gen_cc_objects := $(addprefix $(build_dir)/obj/,$(gen_cc_sources:.cc=.cc.o))
+gen_cc_objects := $(addprefix $(build_dir)/$(obj_subdir)/,$(gen_cc_sources:.cc=.cc.o))
 
 gen_c_sources := $(filter %.c,$(LOCAL_GENERATED_SRC_FILES))
-gen_c_objects := $(addprefix $(build_dir)/obj/,$(gen_c_sources:.c=.c.o))
+gen_c_objects := $(addprefix $(build_dir)/$(obj_subdir)/,$(gen_c_sources:.c=.c.o))
 
 gen_s_sources := $(filter %.s,$(LOCAL_GENERATED_SRC_FILES))
-gen_s_objects := $(addprefix $(build_dir)/obj/,$(gen_s_sources:.s=.s.o))
+gen_s_objects := $(addprefix $(build_dir)/$(obj_subdir)/,$(gen_s_sources:.s=.s.o))
 
 gen_S_sources := $(filter %.S,$(LOCAL_GENERATED_SRC_FILES))
-gen_S_objects := $(addprefix $(build_dir)/obj/,$(gen_S_sources:.S=.S.o))
+gen_S_objects := $(addprefix $(build_dir)/$(obj_subdir)/,$(gen_S_sources:.S=.S.o))
 
 vala_sources := $(filter %.vala,$(LOCAL_SRC_FILES))
-vala_c_sources := $(addprefix $(build_dir)/obj/,$(vala_sources:.vala=.c))
-vala_objects := $(addprefix $(build_dir)/obj/,$(vala_sources:.vala=.c.o))
+vala_c_sources := $(addprefix $(build_dir)/$(obj_subdir)/,$(vala_sources:.vala=.c))
+vala_objects := $(addprefix $(build_dir)/$(obj_subdir)/,$(vala_sources:.vala=.c.o))
 
 ifneq ("$(vala_objects)","")
-vala_done_file := $(build_dir)/obj/vala.done
-vala_deps_file := $(build_dir)/obj/vala.d
+vala_done_file := $(build_dir)/$(obj_subdir)/vala.done
+vala_deps_file := $(build_dir)/$(obj_subdir)/vala.d
 vala_header_file := $(build_dir)/include/$(LOCAL_MODULE).vala.h
 vala_vapi_file := $(build_dir)/include/$(LOCAL_MODULE).vapi
 vala_staging_c_sources_dir := $(TARGET_OUT_STAGING)/usr/src/vala/$(LOCAL_MODULE)
@@ -119,7 +141,7 @@ all_internal_depends += $(all_autoconf)
 
 # cpp files
 ifneq ("$(strip $(cpp_objects))","")
-$(cpp_objects): $(build_dir)/obj/%.cpp.o: $(LOCAL_PATH)/%.cpp
+$(cpp_objects): $(build_dir)/$(obj_subdir)/%.cpp.o: $(LOCAL_PATH)/%.cpp
 	$(transform-cpp-to-o)
 ifneq ("$(skip_include_deps)","1")
 -include $(cpp_objects:%.o=%.d)
@@ -128,7 +150,7 @@ endif
 
 # cxx files
 ifneq ("$(strip $(cxx_objects))","")
-$(cxx_objects): $(build_dir)/obj/%.cxx.o: $(LOCAL_PATH)/%.cxx
+$(cxx_objects): $(build_dir)/$(obj_subdir)/%.cxx.o: $(LOCAL_PATH)/%.cxx
 	$(transform-cpp-to-o)
 ifneq ("$(skip_include_deps)","1")
 -include $(cxx_objects:%.o=%.d)
@@ -137,7 +159,7 @@ endif
 
 # cc files
 ifneq ("$(strip $(cc_objects))","")
-$(cc_objects): $(build_dir)/obj/%.cc.o: $(LOCAL_PATH)/%.cc
+$(cc_objects): $(build_dir)/$(obj_subdir)/%.cc.o: $(LOCAL_PATH)/%.cc
 	$(transform-cpp-to-o)
 ifneq ("$(skip_include_deps)","1")
 -include $(cc_objects:%.o=%.d)
@@ -146,7 +168,7 @@ endif
 
 # c files
 ifneq ("$(strip $(c_objects))","")
-$(c_objects): $(build_dir)/obj/%.c.o: $(LOCAL_PATH)/%.c
+$(c_objects): $(build_dir)/$(obj_subdir)/%.c.o: $(LOCAL_PATH)/%.c
 	$(transform-c-to-o)
 ifneq ("$(skip_include_deps)","1")
 -include $(c_objects:%.o=%.d)
@@ -155,7 +177,7 @@ endif
 
 # cu files (cuda)
 ifneq ("$(strip $(cu_objects))","")
-$(cu_objects): $(build_dir)/obj/%.cu.o: $(LOCAL_PATH)/%.cu
+$(cu_objects): $(build_dir)/$(obj_subdir)/%.cu.o: $(LOCAL_PATH)/%.cu
 	$(transform-cu-to-o)
 ifneq ("$(skip_include_deps)","1")
 -include $(cu_objects:%.o=%.d)
@@ -165,14 +187,14 @@ endif
 # s files
 # There is NO dependency files for raw asm code...
 ifneq ("$(strip $(s_objects))","")
-$(s_objects): $(build_dir)/obj/%.s.o: $(LOCAL_PATH)/%.s
+$(s_objects): $(build_dir)/$(obj_subdir)/%.s.o: $(LOCAL_PATH)/%.s
 	$(transform-s-to-o)
 endif
 
 # S files
 # There is dependency files for asm code...
 ifneq ("$(strip $(S_objects))","")
-$(S_objects): $(build_dir)/obj/%.S.o: $(LOCAL_PATH)/%.S
+$(S_objects): $(build_dir)/$(obj_subdir)/%.S.o: $(LOCAL_PATH)/%.S
 	$(transform-s-to-o)
 ifneq ("$(skip_include_deps)","1")
 -include $(S_objects:%.o=%.d)
@@ -181,7 +203,7 @@ endif
 
 # Generated cpp files
 ifneq ("$(strip $(gen_cpp_objects))","")
-$(gen_cpp_objects): $(build_dir)/obj/%.cpp.o: $(build_dir)/%.cpp
+$(gen_cpp_objects): $(build_dir)/$(obj_subdir)/%.cpp.o: $(build_dir)/%.cpp
 	$(transform-cpp-to-o)
 ifneq ("$(skip_include_deps)","1")
 -include $(gen_cpp_objects:%.o=%.d)
@@ -190,7 +212,7 @@ endif
 
 # Generated cxx files
 ifneq ("$(strip $(gen_cxx_objects))","")
-$(gen_cxx_objects): $(build_dir)/obj/%.cxx.o: $(build_dir)/%.cxx
+$(gen_cxx_objects): $(build_dir)/$(obj_subdir)/%.cxx.o: $(build_dir)/%.cxx
 	$(transform-cpp-to-o)
 ifneq ("$(skip_include_deps)","1")
 -include $(gen_cxx_objects:%.o=%.d)
@@ -199,7 +221,7 @@ endif
 
 # Generated cc files
 ifneq ("$(strip $(gen_cc_objects))","")
-$(gen_cc_objects): $(build_dir)/obj/%.cc.o: $(build_dir)/%.cc
+$(gen_cc_objects): $(build_dir)/$(obj_subdir)/%.cc.o: $(build_dir)/%.cc
 	$(transform-cpp-to-o)
 ifneq ("$(skip_include_deps)","1")
 -include $(gen_cc_objects:%.o=%.d)
@@ -208,7 +230,7 @@ endif
 
 # Generated c files
 ifneq ("$(strip $(gen_c_objects))","")
-$(gen_c_objects): $(build_dir)/obj/%.c.o: $(build_dir)/%.c
+$(gen_c_objects): $(build_dir)/$(obj_subdir)/%.c.o: $(build_dir)/%.c
 	$(transform-c-to-o)
 ifneq ("$(skip_include_deps)","1")
 -include $(gen_c_objects:%.o=%.d)
@@ -218,14 +240,14 @@ endif
 # Generated s files
 # There is NO dependency files for raw asm code...
 ifneq ("$(strip $(gen_s_objects))","")
-$(gen_s_objects): $(build_dir)/obj/%.s.o: $(build_dir)/%.s
+$(gen_s_objects): $(build_dir)/$(obj_subdir)/%.s.o: $(build_dir)/%.s
 	$(transform-s-to-o)
 endif
 
 # Generated S files
 # There is dependency files for asm code...
 ifneq ("$(strip $(gen_S_objects))","")
-$(gen_S_objects): $(build_dir)/obj/%.S.o: $(build_dir)/%.S
+$(gen_S_objects): $(build_dir)/$(obj_subdir)/%.S.o: $(build_dir)/%.S
 	$(transform-s-to-o)
 ifneq ("$(skip_include_deps)","1")
 -include $(gen_S_objects:%.o=%.d)
@@ -234,7 +256,7 @@ endif
 
 # vala files (.vala files are in LOCAL_PATH, generated .c and .o are in build_dir)
 ifneq ("$(strip $(vala_objects))","")
-$(vala_objects): $(build_dir)/obj/%.c.o: $(build_dir)/obj/%.c
+$(vala_objects): $(build_dir)/$(obj_subdir)/%.c.o: $(build_dir)/$(obj_subdir)/%.c
 	$(transform-c-to-o)
 $(vala_c_sources) $(vala_header_file) $(vala_vapi_file): $(vala_done_file)
 	$(empty)
@@ -249,7 +271,7 @@ $(vala_done_file): $(addprefix $(LOCAL_PATH)/,$(vala_sources))
 
 # Copy generated source files in staging directory so it can be included in symbols
 $(foreach __f,$(vala_c_sources), \
-	$(eval __dst := $(patsubst $(build_dir)/obj/%,$(vala_staging_c_sources_dir)/%,$(__f))) \
+	$(eval __dst := $(patsubst $(build_dir)/$(obj_subdir)/%,$(vala_staging_c_sources_dir)/%,$(__f))) \
 	$(eval $(call copy-one-file,$(__f),$(__dst))) \
 	$(eval vala_staging_c_sources += $(__dst)) \
 )
@@ -303,8 +325,8 @@ endif
 LOCAL_PRECOMPILED_FILE := $(strip $(LOCAL_PRECOMPILED_FILE))
 ifneq ("$(LOCAL_PRECOMPILED_FILE)","")
 
-gch_file := $(build_dir)/obj/$(LOCAL_PRECOMPILED_FILE).gch
-LOCAL_C_INCLUDES := $(build_dir)/obj $(LOCAL_C_INCLUDES)
+gch_file := $(build_dir)/$(obj_subdir)/$(LOCAL_PRECOMPILED_FILE).gch
+LOCAL_C_INCLUDES := $(build_dir)/$(obj_subdir) $(LOCAL_C_INCLUDES)
 
 # All objects will depends on the precompiled file
 $(all_objects): $(gch_file)
@@ -348,7 +370,7 @@ $(LOCAL_TARGETS): PRIVATE_C_INCLUDES := $(LOCAL_C_INCLUDES)
 $(LOCAL_TARGETS): PRIVATE_CXXFLAGS := $(LOCAL_CXXFLAGS)
 $(LOCAL_TARGETS): PRIVATE_VALAFLAGS := $(LOCAL_VALAFLAGS)
 $(LOCAL_TARGETS): PRIVATE_VALA_SOURCES := $(addprefix $(LOCAL_PATH)/,$(vala_sources))
-$(LOCAL_TARGETS): PRIVATE_VALA_OUT_DIR := $(build_dir)/obj
+$(LOCAL_TARGETS): PRIVATE_VALA_OUT_DIR := $(build_dir)/$(obj_subdir)
 $(LOCAL_TARGETS): PRIVATE_VALA_DEPS_FILE := $(vala_deps_file)
 $(LOCAL_TARGETS): PRIVATE_ARFLAGS := $(LOCAL_ARFLAGS)
 $(LOCAL_TARGETS): PRIVATE_LDFLAGS := $(LOCAL_LDFLAGS)
