@@ -6,12 +6,13 @@
 ## This file contains additional packages for toolchains.
 ###############################################################################
 
-# When a sdk is used, assume we are not building a full system, so no installation
-# of libc files is done in staging directory
-ifeq ("$(TARGET_SDK_DIRS)","")
+# Only include libc if not already present in a used sdk
+is-full-system := 0
 ifneq ("$(TOOLCHAIN_LIBC)","")
-include $(BUILD_SYSTEM)/toolchains/libc.mk
-endif
+  ifeq ("$(call is-module-registered,libc)","")
+    include $(BUILD_SYSTEM)/toolchains/libc.mk
+    is-full-system := 1
+  endif
 endif
 
 # Include os specific packages

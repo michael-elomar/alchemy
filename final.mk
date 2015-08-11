@@ -34,16 +34,11 @@ ifneq ("$(TARGET_SKEL_DIRS)","")
   $(foreach d,$(TARGET_SKEL_DIRS),$(eval MAKEFINAL_ARGS += --skel="$(d)"))
 endif
 
-# If a sdk is used, we assume that basic components shall not be put in final dir
-ifeq ("$(TARGET_SDK_DIRS)","")
-
 # Create very minimal skeleton for linux (some absolute required directories)
 ifeq ("$(TARGET_OS)","linux")
-ifneq ("$(TARGET_OS_FLAVOUR)","native")
+ifeq ("$(is-full-system)","1")
   MAKEFINAL_ARGS += --linux-basic-skel
 endif
-endif
-
 endif
 
 # When valgrind is used, some libs shall not be stripped
@@ -128,12 +123,8 @@ ifeq ("$(TARGET_LIBC)","eglibc")
 	fi
 	$(Q) $(LDCONFIG) -X -r $(TARGET_OUT_FINAL)
 endif
-ifeq ("$(TARGET_SDK_DIRS)","")
-ifeq ("$(TARGET_OS)","linux")
-ifneq ("$(TARGET_OS_FLAVOUR)","native")
+ifeq ("$(is-full-system)","1")
 	$(Q) $(BUILD_SYSTEM)/scripts/checkdyndeps.py $(TARGET_OUT_FINAL)
-endif
-endif
 endif
 	@echo `date +%s` > $(TARGET_OUT_FINAL)/etc/final.stamp
 	@echo "Done generating final tree"
