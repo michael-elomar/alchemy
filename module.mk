@@ -775,6 +775,11 @@ ifeq ("$(LOCAL_COPY_TO_BUILD_DIR)","1")
 $(unpacked_file): $(__copy-to-build-dir-dst-files)
 endif
 
+# Custom post unpack steps could need dependenciess to be built first
+ifneq ("$(value LOCAL_ARCHIVE_CMD_POST_UNPACK)","")
+$(unpacked_file): $(all_depends_build_filename)
+endif
+
 $(LOCAL_TARGETS): PRIVATE_ARCHIVE := $(archive_file)
 $(LOCAL_TARGETS): PRIVATE_ARCHIVE_UNPACK_DIR := $(unpack_dir)
 $(LOCAL_TARGETS): PRIVATE_ARCHIVE_SUBDIR := $(LOCAL_ARCHIVE_SUBDIR)
