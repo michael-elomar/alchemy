@@ -47,7 +47,6 @@ BOOT_FILES = [
 
 # Linux folders/links
 LINUX_BASIC_SKEL = [
-	["debugfs", None],
 	["dev", None],
 	["home", None],
 	["proc", None],
