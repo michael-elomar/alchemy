@@ -163,7 +163,6 @@ _libc_copy_files = \
 # use $(endl) to separate commands on separate lines
 $(_libc_installed_file): $(BUILD_SYSTEM)/toolchains/libc.mk
 	@mkdir -p $(dir $@)
-	@mkdir -p $(TARGET_OUT_STAGING)/usr/include/$(_libc_arch_subdir)
 	$(call _libc_copy_files,$(_libc_lib_files),lib)
 	$(call _libc_copy_files,$(_libc_lib_arch_files),lib/$(_libc_arch_subdir))
 	$(call _libc_copy_files,$(_libc_usrlib_files),usr/lib)

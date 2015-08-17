@@ -349,11 +349,17 @@ endif
 ## Update target flags.
 ###############################################################################
 
+# Make sure include path in staging directory exists
+$(shell mkdir -p $(TARGET_OUT_STAGING)/usr/include)
+$(shell mkdir -p $(TARGET_OUT_STAGING)/usr/include/$(TOOLCHAIN_TARGET_NAME))
+
 # Make sure that staging dir are found first in case we want to override something
 __extra-target-c-includes := $(strip \
 	$(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
-		$(__dir)/usr/include \
-		$(__dir)/usr/include/$(TOOLCHAIN_TARGET_NAME) \
+		$(wildcard \
+			$(__dir)/usr/include \
+			$(__dir)/usr/include/$(TOOLCHAIN_TARGET_NAME) \
+		) \
 	))
 TARGET_GLOBAL_C_INCLUDES := $(__extra-target-c-includes) $(TARGET_GLOBAL_C_INCLUDES)
 
