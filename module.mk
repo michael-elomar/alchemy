@@ -777,7 +777,7 @@ endif
 
 # Custom post unpack steps could need dependenciess to be built first
 ifneq ("$(value LOCAL_ARCHIVE_CMD_POST_UNPACK)","")
-$(unpacked_file): $(all_depends_build_filename)
+$(unpacked_file): | $(all_depends_build_filename)
 endif
 
 $(LOCAL_TARGETS): PRIVATE_ARCHIVE := $(archive_file)
