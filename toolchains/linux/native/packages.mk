@@ -39,6 +39,8 @@ LOCAL_MODULE := zlib
 LOCAL_EXPORT_LDLIBS := -lz
 include $(BUILD_PREBUILT)
 
+ifeq ("$(TARGET_ARCH)","$(HOST_ARCH)")
+
 ifeq ("$(shell pkg-config --exists avahi-client; echo $$?)","0")
 include $(CLEAR_VARS)
 LOCAL_MODULE := avahi
@@ -200,4 +202,5 @@ LOCAL_EXPORT_LDLIBS := $(shell pkg-config --libs libcrypto)
 include $(BUILD_PREBUILT)
 endif
 
+endif
 endif
