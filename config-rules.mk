@@ -39,6 +39,8 @@ else ifneq ("$(USE_CONFIG_CHECK)","0")
 else
 	@echo "Config check disabled : USE_CONFIG_CHECK=$(USE_CONFIG_CHECK)"
 endif
+	@mkdir -p $(TARGET_OUT)
+	@cp -af $(CONFIG_GLOBAL_FILE) $(TARGET_OUT)/global.config
 
 # Generate a global.config will all modules activated
 # As it uses ALL_BUILD_MODULES it will be a no op if the file alredy exists.

@@ -633,6 +633,7 @@ dirclean: clobber
 
 .PHONY: clobber
 clobber:
+	$(Q)rm -f $(TARGET_OUT)/global.config
 	@echo "Deleting build directory..."
 	$(Q)rm -rf $(TARGET_OUT_BUILD)
 	@echo "Deleting staging directory..."
