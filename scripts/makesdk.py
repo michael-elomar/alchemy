@@ -168,6 +168,10 @@ def copyElements(srcDir, dstDir, extensions=["*"], depth=0,
 		# Save the current level
 		current_depth = os.path.normpath(srcDir).count(os.sep)
 
+	# When executed with LANG=C (via alchemy) os.walk crashes when a path
+	# with accents is found. We force utf8 encoding to solve the issue.
+	srcDir = srcDir.encode("utf-8")
+	dstDir = dstDir.encode("utf-8")
 	for (dirPath, dirNames, fileNames) in os.walk(srcDir):
 		# Aren't we deep enough to parse the content of the files
 		if current_depth:
