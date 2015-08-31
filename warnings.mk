@@ -26,6 +26,18 @@ endif
 
 WARNINGS_COMMON_FLAGS_clang += -fdiagnostics-show-option
 
+# colored diagnostics
+#
+# always been in clang, gcc since 4.9
+ifeq ("$(USE_COLORS)","1")
+  WARNINGS_COMMON_FLAGS_clang += -fcolor-diagnostics
+
+# somehow they managed to use another option name than Clang's option
+ifneq ("$(call check-version,$(TARGET_CC_VERSION),4.9.0)","")
+  WARNINGS_COMMON_FLAGS_gcc += -fdiagnostics-color
+endif
+endif
+
 ###############################################################################
 ## Common flags.
 ###############################################################################
