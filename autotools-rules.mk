@@ -30,9 +30,10 @@ define __autotools-libtool_patch
 		$(if $($(PRIVATE_MODE)AUTOTOOLS_INSTALL_DESTDIR), \
 			sed -i.bak -e "s|^libdir='\$$install_libdir'|libdir='\$${install_libdir:\+$($(PRIVATE_MODE)OUT_STAGING)\$$install_libdir}'|1" $$f; \
 		) \
-		sed -i.bak -e "s|{wl}-rpath|{wl}-rpath-link|1" $$f; \
-		sed -i.bak -e "s|{wl}--rpath|{wl}-rpath-link|1" $$f; \
-		sed -i.bak -e "s|need_relink=yes|need_relink=no|1" $$f; \
+		sed -i.bak \
+			-e 's|\({\?wl}\?\)-\+rpath|\1-rpath-link|1' \
+			-e 's|need_relink=yes|need_relink=no|1' \
+			$$f; \
 		rm -f $$f.bak; \
 	done
 endef
