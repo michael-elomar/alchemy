@@ -65,6 +65,9 @@ def main():
 
 	# Process all ELF files in given root directory
 	for (dirPath, dirNames, fileNames) in os.walk(rootDir):
+		for excludeDir in ["proc", "sys", "dev"]:
+			if excludeDir in dirNames:
+				dirNames.remove(excludeDir)
 		for fileName in fileNames:
 			filePath = os.path.join(dirPath, fileName)
 			if os.path.islink(filePath) or not isElf(filePath):
