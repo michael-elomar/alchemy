@@ -273,7 +273,7 @@ ifneq ("$(TARGET_OS_FLAVOUR)","android")
 TARGET_LOADER := $(shell sh -c " \
 	mkdir -p $(TARGET_OUT_BUILD); \
 	echo 'int main;' | \
-	$(TARGET_CC) -o $(TARGET_OUT_BUILD)/a.out -xc -; \
+	$(TARGET_CC) $(TARGET_GLOBAL_CFLAGS) -o $(TARGET_OUT_BUILD)/a.out -xc -; \
 	readelf -l $(TARGET_OUT_BUILD)/a.out | \
 	grep 'interpreter:' | \
 	sed 's/.*: \\(.*\\)\\]/\\1/g'; \
