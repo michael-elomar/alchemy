@@ -20,7 +20,7 @@ endif
 endif
 
 ifneq ("$(TOOLCHAIN_LIBC)","")
-  GDB_SEARCH_PATH := $(GDB_SEARCH_PATH):$(TOOLCHAIN_LIBC)/lib
+  GDB_SEARCH_PATH := $(TOOLCHAIN_LIBC)/lib
   GDB_SEARCH_PATH := $(GDB_SEARCH_PATH):$(TOOLCHAIN_LIBC)/usr/lib
 endif
 
