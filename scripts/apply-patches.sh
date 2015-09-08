@@ -35,7 +35,7 @@ fi
 # Process files
 for f in ${patchfiles} ; do
 	echo "Applying ${f}: "
-	cat ${patchdir}/${f} | patch -p1 -E -d ${targetdir}
+	cat ${patchdir}/${f} | patch --binary -p1 -E -d ${targetdir}
 	if [ "$?" != "0" ] ; then
 		echo "Patch failed!  Please fix ${f}!"
 		exit 1
