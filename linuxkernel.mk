@@ -13,6 +13,9 @@
 
 ifeq ("$(LOCAL_MODULE)", "linux")
 
+# Make sure config is loaded
+$(call load-config)
+
 # Override the module name...
 LOCAL_MODULE_FILENAME := $(LOCAL_MODULE).done
 
@@ -41,7 +44,7 @@ LINUX_HEADERS_DONE_FILE := $(LINUX_BUILD_DIR)/linux-headers.done
 LOCAL_DONE_FILES += linux-headers.done
 
 # Linux configuration file or target
-LINUX_CONFIG_FILE := $(call module-get-config,$(LOCAL_MODULE))
+LINUX_CONFIG_FILE := $(call __get-build-module-config,$(LOCAL_MODULE))
 LINUX_CONFIG_FILE_IS_TARGET := $(false)
 ifeq ("$(wildcard $(LINUX_CONFIG_FILE))","")
   ifdef LINUX_CONFIG_TARGET
