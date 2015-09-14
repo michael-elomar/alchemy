@@ -13,6 +13,9 @@
 
 ifeq ("$(LOCAL_MODULE)", "linux")
 
+# Make sure config is loaded by our means
+__modules.$(LOCAL_MODULE).config-loaded := 1
+
 # Override the module name...
 LOCAL_MODULE_FILENAME := $(LOCAL_MODULE).done
 
@@ -168,7 +171,8 @@ else # ifneq ("$(LINUX_CONFIG_FILE_IS_TARGET)","")
 # Use a file
 define linux-setup-config
 	@mkdir -p $(LINUX_BUILD_DIR)
-	$(Q) cp -af $(LINUX_CONFIG_FILE) $(LINUX_BUILD_DIR)/.config
+	@$(call __config-apply-sed,linux,$(LINUX_BUILD_DIR)/linux.config.tmp)
+	$(Q) cp -af $(LINUX_BUILD_DIR)/linux.config.tmp $(LINUX_BUILD_DIR)/.config
 endef
 
 define linux-save-config
@@ -245,6 +249,7 @@ ifneq ("$(TARGET_LINUX_DEVICE_TREE)","")
 endif
 	$(Q)cp -af $(LINUX_BUILD_DIR)/vmlinux $(TARGET_OUT_STAGING)/boot
 	$(call linux-gen-sdk)
+	$(Q)cp -af $(LINUX_BUILD_DIR)/.config $(LINUX_BUILD_DIR)/linux.config
 	@echo "Linux kernel built"
 	@touch $@
 
@@ -282,12 +287,16 @@ endif
 .PHONY: linux-menuconfig
 linux-menuconfig: $(LINUX_BUILD_DIR)/.config
 	@echo "Configuring linux kernel: $(LINUX_CONFIG_FILE)"
+	$(if $(call is-var-defined,custom.linux.config.sedfiles), \
+		$(error Sed files found. We cannot save in this case))
 	$(Q)$(MAKE) $(LINUX_MAKE_ARGS) menuconfig
 	$(Q)$(linux-save-config)
 
 .PHONY: linux-xconfig
 linux-xconfig: $(LINUX_BUILD_DIR)/.config
 	@echo "Configuring linux kernel: $(LINUX_CONFIG_FILE)"
+	$(if $(call is-var-defined,custom.linux.config.sedfiles), \
+		$(error Sed files found. We cannot save in this case))
 	$(Q)$(MAKE) $(LINUX_MAKE_ARGS) xconfig
 	$(Q)$(linux-save-config)
 
