@@ -1312,6 +1312,19 @@ supported.</p>
 If not specified, the namespace is used.</li>
 </ul>
 
+<h3>Prebuilt modules</h3>
+
+<p>This class is used to register a module that can be used as a dependency but that
+will not built anything. Mainly used for native build where many modules from
+the host machine will be used without being recompiled. If the same module is
+registered with another class it will be ignored. This allows a workspace normally
+used for cross-compilation to be used as-is to compile some native configuration.</p>
+
+<p>As <code>alchemy</code> comes with a number of native prebuilt modules, and they have
+priority over the ones found in the workspace, it is now possible to explicitely
+mark some of them as overriden (for example in <code>product.mk</code>) using:
+</br><code>prebuilt.&lt;module&gt;.override := 1</code></p>
+
 <h3>Custom rules</h3>
 
 <p>You can add custom rules in you makefile, for example to generate files. However

@@ -1552,3 +1552,11 @@ local-get-build-dir = $(strip \
 # $1 : name of the macro to register
 local-register-custom-macro = \
 	$(eval __custom-macros += $1)
+
+# Register a prebuilt module unless a setting explicitly override it
+local-register-prebuilt-overridable = \
+	$(eval __var := prebuilt.$(LOCAL_MODULE).override) \
+	$(if $(and $(call is-var-defined,$(__var)),$(call streq,$($(__var)),1)), \
+		$(info Prebuilt module $(LOCAL_MODULE) marked as overriden) ,\
+		$(eval include $(BUILD_PREBUILT)) \
+	)
