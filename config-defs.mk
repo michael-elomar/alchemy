@@ -162,24 +162,28 @@ __generate-config-args = $(strip \
 # Path to script used to apply sed files on config file
 __apply-sed-script := $(BUILD_SYSTEM)/scripts/config-apply-sedfiles.sh
 
+# Separate sed files application from __load-config-internal
+## (optional) different destination file can be passed as second argument.
+__config-apply-sed = $(if $(call is-var-defined,custom.$1.config.sedfiles), \
+	$(foreach __f,$(custom.$1.config.sedfiles), \
+		$(info Apply $(__f) on '$1' config) \
+	) \
+	$(eval __out := $(shell $(__apply-sed-script) \
+		$(call __get-orig-module-config,$1) \
+		$(if $2,$2,$(call __get-build-module-config,$1)) \
+		$(custom.$1.config.sedfiles) \
+	)) \
+	, \
+	$(shell mkdir -p $(dir $(call __get-build-module-config,$1))) \
+	$(shell cp -af $(call __get-orig-module-config,$1) $(if $2,$2,$(call __get-build-module-config,$1))) \
+)
+
 define __load-config-internal
 $(if $(wildcard $(call __get-orig-module-config,$1)), \
 	$(if $(call strneq,$(V),0), \
 		$(info $1: Loading config file $(call __get-orig-module-config,$1)) \
 	)
-	$(if $(call is-var-defined,custom.$1.config.sedfiles), \
-		$(foreach __f,$(custom.$1.config.sedfiles), \
-			$(info Apply $(__f) on '$1' config) \
-		) \
-		$(eval __out := $(shell $(__apply-sed-script) \
-			$(call __get-orig-module-config,$1) \
-			$(call __get-build-module-config,$1) \
-			$(custom.$1.config.sedfiles) \
-		)) \
-		, \
-		$(shell mkdir -p $(dir $(call __get-build-module-config,$1))) \
-		$(shell cp -af $(call __get-orig-module-config,$1) $(call __get-build-module-config,$1)) \
-	) \
+	$(call __config-apply-sed,$1) \
 	, \
 	$(shell mkdir -p $(dir $(call __get-build-module-config,$1))) \
 	$(shell [ -e $(call __get-build-module-config,$1) ] || touch $(call __get-build-module-config,$1)) \
