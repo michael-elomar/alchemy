@@ -75,7 +75,17 @@ $(shell if [ -e $(ANDROID_TOOLCHAIN_PATH) ] ; then rm -rf $(ANDROID_TOOLCHAIN_PA
             touch $(ANDROID_TOOLCHAIN_TOKEN))
 endif
 
-TARGET_CROSS = $(ANDROID_TOOLCHAIN_PATH)/bin/$(shell echo $(TARGET_ANDROID_TOOLCHAIN) | sed 's/\(.*\)-[0-9].[0-9]/\1/')-
+ANDROID_TOOLCHAIN_NAME = $(shell echo $(TARGET_ANDROID_TOOLCHAIN) | sed 's/\(.*\)-[0-9].[0-9]/\1/')
+
+ifeq ("$(ANDROID_TOOLCHAIN_NAME)","x86")
+  ANDROID_TOOLCHAIN_PREFIX = i686-linux-android
+else ifeq ("$(ANDROID_TOOLCHAIN_NAME)","x86_64")
+  ANDROID_TOOLCHAIN_PREFIX = x86_64-linux-android
+else
+  ANDROID_TOOLCHAIN_PREFIX = $(ANDROID_TOOLCHAIN_NAME)
+endif
+
+TARGET_CROSS = $(ANDROID_TOOLCHAIN_PATH)/bin/$(ANDROID_TOOLCHAIN_PREFIX)-
 
 ifeq ("$(TARGET_ARCH)","arm")
   TARGET_DEFAULT_LIB_DESTDIR ?= libs/armeabi-v7a
