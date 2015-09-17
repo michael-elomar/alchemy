@@ -33,7 +33,8 @@ endif
 ###############################################################################
 define gen-image
 	$(Q) cd $(TARGET_OUT_FINAL); \
-		find . ! -name '.' -printf '%P\n' | $(FIXSTAT) | \
+		find . $(if $(call streq,$1,cpio),-name 'boot' -prune -o) \
+			! -name '.' -printf '%P\n' | $(FIXSTAT) | \
 			$(MKFS_SCRIPT) --fstype $1 $3 $2
 endef
 
