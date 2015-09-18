@@ -133,6 +133,10 @@ str-starts-with = $(strip $(call not,$(patsubst $2%,,$1)))
 # $2 : suffix to check
 str-ends-with = $(strip $(call not,$(patsubst %$2,,$1)))
 
+# Remove trailing '/' from a path
+# $1 : input string
+remove-trailing-slash = $(strip $(patsubst %/,%,$1))
+
 ###############################################################################
 ## Use some colors if requested.
 ###############################################################################
