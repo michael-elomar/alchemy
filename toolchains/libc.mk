@@ -61,11 +61,9 @@ endif
 _libc_usrlib_dir := $(_libc_sysroot)/usr/lib
 _libc_usrlib_arch_dir := $(_libc_sysroot)/usr/lib/$(_libc_arch_subdir)
 
-# 'usr/lib/debug/lib' directory, try architecture dependent directory first
-_libc_lib_dbg_dir := $(wildcard $(_libc_sysroot)/usr/lib/debug/lib/$(_libc_arch_subdir))
-ifeq ("$(_libc_lib_dbg_dir)","")
-  _libc_lib_dbg_dir := $(wildcard $(_libc_sysroot)/usr/lib/debug/lib)
-endif
+# 'usr/lib/debug/lib' directory
+_libc_lib_dbg_dir := $(_libc_sysroot)/usr/lib/debug/lib
+_libc_lib_dbg_arch_dir := $(_libc_sysroot)/usr/lib/debug/lib/$(_libc_arch_subdir)
 
 # List of files to be put in /lib and /lib/<arch>
 _libc_lib_files :=
@@ -102,11 +100,15 @@ $(foreach __f,$(_libc_usrlib_names), \
 	) \
 )
 
-# List of files to be put in /usr/lib/debug/lib
+# List of files to be put in /usr/lib/debug/lib and /usr/lib/debug/lib/<arch>
 _libc_lib_dbg_files :=
+_libc_lib_dbg_arch_files :=
 $(foreach __f,$(_libc_lib_names), \
 	$(eval _libc_lib_dbg_files += \
 		$(wildcard $(_libc_lib_dbg_dir)/$(__f)-*.so) \
+	) \
+	$(eval _libc_lib_dbg_arch_files += \
+		$(wildcard $(_libc_lib_dbg_arch_dir)/$(__f)-*.so) \
 	) \
 )
 
@@ -129,6 +131,7 @@ _libc_lib_arch_files := $(filter-out %.py,$(_libc_lib_arch_files))
 _libc_usrlib_files := $(filter-out %.py,$(_libc_usrlib_files))
 _libc_usrlib_arch_files := $(filter-out %.py,$(_libc_usrlib_arch_files))
 _libc_lib_dbg_files := $(filter-out %.py,$(_libc_lib_dbg_files))
+_libc_lib_dbg_arch_files := $(filter-out %.py,$(_libc_lib_dbg_arch_files))
 
 # Timezone data
 _libc_tzdata :=
@@ -168,6 +171,7 @@ $(_libc_installed_file): $(BUILD_SYSTEM)/toolchains/libc.mk
 	$(call _libc_copy_files,$(_libc_usrlib_files),usr/lib)
 	$(call _libc_copy_files,$(_libc_usrlib_arch_files),usr/lib/$(_libc_arch_subdir))
 	$(call _libc_copy_files,$(_libc_lib_dbg_files),usr/lib/debug/lib)
+	$(call _libc_copy_files,$(_libc_lib_dbg_arch_files),usr/lib/debug/lib/$(_libc_arch_subdir))
 	$(if $(_libc_tzdata), \
 		@mkdir -p $(TARGET_OUT_STAGING)/usr/share/zoneinfo$(endl) \
 		$(Q) cp -Raf $(_libc_tzdata)/* $(TARGET_OUT_STAGING)/usr/share/zoneinfo$(endl) \
