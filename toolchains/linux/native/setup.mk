@@ -15,17 +15,13 @@ TARGET_GLOBAL_LDLIBS_SHARED += -pthread -lrt
 
 # Machine targetted by toolchain to be used by autotools
 # Use a name that will force autotools to believe we are cross-compiling
-ifeq ("$(TARGET_ARCH)","x64")
+# Do nothing for non chroot native build with TARGET_ARCH = HOST_ARCH
+ifeq ("$(TARGET_OS_FLAVOUR)-$(TARGET_ARCH)","native-$(HOST_ARCH)")
+  # Leave GNU_TARGET_NAME undefined
+else ifeq ("$(TARGET_ARCH)","x64")
   GNU_TARGET_NAME := x86_64-pc-linux-gnu
 else ifeq ("$(TARGET_ARCH)","x86")
   GNU_TARGET_NAME := i686-pc-linux-gnu
-endif
-
-# Let autotools detect full native builds
-ifeq ("$(TARGET_OS_FLAVOUR)","native")
-  ifeq ("$(TARGET_ARCH)","$(HOST_ARCH)")
-    GNU_TARGET_NAME := $(TOOLCHAIN_TARGET_NAME)
-  endif
 endif
 
 # Copy host libc

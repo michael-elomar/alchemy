@@ -188,21 +188,25 @@ ifeq ("$(TARGET_OS)","mingw32")
       RC="$(TARGET_CROSS)windres"
 endif
 
-# Build triplet
-ifndef GNU_BUILD_NAME
-  GNU_BUILD_NAME := $(shell $(HOST_CC) -dumpmachine)
-endif
+TARGET_AUTOTOOLS_CONFIGURE_ARGS :=
 
-# Target triplet
-ifndef GNU_TARGET_NAME
-  GNU_TARGET_NAME := $(TOOLCHAIN_TARGET_NAME)
-endif
-
-# Arguments to give to configure script. Autotools 'host' is the name of the machine
-# on which the package will run and  we call it 'target'.
-TARGET_AUTOTOOLS_CONFIGURE_ARGS := \
+# Build/target triplet, nothing to do for native build TARGET_ARCH = HOST_ARCH
+# For all other, force cross-compilation
+# Autotools 'host' is the name of the machine on which the package will run
+# and  we call it 'target'.
+ifeq ("$(TARGET_OS_FLAVOUR)-$(TARGET_ARCH)","native-$(HOST_ARCH)")
+  # Nothing to do let autotools in native mode
+else
+  ifndef GNU_BUILD_NAME
+    GNU_BUILD_NAME := $(shell $(HOST_CC) -dumpmachine)
+  endif
+  ifndef GNU_TARGET_NAME
+    GNU_TARGET_NAME := $(TOOLCHAIN_TARGET_NAME)
+  endif
+  TARGET_AUTOTOOLS_CONFIGURE_ARGS += \
 	--build="$(GNU_BUILD_NAME)" \
 	--host="$(GNU_TARGET_NAME)"
+endif
 
 # For cross-compilation, use /usr as prefix and install in our staging dir
 # For native compilation, use staging as prefix and nothing for install dest dir

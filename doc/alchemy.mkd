@@ -1107,8 +1107,6 @@ Some variables containing generic content can also be used :
 * `TARGET_AUTOTOOLS_CONFIGURE_PREFIX`
 * `TARGET_AUTOTOOLS_CONFIGURE_SYSCONFDIR`
 * `TARGET_AUTOTOOLS_INSTALL_DESTDIR`
-* `GNU_BUILD_NAME`
-* `GNU_TARGET_NAME`
 
 **Note** : Old variables still available for compatibility :
 
