@@ -190,6 +190,10 @@ $(_libc_installed_file): $(BUILD_SYSTEM)/toolchains/libc.mk
 ifeq ("$(TARGET_ARCH)","x64")
 	$(Q) [ -e $(TARGET_OUT_STAGING)/lib64 ] || ln -sf lib $(TARGET_OUT_STAGING)/lib64
 endif
+ifeq ("$(TARGET_ARCH)","aarch64")
+	$(Q) [ -e $(TARGET_OUT_STAGING)/lib64 ] || ln -sf lib $(TARGET_OUT_STAGING)/lib64
+	$(Q) [ -e $(TARGET_OUT_STAGING)/usr/lib64 ] || ln -sf lib $(TARGET_OUT_STAGING)/usr/lib64
+endif
 # Include gdbserver only if requested (GPLv3)
 ifneq ("$(TARGET_INCLUDE_GDBSERVER)","0")
 ifneq ("$(TOOLCHAIN_GDBSERVER)","")
