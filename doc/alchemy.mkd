@@ -101,6 +101,7 @@ conflict with other build systems (android for example).
   optimization and select some module (for ex: linux). Possible values are :
   * `p6`
   * `p6i`
+  * `armv5te`
   * `p7`
   * `o3`
   * `omap3`

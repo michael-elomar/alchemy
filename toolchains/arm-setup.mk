@@ -56,6 +56,11 @@ ifeq ("$(TARGET_CPU)","p6i")
   TARGET_FLOAT_ABI ?= soft
 endif
 
+ifeq ("$(TARGET_CPU)","armv5te")
+  TARGET_GLOBAL_CFLAGS += $(cflags_armv5te)
+  TARGET_FLOAT_ABI ?= soft
+endif
+
 # If compiler does not support this -mcpu option a warning will be generated
 # and removed from flags later
 ifeq ("$(TARGET_CPU)","p7")
