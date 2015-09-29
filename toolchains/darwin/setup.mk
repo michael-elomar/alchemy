@@ -25,10 +25,17 @@ else ifeq ("${TARGET_OS_FLAVOUR}","iphonesimulator")
 
 # iPhoneSimulator target
 APPLE_SDK = iphonesimulator
-APPLE_ARCH = -arch x86_64
+
+ifeq ("$(TARGET_ARCH)","x86")
+  APPLE_ARCH = -arch i386
+  TOOLCHAIN_TARGET_NAME = i386-apple-darwin
+else
+  TARGET_ARCH = x64
+  APPLE_ARCH = -arch x86_64
+  TOOLCHAIN_TARGET_NAME = x86_64-apple-darwin
+endif
+
 APPLE_MINVERSION = -miphoneos-version-min=${TARGET_IPHONE_VERSION}
-TOOLCHAIN_TARGET_NAME = x86_64-apple-darwin
-TARGET_ARCH = x64
 TARGET_PBUILD_FORCE_STATIC := 1
 
 else ifeq ("${TARGET_OS_FLAVOUR}","native")
