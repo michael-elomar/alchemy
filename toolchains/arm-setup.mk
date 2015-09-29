@@ -116,7 +116,7 @@ endif
 endif
 
 ifeq ("$(TARGET_CPU)","tegrax1")
-  TARGET_GLOBAL_CFLAGS += -march=armv8-a+crc -mtune=cortex-a57.cortex-a53 -mcpu=cortex-a57.cortex-a53
+  TARGET_GLOBAL_CFLAGS += -march=armv8-a+crc -mtune=cortex-a57 -mcpu=cortex-a57
   TARGET_GLOBAL_CFLAGS += -mfpu=crypto-neon-fp-armv8
   TARGET_CPU_HAS_NEON := 1
   TARGET_FLOAT_ABI ?= hard
