@@ -113,6 +113,7 @@ endif
   TARGET_GLOBAL_CFLAGS += -mtune=cortex-a15 -mfpu=neon-vfpv4
   TARGET_CPU_HAS_NEON := 1
   TARGET_FLOAT_ABI ?= hard
+  TARGET_GLOBAL_NVCFLAGS += -arch=sm_32 -lineinfo -m32
 endif
 
 ifeq ("$(TARGET_CPU)","tegrax1")
@@ -120,6 +121,7 @@ ifeq ("$(TARGET_CPU)","tegrax1")
   TARGET_GLOBAL_CFLAGS += -mfpu=crypto-neon-fp-armv8
   TARGET_CPU_HAS_NEON := 1
   TARGET_FLOAT_ABI ?= hard
+  TARGET_GLOBAL_NVCFLAGS += -arch=sm_53 -lineinfo -m32
 endif
 
 # set float abi
