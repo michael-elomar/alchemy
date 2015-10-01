@@ -24,22 +24,47 @@ import addbuildid
 # Global variables.
 #===============================================================================
 
-# Directories to exclude
-EXCLUDE_DIRS = [
-	".git", ".repo",
-	"linux-headers", "linux-sdk", "include", "vapi",
-	"man", "doc", "html", "info",
-	"pkgconfig", "cmake",
-	"aclocal", "locale"]
+# Available modes
+MODE_FIRWMARE = "firmware"
+MODE_FULL = "full"
+MODE_DEFAULT = MODE_FIRWMARE
+MODES = [MODE_FIRWMARE, MODE_FULL]
 
-# Extension to exclude
-EXCLUDE_FILTERS = [".a", ".la"]
-EXCLUDE_FILTERS_PYTHON = [".py", ".pyc", ".pyo"]
+# Directories to always exclude
+EXCLUDE_DIRS_ALWAYS = [".git", ".repo", "linux-headers", "linux-sdk"]
 
-# Files to exclude
-EXCLUDE_FILES = [
+# Directories to exclude depending on mode
+EXCLUDE_DIRS = {
+	MODE_FIRWMARE: EXCLUDE_DIRS_ALWAYS + [
+		"include", "vapi",
+		"man", "doc", "html", "info",
+		"pkgconfig", "cmake",
+		"aclocal", "locale"
+	],
+	MODE_FULL: EXCLUDE_DIRS_ALWAYS
+}
+
+# Files to always exclude
+EXCLUDE_FILES_ALWAYS = [
 	".gitignore",
 	"THIS_IS_NOT_THE_DIRECTORY_FOR_NATIVE_CHROOT"]
+
+# Files to exclude depending on mode
+EXCLUDE_FILES = {
+	MODE_FIRWMARE: EXCLUDE_FILES_ALWAYS,
+	MODE_FULL: EXCLUDE_FILES_ALWAYS,
+}
+
+# Patterns to always exclude
+EXCLUDE_FILTERS_ALWAYS = []
+
+# Patterns to exclude depending on mode
+EXCLUDE_FILTERS = {
+	MODE_FIRWMARE: EXCLUDE_FILTERS_ALWAYS + [".a", ".la"],
+	MODE_FULL: EXCLUDE_FILTERS_ALWAYS
+}
+
+EXCLUDE_FILTERS_PYTHON = [".py", ".pyc", ".pyo"]
 
 # Files to keep in boot directory
 BOOT_FILES = [
@@ -381,7 +406,8 @@ def processDir(rootDir, options, withEmptyDir, copyType, forceCopy=False):
 		# exclude some directories
 		# (use a copy in for loop because we will modify dirNames)
 		for dirName in dirNames[:]:
-			if any([fnmatch.fnmatch(dirName, pattern) for pattern in EXCLUDE_DIRS]):
+			if any([fnmatch.fnmatch(dirName, pattern)
+						for pattern in EXCLUDE_DIRS[options.mode]]):
 				logging.debug("Exclude directory : %s",
 					os.path.relpath(os.path.join(dirPath, dirName), rootDir))
 				dirNames.remove(dirName)
@@ -399,14 +425,15 @@ def processDir(rootDir, options, withEmptyDir, copyType, forceCopy=False):
 
 		# copy files
 		for fileName in fileNames:
-			if any([fnmatch.fnmatch(fileName, pattern) for pattern in EXCLUDE_FILES]):
+			if any([fnmatch.fnmatch(fileName, pattern)
+						for pattern in EXCLUDE_FILES[options.mode]]):
 				logging.debug("Exclude file : %s",
 					os.path.relpath(os.path.join(dirPath, fileName), rootDir))
 				continue
 			# skip some extensions
 			srcFileName = os.path.join(dirPath, fileName)
 			relPath = os.path.relpath(srcFileName, rootDir)
-			if os.path.splitext(srcFileName)[1] in EXCLUDE_FILTERS:
+			if os.path.splitext(srcFileName)[1] in EXCLUDE_FILTERS[options.mode]:
 				logging.debug("Exclude file : %s", relPath)
 				continue
 
@@ -464,9 +491,15 @@ def main():
 			logging.error("Failed to create file: %s [err=%d %s]",
 					args[2], ex.errno, ex.strerror)
 
+	# check mode
+	if options.mode not in MODES:
+		logging.error("Invalid mode '%s'. Available: %s", options.mode,
+			", ".join(MODES))
+		sys.exit(1)
+
 	# update filter
-	if not options.keepPythonFiles:
-		EXCLUDE_FILTERS.extend(EXCLUDE_FILTERS_PYTHON)
+	if options.mode != MODE_FULL and not options.keepPythonFiles:
+		EXCLUDE_FILTERS[options.mode].extend(EXCLUDE_FILTERS_PYTHON)
 
 	# filelist file
 	options.fileListFile = None
@@ -569,6 +602,11 @@ def parseArgs():
 		action="store_true",
 		default=False,
 		help="keep python files (*.py, *.pyc, *.pyo)")
+	parser.add_option("--mode",
+		dest="mode",
+		default=MODE_DEFAULT,
+		help="generation mode (what to put/filter): %s (default is %s)" % (
+				", ".join(MODES), MODE_DEFAULT))
 
 	parser.add_option("-q",
 		dest="quiet",

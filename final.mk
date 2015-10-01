@@ -63,12 +63,16 @@ ifeq ("$(TARGET_OS_FLAVOUR)","native-chroot")
   MAKEFINAL_ARGS += --remove-wgo
 endif
 
-# Additional files to filter
+# Additional files to filter during strip
 MAKEFINAL_ARGS += \
 	$(foreach __lib,$(TARGET_STRIP_FILTER),--strip-filter="$(__lib)")
 
 MAKEFINAL_ARGS += \
 	--filelist=$(TARGET_OUT)/filelist.txt
+
+# generation mode
+MAKEFINAL_ARGS += \
+	--mode=$(TARGET_FINAL_MODE)
 
 ###############################################################################
 ## Add a build-id section to all binaries in staging dir before copying them

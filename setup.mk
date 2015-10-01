@@ -205,6 +205,11 @@ else ifeq ("$(TARGET_ARCH)","aarch64")
   TARGET_ARCH_ARM := 1
 endif
 
+# Customize how final tree is done (what will be filtered)
+# full: nothing filtered
+# firmware: filtered according to internal heuristics suitable for embedded execution
+TARGET_FINAL_MODE ?= firmware
+
 ###############################################################################
 ## Toolchain setup.
 ###############################################################################
