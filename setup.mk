@@ -378,30 +378,28 @@ endif
 
 # Add staging/sdk dirs to linker
 # To make sure linker does not hardcode path to libs, set rpath-link
+__extra-target-ldflags-dirs := \
+	lib \
+	usr/lib \
+	lib/$(TOOLCHAIN_TARGET_NAME) \
+	usr/lib/$(TOOLCHAIN_TARGET_NAME) \
+	$(TARGET_DEFAULT_LIB_DESTDIR) \
+	$(TARGET_LDCONFIG_DIRS)
 __extra-target-ldflags := $(strip \
 	$(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
-		-L$(__dir)/lib \
-		-L$(__dir)/usr/lib \
-		-L$(__dir)/lib/$(TOOLCHAIN_TARGET_NAME) \
-		-L$(__dir)/usr/lib/$(TOOLCHAIN_TARGET_NAME) \
-		-L$(__dir)/$(TARGET_DEFAULT_LIB_DESTDIR) \
+		$(foreach __dir2,$(__extra-target-ldflags-dirs), \
+			-L$(__dir)/$(__dir2) \
+		) \
 	))
 ifneq ("$(TARGET_OS)","darwin")
 __extra-target-ldflags += $(strip \
 	$(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
-		-Wl,-rpath-link=$(__dir)/lib \
-		-Wl,-rpath-link=$(__dir)/usr/lib \
-		-Wl,-rpath-link=$(__dir)/lib/$(TOOLCHAIN_TARGET_NAME) \
-		-Wl,-rpath-link=$(__dir)/usr/lib/$(TOOLCHAIN_TARGET_NAME) \
-		-Wl,-rpath-link=$(__dir)/$(TARGET_DEFAULT_LIB_DESTDIR) \
+		$(foreach __dir2,$(__extra-target-ldflags-dirs), \
+			-Wl,-rpath-link=$(__dir)/$(__dir2) \
+		) \
 	))
-$(foreach __dir,$(TARGET_LDCONFIG_DIRS), \
-		$(eval TARGET_GLOBAL_LDFLAGS += -L$(TARGET_OUT_STAGING)/$(__dir)) \
-		$(eval TARGET_GLOBAL_LDFLAGS_SHARED += -L$(TARGET_OUT_STAGING)/$(__dir)) \
-		$(eval TARGET_GLOBAL_LDFLAGS += -Wl,-rpath-link=$(TARGET_OUT_STAGING)/$(__dir)) \
-		$(eval TARGET_GLOBAL_LDFLAGS_SHARED += -Wl,-rpath-link=$(TARGET_OUT_STAGING)/$(__dir)) \
-	)
 endif
+$(info __extra-target-ldflags=$(__extra-target-ldflags))
 
 TARGET_GLOBAL_LDFLAGS += $(__extra-target-ldflags)
 TARGET_GLOBAL_LDFLAGS_SHARED += $(__extra-target-ldflags)
