@@ -171,7 +171,7 @@ else # ifneq ("$(LINUX_CONFIG_FILE_IS_TARGET)","")
 # Use a file
 define linux-setup-config
 	@mkdir -p $(LINUX_BUILD_DIR)
-	@$(call __config-apply-sed,linux,$(LINUX_BUILD_DIR)/linux.config.tmp)
+	@$(call __config-apply-sed,linux,$(LINUX_BUILD_DIR)/linux.config.tmp,$(LINUX_CONFIG_FILE))
 	$(Q) cp -af $(LINUX_BUILD_DIR)/linux.config.tmp $(LINUX_BUILD_DIR)/.config
 endef
 

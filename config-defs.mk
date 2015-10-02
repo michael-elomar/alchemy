@@ -164,18 +164,21 @@ __apply-sed-script := $(BUILD_SYSTEM)/scripts/config-apply-sedfiles.sh
 
 # Separate sed files application from __load-config-internal
 ## (optional) different destination file can be passed as second argument.
-__config-apply-sed = $(if $(call is-var-defined,custom.$1.config.sedfiles), \
+__config-apply-sed = \
+	$(eval __cas_src_file := $(or $3,$(call __get-orig-module-config,$1))) \
+	$(eval __cas_dst_file := $(or $2,$(call __get-build-module-config,$1))) \
+	$(if $(call is-var-defined,custom.$1.config.sedfiles), \
 	$(foreach __f,$(custom.$1.config.sedfiles), \
 		$(info Apply $(__f) on '$1' config) \
 	) \
 	$(eval __out := $(shell $(__apply-sed-script) \
-		$(call __get-orig-module-config,$1) \
-		$(if $2,$2,$(call __get-build-module-config,$1)) \
+		$(__cas_src_file) \
+		$(__cas_dst_file) \
 		$(custom.$1.config.sedfiles) \
 	)) \
 	, \
-	$(shell mkdir -p $(dir $(call __get-build-module-config,$1))) \
-	$(shell cp -af $(call __get-orig-module-config,$1) $(if $2,$2,$(call __get-build-module-config,$1))) \
+	$(shell mkdir -p $(dir $(__cas_dst_file))) \
+	$(shell cp -af $(__cas_src_file) $(__cas_dst_file)) \
 )
 
 define __load-config-internal
