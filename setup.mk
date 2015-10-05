@@ -399,7 +399,6 @@ __extra-target-ldflags += $(strip \
 		) \
 	))
 endif
-$(info __extra-target-ldflags=$(__extra-target-ldflags))
 
 TARGET_GLOBAL_LDFLAGS += $(__extra-target-ldflags)
 TARGET_GLOBAL_LDFLAGS_SHARED += $(__extra-target-ldflags)
