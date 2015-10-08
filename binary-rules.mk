@@ -58,6 +58,9 @@ c_objects := $(addprefix $(build_dir)/$(obj_subdir)/,$(c_sources:.c=.c.o))
 cu_sources := $(filter %.cu,$(LOCAL_SRC_FILES))
 cu_objects := $(addprefix $(build_dir)/$(obj_subdir)/,$(cu_sources:.cu=.cu.o))
 
+m_sources := $(filter %.m,$(LOCAL_SRC_FILES))
+m_objects := $(addprefix $(build_dir)/$(obj_subdir)/,$(m_sources:.m=.m.o))
+
 s_sources := $(filter %.s,$(LOCAL_SRC_FILES))
 s_objects := $(addprefix $(build_dir)/$(obj_subdir)/,$(s_sources:.s=.s.o))
 
@@ -121,6 +124,7 @@ all_objects := \
 	$(cc_objects) \
 	$(c_objects) \
 	$(cu_objects) \
+	$(m_objects) \
 	$(s_objects) \
 	$(S_objects) \
 	$(gen_cpp_objects) \
@@ -181,6 +185,15 @@ $(cu_objects): $(build_dir)/$(obj_subdir)/%.cu.o: $(LOCAL_PATH)/%.cu
 	$(transform-cu-to-o)
 ifneq ("$(skip_include_deps)","1")
 -include $(cu_objects:%.o=%.d)
+endif
+endif
+
+# m files
+ifneq ("$(strip $(m_objects))","")
+$(m_objects): $(build_dir)/$(obj_subdir)/%.m.o: $(LOCAL_PATH)/%.m
+	$(transform-c-to-o)
+ifneq ("$(skip_include_deps)","1")
+-include $(m_objects:%.o=%.d)
 endif
 endif
 
