@@ -1523,29 +1523,25 @@ see how to call <code>alchemy</code> to actually build a project.</p>
 variables need to be set in the environment. However, without anything it will
 defaults to compile natively in a linux pc without any configuration directory.
 Output directories will also be selected by default. A typical wrapper script
-will look like this :</p>
+will look like this (assuming alchemy is at the root of the workspace):</p>
 
 <pre>
 #!/bin/bash
 
 readonly TOP_DIR=`pwd`
 
-export ALCHEMY_TARGET_PRODUCT="fc6050"
-export ALCHEMY_TARGET_PRODUCT_VARIANT="hiphop"
-export ALCHEMY_TARGET_OUT="${TOP_DIR}/Alchemy-out/${ALCHEMY_TARGET_PRODUCT}-${ALCHEMY_TARGET_PRODUCT_VARIANT}"
-export ALCHEMY_TARGET_SKEL_DIRS="${TOP_DIR}/Data/Common"
-export ALCHEMY_TARGET_CONFIG_DIR="${TOP_DIR}/Alchemy/test/config/${ALCHEMY_TARGET_PRODUCT}-${ALCHEMY_TARGET_PRODUCT_VARIANT}"
-export ALCHEMY_TARGET_SCAN_PRUNE_DIRS="Alchemy-out raptor"
+export TARGET_PRODUCT="pclinux"
+export TARGET_CONFIG_DIR=${TOP_DIR}/config
+export TARGET_OUT=${TOP_DIR}/out
 export ALCHEMY_USE_COLORS=1
 
-# This can be put in a product.mk file localted in ALCHEMY_TARGET_CONFIG_DIR
+# This can be put in a product.mk file located in ALCHEMY_TARGET_CONFIG_DIR
 export TARGET_OS="linux"
-export TARGET_OS_FLAVOUR="parrot"
-export TARGET_LIBC="eglibc"
-export TARGET_ARCH="arm"
-export TARGET_CPU="p6i"
+export TARGET_OS_FLAVOUR="native"
+export TARGET_LIBC="native"
+export TARGET_ARCH="x86"
 
-time ./Alchemy/scripts/alchemake.py -f ./Alchemy/main.mk $*
+time ${TOP_DIR}/alchemy/scripts/alchemake.py -f ${TOP_DIR}/alchemy/main.mk $*
 </pre>
 
 <p><strong>Note</strong>: <code>alchemake.py</code> is a simple python script that wraps the invocation of
@@ -1553,28 +1549,6 @@ time ./Alchemy/scripts/alchemake.py -f ./Alchemy/main.mk $*
 but without it, a parallel compilation will continue if a error is seen until
 current targets are finished, which can be long if a kernel or busybox
 compilation is in progress.</p>
-
-<h3>From the configuration to the plf</h3>
-
-<p>Lets assume that the wrapper script is called <code>build.sh</code>. The following steps
-will configure the project, build it, generate its rootfs and the plf.</p>
-
-<pre>
-./build.sh config
-./build.sh -j16
-./build.sh final plf
-</pre>
-
-<p><strong>Note</strong>: <code>final</code> and <code>plf</code> can be specified together only if not in a parallel
-build (no -j option).</p>
-
-<p>Steps have been separated to allow better customization of what is done in a
-project environment.</p>
-
-<h3>Example of environment</h3>
-
-<p>You can take a look at <code>pulsar</code> environment for an example of use. Take a look
-at the README: <code>http://canari/cgi-bin/cgit.cgi/pulsar/pulsar_base.git/tree/README</code>.</p>
 
 <h3>Command line options</h3>
 
