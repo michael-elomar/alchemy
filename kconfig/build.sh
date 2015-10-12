@@ -1,5 +1,8 @@
 #!/bin/bash -e
 
+# Autodetect target os
+export TARGET_OS=$(uname -s | awk '{print tolower($$0)}')
+
 # Autodetect target architecture
 if [ "${TARGET_ARCH}" = "" ]; then
 	dummy=$(gcc -dumpmachine | grep 64)
