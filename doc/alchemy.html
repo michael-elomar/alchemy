@@ -15,7 +15,28 @@ directories and some other more advanced stuff.</p>
 
 <p>Modules can be libraries (static and shared), executable, prebuilt binaries of
 components built by another build system (like autotools suite for many linux
-packages).</p>
+packages). Build of external modules is similar to what is done in buildroot.</p>
+
+<p><code>Alchemy</code> is hence a mix of what can be done in Android (building source files
+without having to write complicated makefile/autoconfo.ac) and buildroot
+(building open-source components having there own makefile/configure/cmake)</p>
+
+<p><code>Alchemy</code> supports:</p>
+
+<ul>
+<li>building static/shared libraries and executables from source code.</li>
+<li>building autotools/cmake from archives or source tree.</li>
+<li>building qmake applications.</li>
+<li>building for linux/ios/macos/android/mingw32 targets.</li>
+<li>building on linux/macos hosts.</li>
+</ul>
+
+<p><code>Alchemy</code> uses gnu make and shell/python scripts to do the job. The
+configuration tool is kconfig (as on linux/buildroot/busybox) and prebuilt
+binaries are provided on linux/macos hosts.</p>
+
+<p>A first working example is how kconfig binaries are built (see kconfig subdir
+and its atom.mk/build.sh)</p>
 
 <p>As the build system is real close in its philosophy to the Android one, please
 take a look at the following documentation to have a overview of the system.
