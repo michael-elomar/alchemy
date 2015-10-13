@@ -1,3 +1,18 @@
+parrot-tools-alchemy (1.2.0) unstable; urgency=low
+  * Add support for MacOS/iOS
+  * Add support for mingw32 target os.
+  * Include config files in sdk and update the way they are used.
+  * Add support for aarch64.
+  * Add tegrak1 and tegrax1 support.
+  * Add more prebuilt lib for native build
+  * Fix extfs image generation.
+  * Introduce CPU features TARGET_CPU_HAS_NEON and TARGET_CPU_HAS_SSE2
+  * Add QtCreator generic projects generation tool
+  * Check dynamic dependencies in final tree.
+  * ... and many more DEV and DEBUG...
+
+ -- Yves-Marie Morgan (Parrot) <yves-marie.morgan@parrot.com>  Tue, 13 Oct 2015 10:48:42 +0200
+
 parrot-tools-alchemy (1.0.20) unstable; urgency=low
   * Allow static binaries to link with static libraries instead on shared one.
   * Use -isystem instead of -I for global include dirs
