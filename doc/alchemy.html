@@ -217,6 +217,9 @@ It shall be in <code>$(LINUX_BUILD_DIR)/arch/$(TARGET_ARCH)/boot/dts</code>. The
 shall be the one with the <code>.dtb</code> extension. Default is empty.</li>
 <li><code>TARGET_GENERATE_LINUX_UIMAGE</code> : generate a u-boot image of linux.
 </br>Default is <code>0</code></li>
+<li><code>TARGET_LINUX_IMAGE</code> : linux image to generate and copy in boot directory.
+</br>Default is <code>zImage</code> for arm, <code>bzImage</code> for <code>x86</code> and <code>x64</code>,
+<code>Image</code> for <code>aarch64</code></li>
 </ul>
 
 <h3>Darwin specific</h3>
