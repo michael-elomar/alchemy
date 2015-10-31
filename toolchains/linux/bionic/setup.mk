@@ -113,6 +113,9 @@ endif
 # Force adding lib prefix to libraries
 USE_AUTO_LIB_PREFIX := 1
 
+# Needed by some modules
+TARGET_GLOBAL_CFLAGS += -DANDROID -DANDROID_NDK
+
 else # USE_ALCHEMY_ANDROID_SDK
 
 # Flags shall be given through environment as they are very, very android
