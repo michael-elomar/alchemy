@@ -11,6 +11,15 @@ ifndef USE_ALCHEMY_ANDROID_SDK
 ANDROID_NDK_DEFAULT_PATHS=/opt/android-ndk-* /opt/android/ndk-* ~/Library/Android/android-ndk-* ~/android-ndk-*
 ANDROID_SDK_DEFAULT_PATHS=/opt/android-sdk* /opt/android/sdk* ~/Library/Android/sdk* ~/Library/Android/android-sdk* ~/android-sdk*
 
+# Map target arch to android arch
+ifeq ("$(TARGET_ARCH)","aarch64")
+  ANDROID_ARCH := arm64
+else ifeq ("$(TARGET_ARCH)","x64")
+  ANDROID_ARCH := x86_64
+else
+  ANDROID_ARCH := $(TARGET_ARCH)
+endif
+
 # Configuration options
 TARGET_ANDROID_APILEVEL?=17
 
@@ -33,7 +42,7 @@ $(error No Android NDK found, use Alchemy-raptor package or set your Android NDK
 endif
 
 TARGET_ANDROID_TOOLCHAIN ?= $(shell . $(TARGET_ANDROID_NDK)/build/tools/dev-defaults.sh &&          \
-                                    echo $$(get_default_toolchain_name_for_arch $(TARGET_ARCH)))
+                                    echo $$(get_default_toolchain_name_for_arch $(ANDROID_ARCH)))
 ifeq ("$(TARGET_ANDROID_TOOLCHAIN)","")
 $(error Failed to detect Android toolchain, set the name of the toolchain in the TARGET_ANDROID_TOOLCHAIN variable)
 endif
@@ -62,7 +71,7 @@ endif
 ANDROID_TOOLCHAIN_PATH=$(TARGET_OUT)/toolchain
 ANDROID_TOOLCHAIN_OPTIONS =                         \
 	--platform=android-$(TARGET_ANDROID_APILEVEL)   \
-	--arch=$(TARGET_ARCH)                           \
+	--arch=$(ANDROID_ARCH)                           \
 	--install-dir=$(ANDROID_TOOLCHAIN_PATH)	        \
 	--toolchain=$(TARGET_ANDROID_TOOLCHAIN)	        \
     --stl=$(TARGET_ANDROID_STL)
@@ -89,7 +98,7 @@ TARGET_CROSS = $(ANDROID_TOOLCHAIN_PATH)/bin/$(ANDROID_TOOLCHAIN_PREFIX)-
 
 ifeq ("$(TARGET_ARCH)","arm")
   TARGET_DEFAULT_LIB_DESTDIR ?= libs/armeabi-v7a
-else ifeq ("$(TARGET_ARCH)","arm64")
+else ifeq ("$(TARGET_ARCH)","aarch64")
   TARGET_DEFAULT_LIB_DESTDIR ?= libs/arm64-v8a
 else ifeq ("$(TARGET_ARCH)","x86")
   TARGET_DEFAULT_LIB_DESTDIR ?= libs/x86
