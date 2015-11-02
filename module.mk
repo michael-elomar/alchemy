@@ -887,7 +887,7 @@ data_c_includes += $(LOCAL_PATH)
 
 # Search for include files in directories with source files
 data_c_includes += $(sort $(foreach __src,$(data_src_files),$(dir $(__src))))
-data_c_includes := $(sort $(wildcard $(abspath $(data_c_includes))))
+data_c_includes := $(sort $(abspath $(data_c_includes)))
 
 # Checkpatch is only for c files
 codecheck_files := $(filter %.c,$(data_src_files))
