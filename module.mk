@@ -883,6 +883,7 @@ endif
 data_src_files := $(addprefix $(LOCAL_PATH)/,$(__modules.$(LOCAL_MODULE).SRC_FILES))
 data_c_includes := $(__modules.$(LOCAL_MODULE).C_INCLUDES)
 data_c_includes += $(__modules.$(LOCAL_MODULE).EXPORT_C_INCLUDES)
+data_c_includes += $(LOCAL_PATH)
 
 # Search for include files in directories with source files
 data_c_includes += $(sort $(foreach __src,$(data_src_files),$(dir $(__src))))
@@ -890,22 +891,22 @@ data_c_includes := $(sort $(wildcard $(abspath $(data_c_includes))))
 
 # Checkpatch is only for c files
 codecheck_files := $(filter %.c,$(data_src_files))
-codecheck_files += $(foreach __inc,$(data_c_includes),$(shell find $(__inc) -name '*.h'))
+codecheck_files += $(foreach __inc,$(data_c_includes),$(wildcard $(__inc)/*.h))
 
 # Cpplint is only for cpp files
 cppcheck_files := $(filter %.cpp,$(data_src_files))
 cppcheck_files += $(filter %.cc,$(data_src_files))
 cppcheck_files += $(filter %.cxx,$(data_src_files))
-cppcheck_files += $(foreach __inc,$(data_c_includes),$(shell find $(__inc) -name '*.hpp'))
-cppcheck_files += $(foreach __inc,$(data_c_includes),$(shell find $(__inc) -name '*.hh'))
-cppcheck_files += $(foreach __inc,$(data_c_includes),$(shell find $(__inc) -name '*.hxx'))
+cppcheck_files += $(foreach __inc,$(data_c_includes),$(wildcard $(__inc)/*.hpp))
+cppcheck_files += $(foreach __inc,$(data_c_includes),$(wildcard $(__inc)/*.hh))
+cppcheck_files += $(foreach __inc,$(data_c_includes),$(wildcard $(__inc)/*.hxx))
 
 # Cloc
 cloc_files := $(data_src_files)
-cloc_files += $(foreach __inc,$(data_c_includes),$(shell find $(__inc) -name '*.h'))
-cloc_files += $(foreach __inc,$(data_c_includes),$(shell find $(__inc) -name '*.hpp'))
-cloc_files += $(foreach __inc,$(data_c_includes),$(shell find $(__inc) -name '*.hh'))
-cloc_files += $(foreach __inc,$(data_c_includes),$(shell find $(__inc) -name '*.hxx'))
+cloc_files += $(foreach __inc,$(data_c_includes),$(wildcard $(__inc)/*.h))
+cloc_files += $(foreach __inc,$(data_c_includes),$(wildcard $(__inc)/*.hpp))
+cloc_files += $(foreach __inc,$(data_c_includes),$(wildcard $(__inc)/*.hh))
+cloc_files += $(foreach __inc,$(data_c_includes),$(wildcard $(__inc)/*.hxx))
 
 # Sort to have unique names
 codecheck_files := $(sort $(codecheck_files))
