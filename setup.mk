@@ -49,6 +49,10 @@ else ifeq ("$(TARGET_OS)","iphone")
 else ifeq ("$(TARGET_OS)","iphonesimulator")
   override TARGET_OS = darwin
   override TARGET_OS_FLAVOUR = iphonesimulator
+else ifeq ("$(TARGET_OS)","yocto")
+  override TARGET_OS = linux
+  override TARGET_OS_FLAVOUR = yocto
+  TARGET_ARCH ?= arm
 endif
 
 ###############################################################################

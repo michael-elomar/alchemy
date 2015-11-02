@@ -97,6 +97,8 @@ ifeq ("$(TARGET_LIBC)","")
     TARGET_LIBC := native
   else ifeq ("$(TARGET_OS_FLAVOUR)","native-chroot")
     TARGET_LIBC := native
+  else ifeq ("$(TARGET_OS_FLAVOUR)","yocto")
+    TARGET_LIBC := yocto
   else
     TARGET_LIBC := eglibc
   endif
