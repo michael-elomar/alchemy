@@ -208,6 +208,13 @@ else
 	--host="$(GNU_TARGET_NAME)"
 endif
 
+# Force static compilation if required
+ifeq ("$(TARGET_FORCE_STATIC)","1")
+  TARGET_AUTOTOOLS_CONFIGURE_ARGS += \
+	--enable-static \
+	--disable-shared
+endif
+
 # For cross-compilation, use /usr as prefix and install in our staging dir
 # For native compilation, use staging as prefix and nothing for install dest dir
 ifeq ("$(TARGET_OS_FLAVOUR)","native")

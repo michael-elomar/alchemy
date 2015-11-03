@@ -100,8 +100,15 @@ TARGET_NOSTRIP_FINAL ?= 0
 TARGET_CONFIG_PREFIX ?= Alchemy-config/
 TARGET_CONFIG_DIR ?= $(TOP_DIR)/$(TARGET_CONFIG_PREFIX)$(TARGET_PRODUCT)-$(TARGET_PRODUCT_VARIANT)
 
+# Force compilation of all modules as static (disable shared libraries)
+TARGET_FORCE_STATIC ?= 0
+
 # Force using static libraries instead of shared for module that specifies they support it
-TARGET_PBUILD_FORCE_STATIC ?= 0
+ifeq ("$(TARGET_FORCE_STATIC)","1")
+  TARGET_PBUILD_FORCE_STATIC := 1
+else
+  TARGET_PBUILD_FORCE_STATIC ?= 0
+endif
 
 # Register list of tags used by a module. It can be retrieved at run time with
 # pal function 'pal_lib_desc_get_table_entry'

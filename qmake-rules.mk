@@ -52,6 +52,7 @@ define qmake_gen_deps
 	@( \
 		echo "equals(TEMPLATE, lib) {"; \
 		echo "    target.path = $(if $(__qmake_has_qt_sysroot),$(TARGET_OUT_STAGING))/$(TARGET_DEFAULT_LIB_DESTDIR)"; \
+		$(if $(call streq,$(TARGET_FORCE_STATIC),1),echo "    CONFIG += staticlib";) \
 		echo "} else {"; \
 		echo "    target.path = $(if $(__qmake_has_qt_sysroot),$(TARGET_OUT_STAGING))/$(TARGET_DEFAULT_BIN_DESTDIR)"; \
 		echo "}"; \
@@ -86,6 +87,7 @@ define qmake_gen_deps
 	@( \
 		echo "equals(TEMPLATE, lib) {"; \
 		echo "    target.path = $(if $(__qmake_has_qt_sysroot),$(TARGET_OUT_STAGING))/$(TARGET_DEFAULT_LIB_DESTDIR)"; \
+		$(if $(call streq,$(TARGET_FORCE_STATIC),1),echo "    CONFIG += staticlib";) \
 		echo "} else {"; \
 		echo "    target.path = $(if $(__qmake_has_qt_sysroot),$(TARGET_OUT_STAGING))/$(TARGET_DEFAULT_BIN_DESTDIR)"; \
 		echo "}"; \

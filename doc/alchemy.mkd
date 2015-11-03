@@ -271,10 +271,13 @@ Mainly used by the android wrapper.
 
 ### Other variables
 
-* `TARGET_PBUILD_FORCE_STATIC` : Can be set to `1` to force the compilation of
-  static libraries even if module requested to build a dynamic one. Mainly here
-  to compile ecos target and prepare the transition from monolithic SoftAT
-  executable to separate shared libraries.
+* `TARGET_FORCE_STATIC` : Can be set to `1` to force the compilation of libraries
+  as static even if module requested to build a shared one. This option impacts
+  all modules (internal AND external).
+  </br>Default is `0`.
+* `TARGET_PBUILD_FORCE_STATIC` : Similar to `TARGET_FORCE_STATIC` but module
+  shall also set `LOCAL_PBUILD_ALLOW_FORCE_STATIC` to `1` to be compiled as static.
+  This option only impacts modules of class `SHARED` and `LIBRARY`.
   </br>Default is `0`.
 * `TARGET_PBUILD_HOOK_USE_DESCRIBE` : Can be set to `1` to save tags of libraries
   used in binary. It can be retrieved at run time with pal function
