@@ -374,7 +374,7 @@ else
 # warnings due to the fact that no module could be registered. Another parsing
 # of Alchemy will anyway be triggered after generation of the cache.
 ifeq ("$(wildcard $(USER_MAKEFILES_CACHE))","")
-  CONFIG_GLOBAL_FILE_AVAILABLE := 0
+  SKIP_CONFIG_CHECK := 1
 endif
 
 # Include makefile containing all available makefiles
