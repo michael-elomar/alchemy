@@ -38,12 +38,13 @@ class Project(object):
 		self.modules = modules
 		self.depends = [modules[dep] for dep in self.module.fields.get("depends", "").split()]
 		self.depends_all = [modules[dep] for dep in self.module.fields.get("depends.all", "").split()]
+		self.depends_headers = [modules[dep] for dep in self.module.fields.get("depends.headers", "").split()]
 		self.link_depends = {}
 
 		if options.linkdeps_full:
-			depends = self.depends_all
+			depends = self.depends_all + self.depends_headers
 		else:
-			depends = self.depends
+			depends = self.depends + self.depends_headers
 
 		# populate link dependencies only for direct dependencies
 		for dep in depends:
