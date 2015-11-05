@@ -232,7 +232,7 @@ $(error Unable to find compiler: $(TARGET_CC))
 endif
 
 # TODO: remove when not used anymore
-TARGET_COMPILER_PATH := $(shell PARAM=$(TARGET_CC);echo $${PARAM%/bin*})
+TARGET_COMPILER_PATH := $(shell PARAM="$(TARGET_CC)";echo $${PARAM%/bin*})
 
 # Machine targetted by toolchain to be used by autotools and libc installation
 ifndef TOOLCHAIN_TARGET_NAME
