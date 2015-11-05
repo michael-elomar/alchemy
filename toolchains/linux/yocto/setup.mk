@@ -31,28 +31,37 @@ YOCTO_SDK_HOST_SYSROOT := $(shell . $(YOCTO_ENV_FILE) && echo $$OECORE_NATIVE_SY
 
 #get cross toolchain path
 ifndef TARGET_CROSS
-TARGET_CROSS := $(shell . $(YOCTO_ENV_FILE) && which $$CC | sed 's/gcc//')
-endif
-ifeq ("$(TARGET_CROSS)","")
-$(error Failed to detect Yocto target cross, set the target cross path in the TARGET_CROSS variable)
+YOCTO_TOOLCHAIN_PATH := $(shell . $(YOCTO_ENV_FILE) && which $$CC | sed 's:/[^/]*$$::')
+
+TARGET_CC := $(YOCTO_TOOLCHAIN_PATH)/$(shell . $(YOCTO_ENV_FILE) && echo $$CC)
+TARGET_CXX := $(YOCTO_TOOLCHAIN_PATH)/$(shell . $(YOCTO_ENV_FILE) && echo $$CXX)
+TARGET_CPP := $(YOCTO_TOOLCHAIN_PATH)/$(shell . $(YOCTO_ENV_FILE) && echo $$CPP)
+TARGET_AS := $(YOCTO_TOOLCHAIN_PATH)/$(shell . $(YOCTO_ENV_FILE) && echo $$AS)
+TARGET_LD := $(YOCTO_TOOLCHAIN_PATH)/$(shell . $(YOCTO_ENV_FILE) && echo $$LD)
+TARGET_STRIP := $(YOCTO_TOOLCHAIN_PATH)/$(shell . $(YOCTO_ENV_FILE) && echo $$STRIP)
+TARGET_RANLIB := $(YOCTO_TOOLCHAIN_PATH)/$(shell . $(YOCTO_ENV_FILE) && echo $$RANLIB)
+TARGET_OBJCOPY := $(YOCTO_TOOLCHAIN_PATH)/$(shell . $(YOCTO_ENV_FILE) && echo $$OBJCOPY)
+TARGET_OBJDUMP := $(YOCTO_TOOLCHAIN_PATH)/$(shell . $(YOCTO_ENV_FILE) && echo $$OBJDUMP)
+TARGET_AR := $(YOCTO_TOOLCHAIN_PATH)/$(shell . $(YOCTO_ENV_FILE) && echo $$AR)
+TARGET_NM := $(YOCTO_TOOLCHAIN_PATH)/$(shell . $(YOCTO_ENV_FILE) && echo $$NM)
 endif
 
 #get cross toolchain flags
-TARGET_GLOBAL_CFLAGS += $(shell . $(YOCTO_ENV_FILE) && echo $$CC $$CFLAGS | cut -d ' ' -f2-)
-TARGET_GLOBAL_CXXFLAGS += $(shell . $(YOCTO_ENV_FILE) && echo $$CXX $$CXXFLAGS | cut -d ' ' -f2-)
-TMP_LDFLAGS := $(shell . $(YOCTO_ENV_FILE) && echo $$LD $$LDFLAGS | cut -d ' ' -f2-)
-TARGET_GLOBAL_LDFLAGS += $(TMP_LDFLAGS)
-TARGET_GLOBAL_LDFLAGS_SHARED += $(TMP_LDFLAGS)
+TARGET_GLOBAL_CFLAGS += $(shell . $(YOCTO_ENV_FILE) && echo $$CFLAGS)
+TARGET_GLOBAL_CXXFLAGS += $(shell . $(YOCTO_ENV_FILE) && echo $$CXXFLAGS)
+YOCTO_TMP_LDFLAGS := $(shell . $(YOCTO_ENV_FILE) && echo $$LDFLAGS)
+TARGET_GLOBAL_LDFLAGS += $(YOCTO_TMP_LDFLAGS)
+TARGET_GLOBAL_LDFLAGS_SHARED += $(YOCTO_TMP_LDFLAGS)
 
 TARGET_GLOBAL_C_INCLUDES += $(YOCTO_SDK_TARGET_SYSROOT)/usr/include
 
 # Qt variables
 QTSDK_QMAKE := $(YOCTO_SDK_HOST_SYSROOT)/usr/bin/qt5/qmake
 ifneq ("$(wildcard $(QTSDK_QMAKE))","")
-export OE_QMAKE_CC := $(shell . $(YOCTO_ENV_FILE) && which $$CC)
-export OE_QMAKE_CXX := $(shell . $(YOCTO_ENV_FILE) && which $$CXX)
-export OE_QMAKE_LINK := $(OE_QMAKE_CXX)
-export OE_QMAKE_AR := $(shell . $(YOCTO_ENV_FILE) && which $$AR)
+export OE_QMAKE_CC := $(TARGET_CC)
+export OE_QMAKE_CXX := $(TARGET_CXX)
+export OE_QMAKE_LINK := $(TARGET_CXX)
+export OE_QMAKE_AR := $(TARGET_AR)
 export QT_CONF_PATH := $(shell . $(YOCTO_ENV_FILE) && echo $$QT_CONF_PATH)
 export OE_QMAKE_LIBDIR_QT := $(shell . $(YOCTO_ENV_FILE) && echo $$OE_QMAKE_LIBDIR_QT)
 export OE_QMAKE_INCDIR_QT := $(shell . $(YOCTO_ENV_FILE) && echo $$OE_QMAKE_INCDIR_QT)
