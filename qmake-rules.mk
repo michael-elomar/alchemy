@@ -59,9 +59,9 @@ define qmake_gen_deps
 		echo "INSTALLS += target"; \
 		echo "INCLUDEPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
 		echo "DEPENDPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
-		echo "QMAKE_CFLAGS += $(PRIVATE_CFLAGS) $(qmake_global_cflags)"; \
-		echo "QMAKE_CXXFLAGS += $(PRIVATE_CFLAGS) $(qmake_global_cflags) $(PRIVATE_CXXFLAGS) $(TARGET_GLOBAL_CXXFLAGS)"; \
-		echo "LIBS += $(PRIVATE_LDFLAGS) $(qmake_global_ldflags)"; \
+		echo "QMAKE_CFLAGS += $(qmake_global_cflags) $(PRIVATE_CFLAGS)"; \
+		echo "QMAKE_CXXFLAGS += $(qmake_global_cflags) $(TARGET_GLOBAL_CXXFLAGS) $(PRIVATE_CFLAGS) $(PRIVATE_CXXFLAGS)"; \
+		echo "LIBS += $(qmake_global_ldflags) $(PRIVATE_LDFLAGS)"; \
 		echo "LIBS += $(foreach __lib, $(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES), -force_load $(__lib))"; \
 		echo "LIBS += $(PRIVATE_ALL_STATIC_LIBRARIES)"; \
 		echo "LIBS += $(PRIVATE_ALL_SHARED_LIBRARIES)"; \
@@ -94,9 +94,9 @@ define qmake_gen_deps
 		echo "INSTALLS += target"; \
 		echo "INCLUDEPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
 		echo "DEPENDPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
-		echo "QMAKE_CFLAGS += $(PRIVATE_CFLAGS) $(TARGET_GLOBAL_CFLAGS)"; \
-		echo "QMAKE_CXXFLAGS += $(PRIVATE_CFLAGS) $(TARGET_GLOBAL_CFLAGS) $(PRIVATE_CXXFLAGS) $(TARGET_GLOBAL_CXXFLAGS)"; \
-		echo "LIBS += $(PRIVATE_LDFLAGS) $(TARGET_GLOBAL_LDFLAGS)"; \
+		echo "QMAKE_CFLAGS += $(TARGET_GLOBAL_CFLAGS) $(PRIVATE_CFLAGS)"; \
+		echo "QMAKE_CXXFLAGS += $(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CXXFLAGS) $(PRIVATE_CFLAGS) $(PRIVATE_CXXFLAGS)"; \
+		echo "LIBS += $(TARGET_GLOBAL_LDFLAGS) $(PRIVATE_LDFLAGS)"; \
 		echo "LIBS += -Wl,--whole-archive $(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES) -Wl,--no-whole-archive"; \
 		echo "LIBS += $(PRIVATE_ALL_STATIC_LIBRARIES)"; \
 		echo "LIBS += $(PRIVATE_ALL_SHARED_LIBRARIES)"; \
