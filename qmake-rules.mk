@@ -73,7 +73,7 @@ define qmake_gen_deps
 		echo "QMAKE_IOS_SIMULATOR_ARCHS = $(filter-out -arch,$(APPLE_ARCH))"; \
 		echo "QMAKE_IOS_DEPLOYMENT_TARGET = $(TARGET_IPHONE_VERSION)"; \
 		echo "QMAKE_MACOSX_DEPLOYMENT_TARGET = $(TARGET_MACOS_VERSION)"; \
-		echo "deployement.files = $(shell find $(TARGET_OUT_STAGING)/$(TARGET_DEFAULT_LIB_DESTDIR) -name '*.dylib' -type f -maxdepth 1)"; \
+		echo "deployement.files = $(shell find $(TARGET_OUT_STAGING)/$(TARGET_DEFAULT_LIB_DESTDIR) -maxdepth 1 -name '*.dylib' -type f)"; \
 		echo "deployement.path = Contents/Frameworks/"; \
 		echo "QMAKE_BUNDLE_DATA += deployement"; \
 	) >> $(PRIVATE_ALCHEMY_PRI_FILE)
@@ -102,7 +102,7 @@ define qmake_gen_deps
 		echo "LIBS += $(PRIVATE_ALL_SHARED_LIBRARIES)"; \
 		echo "LIBS += $(PRIVATE_LDLIBS)"; \
 		echo "LIBS += $(TARGET_GLOBAL_LDLIBS_SHARED)"; \
-		echo "ANDROID_EXTRA_LIBS = $(shell find $(TARGET_OUT_STAGING)/$(TARGET_DEFAULT_LIB_DESTDIR) -name 'lib*.so' -type f -maxdepth 1)"; \
+		echo "ANDROID_EXTRA_LIBS = $(shell find $(TARGET_OUT_STAGING)/$(TARGET_DEFAULT_LIB_DESTDIR) -maxdepth 1 -name 'lib*.so' -type f)"; \
 	) >> $(PRIVATE_ALCHEMY_PRI_FILE)
 endef
 
