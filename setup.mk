@@ -196,8 +196,13 @@ TARGET_LINUX_LINK_CPIO_IMAGE ?= 0
 # Generate a Uboot image of linux
 TARGET_LINUX_GENERATE_UIMAGE ?= 0
 
-# Append a device tree to the linux image
-TARGET_LINUX_DEVICE_TREE ?=
+# Copy device tree files to the boot directory
+TARGET_LINUX_DEVICE_TREE_NAMES ?=
+
+# TODO: remove compatibility with old name in future version
+ifdef TARGET_LINUX_DEVICE_TREE
+  TARGET_LINUX_DEVICE_TREE_NAMES += $(TARGET_LINUX_DEVICE_TREE)
+endif
 
 # Target image format (tar, cpio, ext2, ext3, ext4, plf)
 # It can optionaly be suffixed with .gz or .bz2 to compress the image

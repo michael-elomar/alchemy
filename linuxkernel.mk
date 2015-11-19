@@ -262,14 +262,11 @@ ifeq ("$(TARGET_LINUX_IMAGE)","uImage")
 endif
 	@mkdir -p $(TARGET_OUT_STAGING)/boot
 	$(call linux-copy-images)
-ifneq ("$(TARGET_LINUX_DEVICE_TREE)","")
-	$(Q)if [ -f $(TARGET_OUT_STAGING)/boot/zImage ]; then \
-			cat $(TARGET_OUT_STAGING)/boot/zImage \
-				$(LINUX_BUILD_DIR)/arch/$(LINUX_SRCARCH)/boot/dts/$(TARGET_LINUX_DEVICE_TREE) \
-				> $(TARGET_OUT_STAGING)/boot/zImage_$(TARGET_LINUX_DEVICE_TREE); \
-		fi
-	$(Q)cp -af $(LINUX_BUILD_DIR)/arch/$(LINUX_SRCARCH)/boot/dts/$(TARGET_LINUX_DEVICE_TREE) \
-		$(TARGET_OUT_STAGING)/boot/
+ifneq ("$(TARGET_LINUX_DEVICE_TREE_NAMES)","")
+	$(Q)for f in $(TARGET_LINUX_DEVICE_TREE_NAMES); do \
+		cp -af $(LINUX_BUILD_DIR)/arch/$(LINUX_SRCARCH)/boot/dts/$$f \
+			$(TARGET_OUT_STAGING)/boot/; \
+	done
 endif
 	$(Q)cp -af $(LINUX_BUILD_DIR)/vmlinux $(TARGET_OUT_STAGING)/boot
 	$(call linux-gen-sdk)

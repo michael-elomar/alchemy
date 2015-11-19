@@ -220,9 +220,9 @@ kernel. During cpio image generation, the kernel will be re-linked to add it
 inside. Also, required options are internally set in linux config. Although
 only the copy in build directory is modified, the original one is not touched.
 </br>Default is <code>0</code></li>
-<li><code>TARGET_LINUX_DEVICE_TREE</code> : name of a device tree to append to kernel image.
-It shall be in <code>$(LINUX_BUILD_DIR)/arch/$(TARGET_ARCH)/boot/dts</code>. The name
-shall be the one with the <code>.dtb</code> extension. Default is empty.</li>
+<li><code>TARGET_LINUX_DEVICE_TREE_NAMES</code> : list of device tree name to copy in boot
+directory. It shall be in <code>$(LINUX_BUILD_DIR)/arch/$(TARGET_ARCH)/boot/dts</code>.
+The names shall be the ones with the <code>.dtb</code> extension. Default is empty.</li>
 <li><code>TARGET_GENERATE_LINUX_UIMAGE</code> : generate a u-boot image of linux.
 </br>Default is <code>0</code></li>
 <li><code>TARGET_LINUX_IMAGE</code> : linux image to generate and copy in boot directory.
