@@ -497,7 +497,7 @@ $(foreach __mod,$(ALL_MODULES), \
 				$(eval ALL_BUILD_MODULES_HOST += $(__mod)) \
 			), \
 			$(if $(call is-not-item-in-list,$(__mod),$(ALL_BUILD_MODULES)), \
-				$(warning $(__mod) is not enabled in the config) \
+				$(info $(__mod) is not enabled in the config) \
 				$(eval ALL_BUILD_MODULES += $(__mod) \
 					$(call module-get-all-depends,$(__mod)) \
 				) \
