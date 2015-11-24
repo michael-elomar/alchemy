@@ -56,7 +56,7 @@ LOCAL_EXPORT_LDLIBS := $(shell pkg-config --libs json)
 $(call local-register-prebuilt-overridable)
 endif
 
-ifeq ("$(shell pkg-config --exists glib-20 gobject-2.0 gio-2.0; echo $$?)","0")
+ifeq ("$(shell pkg-config --exists glib-2.0 gobject-2.0 gio-2.0; echo $$?)","0")
 include $(CLEAR_VARS)
 LOCAL_MODULE := glib
 LOCAL_EXPORT_CFLAGS := $(shell pkg-config --cflags glib-2.0 gobject-2.0 gio-2.0)
