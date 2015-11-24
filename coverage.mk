@@ -39,8 +39,8 @@ coverage-copy-gcno:
 	@echo "Copying gcno files..."
 	@( \
 		for f in $$(cd $(TARGET_OUT_BUILD) && find -name '*.gcno'); do \
-			mkdir -p $$(dirname $(TARGET_OUT)/gcov/$$f); \
-			cp -af $(TARGET_OUT_BUILD)/$$f $(TARGET_OUT)/gcov/$$f; \
+			mkdir -p $$(dirname $(TARGET_OUT_GCOV)/$$f); \
+			cp -af $(TARGET_OUT_BUILD)/$$f $(TARGET_OUT_GCOV)/$$f; \
 		done \
 	)
 	@echo "Done copying gcno files"
@@ -48,7 +48,7 @@ coverage-copy-gcno:
 # Clean gcov directory
 .PHONY: coverage-copy-gcno-clean
 coverage-copy-gcno-clean:
-	$(Q) rm -rf $(TARGET_OUT)/gcov
+	$(Q) rm -rf $(TARGET_OUT_GCOV)
 
 # Setup dependencies
 coverage-copy-gcno: post-build

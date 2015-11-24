@@ -157,6 +157,8 @@ conflict with other build systems (android for example).
   provided by the product.
   </br>Default is `$(TARGET_OUT)/final`.
   </br>Note: setting this variable is deprecated
+* `TARGET_OUT_GCOV` : Full path to folder where the gcno files will be put.
+  </br>Default is `$(TARGET_OUT)/gcov`.
 * `TARGET_CONFIG_DIR` : Full path to folder where the configuration files are
   stored. If not set, it is assumed that there will be no configurable module
   and everything will be built.
