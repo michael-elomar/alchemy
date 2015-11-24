@@ -693,6 +693,9 @@ include $(BUILD_SYSTEM)/help.mk
 post-build: $(__modlist)
 all: post-build
 
+.PHONY: pre-final
+pre-final: post-build
+
 # Depends on this to be executed AFTER final directory has been done
 # If 'final' is not given in goals, this is a no op
 .PHONY: post-final

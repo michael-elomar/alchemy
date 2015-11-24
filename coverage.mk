@@ -52,7 +52,7 @@ coverage-copy-gcno-clean:
 
 # Setup dependencies
 coverage-copy-gcno: post-build
-final: coverage-copy-gcno
+pre-final: coverage-copy-gcno
 clobber: coverage-copy-gcno-clean
 
 endif # ifeq ("$(USE_COVERAGE)","1")
