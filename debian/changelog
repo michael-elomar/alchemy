@@ -1,3 +1,28 @@
+parrot-tools-alchemy (1.2.1) unstable; urgency=low
+  * Use python executable according to configuration
+  * Only copy in boot a single linux image and stop filtering in makefinal.
+  * Fix colors in mac
+  * Use correct name for CXXFLAGS.
+  * Fix build when using USE_SCAN_CACHE
+  * Map target arch to android arch.
+  * Add -DANDROID -DANDROID_NDK to global cflags
+  * eclipseproject add depends_headers modules in link dependencies
+  * Make possible to cross-compile using a Yocto SDK.
+  * Fix configure of thrift when building for Yocto
+  * Add TARGET_FORCE_STATIC option.
+  * Update qmake flags override.
+  * Update qmake selection/detection.
+  * Allow several device tree to be specified.
+  * Remove warning when some pre-built packages are not found.
+  * by default, use 2015.02 toolchain for o3 cpu
+  * Do not issue a warning when building a disabled module.
+  * Extract all target/path logic into a dedicated makefile.
+  * Add 'pre-final' target
+  * Allow customizing the gcov folder
+  * don't export headers for um arch
+
+ -- Yves-Marie Morgan (Parrot) <yves-marie.morgan@parrot.com>  Thu, 26 Nov 2015 16:55:44 +0100
+
 parrot-tools-alchemy (1.2.0) unstable; urgency=low
   * Add support for MacOS/iOS
   * Add support for mingw32 target os.
