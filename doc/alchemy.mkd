@@ -202,6 +202,8 @@ conflict with other build systems (android for example).
 * `TARGET_LINUX_IMAGE` : linux image to generate and copy in boot directory.
   </br>Default is `zImage` for arm, `bzImage` for `x86` and `x64`,
   `Image` for `aarch64`
+* `TARGET_LINUX_MAKE_BUILD_ARGS` : Additional variables to be given as
+  parameters to the kernel build commands (using make).
 
 ### Darwin specific
 
