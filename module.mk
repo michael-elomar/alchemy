@@ -388,7 +388,7 @@ $(call add-debug-flags)
 # Code coverage flags (for internal modules only)
 ifeq ("$(and $(call is-module-external,$(LOCAL_MODULE)),$(call strneq,$(LOCAL_MODULE_CLASS),QMAKE))","")
 ifeq ("$(USE_COVERAGE)","1")
-  LOCAL_CFLAGS  += -fprofile-arcs -ftest-coverage -O0
+  LOCAL_CFLAGS  += -fprofile-arcs -ftest-coverage -O0 -D__COVERAGE__
   LOCAL_LDFLAGS += -fprofile-arcs -ftest-coverage
   LOCAL_LDFLAGS_SHARED += -fprofile-arcs -ftest-coverage
 endif
