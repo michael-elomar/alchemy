@@ -1125,9 +1125,6 @@ In the definition of custom commands, the following points shall be noted :
 
 * `PRIVATE_ARCHIVE` : Full path to the archive file specified in
   `LOCAL_AUTOTOOLS_ARCHIVE`.
-* `PRIVATE_UNPACK_DIR` : Full path to where the archive has been extracted
-  (usually the build directory). This is also where the directory specified in
-  `LOCAL_AUTOTOOLS_SUBDIR` will be found.
 * `PRIVATE_SRC_DIR` : Full path to the source directory of the module. For
   modules with an archive to be unpacked, it is the same as `PRIVATE_OBJ_DIR`.
 * `PRIVATE_OBJ_DIR` : Full path to the directory where the module will be
