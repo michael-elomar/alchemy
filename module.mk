@@ -407,6 +407,7 @@ __external-add_CXXFLAGS := $(__external-add_CFLAGS) $(LOCAL_CXXFLAGS)
 # Linker flags
 __external-add_LDFLAGS :=
 
+
 # Whole static libraries
 # As one unique -Wl option otherwise libtool make a terrible mess with it
 # (it splits -Wl otions from -l options making encapsulation useless)
@@ -414,7 +415,9 @@ __external-add_LDFLAGS :=
 ifneq ("$(strip $(all_whole_static_libs_filename))","")
 __external-add_LDFLAGS += -Wl,--whole-archive
 $(foreach __lib,$(all_whole_static_libs_filename), \
-	$(eval __external-add_LDFLAGS := $(__external-add_LDFLAGS),-l:$(notdir $(__lib))) \
+	$(if $(filter lib%$(TARGET_STATIC_LIB_SUFFIX), $(notdir $(__lib))), \
+	$(eval __external-add_LDFLAGS := $(__external-add_LDFLAGS),-l$(patsubst lib%$(TARGET_STATIC_LIB_SUFFIX),%,$(notdir $(__lib)))), \
+	$(eval __external-add_LDFLAGS := $(__external-add_LDFLAGS),-l:$(notdir $(__lib)))) \
 )
 __external-add_LDFLAGS := $(__external-add_LDFLAGS),--no-whole-archive
 endif
@@ -424,7 +427,9 @@ endif
 # No comma separated list (like above or below !)
 ifneq ("$(strip $(all_static_libs_filename))","")
 $(foreach __lib,$(all_static_libs_filename), \
-	$(eval __external-add_LDFLAGS := $(__external-add_LDFLAGS) -l:$(notdir $(__lib))) \
+	$(if $(filter lib%$(TARGET_STATIC_LIB_SUFFIX), $(notdir $(__lib))), \
+	$(eval __external-add_LDFLAGS := $(__external-add_LDFLAGS) -l$(patsubst lib%$(TARGET_STATIC_LIB_SUFFIX),%,$(notdir $(__lib)))), \
+	$(eval __external-add_LDFLAGS := $(__external-add_LDFLAGS) -l:$(notdir $(__lib)))) \
 )
 endif
 
@@ -435,7 +440,9 @@ endif
 ifneq ("$(strip $(all_shared_libs_filename))","")
 __external-add_LDFLAGS += -Wl
 $(foreach __lib,$(all_shared_libs_filename), \
-	$(eval __external-add_LDFLAGS := $(__external-add_LDFLAGS),-l:$(notdir $(__lib))) \
+	$(if $(filter lib%$(TARGET_SHARED_LIB_SUFFIX), $(notdir $(__lib))), \
+	$(eval __external-add_LDFLAGS := $(__external-add_LDFLAGS),-l$(patsubst lib%$(TARGET_SHARED_LIB_SUFFIX),%,$(notdir $(__lib)))), \
+	$(eval __external-add_LDFLAGS := $(__external-add_LDFLAGS),-l:$(notdir $(__lib)))) \
 )
 endif
 
