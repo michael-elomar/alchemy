@@ -1,3 +1,15 @@
+parrot-tools-alchemy (1.2.2) unstable; urgency=low
+  * Add path to search for gdbserver (linaro 2014 toolchain)
+  * Use LINUX_ARCH instead of TARGET_ARCH to build kernel modules
+  * Store LINUX_ARCH value in linux build/sdk dir.
+  * [image-plf] prune boot directory content but dtb files.
+  * Add -D__COVERAGE__ to local cflags when USE_COVERAGE=1
+  * Add USE_AUTO_LIB_PREFIX for static libraries
+  * Use '-l:' option only for libraries not compliant with '-l'
+  * cpio need a 512 bytes alignment
+
+ -- Yves-Marie Morgan (Parrot) <yves-marie.morgan@parrot.com>  Mon, 14 Dec 2015 14:08:49 +0100
+
 parrot-tools-alchemy (1.2.1) unstable; urgency=low
   * Use python executable according to configuration
   * Only copy in boot a single linux image and stop filtering in makefinal.
