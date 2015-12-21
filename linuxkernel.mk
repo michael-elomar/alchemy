@@ -109,7 +109,8 @@ LINUX_EXPORTED_HEADERS_OVER := \
 	include/linux/sock_diag.h \
 	include/linux/inet_diag.h \
 	include/linux/iio/events.h \
-	include/linux/iio/types.h
+	include/linux/iio/types.h \
+	include/linux/cn_proc.h
 
 # Linux image to generate
 ifndef TARGET_LINUX_IMAGE
