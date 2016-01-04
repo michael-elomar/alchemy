@@ -86,11 +86,13 @@ $(call check-pwd-is-top-dir)
 $(Q)$(CCACHE) $(PRIVATE_CC) \
 	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
 	$(call normalize-system-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
+	$(TARGET_GLOBAL_ASFLAGS) \
 	$(TARGET_GLOBAL_CFLAGS) $(WARNINGS_CFLAGS) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_COMPILER_FLAVOUR)) \
 	$(WARNINGS_CFLAGS_$(PRIVATE_COMPILER_FLAVOUR)) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARCH)) \
 	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARCH)_$(PRIVATE_COMPILER_FLAVOUR)) \
+	$(PRIVATE_ASFLAGS) \
 	$(PRIVATE_CFLAGS) \
 	-c -MMD -MP -MF $(@:.o=.d) -MT $@ -o $@ \
 	$(call path-from-top,$<)

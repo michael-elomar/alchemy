@@ -401,6 +401,7 @@ endif
 ###############################################################################
 
 # Compilation flags
+__external-add_ASFLAGS := $(LOCAL_ASFLAGS)
 __external-add_CFLAGS := $(LOCAL_CFLAGS) $(call normalize-c-includes,$(LOCAL_C_INCLUDES))
 __external-add_CXXFLAGS := $(__external-add_CFLAGS) $(LOCAL_CXXFLAGS)
 

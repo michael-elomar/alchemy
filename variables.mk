@@ -93,6 +93,9 @@ vars-LOCAL += DEPENDS_HOST_MODULES
 # Format : <fullpath> (-I will be prepended automatically)
 vars-LOCAL += C_INCLUDES
 
+# Additional flags to pass into the assembler
+vars-LOCAL += ASFLAGS
+
 # Additional flags to pass into the C or C++ compiler
 vars-LOCAL += CFLAGS
 
@@ -345,6 +348,7 @@ vars-TARGET += RANLIB
 
 # Flags for tools
 vars-TARGET += GLOBAL_C_INCLUDES
+vars-TARGET += GLOBAL_ASFLAGS
 vars-TARGET += GLOBAL_CFLAGS
 vars-TARGET += GLOBAL_CXXFLAGS
 vars-TARGET += GLOBAL_CFLAGS_arm
@@ -431,6 +435,7 @@ vars-TARGET_SETUP += RANLIB
 
 # Flags for tools
 vars-TARGET_SETUP += GLOBAL_C_INCLUDES
+vars-TARGET_SETUP += GLOBAL_ASFLAGS
 vars-TARGET_SETUP += GLOBAL_CFLAGS
 vars-TARGET_SETUP += GLOBAL_CXXFLAGS
 vars-TARGET_SETUP += GLOBAL_CFLAGS_arm

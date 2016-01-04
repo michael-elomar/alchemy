@@ -47,6 +47,7 @@ __autotools-target-cache-file := $(TARGET_OUT_BUILD)/autotools.cache
 ###############################################################################
 
 # Setup flags
+HOST_AUTOTOOLS_ASFLAGS := $(HOST_GLOBAL_ASFLAGS)
 HOST_AUTOTOOLS_CPPFLAGS := $(call normalize-system-c-includes,$(HOST_GLOBAL_C_INCLUDES))
 HOST_AUTOTOOLS_CFLAGS := $(HOST_AUTOTOOLS_CPPFLAGS) $(HOST_GLOBAL_CFLAGS)
 HOST_AUTOTOOLS_CXXFLAGS := $(HOST_AUTOTOOLS_CFLAGS) $(HOST_GLOBAL_CXXFLAGS)
@@ -75,6 +76,7 @@ HOST_AUTOTOOLS_CONFIGURE_ENV := \
 	OBJDUMP="$(HOST_OBJDUMP)" \
 	INSTALL="$(__autotools-install-bin) -p" \
 	MANIFEST_TOOL=":" \
+	ASFLAGS="$(HOST_AUTOTOOLS_ASFLAGS)" \
 	CPPFLAGS="$(HOST_AUTOTOOLS_CPPFLAGS)" \
 	CFLAGS="$(HOST_AUTOTOOLS_CFLAGS)" \
 	CXXFLAGS="$(HOST_AUTOTOOLS_CXXFLAGS)" \

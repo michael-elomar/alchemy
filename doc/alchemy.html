@@ -291,6 +291,7 @@ Mainly used by the android wrapper.</p>
 <ul>
 <li><code>TARGET_GLOBAL_C_INCLUDES</code> : List of full path to directories to add for all
 file compiled. The -I prefix will be appended so do not put it.</li>
+<li><code>TARGET_GLOBAL_ASFLAGS</code> : Flags to pass to the assembler.</li>
 <li><code>TARGET_GLOBAL_CFLAGS</code> : Flags to pass to the C <strong>and</strong> C++ compiler.</li>
 <li><code>TARGET_GLOBAL_CXXFLAGS</code> : Flags to pass to the C++ compiler only.</li>
 <li><code>TARGET_GLOBAL_ARFLAGS</code> : Flags to pass to the archive maker.
@@ -1012,10 +1013,11 @@ specifying path under the <code>atom.mk</code>.</p>
 <p><strong>Note</strong> : The build directory and <code>LOCAL_PATH</code> are automatically added during
 compilation</p>
 
-<h4><code>LOCAL_CFLAGS</code>, <code>LOCAL_CXXFLAGS</code></h4>
+<h4><code>LOCAL_ASFLAGS</code>, <code>LOCAL_CFLAGS</code>, <code>LOCAL_CXXFLAGS</code></h4>
 
-<p>Flags to be passed during the compilation of source files. <code>LOCAL_CFLAGS</code> is
-given to <strong>all</strong> files, whereas <code>LOCAL_CXXFLAGS</code> is given only to <code>c++</code> files</p>
+<p>Flags to be passed during the compilation of source files. <code>LOCAL_ASFLAGS</code> is
+given only to <code>asm</code> files. <code>LOCAL_CFLAGS</code> is given to <strong>all</strong> files, whereas
+<code>LOCAL_CXXFLAGS</code> is given only to <code>c++</code> files</p>
 
 <p><strong>Note</strong> : some warning flags are automatically added by the build system,
 please do not add/remove any to let the build system decides which flags are
@@ -1158,6 +1160,7 @@ not need to be explicitly specified :</p>
 <li><code>OBJDUMP</code></li>
 <li><code>CC_FOR_BUILD</code></li>
 <li><code>CPPFLAGS</code></li>
+<li><code>ASFLAGS</code></li>
 <li><code>CFLAGS</code></li>
 <li><code>CXXFLAGS</code></li>
 <li><code>LDFLAGS</code></li>
@@ -1234,6 +1237,7 @@ otherwise it will be under the directory <code>obj</code> inside the build direc
 
 <ul>
 <li><code>TARGET_AUTOTOOLS_CPPFLAGS</code></li>
+<li><code>TARGET_AUTOTOOLS_ASFLAGS</code></li>
 <li><code>TARGET_AUTOTOOLS_CFLAGS</code></li>
 <li><code>TARGET_AUTOTOOLS_CXXFLAGS</code></li>
 <li><code>TARGET_AUTOTOOLS_LDFLAGS</code></li>
@@ -1430,6 +1434,7 @@ customized before invoking <code>alchemy</code>. For the meaning, see the corres
 <li><code>HOST_OUT_BUILD</code> : <code>$(TARGET_OUT)/build-host</code></li>
 <li><code>HOST_OUT_STAGING</code> : <code>$(TARGET_OUT)/staging-host</code></li>
 <li><code>HOST_GLOBAL_C_INCLUDES</code> :</li>
+<li><code>HOST_GLOBAL_ASFLAGS</code> : empty</li>
 <li><code>HOST_GLOBAL_CFLAGS</code> : <code>-pipe -O2 -g0</code></li>
 <li><code>HOST_GLOBAL_CXXFLAGS</code> : empty</li>
 <li><code>HOST_GLOBAL_ARFLAGS</code> : <code>rcs</code></li>

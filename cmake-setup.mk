@@ -12,6 +12,9 @@ CMAKE := $(shell which cmake)
 
 CMAKE_TOOLCHAIN_FILE := $(TARGET_OUT_BUILD)/toolchainfile.cmake
 
+CMAKE_ASM_FLAGS := \
+	$(TARGET_GLOBAL_ASFLAGS)
+
 CMAKE_C_FLAGS := \
 	$(call normalize-system-c-includes,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(TARGET_GLOBAL_CFLAGS)
@@ -66,6 +69,9 @@ define cmake-gen-toolchain-file
 	echo "set(CMAKE_CXX_COMPILER \"$(TARGET_CXX)\")"; \
 	echo "set(CMAKE_AR \"$(TARGET_AR)\" CACHE FILEPATH "Archiver")"; \
 	echo "set(CMAKE_LINKER \"$(TARGET_LD)\")"; \
+	echo 'set(CMAKE_ASM_FLAGS \
+		"$(subst \,\\\,$(CMAKE_AS_FLAGS)) $${ALCHEMY_EXTRA_AS_FLAGS}" \
+		CACHE STRING "ASM_FLAGS")'; \
 	echo 'set(CMAKE_C_FLAGS \
 		"$(subst \,\\\,$(CMAKE_C_FLAGS)) $${ALCHEMY_EXTRA_C_FLAGS}" \
 		CACHE STRING "C_FLAGS")'; \

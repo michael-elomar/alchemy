@@ -10,6 +10,7 @@
 # Initialize target global variables.
 ###############################################################################
 TARGET_GLOBAL_C_INCLUDES ?=
+TARGET_GLOBAL_ASFLAGS ?=
 TARGET_GLOBAL_CFLAGS ?=
 TARGET_GLOBAL_CXXFLAGS ?=
 TARGET_GLOBAL_ARFLAGS ?=
