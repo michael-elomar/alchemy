@@ -79,6 +79,7 @@ conflict with other build systems (android for example).
 * `TARGET_OS` : Specify the OS of the target. Possible values are :
   * `linux`.
   * `ecos`.
+  * `baremetal`.
   * `darwin`.
   * `android` : alias for `linux` OS with `android` flavour. `TARGET_ARCH` defaults to `arm`.
   * `iphone` : alias for `darwin` OS with `iphoneos` flavour.
@@ -132,6 +133,7 @@ conflict with other build systems (android for example).
   * `armv7a-neon`
   * `tegrak1`
   * `tegrax1`
+  * `arm7tdmi`
   </br>Default is empty (no specific optimization activated).
 * `TARGET_PRODUCT`: Name of the product. Mainly used for determining some other
   default values.

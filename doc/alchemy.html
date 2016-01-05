@@ -87,6 +87,7 @@ conflict with other build systems (android for example).</p>
 <ul>
 <li><code>linux</code>.</li>
 <li><code>ecos</code>.</li>
+<li><code>baremetal</code>.</li>
 <li><code>darwin</code>.</li>
 <li><code>android</code> : alias for <code>linux</code> OS with <code>android</code> flavour. <code>TARGET_ARCH</code> defaults to <code>arm</code>.</li>
 <li><code>iphone</code> : alias for <code>darwin</code> OS with <code>iphoneos</code> flavour.</li>
@@ -153,7 +154,8 @@ optimization and select some module (for ex: linux). Possible values are :
 <li><code>omap4</code></li>
 <li><code>armv7a-neon</code></li>
 <li><code>tegrak1</code></li>
-<li><code>tegrax1</code>
+<li><code>tegrax1</code></li>
+<li><code>arm7tdmi</code>
 </br>Default is empty (no specific optimization activated).</li>
 </ul></li>
 <li><code>TARGET_PRODUCT</code>: Name of the product. Mainly used for determining some other
