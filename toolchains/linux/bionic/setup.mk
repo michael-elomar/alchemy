@@ -139,6 +139,6 @@ else # USE_ALCHEMY_ANDROID_SDK
 # specific and hard to extract.
 
 TARGET_GLOBAL_C_INCLUDES += \
-	$(BUILD_SYSTEM)/toolchains/bionic/include
+	$(BUILD_SYSTEM)/toolchains/linux/bionic/include
 
 endif
