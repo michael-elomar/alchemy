@@ -1153,6 +1153,11 @@ ifeq ("$(LOCAL_MODULE_CLASS)","EXECUTABLE")
 
 include $(BUILD_SYSTEM)/binary-rules.mk
 
+ifneq ("$(LOCAL_LDSCRIPT)","")
+$(LOCAL_BUILD_MODULE): $(LOCAL_PATH)/$(LOCAL_LDSCRIPT)
+$(LOCAL_BUILD_MODULE): PRIVATE_LDFLAGS += -T $(LOCAL_PATH)/$(LOCAL_LDSCRIPT)
+endif
+
 $(LOCAL_BUILD_MODULE): $(all_objects) $(all_link_libs_filenames)
 	$(transform-o-to-executable)
 ifneq ("$(TARGET_ADD_DEPENDS_SECTION)","0")

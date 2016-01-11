@@ -1003,6 +1003,11 @@ when needed.
 If set to `1`, the module output file will not be copied in staging directory.
 This allow customization of this step by the `atom.mk`.
 
+#### `LOCAL_LDSCRIPT`
+
+Optional linker script for an `EXECUTABLE` module. The path shall be relative
+to `LOCAL_PATH`. This is usually only used for `baremetal` target OS modules.
+
 ### Autotools modules
 
 The term `autotools` refer to modules that use a configure script that generates

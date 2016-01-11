@@ -246,6 +246,9 @@ vars-LOCAL += CREATE_LINKS
 #       usr/include directory of staging directory
 vars-LOCAL += INSTALL_HEADERS
 
+# Linker script
+vars-LOCAL += LDSCRIPT
+
 # Name of the doxyfile used for documentation generation
 # If none specified, LOCAL_PATH will be added to DOXYGEN_INPUT
 vars-LOCAL += DOXYFILE

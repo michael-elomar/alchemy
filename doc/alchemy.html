@@ -1081,6 +1081,11 @@ when needed.</p>
 <p>If set to <code>1</code>, the module output file will not be copied in staging directory.
 This allow customization of this step by the <code>atom.mk</code>.</p>
 
+<h4><code>LOCAL_LDSCRIPT</code></h4>
+
+<p>Optional linker script for an <code>EXECUTABLE</code> module. The path shall be relative
+to <code>LOCAL_PATH</code>. This is usually only used for <code>baremetal</code> target OS modules.</p>
+
 <h3>Autotools modules</h3>
 
 <p>The term <code>autotools</code> refer to modules that use a configure script that generates
