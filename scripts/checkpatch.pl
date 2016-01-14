@@ -2523,8 +2523,9 @@ sub process {
 		}
 		if (defined $suppress_export{$linenr} &&
 		    $suppress_export{$linenr} == 2) {
-			WARN("EXPORT_SYMBOL",
-			     "EXPORT_SYMBOL(foo); should immediately follow its function/variable\n" . $herecurr);
+# YMM: Some user-space libs use this in a way different from the kernel.
+#			WARN("EXPORT_SYMBOL",
+#			     "EXPORT_SYMBOL(foo); should immediately follow its function/variable\n" . $herecurr);
 		}
 
 # check for global initialisers.
