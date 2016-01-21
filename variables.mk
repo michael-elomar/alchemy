@@ -102,6 +102,9 @@ vars-LOCAL += CFLAGS
 # Additional flags to pass into only the C++ compiler
 vars-LOCAL += CXXFLAGS
 
+# Additional flags to pass into the Objective-C compiler
+vars-LOCAL += OBJCFLAGS
+
 # Additional flags to pass into the vala compiler
 vars-LOCAL += VALAFLAGS
 
@@ -371,6 +374,7 @@ vars-TARGET += GLOBAL_LDLIBS_SHARED
 vars-TARGET += GLOBAL_ARFLAGS
 vars-TARGET += GLOBAL_PCH_FLAGS
 vars-TARGET += GLOBAL_VALAFLAGS
+vars-TARGET += GLOBAL_OBJCFLAGS
 
 # Cuda
 vars-TARGET += NVCC
@@ -458,6 +462,7 @@ vars-TARGET_SETUP += GLOBAL_LDLIBS_SHARED
 vars-TARGET_SETUP += GLOBAL_ARFLAGS
 vars-TARGET_SETUP += GLOBAL_PCH_FLAGS
 vars-TARGET_SETUP += GLOBAL_VALAFLAGS
+vars-TARGET_SETUP += GLOBAL_OBJCFLAGS
 vars-TARGET_SETUP += LDCONFIG_DIRS
 
 # Cuda

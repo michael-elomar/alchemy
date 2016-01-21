@@ -75,6 +75,29 @@ $(Q)$(CCACHE) $(PRIVATE_CC) \
 $(call fix-deps-file,$(@:.o=.d))
 endef
 
+ ###############################################################################
+## Commands to compile a Objective-C file.
+###############################################################################
+
+define transform-m-to-o
+$(call print-banner1,"$(PRIVATE_ARCH) OBJC",$(PRIVATE_MODULE),$(call path-from-top,$<))
+$(call check-pwd-is-top-dir)
+@mkdir -p $(dir $@)
+$(Q)$(CCACHE) $(PRIVATE_CC) \
+	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
+	$(call normalize-system-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
+	$(TARGET_GLOBAL_CFLAGS) $(WARNINGS_CFLAGS) \
+	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_COMPILER_FLAVOUR)) \
+	$(WARNINGS_CFLAGS_$(PRIVATE_COMPILER_FLAVOUR)) \
+	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARCH)) \
+	$(TARGET_GLOBAL_CFLAGS_$(PRIVATE_ARCH)_$(PRIVATE_COMPILER_FLAVOUR)) \
+	$(TARGET_GLOBAL_OBJCFLAGS) \
+	$(PRIVATE_CFLAGS) $(PRIVATE_OBJCFLAGS) \
+	-c -MMD -MP -MF $(@:.o=.d) -MT $@ -o $@ \
+	$(call path-from-top,$<)
+	$(call fix-deps-file,$(@:.o=.d))
+endef
+
 ###############################################################################
 ## Commands to compile a S file.
 ###############################################################################

@@ -262,6 +262,7 @@ Mainly used by the android wrapper.
 * `TARGET_GLOBAL_LDLIBS_SHARED` : Additional libraries to use when linking
   libraries.
 * `TARGET_GLOBAL_PCH_FLAGS` : Flags to pass when precompiling headers.
+* `TARGET_GLOBAL_OBJCFLAGS` : Flags to pass to the Objective-C compiler.
 
 ### Specific flags for arm targets.
 Normally not needed, default values are determined based on target setting.
@@ -937,11 +938,12 @@ specifying path under the `atom.mk`.
 **Note** : The build directory and `LOCAL_PATH` are automatically added during
 compilation
 
-#### `LOCAL_ASFLAGS`, `LOCAL_CFLAGS`, `LOCAL_CXXFLAGS`
+#### `LOCAL_ASFLAGS`, `LOCAL_CFLAGS`, `LOCAL_CXXFLAGS`, `LOCAL_OBJCFLAGS`
 
 Flags to be passed during the compilation of source files. `LOCAL_ASFLAGS` is
 given only to `asm` files. `LOCAL_CFLAGS` is given to **all** files, whereas
-`LOCAL_CXXFLAGS` is given only to `c++` files
+`LOCAL_CXXFLAGS` is given only to `c++` files and `LOCAL_OBJCFLAGS` to
+objective-C files.
 
 **Note** : some warning flags are automatically added by the build system,
 please do not add/remove any to let the build system decides which flags are

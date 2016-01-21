@@ -305,6 +305,7 @@ libraries.</li>
 <li><code>TARGET_GLOBAL_LDLIBS_SHARED</code> : Additional libraries to use when linking
 libraries.</li>
 <li><code>TARGET_GLOBAL_PCH_FLAGS</code> : Flags to pass when precompiling headers.</li>
+<li><code>TARGET_GLOBAL_OBJCFLAGS</code> : Flags to pass to the Objective-C compiler.</li>
 </ul>
 
 <h3>Specific flags for arm targets.</h3>
@@ -1015,11 +1016,12 @@ specifying path under the <code>atom.mk</code>.</p>
 <p><strong>Note</strong> : The build directory and <code>LOCAL_PATH</code> are automatically added during
 compilation</p>
 
-<h4><code>LOCAL_ASFLAGS</code>, <code>LOCAL_CFLAGS</code>, <code>LOCAL_CXXFLAGS</code></h4>
+<h4><code>LOCAL_ASFLAGS</code>, <code>LOCAL_CFLAGS</code>, <code>LOCAL_CXXFLAGS</code>, <code>LOCAL_OBJCFLAGS</code></h4>
 
 <p>Flags to be passed during the compilation of source files. <code>LOCAL_ASFLAGS</code> is
 given only to <code>asm</code> files. <code>LOCAL_CFLAGS</code> is given to <strong>all</strong> files, whereas
-<code>LOCAL_CXXFLAGS</code> is given only to <code>c++</code> files</p>
+<code>LOCAL_CXXFLAGS</code> is given only to <code>c++</code> files and <code>LOCAL_OBJCFLAGS</code> to
+objective-C files.</p>
 
 <p><strong>Note</strong> : some warning flags are automatically added by the build system,
 please do not add/remove any to let the build system decides which flags are
