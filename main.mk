@@ -42,6 +42,7 @@ USE_CONFIG_CHECK ?= 1
 USE_COVERAGE ?= 0
 USE_AUTOTOOLS_CACHE ?= 0
 USE_AUTO_LIB_PREFIX ?= 0
+USE_LINK_MAP_FILE ?= 1
 
 # The host module feature might break temporatily some atom/mk, add a flag
 # so it can be checked

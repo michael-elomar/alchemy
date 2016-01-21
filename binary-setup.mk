@@ -181,7 +181,7 @@ $(call check-pwd-is-top-dir)
 $(Q)$(PRIVATE_CXX) \
 	$(TARGET_GLOBAL_LDFLAGS_SHARED) \
 	$(TARGET_GLOBAL_LDFLAGS_$(PRIVATE_COMPILER_FLAVOUR)) \
-	-Wl,-map -Wl,$(basename $@).map \
+	$(if $(call streq,$(USE_LINK_MAP_FILE),1),-Wl$(comma)-map$(comma)$(basename $@).map) \
 	-shared \
 	-Wl,-dead_strip \
 	-Wl,-install_name,$(TARGET_OUT_STAGING)/$(TARGET_DEFAULT_LIB_DESTDIR)/$(notdir $@) \
@@ -208,7 +208,7 @@ $(call check-pwd-is-top-dir)
 $(Q)$(PRIVATE_CXX) \
 	$(TARGET_GLOBAL_LDFLAGS_SHARED) \
 	$(TARGET_GLOBAL_LDFLAGS_$(PRIVATE_COMPILER_FLAVOUR)) \
-	-Wl,-Map -Wl,$(basename $@).map \
+	$(if $(call streq,$(USE_LINK_MAP_FILE),1),-Wl$(comma)-Map$(comma)$(basename $@).map) \
 	-shared \
 	-Wl,-soname -Wl,$(notdir $@) \
 	-Wl,--no-undefined \
@@ -245,7 +245,7 @@ $(call check-pwd-is-top-dir)
 $(Q)$(PRIVATE_CXX) \
 	$(TARGET_GLOBAL_LDFLAGS) \
 	$(TARGET_GLOBAL_LDFLAGS_$(PRIVATE_COMPILER_FLAVOUR)) \
-	-Wl,-map -Wl,$(basename $@).map \
+	$(if $(call streq,$(USE_LINK_MAP_FILE),1),-Wl$(comma)-map$(comma)$(basename $@).map) \
 	-Wl,-dead_strip \
 	$(PRIVATE_LDFLAGS) \
 	$(PRIVATE_ALL_OBJECTS) \
@@ -270,7 +270,7 @@ $(call check-pwd-is-top-dir)
 $(Q)$(PRIVATE_CXX) \
 	$(TARGET_GLOBAL_LDFLAGS) \
 	$(TARGET_GLOBAL_LDFLAGS_$(PRIVATE_COMPILER_FLAVOUR)) \
-	-Wl,-Map -Wl,$(basename $@).map \
+	$(if $(call streq,$(USE_LINK_MAP_FILE),1),-Wl$(comma)-Map$(comma)$(basename $@).map) \
 	-Wl,--gc-sections \
 	-Wl,--as-needed \
 	$(PRIVATE_LDFLAGS) \

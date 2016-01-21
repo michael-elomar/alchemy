@@ -130,6 +130,9 @@ endif
 # Force adding lib prefix to libraries
 USE_AUTO_LIB_PREFIX := 1
 
+# Disable map file generation, it causes linker to crash
+USE_LINK_MAP_FILE := 0
+
 # Needed by some modules
 TARGET_GLOBAL_CFLAGS += -DANDROID -DANDROID_NDK
 
