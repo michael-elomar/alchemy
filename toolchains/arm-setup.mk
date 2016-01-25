@@ -149,10 +149,11 @@ TARGET_GLOBAL_CFLAGS_arm ?= \
 	-marm \
 	-O2 \
 	-fomit-frame-pointer \
-	-fstrict-aliasing \
-	-funswitch-loops
+	-fstrict-aliasing
 
-TARGET_GLOBAL_CFLAGS_arm_gcc ?= -finline-limit=300
+TARGET_GLOBAL_CFLAGS_arm_gcc ?= \
+	-finline-limit=300 \
+	-funswitch-loops
 
 # Thumb mode specific flags
 ifneq ("$(TARGET_DEFAULT_ARM_MODE)","arm")
