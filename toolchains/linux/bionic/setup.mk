@@ -96,9 +96,9 @@ ANDROID_TOOLCHAIN_OPTIONS := \
 ANDROID_TOOLCHAIN_TOKEN := $(ANDROID_TOOLCHAIN_PATH)/$(TARGET_ANDROID_TOOLCHAIN).android-$(TARGET_ANDROID_APILEVEL)
 ifeq ("$(wildcard $(ANDROID_TOOLCHAIN_TOKEN))","")
   $(info Installing Android-$(TARGET_ANDROID_APILEVEL) toolchain $(TARGET_ANDROID_TOOLCHAIN) from NDK)
-  $(shell if [ -e $(ANDROID_TOOLCHAIN_PATH) ] ; then rm -rf $(ANDROID_TOOLCHAIN_PATH); fi ; \
+  $(shell (if [ -e $(ANDROID_TOOLCHAIN_PATH) ] ; then rm -rf $(ANDROID_TOOLCHAIN_PATH); fi ; \
 	$(TARGET_ANDROID_NDK)/build/tools/make-standalone-toolchain.sh $(ANDROID_TOOLCHAIN_OPTIONS) && \
-		touch $(ANDROID_TOOLCHAIN_TOKEN))
+		touch $(ANDROID_TOOLCHAIN_TOKEN)) >&2)
 endif
 
 ANDROID_TOOLCHAIN_NAME := $(shell echo $(TARGET_ANDROID_TOOLCHAIN) | sed 's/\(.*\)-[0-9].[0-9]/\1/')
