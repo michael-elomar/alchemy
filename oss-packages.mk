@@ -70,4 +70,10 @@ oss-packages:
 	@rm -rf $(OSS_PACKAGES_DIR)/git
 	@echo "Packages: done -> $(OSS_PACKAGES_DIR)"
 
+else
+
+# Nothing to do
+.PHONY: oss-packages
+oss-packages:
+	@echo "Packages: OSS_PACKAGES is not defined or empty"
 endif
