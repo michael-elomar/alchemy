@@ -34,7 +34,6 @@ TARGET_GLOBAL_CXXFLAGS += \
 
 TARGET_GLOBAL_LDFLAGS += \
 	-Wl,-static \
-	-nostdlib
 
 TARGET_GLOBAL_LDLIBS += \
 	-lgcc

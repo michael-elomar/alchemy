@@ -69,6 +69,10 @@ ifeq ("$(TARGET_ARCH)","arm")
    include $(BUILD_SYSTEM)/toolchains/arm-setup.mk
 endif
 
+ifeq ("$(TARGET_ARCH)","avr")
+   include $(BUILD_SYSTEM)/toolchains/avr-setup.mk
+endif
+
 ifeq ("$(TARGET_ARCH)","aarch64")
   TARGET_GLOBAL_CFLAGS += -fPIC
 endif
