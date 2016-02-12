@@ -1,3 +1,24 @@
+parrot-tools-alchemy (1.2.3) unstable; urgency=low
+  * Export connector proc header.
+  * Add global and local ASFLAGS to allow custom assembler flags
+  * Add support for baremetal products
+  * scripts/native-wrapper.sh: allow sourcing from ZSH
+  * Fix incorrect path for Bionic toolchains
+  * Fix quote escape in sdk generation.
+  * Remove unescaped left brace in Perl regex
+  * Add LOCAL_LDSCRIPT variable for internal EXECUTABLE modules
+  * Set CMAKE_MODULE_LINKER_FLAGS
+  * [scripts/checkpatch] Remove warning about EXPORT_SYMBOL.
+  * Allow to force using the kconfig tools installed on the system
+  * Use a dediacted rule to compile objective-c files.
+  * Disable link map file for android.
+  * Filter out -std= flags for C++
+  * Warn if oss-packages is done with a missing or empty OSS_PACKAGES
+  * perf tool shall be build against target arch
+  * New avr target arch added for minidrones attiny firmware.
+
+ -- Yves-Marie Morgan (Parrot) <yves-marie.morgan@parrot.com>  Fri, 12 Feb 2016 10:32:12 +0100
+
 parrot-tools-alchemy (1.2.2) unstable; urgency=low
   * Add path to search for gdbserver (linaro 2014 toolchain)
   * Use LINUX_ARCH instead of TARGET_ARCH to build kernel modules
