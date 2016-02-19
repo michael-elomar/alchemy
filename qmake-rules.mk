@@ -35,7 +35,8 @@ endif
 
 # Silence...
 ifeq ("$(V)","0")
-  qmake_make_arg := -s --no-print-directory
+  qmake_make_arg := --no-print-directory
+  qmake_arg := CONFIG+=silent
 endif
 
 # Generate a .pri file to be included by the .pro file with dependencies found by alchemy
@@ -140,6 +141,7 @@ $(built_file):
 		&& $(QMAKE) $(if $(call is-path-absolute,$(PRIVATE_QMAKE_PRO_FILE)), \
 						$(PRIVATE_QMAKE_PRO_FILE), \
 						$(PRIVATE_PATH)/$(PRIVATE_QMAKE_PRO_FILE)) \
+						$(qmake_arg) \
 		&& $(MAKE) $(qmake_make_arg)
 	@touch $@
 
