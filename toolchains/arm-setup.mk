@@ -141,6 +141,13 @@ ifeq ("$(TARGET_CPU)","arm7tdmi")
   TARGET_GLOBAL_CFLAGS += -mcpu=arm7tdmi
 endif
 
+ifeq ("$(TARGET_CPU)", "stm32f3")
+  TARGET_GLOBAL_CFLAGS += -mcpu=cortex-m4 -mfpu=fpv4-sp-d16
+  TARGET_GLOBAL_LDFLAGS += -mcpu=cortex-m4 -mfpu=fpv4-sp-d16
+  TARGET_GLOBAL_LDFLAGS += -mfloat-abi=hard
+  TARGET_FLOAT_ABI ?= hard
+endif
+
 # set float abi
 ifdef TARGET_FLOAT_ABI
   TARGET_GLOBAL_CFLAGS += -mfloat-abi=$(TARGET_FLOAT_ABI)
