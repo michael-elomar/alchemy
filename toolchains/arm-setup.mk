@@ -148,6 +148,12 @@ ifeq ("$(TARGET_CPU)", "stm32f3")
   TARGET_FLOAT_ABI ?= hard
 endif
 
+ifeq ("$(TARGET_CPU)", "m0")
+  TARGET_GLOBAL_CFLAGS += -mcpu=cortex-m0
+  TARGET_GLOBAL_LDFLAGS += -mcpu=cortex-m0
+  TARGET_FLOAT_ABI := soft
+endif
+
 # set float abi
 ifdef TARGET_FLOAT_ABI
   TARGET_GLOBAL_CFLAGS += -mfloat-abi=$(TARGET_FLOAT_ABI)
