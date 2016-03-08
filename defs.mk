@@ -734,14 +734,14 @@ __module-compute-depends-static-internal = \
 
 # When forcing static libraries, take into account external libraries as well
 # Otherwise assume they are mostly shared libraries
-ifeq ("$(TARGET_FORCE_STATIC)","1")
 __module-compute-depends-static-internal += \
-	$(foreach __mod,$(__modules.$1.EXTERNAL_LIBRARIES), \
-		$(if $(call is-module-registered,$(__mod)), \
-			$(call __module-compute-depends-static,$(__mod),$2) \
+	$(if $(call streq,$(TARGET_FORCE_STATIC),1), \
+		$(foreach __mod,$(__modules.$1.EXTERNAL_LIBRARIES), \
+			$(if $(call is-module-registered,$(__mod)), \
+				$(call __module-compute-depends-static,$(__mod),$2) \
+			) \
 		) \
 	)
-endif
 
 # Compute dependencies for link. It simply aggregate (and sort) dependencies
 # $1 : module name.

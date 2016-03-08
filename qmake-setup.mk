@@ -45,25 +45,37 @@ else
 endif
 
 # Try to auto-detect Qt SDK path
-QT_SDK_DEFAULT_PATHS := /opt/Qt* /opt/QT* /Applications/Qt* ~/Qt*
-TARGET_QT_SDKROOT ?= $(shell shopt -s nullglob ;                       \
-                             for path in $(QT_SDK_DEFAULT_PATHS) ; do  \
-                                 if [ -e $$path/$(TARGET_QT_VERSION)/$(TARGET_QT_PLATFORM)/bin/qmake ]; then   \
-                                     cd $$path && pwd && break;        \
-                             fi; done)
+QT_SDK_DEFAULT_PATHS := \
+	/opt/Qt* \
+	/opt/QT* \
+	/Applications/Qt* \
+	~/Qt*
+
+ifndef TARGET_QT_SDKROOT
+TARGET_QT_SDKROOT := $(shell shopt -s nullglob ; \
+	for path in $(QT_SDK_DEFAULT_PATHS) ; do \
+		if [ -e $$path/$(TARGET_QT_VERSION)/$(TARGET_QT_PLATFORM)/bin/qmake ]; then \
+			cd $$path && pwd && break; \
+		fi; \
+	done)
+endif
 
 # Define QMake path accordingly
-ifneq ("$(TARGET_QT_SDKROOT)","")
-  TARGET_QT_SDK ?= $(TARGET_QT_SDKROOT)/$(TARGET_QT_VERSION)/$(TARGET_QT_PLATFORM)
-endif
-ifneq ("$(TARGET_QT_SDK)","")
-  QTSDK_QMAKE ?= $(TARGET_QT_SDK)/bin/qmake
+ifndef TARGET_QT_SDK
+  ifneq ("$(TARGET_QT_SDKROOT)","")
+    TARGET_QT_SDK := $(TARGET_QT_SDKROOT)/$(TARGET_QT_VERSION)/$(TARGET_QT_PLATFORM)
+  else
+    TARGET_QT_SDK :=
+  endif
 endif
 
 # Use qmake from PATH in last resort, on host build
-ifeq ("$(QTSDK_QMAKE)","")
-ifeq ("$(TARGET_OS)-$(TARGET_OS_FLAVOUR)","$(HOST_OS)-native")
-QTSDK_QMAKE = $(shell which qmake)
+ifndef QTSDK_QMAKE
+  ifneq ("$(TARGET_QT_SDK)","")
+    QTSDK_QMAKE := $(TARGET_QT_SDK)/bin/qmake
+  else ifeq ("$(TARGET_OS)-$(TARGET_OS_FLAVOUR)","$(HOST_OS)-native")
+    QTSDK_QMAKE := $(shell which qmake)
+  else
+    QTSDK_QMAKE :=
+  endif
 endif
-endif
-
