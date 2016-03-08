@@ -163,7 +163,9 @@ __generate-config-args = $(strip \
 __apply-sed-script := $(BUILD_SYSTEM)/scripts/config-apply-sedfiles.sh
 
 # Separate sed files application from __load-config-internal
-## (optional) different destination file can be passed as second argument.
+# $1: module name
+# $2: destination file
+# $3: source file
 __config-apply-sed = \
 	$(eval __cas_src_file := $3) \
 	$(eval __cas_dst_file := $2) \
@@ -181,6 +183,7 @@ __config-apply-sed = \
 	$(shell cp -af $(__cas_src_file) $(__cas_dst_file)) \
 )
 
+# $1: module name
 define __load-config-internal
 $(if $(wildcard $(call __get-orig-module-config,$1)), \
 	$(if $(call strneq,$(V),0), \
@@ -190,17 +193,12 @@ $(if $(wildcard $(call __get-orig-module-config,$1)), \
 		$(call __get-build-module-config,$1), \
 		$(call __get-orig-module-config,$1) \
 	) \
-	, \
-	$(shell mkdir -p $(dir $(call __get-build-module-config,$1))) \
-	$(shell [ -e $(call __get-build-module-config,$1) ] || touch $(call __get-build-module-config,$1)) \
+	-include $(call __get-build-module-config,$1) \
 )
--include $(call __get-build-module-config,$1)
-$(eval __modules.$1.config-loaded := 1)
 endef
 
 ###############################################################################
 ## Load configuration of a module.
 ## Simply evaluate a call to simplify job of caller.
 ###############################################################################
-load-config = $(if $(call is-var-undefined,__modules.$(LOCAL_MODULE).config-loaded), \
-	$(eval $(call __load-config-internal,$(LOCAL_MODULE))))
+load-config = $(eval $(call __load-config-internal,$(LOCAL_MODULE)))

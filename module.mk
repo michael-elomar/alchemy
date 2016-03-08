@@ -13,9 +13,6 @@ ifneq ("$(V)","0")
 $(info Generating rules for $(LOCAL_MODULE))
 endif
 
-# Make sure config is loaded
-$(call load-config)
-
 # This will print a warning if this module misses a custom macro
 $(call check-custom-macro,$(LOCAL_MODULE))
 
@@ -675,13 +672,26 @@ $(LOCAL_TARGETS): export MODULE_NAME := $(LOCAL_MODULE)
 ## Configuration file management.
 ###############################################################################
 
-config_file := $(call __get-build-module-config,$(LOCAL_MODULE))
+orig_config_file := $(call __get-orig-module-config,$(LOCAL_MODULE))
+build_config_file := $(call __get-build-module-config,$(LOCAL_MODULE))
 autoconf_file := $(call module-get-autoconf,$(LOCAL_MODULE))
 ifneq ("$(autoconf_file)","")
 
 # autoconf.h file depends on module config
-$(autoconf_file): $(config_file)
+$(autoconf_file): $(build_config_file)
 	@$(call generate-autoconf-file,$<,$@)
+
+# Copy config file in build dir if not done yet by load-config
+ifneq ("$(wildcard $(orig_config_file))","")
+# Original config file exists, copy it with optional sed files applied
+$(build_config_file): $(call __get-orig-module-config,$(LOCAL_MODULE))
+	$(call __config-apply-sed,$(PRIVATE_MODULE),$@,$<)
+else
+# No Original config file, simply create an empty one in build dir
+$(build_config_file):
+	@mkdir -p $(dir $@)
+	@touch $@
+endif
 
 # Don't forget to clean autoconf.h file
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(autoconf_file)
