@@ -1,11 +1,7 @@
 ###############################################################################
-## @file toolchains/linux/packages.mk
+## @file targets/linux/native-chroot/packages.mk
 ## @author Y.M. Morgan
 ## @date 2016/03/05
 ##
-## Additional packages for linux toolchain.
+## Additional packages for linux/native-chroot target.
 ###############################################################################
-
-ifneq ("$(TARGET_LIBC)","")
-  -include $(BUILD_SYSTEM)/toolchains/$(TARGET_OS)/$(TARGET_LIBC)/packages.mk
-endif

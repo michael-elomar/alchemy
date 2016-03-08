@@ -25,7 +25,7 @@ LOCAL_COPY_FILES := ld.so.preload:etc/ld.so.preload
 include $(BUILD_LIBRARY)
 
 ifdef TARGET_TEST
- 
+
 # test libstrstr.so
 include $(CLEAR_VARS)
 

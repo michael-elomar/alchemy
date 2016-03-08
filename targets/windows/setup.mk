@@ -1,11 +1,13 @@
 ###############################################################################
-## @file toolchains/linux/packages.mk
+## @file targets/windows/setup.mk
 ## @author Y.M. Morgan
 ## @date 2016/03/05
 ##
-## Additional packages for linux toolchain.
+## Setup variables for windows target.
 ###############################################################################
 
-ifneq ("$(TARGET_LIBC)","")
-  -include $(BUILD_SYSTEM)/toolchains/$(TARGET_OS)/$(TARGET_LIBC)/packages.mk
-endif
+TARGET_STATIC_LIB_SUFFIX := .a
+TARGET_SHARED_LIB_SUFFIX := .dll
+TARGET_EXE_SUFFIX := .exe
+
+TARGET_LIBC ?= mingw

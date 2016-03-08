@@ -21,7 +21,7 @@ _libc_installed_file := $(call local-get-build-dir)/$(LOCAL_MODULE).installed
 _libc_sysroot := $(patsubst %/,%,$(TOOLCHAIN_LIBC))
 
 # architecture dependent sub-directory
-_libc_arch_subdir := $(TOOLCHAIN_TARGET_NAME)
+_libc_arch_subdir := $(TARGET_TOOLCHAIN_TRIPLET)
 
 # List of files to be put in /lib or /lib/<arch>
 _libc_lib_names := \
@@ -54,7 +54,7 @@ _libc_usrlib_names := \
 _libc_lib_dir := $(_libc_sysroot)/lib
 _libc_lib_arch_dir := $(_libc_sysroot)/lib/$(_libc_arch_subdir)
 ifeq ("$(TARGET_ARCH)","x64")
-_libc_lib64_dir := $(_libc_sysroot)/lib64
+  _libc_lib64_dir := $(_libc_sysroot)/lib64
 endif
 
 # 'usr/lib' directory

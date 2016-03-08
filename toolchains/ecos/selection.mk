@@ -1,11 +1,12 @@
 ###############################################################################
-## @file toolchains/linux/packages.mk
+## @file toolchains/ecos/selection.mk
 ## @author Y.M. Morgan
 ## @date 2016/03/05
 ##
-## Additional packages for linux toolchain.
+## Setup toolchain variables.
 ###############################################################################
 
-ifneq ("$(TARGET_LIBC)","")
-  -include $(BUILD_SYSTEM)/toolchains/$(TARGET_OS)/$(TARGET_LIBC)/packages.mk
+ifndef TARGET_CROSS
+  export PATH := /usr/local/gnutools-20080328/bin:$(PATH)
+  TARGET_CROSS := /usr/local/gnutools-20080328/bin/arm-elf-
 endif

@@ -1,11 +1,11 @@
 ###############################################################################
-## @file toolchains/linux/packages.mk
+## @file toolchains/linux/native/flags.mk
 ## @author Y.M. Morgan
 ## @date 2016/03/05
 ##
-## Additional packages for linux toolchain.
+## Additional flags for linux/native toolchain.
 ###############################################################################
 
-ifneq ("$(TARGET_LIBC)","")
-  -include $(BUILD_SYSTEM)/toolchains/$(TARGET_OS)/$(TARGET_LIBC)/packages.mk
-endif
+# Assume everybody will want this
+TARGET_GLOBAL_LDLIBS += -pthread -lrt
+TARGET_GLOBAL_LDLIBS_SHARED += -pthread -lrt

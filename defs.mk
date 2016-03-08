@@ -1020,6 +1020,20 @@ generate-last-revision-file = \
 endif
 
 ###############################################################################
+## Register a prebuilt module using pkg-config
+## $1 : name of the alchemy module
+## $2 : name of the pkg-config module (can specify several separaed by space)
+###############################################################################
+register-prebuilt-pkg-config-module = \
+	$(if $(call streq,$(shell pkg-config --exists $2; echo $$?),0), \
+		$(eval include $(CLEAR_VARS)) \
+		$(eval LOCAL_MODULE := $1) \
+		$(eval LOCAL_EXPORT_CFLAGS := $(shell pkg-config --cflags $2)) \
+		$(eval LOCAL_EXPORT_LDLIBS := $(shell pkg-config --libs $2)) \
+		$(call local-register-prebuilt-overridable) \
+	)
+
+###############################################################################
 ## Generate autoconf.h file from config file.
 ## $1 : input config file.
 ## $2 : output autoconf.h file.

@@ -1,11 +1,7 @@
 ###############################################################################
-## @file toolchains/linux/packages.mk
+## @file toolchains/windows/flags.mk
 ## @author Y.M. Morgan
 ## @date 2016/03/05
 ##
-## Additional packages for linux toolchain.
+## Additional flags for windows/ toolchain.
 ###############################################################################
-
-ifneq ("$(TARGET_LIBC)","")
-  -include $(BUILD_SYSTEM)/toolchains/$(TARGET_OS)/$(TARGET_LIBC)/packages.mk
-endif

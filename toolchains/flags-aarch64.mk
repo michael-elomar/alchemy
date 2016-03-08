@@ -1,11 +1,9 @@
 ###############################################################################
-## @file toolchains/linux/packages.mk
+## @file toolchains/windows/flags-aarch64.mk
 ## @author Y.M. Morgan
 ## @date 2016/03/05
 ##
-## Additional packages for linux toolchain.
+## Setup toolchain variables.
 ###############################################################################
 
-ifneq ("$(TARGET_LIBC)","")
-  -include $(BUILD_SYSTEM)/toolchains/$(TARGET_OS)/$(TARGET_LIBC)/packages.mk
-endif
+TARGET_GLOBAL_CFLAGS += -fPIC

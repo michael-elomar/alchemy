@@ -142,7 +142,7 @@ $(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
 	$(eval __target_pkg_config_path := $(__target_pkg_config_path):$(__dir)/usr/lib/pkgconfig) \
 	$(eval __target_pkg_config_path := $(__target_pkg_config_path):$(__dir)/lib/pkgconfig) \
 	$(eval __target_pkg_config_path := $(__target_pkg_config_path):$(__dir)/usr/share/pkgconfig) \
-	$(eval __target_pkg_config_path := $(__target_pkg_config_path):$(__dir)/usr/lib/$(TOOLCHAIN_TARGET_NAME)/pkgconfig) \
+	$(eval __target_pkg_config_path := $(__target_pkg_config_path):$(__dir)/usr/lib/$(TARGET_TOOLCHAIN_TRIPLET)/pkgconfig) \
 )
 
 # Setup pkg-config
@@ -184,7 +184,7 @@ TARGET_AUTOTOOLS_CONFIGURE_ENV := \
 	XDG_DATA_DIRS=$(TARGET_XDG_DATA_DIRS) \
 	$(TARGET_PKG_CONFIG_ENV)
 
-ifeq ("$(TARGET_OS)","mingw32")
+ifeq ("$(TARGET_OS)","windows")
   TARGET_AUTOTOOLS_CONFIGURE_ENV += \
       WINDRES="$(TARGET_CROSS)windres" \
       RC="$(TARGET_CROSS)windres"
@@ -203,7 +203,7 @@ else
     GNU_BUILD_NAME := $(shell $(HOST_CC) -dumpmachine)
   endif
   ifndef GNU_TARGET_NAME
-    GNU_TARGET_NAME := $(TOOLCHAIN_TARGET_NAME)
+    GNU_TARGET_NAME := $(TARGET_TOOLCHAIN_TRIPLET)
   endif
   TARGET_AUTOTOOLS_CONFIGURE_ARGS += \
 	--build="$(GNU_BUILD_NAME)" \
@@ -246,6 +246,7 @@ else
   TARGET_AUTOTOOLS_INSTALL_DESTDIR := $(TARGET_OUT_STAGING)
 endif
 
+# FIXME YACC should be bison -y (and test that BISON_PATH is not empty)
 TARGET_AUTOTOOLS_CONFIGURE_ARGS += \
 	--prefix="$(TARGET_AUTOTOOLS_CONFIGURE_PREFIX)" \
 	--sysconfdir="$(TARGET_AUTOTOOLS_CONFIGURE_SYSCONFDIR)" \
