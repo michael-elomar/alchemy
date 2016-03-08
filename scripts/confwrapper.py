@@ -11,12 +11,14 @@ import shutil
 import difflib
 import hashlib
 
+import host
+
 # Full path to this script
 SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
 
 # 32-bit or 64-bit ?
-ARCH = "x64" if (platform.architecture()[0] == "64bit") else "x86"
-SYSTEM = platform.system().lower()
+HOST_OS = host.getinfo("OS")
+HOST_ARCH = host.getinfo("ARCH")
 
 # Possible actions
 ACTION_CHECK = "check"
@@ -178,7 +180,7 @@ def getKconfigPath(name):
 	useInstalled = os.environ.get("KCONFIG_USE_INSTALLED", "")
 	if useInstalled != "1":
 		# Use the one in alchemy tree if available
-		binDir = os.path.join(SCRIPT_PATH, "../kconfig/bin-" + SYSTEM + "-" + ARCH)
+		binDir = os.path.join(SCRIPT_PATH, "../kconfig/bin-" + HOST_OS + "-" + HOST_ARCH)
 		path = os.path.join(binDir, name)
 		if os.path.exists(path):
 			return path
