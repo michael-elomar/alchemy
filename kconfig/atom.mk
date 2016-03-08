@@ -58,6 +58,8 @@ LOCAL_SRC_FILES := \
 	lxdialog/util.c \
 	lxdialog/yesno.c
 
+LOCAL_LIBRARIES := ncurses
+
 include $(BUILD_STATIC_LIBRARY)
 
 ###############################################################################
@@ -66,7 +68,6 @@ include $(BUILD_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := conf
-LOCAL_DESTDIR := .
 LOCAL_SRC_FILES := conf.c
 LOCAL_LIBRARIES := parser
 
@@ -78,7 +79,6 @@ include $(BUILD_EXECUTABLE)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := mconf
-LOCAL_DESTDIR := .
 LOCAL_LDLIBS := -lncurses
 LOCAL_SRC_FILES := mconf.c
 LOCAL_LIBRARIES := parser lxdialog
@@ -91,11 +91,9 @@ include $(BUILD_EXECUTABLE)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := nconf
-LOCAL_DESTDIR := .
 LOCAL_LDLIBS := -lmenu -lpanel -lncurses
 LOCAL_SRC_FILES := nconf.c nconf.gui.c
-LOCAL_LIBRARIES := parser
-
+LOCAL_LIBRARIES := parser ncurses
 include $(BUILD_EXECUTABLE)
 
 ###############################################################################
@@ -108,7 +106,6 @@ ifeq ("$(shell pkg-config --exists $(QCONF_PKG); echo $$?)","0")
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := qconf
-LOCAL_DESTDIR := .
 QCONF_BUILD_DIR := $(call local-get-build-dir)
 LOCAL_CFLAGS := $(shell pkg-config $(QCONF_PKG) --cflags)
 LOCAL_LDLIBS := $(shell pkg-config $(QCONF_PKG) --libs)
@@ -129,4 +126,3 @@ $(QCONF_BUILD_DIR)/qconf.moc: qconf.h
 include $(BUILD_EXECUTABLE)
 
 endif
-
