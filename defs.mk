@@ -1363,9 +1363,8 @@ macro-has-cmd = $(or $(value __modules.$(PRIVATE_MODULE).$1),$(value $2))
 exec-custom-macro = \
 	$(call module-restore-locals,$1) \
 	$(foreach __entry,$(LOCAL_CUSTOM_MACROS), \
-		$(eval __entry2 := $(subst :,$(space),$(__entry))) \
-		$(eval __w1 := $(word 1,$(__entry2))) \
-		$(eval __w2 := $(word 2,$(__entry2))) \
+		$(eval __w1 := $(firstword $(subst :,$(space),$(__entry)))) \
+		$(eval __w2 := $(patsubst $(__w1):%,%,$(__entry))) \
 		$(if $(call is-var-defined,$(__w1)), \
 			$(eval __tmp := $$(call $(__w1),$(__w2))) \
 			$(eval $(__tmp)) \
