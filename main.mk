@@ -95,6 +95,9 @@ $(foreach __var,$(vars-TARGET), \
 include $(BUILD_SYSTEM)/target-setup.mk
 include $(BUILD_SYSTEM)/toolchain-setup.mk
 
+# Setup warnings flags
+include $(BUILD_SYSTEM)/warnings.mk
+
 ###############################################################################
 ## Display configuration.
 ###############################################################################
@@ -134,6 +137,18 @@ SKIP_EXT_DEPS_AND_CHECKS := 0
 # Silently skip config check (in contrast to USE_CONFIG_CHECK that warn)
 SKIP_CONFIG_CHECK := 0
 
+# Register and setup all module classes
+include $(BUILD_SYSTEM)/classes/setup.mk
+
+# Setup configuration definitions
+include $(BUILD_SYSTEM)/config-defs.mk
+
+# Makefile that will clear all LOCAL_XXX variable before registering a new module
+CLEAR_VARS := $(BUILD_SYSTEM)/clearvars.mk
+
+# Shall be defined before including user makefiles
+AUTOCONF_MERGE_FILE := $(TARGET_OUT_BUILD)/autoconf-merge.h
+
 # Define some target class
 __clobber-targets := clobber clean dirclean
 __query-targets := scan help help-modules dump dump-depends dump-xml build-graph
@@ -167,48 +182,6 @@ endif
 ifneq ("$(SKIP_DEPS_AND_CHECKS)","0")
   SKIP_EXT_DEPS_AND_CHECKS := 1
 endif
-
-###############################################################################
-## Setup part2 (may use optimization flags from above).
-###############################################################################
-
-# Setup internal build definitions
-include $(BUILD_SYSTEM)/binary-setup.mk
-
-# Setup autotools definitions (shall be after inclusion of defs.mk)
-include $(BUILD_SYSTEM)/autotools-setup.mk
-
-# Setup CMake definitions
-include $(BUILD_SYSTEM)/cmake-setup.mk
-
-# Setup QMake definitions
-include $(BUILD_SYSTEM)/qmake-setup.mk
-
-# Setup warnings flags
-include $(BUILD_SYSTEM)/warnings.mk
-
-# Setup configuration definitions
-include $(BUILD_SYSTEM)/config-defs.mk
-
-# Names of makefiles that can be included by user Makefiles
-CLEAR_VARS := $(BUILD_SYSTEM)/clearvars.mk
-BUILD_STATIC_LIBRARY := $(BUILD_SYSTEM)/static.mk
-BUILD_SHARED_LIBRARY := $(BUILD_SYSTEM)/shared.mk
-BUILD_LIBRARY := $(BUILD_SYSTEM)/library.mk
-BUILD_EXECUTABLE := $(BUILD_SYSTEM)/executable.mk
-BUILD_AUTOTOOLS := $(BUILD_SYSTEM)/autotools.mk
-BUILD_CMAKE := $(BUILD_SYSTEM)/cmake.mk
-BUILD_QMAKE := $(BUILD_SYSTEM)/qmake.mk
-BUILD_PYTHON_EXTENSION := $(BUILD_SYSTEM)/python-ext.mk
-BUILD_CUSTOM := $(BUILD_SYSTEM)/custom.mk
-BUILD_META_PACKAGE := $(BUILD_SYSTEM)/meta.mk
-BUILD_LINUX := $(BUILD_SYSTEM)/linuxkernel.mk
-BUILD_PREBUILT := $(BUILD_SYSTEM)/prebuilt.mk
-BUILD_LINUX_MODULE := $(BUILD_SYSTEM)/linuxkernelmodule.mk
-BUILD_GI_TYPELIB := $(BUILD_SYSTEM)/gobject-introspection.mk
-
-# Shall be defined before including user makefiles
-AUTOCONF_MERGE_FILE := $(TARGET_OUT_BUILD)/autoconf-merge.h
 
 ###############################################################################
 ## Makefile scan and includes.

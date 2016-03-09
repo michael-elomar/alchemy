@@ -1081,7 +1081,7 @@ $(LOCAL_EXPORT_PREREQUISITES): | $(all_external_prerequisites)
 ifeq ("$(LOCAL_MODULE_CLASS)","STATIC_LIBRARY")
 ifeq ("$(LOCAL_SDK)","")
 
-include $(BUILD_SYSTEM)/binary-rules.mk
+include $(BUILD_SYSTEM)/classes/BINARY/rules.mk
 
 $(LOCAL_BUILD_MODULE): $(all_objects)
 	$(transform-o-to-static-lib)
@@ -1102,7 +1102,7 @@ endif
 ifeq ("$(LOCAL_MODULE_CLASS)","SHARED_LIBRARY")
 ifeq ("$(LOCAL_SDK)","")
 
-include $(BUILD_SYSTEM)/binary-rules.mk
+include $(BUILD_SYSTEM)/classes/BINARY/rules.mk
 
 $(LOCAL_BUILD_MODULE): $(all_objects) $(all_link_libs_filenames)
 	$(transform-o-to-shared-lib)
@@ -1130,7 +1130,7 @@ endif
 ifeq ("$(LOCAL_MODULE_CLASS)","LIBRARY")
 ifeq ("$(LOCAL_SDK)","")
 
-include $(BUILD_SYSTEM)/binary-rules.mk
+include $(BUILD_SYSTEM)/classes/BINARY/rules.mk
 
 # Static version
 $(LOCAL_BUILD_MODULE_STATIC): $(all_objects) $(all_link_libs_filenames)
@@ -1163,7 +1163,7 @@ endif
 
 ifeq ("$(LOCAL_MODULE_CLASS)","EXECUTABLE")
 
-include $(BUILD_SYSTEM)/binary-rules.mk
+include $(BUILD_SYSTEM)/classes/BINARY/rules.mk
 
 ifneq ("$(LOCAL_LDSCRIPT)","")
 $(LOCAL_BUILD_MODULE): $(LOCAL_PATH)/$(LOCAL_LDSCRIPT)
@@ -1194,7 +1194,7 @@ endif
 
 ifeq ("$(LOCAL_MODULE_CLASS)","AUTOTOOLS")
 
-include $(BUILD_SYSTEM)/autotools-rules.mk
+include $(BUILD_SYSTEM)/classes/AUTOTOOLS/rules.mk
 
 endif
 
@@ -1204,7 +1204,7 @@ endif
 
 ifeq ("$(LOCAL_MODULE_CLASS)","CMAKE")
 
-include $(BUILD_SYSTEM)/cmake-rules.mk
+include $(BUILD_SYSTEM)/classes/CMAKE/rules.mk
 
 endif
 
@@ -1214,7 +1214,7 @@ endif
 
 ifeq ("$(LOCAL_MODULE_CLASS)","QMAKE")
 
-include $(BUILD_SYSTEM)/qmake-rules.mk
+include $(BUILD_SYSTEM)/classes/QMAKE/rules.mk
 
 endif
 
@@ -1224,7 +1224,7 @@ endif
 
 ifeq ("$(LOCAL_MODULE_CLASS)","PYTHON_EXTENSION")
 
-include $(BUILD_SYSTEM)/python-ext-rules.mk
+include $(BUILD_SYSTEM)/classes/PYTHON_EXTENSION/rules.mk
 
 endif
 
@@ -1247,7 +1247,7 @@ endif
 
 ifeq ("$(LOCAL_MODULE_CLASS)","GI_TYPELIB")
 
-include $(BUILD_SYSTEM)/gobject-introspection-rules.mk
+include $(BUILD_SYSTEM)/classes/GI_TYPELIB/rules.mk
 
 # Gir file
 $(LOCAL_BUILD_MODULE:.typelib=.gir): $(all_link_libs_filenames) $(all_sources)
