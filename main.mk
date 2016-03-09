@@ -95,9 +95,6 @@ $(foreach __var,$(vars-TARGET), \
 include $(BUILD_SYSTEM)/target-setup.mk
 include $(BUILD_SYSTEM)/toolchain-setup.mk
 
-# Setup warnings flags
-include $(BUILD_SYSTEM)/warnings.mk
-
 ###############################################################################
 ## Display configuration.
 ###############################################################################

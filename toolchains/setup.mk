@@ -9,6 +9,7 @@
 # Select toolchain and setup flags.
 include $(BUILD_SYSTEM)/toolchains/selection.mk
 include $(BUILD_SYSTEM)/toolchains/flags.mk
+include $(BUILD_SYSTEM)/toolchains/warnings.mk
 
 # Machine targetted by toolchain to be used by autotools and libc installation
 ifndef TARGET_TOOLCHAIN_TRIPLET
