@@ -33,6 +33,9 @@ $(PARSER_BUILD_DIR)/zconf.hash.c: $(LOCAL_PATH)/parser/zconf.gperf
 	@echo "Generating zconf.hash.c"
 	$(Q)gperf --readonly-tables --output-file=$@ $<
 
+ifeq ("$(BISON_PATH)","")
+  error "BISON_PATH empty, please install bison"
+endif
 $(PARSER_BUILD_DIR)/zconf.tab.c: $(LOCAL_PATH)/parser/zconf.y
 	@mkdir -p $(dir $@)
 	@echo "Generating zconf.tab.c"
