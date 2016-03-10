@@ -12,7 +12,7 @@
 # to avoid surprises...
 
 import sys, os, logging
-import platform
+import stat
 import subprocess
 import optparse
 import re
@@ -279,14 +279,9 @@ def getCopyCmds(dstFileName, srcFileName, options, doStrip=False):
 				cmds.append("%s -o \"%s\" \"%s\"" % \
 					(options.strip, dstFileName, srcFileName))
 		# Restore mode and timestamp
-		if platform.system().lower() == 'darwin':
-			statCmd = 'stat -f \'%p\''
-		else:
-			statCmd = 'stat --printf \'%a\''
-		cmds.append("chmod $(%s \"%s\") \"%s\"" % \
-			(statCmd, srcFileName, dstFileName))
-		cmds.append("touch -r \"%s\" \"%s\"" % \
-			(srcFileName, dstFileName))
+		mode = stat.S_IMODE(os.stat(srcFileName).st_mode)
+		cmds.append("chmod 0%o \"%s\"" % (mode, dstFileName))
+		cmds.append("touch -r \"%s\" \"%s\"" % (srcFileName, dstFileName))
 	if options.removeWGO and not os.path.islink(srcFileName):
 		cmds.append("chmod g-w,o-w \"%s\"" % dstFileName)
 	return cmds
