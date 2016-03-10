@@ -15,7 +15,7 @@ else
 endif
 
 # OS specific setup
-include $(BUILD_SYSTEM)/targets/$(TARGET_OS)/setup.mk
+-include $(BUILD_SYSTEM)/targets/$(TARGET_OS)/setup.mk
 
 # Default arch if not set is host arch
 ifeq ("$(TARGET_OS)","$(HOST_OS)")

@@ -33,7 +33,7 @@ else
 endif
 
 # Select correct toolchain
-include $(BUILD_SYSTEM)/toolchains/$(TARGET_OS)/selection.mk
+-include $(BUILD_SYSTEM)/toolchains/$(TARGET_OS)/selection.mk
 
 TARGET_CROSS ?=
 
