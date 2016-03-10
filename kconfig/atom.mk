@@ -13,6 +13,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := parser
 PARSER_BUILD_DIR := $(call local-get-build-dir)
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/parser
+LOCAL_EXPORT_CFLAGS := -DKBUILD_NO_NLS
 LOCAL_SRC_FILES := parser/zconf.c
 
 # Too many warning diue to gperf generated code
@@ -51,7 +52,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := lxdialog
 
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/lxdialog
-LOCAL_EXPORT_CFLAGS := -DCURSES_LOC="<ncurses.h>"
+LOCAL_EXPORT_CFLAGS := -DCURSES_LOC="<ncurses.h>" -DKBUILD_NO_NLS
 
 LOCAL_SRC_FILES := \
 	lxdialog/checklist.c \
