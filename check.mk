@@ -16,10 +16,10 @@ ifeq ("$(call check-version,$(MAKE_VERSION),3.81)","")
 endif
 
 # Need pkg-config v0.24 at least (for PKG_CONFIG_SYSROOT_DIR support)
-# not needed for ecos
+# not needed for ecos or baremetal
 ifneq ("$(TARGET_OS)","ecos")
 ifneq ("$(TARGET_OS)","baremetal")
-ifeq ("$(shell which pkg-config)","")
+ifeq ("$(shell which pkg-config 2>/dev/null)","")
   $(error 'pkg-config' is required)
 endif
 PKGCONFIG_VERSION := $(shell pkg-config --version)

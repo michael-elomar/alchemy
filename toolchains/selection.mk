@@ -72,7 +72,7 @@ endif
 TARGET_NVCC ?=
 
 # Determine compiler path
-TARGET_CC_PATH := $(shell which $(TARGET_CC))
+TARGET_CC_PATH := $(shell which $(TARGET_CC) 2>/dev/null)
 ifeq ("$(TARGET_CC_PATH)","")
   $(error Unable to find compiler: $(TARGET_CC))
 endif

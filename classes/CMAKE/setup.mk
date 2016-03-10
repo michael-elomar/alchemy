@@ -8,7 +8,7 @@
 ## Variables used for cmake.
 ###############################################################################
 
-CMAKE := $(shell which cmake)
+CMAKE := $(shell which cmake 2>/dev/null)
 
 CMAKE_TOOLCHAIN_FILE := $(TARGET_OUT_BUILD)/toolchainfile.cmake
 

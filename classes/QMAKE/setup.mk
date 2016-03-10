@@ -74,7 +74,7 @@ ifndef QTSDK_QMAKE
   ifneq ("$(TARGET_QT_SDK)","")
     QTSDK_QMAKE := $(TARGET_QT_SDK)/bin/qmake
   else ifeq ("$(TARGET_OS)-$(TARGET_OS_FLAVOUR)","$(HOST_OS)-native")
-    QTSDK_QMAKE := $(shell which qmake)
+    QTSDK_QMAKE := $(shell which qmake 2>/dev/null)
   else
     QTSDK_QMAKE :=
   endif

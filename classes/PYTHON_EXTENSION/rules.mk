@@ -10,7 +10,7 @@
 ifneq ("$(call is-module-in-build-config,python3)","")
   python_exe := $(HOST_OUT_STAGING)/usr/bin/python3
 else ifeq ("$(TARGET_OS)-$(TARGET_OS_FLAVOUR)","$(HOST_OS)-native")
-  python_exe = $(realpath $(shell which python))
+  python_exe = $(realpath $(shell which python 2>/dev/null))
 else
   python_exe :=
 endif

@@ -10,10 +10,10 @@
 
 # Get path to 'install' binary so we can override it in configure environment
 # (we add the -p option to preserve timestamp of installed files)
-__autotools-install-bin := $(shell which install)
+__autotools-install-bin := $(shell which install 2>/dev/null)
 
 ## Get path to 'pkg-config' binary
-__autotools-pkg-config-bin := $(shell which pkg-config)
+__autotools-pkg-config-bin := $(shell which pkg-config 2>/dev/null)
 
 # Update host compilation path
 __autotools-host-path := $(HOST_OUT_STAGING)/bin:$(HOST_OUT_STAGING)/usr/bin:$(PATH)

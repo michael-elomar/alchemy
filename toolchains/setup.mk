@@ -173,7 +173,7 @@ TARGET_GLOBAL_LDFLAGS_SHARED += $(__extra-target-ldflags)
 # variables are required
 CCACHE :=
 ifeq ("$(USE_CCACHE)","1")
-  ifneq ("$(shell which ccache)","")
+  ifneq ("$(shell which ccache 2>/dev/null)","")
     export CCACHE_SLOPPINESS := time_macros
     CCACHE := ccache
     TARGET_GLOBAL_CFLAGS += -fpch-preprocess
