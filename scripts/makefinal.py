@@ -184,7 +184,7 @@ def canStrip(filePath):
 		# get error output from nm command to check for 'no symbols'
 		p = subprocess.Popen("nm %s" % filePath,
 			stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell = True)
-		res = p.communicate()[1].rstrip("\n").split("\n")
+		res = p.communicate()[1].decode("UTF-8").rstrip("\n").split("\n")
 		result = (len(res) == 0 or res[0].find("no symbols") < 0)
 	except IOError as ex:
 		# assume not strippable if nm failed
@@ -374,7 +374,7 @@ def doCopy(dstFileName, srcFileName, options, forceCopy=False):
 	# make sure destination directory exists
 	dstDirName = os.path.split(dstFileName)[0]
 	if not os.path.lexists(dstDirName):
-		os.makedirs(dstDirName, 0755)
+		os.makedirs(dstDirName, 0o755)
 
 	# do the copy by wanted method (always process links directly)
 	if options.makefile != None and not os.path.islink(srcFileName):
@@ -412,7 +412,7 @@ def processDir(rootDir, options, withEmptyDir, copyType, forceCopy=False):
 				addPathInFileList(relPath, True, options)
 				if not os.path.lexists(dstDirName):
 					logging.info("Directory : %s", relPath)
-					os.makedirs(dstDirName, 0755)
+					os.makedirs(dstDirName, 0o755)
 
 		# copy files
 		for fileName in fileNames:
@@ -446,7 +446,7 @@ def processLinuxBasicSkel(options):
 			dstDirName = getRealPath(options.finalDir, entry[0])
 			if not os.path.lexists(dstDirName):
 				logging.info("Directory : %s", entry[0])
-				os.makedirs(dstDirName, 0755)
+				os.makedirs(dstDirName, 0o755)
 		else:
 			dstLnkName = getRealPath(options.finalDir, entry[0])
 			logging.info("Link : %s", entry[0])

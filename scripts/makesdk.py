@@ -6,7 +6,10 @@ import shutil
 import fnmatch
 import xml.parsers
 
-from cStringIO import StringIO
+try:
+	from cStringIO import StringIO
+except ImportError:
+	from io import StringIO
 
 import moduledb
 
@@ -33,7 +36,7 @@ class Context(object):
 def copyTree(src, dst, symlinks=False, exclude=None):
 	names = os.listdir(src)
 	if not os.path.exists(dst):
-		os.makedirs(dst, mode=0755)
+		os.makedirs(dst, mode=0o755)
 	errors = []
 	for name in names:
 		srcname = os.path.join(src, name)
@@ -56,20 +59,20 @@ def copyTree(src, dst, symlinks=False, exclude=None):
 					shutil.copy2(srcname, dstname)
 		# catch the Error from the recursive copyTree so that we can
 		# continue with other files
-		except shutil.Error, err:
-			errors.extend(err.args[0])
-		except EnvironmentError, why:
-			errors.append((srcname, dstname, str(why)))
+		except shutil.Error as ex:
+			errors.extend(ex.args[0])
+		except EnvironmentError as ex:
+			errors.append((srcname, dstname, str(ex)))
 	try:
 		shutil.copystat(src, dst)
-	except OSError, why:
-		if shutil.WindowsError is not None and isinstance(why, shutil.WindowsError):
+	except OSError as ex:
+		if shutil.WindowsError is not None and isinstance(ex, shutil.WindowsError):
 			# Copying file access times may fail on Windows
 			pass
 		else:
-			errors.append((src, dst, str(why)))
+			errors.append((src, dst, str(ex)))
 	if errors:
-		raise shutil.Error, errors
+		raise shutil.Error(errors)
 
 #===============================================================================
 #===============================================================================
@@ -128,7 +131,7 @@ def copyLibs(srcDir, dstDir):
 #===============================================================================
 def copyElement(srcPath, dstPath, keepLinks=False):
 	if not os.path.exists(os.path.dirname(dstPath)):
-		os.makedirs(os.path.dirname(dstPath), mode=0755)
+		os.makedirs(os.path.dirname(dstPath), mode=0o755)
 
 	# Set the function to use for copy
 	if os.path.isdir(srcPath):
@@ -165,8 +168,8 @@ def copyElements(srcDir, dstDir, extensions=["*"], depth=0,
 
 	# When executed with LANG=C (via alchemy) os.walk crashes when a path
 	# with accents is found. We force utf8 encoding to solve the issue.
-	srcDir = srcDir.encode("utf-8")
-	dstDir = dstDir.encode("utf-8")
+	srcDir = srcDir.encode("UTF-8")
+	dstDir = dstDir.encode("UTF-8")
 	for (dirPath, dirNames, fileNames) in os.walk(srcDir):
 		# Aren't we deep enough to parse the content of the files
 		if current_depth:
@@ -180,7 +183,7 @@ def copyElements(srcDir, dstDir, extensions=["*"], depth=0,
 			srcFilePath = os.path.normpath(os.path.join(dirPath, fileName))
 			relPath = os.path.relpath(srcFilePath, srcDir)
 			dstFilePath = os.path.normpath(os.path.join(dstDir, relPath))
-			if any([fnmatch.fnmatch(os.path.basename(srcFilePath), ext) for ext in extensions]):
+			if any([fnmatch.fnmatch(os.path.basename(srcFilePath), ext.encode("UTF-8")) for ext in extensions]):
 				copyElement(srcFilePath, dstFilePath, keepLinks=keepLinks)
 
 #===============================================================================
@@ -331,7 +334,7 @@ def processModule(ctx, module, headersOnly=False):
 		dstDirPath = os.path.join(ctx.outDir, "config")
 		if os.path.exists(srcFilePath):
 			if not os.path.exists(dstDirPath):
-				os.makedirs(dstDirPath, mode=0755)
+				os.makedirs(dstDirPath, mode=0o755)
 			shutil.copy2(srcFilePath, os.path.join(dstDirPath, configFileName))
 			ctx.atom.write("LOCAL_CONFIG_FILES := 1\n")
 			ctx.atom.write("sdk.%s.config := $(LOCAL_PATH)/config/%s\n" % (
@@ -407,7 +410,7 @@ def main():
 	logging.info("Initializing output directory '%s'", ctx.outDir)
 	if os.path.exists(ctx.outDir):
 		shutil.rmtree(ctx.outDir)
-	os.makedirs(ctx.outDir, mode=0755)
+	os.makedirs(ctx.outDir, mode=0o755)
 
 	# Copy content of host staging directory
 	if os.path.exists(ctx.hostStagingDir):

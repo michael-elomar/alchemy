@@ -66,7 +66,7 @@ class Project(object):
 				src_dir = getRealSourceDir(dep.fields["PATH"])
 
 			addDepend = True
-			for d in self.link_depends.keys() + [self.module.fields["PATH"]]:
+			for d in list(self.link_depends.keys()) + [self.module.fields["PATH"]]:
 				if src_dir.startswith(d):
 					addDepend = False
 					break
@@ -106,7 +106,8 @@ class Project(object):
 
 		if options.linkdeps and self.link_depends:
 			fd.write("\t<linkedResources>\n")
-			for src_dir, dep in self.link_depends.iteritems():
+			for src_dir in self.link_depends:
+				dep = self.link_depends[src_dir]
 				# exclude libboost
 				if dep.name == "libboost":
 					continue

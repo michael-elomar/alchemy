@@ -100,6 +100,8 @@ class Menu:
 			return self
 
 		def next(self):
+			return self.__next__()
+		def __next__(self):
 			item = None
 			# If first list is finished, use second list until its end
 			if self.idx1 >= len(self.menu.subMenus):
@@ -305,7 +307,7 @@ def safeCreateFile(path):
 #===============================================================================
 def getEditConfigPath(origPath):
 	return os.path.join(tempfile.gettempdir(), "alchemy-%d-%s.new" %
-			(os.getpid(), hashlib.md5(origPath).hexdigest())) # IGNORE:E1101
+			(os.getpid(), hashlib.md5(bytearray(origPath, "UTF-8")).hexdigest())) # IGNORE:E1101
 
 #===============================================================================
 # Get the path to use for config diff.
