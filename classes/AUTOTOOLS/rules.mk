@@ -75,8 +75,9 @@ ifeq ("$(mode_host)","")
 endif
 endif
 
+# TODO: rework this
 ifeq ("$(LOCAL_USE_CLANG)","1")
-ifneq ("$(USE_CLANG)","1")
+ifneq ("$(TARGET_CC_FLAVOUR)","clang")
   LOCAL_AUTOTOOLS_CONFIGURE_ENV += CC="$(LOCAL_CLANG_PATH)/clang"
   LOCAL_AUTOTOOLS_CONFIGURE_ENV += CXX="$(LOCAL_CLANG_PATH)/clang++"
 endif

@@ -33,7 +33,7 @@ endif
 ## '-mcpu=cortex-a9' is only supported by gcc >= 4.5
 ###############################################################################
 
-ifneq ("$(USE_CLANG)","1")
+ifeq ("$(TARGET_CC_FLAVOUR)","gcc")
 ifeq ("$(call check-version,$(TARGET_CC_VERSION),4.5.0)","")
 ifneq ("$(findstring -mcpu=cortex-a9,$(TARGET_GLOBAL_CFLAGS))","")
   $(warning This version of gcc does not support '-mcpu=cortex-a9' option)

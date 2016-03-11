@@ -13,18 +13,20 @@ include $(BUILD_SYSTEM)/toolchains/warnings.mk
 
 # Machine targetted by toolchain to be used by autotools and libc installation
 ifndef TARGET_TOOLCHAIN_TRIPLET
-  TARGET_TOOLCHAIN_TRIPLET := $(shell $(TARGET_CC) $(TARGET_GLOBAL_CFLAGS) -print-multiarch 2>&1)
+  __toolchain_triplet_cmd := $(TARGET_CC) $(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CFLAGS_$(TARGET_CC_FLAVOUR))
+  TARGET_TOOLCHAIN_TRIPLET := $(shell $(__toolchain_triplet_cmd) -print-multiarch 2>&1)
   ifeq ("$(TARGET_TOOLCHAIN_TRIPLET)","")
-    TARGET_TOOLCHAIN_TRIPLET := $(shell $(TARGET_CC) $(TARGET_GLOBAL_CFLAGS) -dumpmachine)
+    TARGET_TOOLCHAIN_TRIPLET := $(shell $(__toolchain_triplet_cmd) -dumpmachine)
   else ifneq ("$(findstring -print-multiarch,$(TARGET_TOOLCHAIN_TRIPLET))","")
-    TARGET_TOOLCHAIN_TRIPLET := $(shell $(TARGET_CC) $(TARGET_GLOBAL_CFLAGS) -dumpmachine)
+    TARGET_TOOLCHAIN_TRIPLET := $(shell $(__toolchain_triplet_cmd) -dumpmachine)
   endif
 endif
 
 # Clang uses gcc toochain(libc&binutils) to cross-compile
 # The sysroot is the top level one (without subarch like thumb2 for arm)
 ifeq ("$(TARGET_OS)","linux")
-__clang_toolchain_sysroot := $(shell $(TARGET_CROSS)gcc $(TARGET_GLOBAL_CFLAGS) -print-sysroot)
+ifneq ("$(TARGET_CROSS)","")
+__clang_toolchain_sysroot := $(shell $(TARGET_CROSS)gcc $(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CFLAGS_gcc) -print-sysroot)
 __clang_toolchain_root := $(shell PARAM=$(TARGET_CC_PATH); echo $${PARAM%/bin*})
 TARGET_GLOBAL_CFLAGS_clang += --sysroot=$(__clang_toolchain_sysroot) \
 	-target $(TARGET_TOOLCHAIN_TRIPLET) -B $(__clang_toolchain_root)
@@ -33,16 +35,11 @@ TARGET_GLOBAL_LDFLAGS_clang += --sysroot=$(__clang_toolchain_sysroot) \
 TARGET_GLOBAL_LDFLAGS_SHARED_clang += --sysroot=$(__clang_toolchain_sysroot) \
 	-target $(TARGET_TOOLCHAIN_TRIPLET) -B $(__clang_toolchain_root)
 endif
-
-# Toolchain sysroot
-__toolchain-sysroot-flags := $(TARGET_GLOBAL_CFLAGS)
-ifeq ("$(TARGET_ARCH)","arm")
-  __toolchain-sysroot-flags += $(TARGET_GLOBAL_CFLAGS_$(TARGET_DEFAULT_ARM_MODE))
 endif
-TARGET_TOOLCHAIN_SYSROOT := $(shell $(TARGET_CC) $(__toolchain-sysroot-flags) -print-sysroot)
 
 # Get libc/gdbserver to copy
 # We use cflags as well as arm/thumb mode to select correct variant
+TARGET_TOOLCHAIN_SYSROOT ?=
 TOOLCHAIN_LIBC ?=
 TOOLCHAIN_GDBSERVER ?=
 ifeq ("$(TARGET_OS)","linux")
@@ -54,6 +51,12 @@ ifeq ("$(TARGET_OS)","linux")
     __need_sysroot := 0
   endif
   ifeq ("$(__need_sysroot)","1")
+    __toolchain-sysroot-flags := $(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CFLAGS_gcc)
+    ifeq ("$(TARGET_ARCH)","arm")
+      __toolchain-sysroot-flags += $(TARGET_GLOBAL_CFLAGS_$(TARGET_DEFAULT_ARM_MODE))
+      __toolchain-sysroot-flags += $(TARGET_GLOBAL_CFLAGS_$(TARGET_DEFAULT_ARM_MODE)_gcc)
+    endif
+    TARGET_TOOLCHAIN_SYSROOT := $(shell $(TARGET_CROSS)gcc $(__toolchain-sysroot-flags) -print-sysroot)
     ifneq ("$(wildcard $(TARGET_TOOLCHAIN_SYSROOT))","")
       TOOLCHAIN_LIBC := $(TARGET_TOOLCHAIN_SYSROOT)
       ifneq ("$(wildcard $(TARGET_TOOLCHAIN_SYSROOT)/usr/bin/gdbserver)","")
@@ -76,7 +79,7 @@ ifneq ("$(TARGET_OS_FLAVOUR)","android")
 TARGET_LOADER := $(shell sh -c " \
 	mkdir -p $(TARGET_OUT_BUILD); \
 	echo 'int main;' | \
-	$(TARGET_CC) $(TARGET_GLOBAL_CFLAGS) -o $(TARGET_OUT_BUILD)/a.out -xc -; \
+	$(TARGET_CC) $(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CFLAGS_$(TARGET_CC_FLAVOUR)) -o $(TARGET_OUT_BUILD)/a.out -xc -; \
 	readelf -l $(TARGET_OUT_BUILD)/a.out | \
 	grep 'interpreter:' | \
 	sed 's/.*: \\(.*\\)\\]/\\1/g'; \

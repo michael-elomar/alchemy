@@ -115,9 +115,10 @@ $(foreach __f,$(_libc_lib_names), \
 # Some toolchains, such as recent Linaro toolchains, store GCC support libraries
 # (libstdc++, libgcc_s, etc.) outside of the sysroot
 ifeq ("$(findstring libstdc++,$(_libc_usrlib_files) $(_libc_usrlib_arch_files))","")
-  _libc_support_dir_cmd := $(TARGET_CC) $(TARGET_GLOBAL_CFLAGS)
+  _libc_support_dir_cmd := $(TARGET_CC) $(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CFLAGS_$(TARGET_CC_FLAVOUR))
   ifeq ("$(TARGET_ARCH)","arm")
     _libc_support_dir_cmd += $(TARGET_GLOBAL_CFLAGS_$(TARGET_DEFAULT_ARM_MODE))
+    _libc_support_dir_cmd += $(TARGET_GLOBAL_CFLAGS_$(TARGET_DEFAULT_ARM_MODE)_$(TARGET_CC_FLAVOUR))
   endif
   _libc_support_dir_cmd += -print-file-name=libstdc++.a
   _libc_support_dir := $(wildcard $(dir $(shell $(_libc_support_dir_cmd))))

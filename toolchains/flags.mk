@@ -23,6 +23,13 @@ HOST_GLOBAL_LDLIBS ?=
 HOST_GLOBAL_LDLIBS_SHARED ?=
 HOST_GLOBAL_PCH_FLAGS ?=
 
+HOST_GLOBAL_CFLAGS_gcc ?=
+HOST_GLOBAL_CFLAGS_clang ?=
+HOST_GLOBAL_LDFLAGS_gcc ?=
+HOST_GLOBAL_LDFLAGS_clang ?=
+HOST_GLOBAL_LDFLAGS_SHARED_gcc ?=
+HOST_GLOBAL_LDFLAGS_SHARED_clang ?=
+
 ###############################################################################
 # Initialize target global variables.
 ###############################################################################
@@ -43,6 +50,8 @@ TARGET_GLOBAL_LDLIBS_SHARED ?=
 TARGET_GLOBAL_CFLAGS_gcc ?=
 TARGET_GLOBAL_CFLAGS_clang ?=
 TARGET_GLOBAL_CFLAGS_$(TARGET_ARCH) ?=
+TARGET_GLOBAL_CFLAGS_$(TARGET_ARCH)_gcc ?=
+TARGET_GLOBAL_CFLAGS_$(TARGET_ARCH)_clang ?=
 TARGET_GLOBAL_LDFLAGS_gcc ?=
 TARGET_GLOBAL_LDFLAGS_clang ?=
 TARGET_GLOBAL_LDFLAGS_SHARED_gcc ?=
@@ -81,10 +90,8 @@ ifeq ("$(findstring -D__STDC_LIMIT_MACROS,$(TARGET_GLOBAL_CXXFLAGS))","")
 endif
 
 # Don't emit warning for unused driver arguments
-ifeq ("$(USE_CLANG)","1")
-  HOST_GLOBAL_CFLAGS += -Qunused-arguments
-  TARGET_GLOBAL_CFLAGS += -Qunused-arguments
-endif
+HOST_GLOBAL_CFLAGS_clang += -Qunused-arguments
+TARGET_GLOBAL_CFLAGS_clang += -Qunused-arguments
 
 # TODO : get this based on real version of valac and glib used.
 TARGET_GLOBAL_VALAFLAGS += \

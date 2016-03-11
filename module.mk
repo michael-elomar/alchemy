@@ -141,16 +141,15 @@ module_ranlib := $(TARGET_RANLIB)
 module_objcopy := $(TARGET_OBJCOPY)
 module_objdump := $(TARGET_OBJDUMP)
 
-ifeq ("$(USE_CLANG)","1")
-module_compiler_flavour := clang
-else ifeq ("$(LOCAL_USE_CLANG)","1")
-module_compiler_flavour := clang
+ifeq ("$(LOCAL_USE_CLANG)","1")
+  module_compiler_flavour := clang
 else
-module_compiler_flavour := gcc
+  module_compiler_flavour := $(TARGET_CC_FLAVOUR)
 endif
 
+# TODO: rework this
 ifeq ("$(LOCAL_USE_CLANG)","1")
-ifneq ("$(USE_CLANG)","1")
+ifneq ("$($(TARGET_CC_FLAVOUR))","clang")
   ifeq ("$(LOCAL_CLANG_PATH)","")
     LOCAL_CLANG_PATH := $(HOST_OUT_STAGING)/usr/bin
   endif

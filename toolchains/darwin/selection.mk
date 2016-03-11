@@ -17,7 +17,6 @@ else ifeq ("$(TARGET_ARCH)","arm")
   TARGET_TOOLCHAIN_TRIPLET := arm-apple-darwin
 endif
 
-USE_CLANG := 1
 TARGET_CROSS ?=
 TARGET_CC := $(shell xcrun --find --sdk $(APPLE_SDK) clang)
 TARGET_CXX := $(shell xcrun --find --sdk $(APPLE_SDK) clang++)
