@@ -904,6 +904,25 @@ module-get-staging-filename = $(strip \
 		) \
 	))
 
+# Get build file name for the static lib when the module is a generic libr (both shared/static).
+module-get-static-lib-build-filename = $(strip \
+	$(subst $(TARGET_SHARED_LIB_SUFFIX),$(TARGET_STATIC_LIB_SUFFIX), \
+		$(call module-get-build-filename,$1) \
+	))
+
+# Get staging file name for the static lib when the module is a generic lib (both shared/static).
+module-get-static-lib-staging-filename = $(strip \
+	$(if $(call streq,$(__modules.$1.DESTDIR),$(TARGET_DEFAULT_BIN_DESTDIR)), \
+		$(subst $(TARGET_DEFAULT_BIN_DESTDIR),$(TARGET_DEFAULT_LIB_DESTDIR), \
+			$(subst $(TARGET_SHARED_LIB_SUFFIX),$(TARGET_STATIC_LIB_SUFFIX), \
+				$(call module-get-staging-filename,$1) \
+			) \
+		), \
+		$(subst $(TARGET_SHARED_LIB_SUFFIX),$(TARGET_STATIC_LIB_SUFFIX), \
+			$(call module-get-staging-filename,$1) \
+		) \
+	))
+
 ###############################################################################
 ## Debug cutomization access.
 ## $1 : module name.

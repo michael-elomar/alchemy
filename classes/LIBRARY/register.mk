@@ -24,16 +24,24 @@ endif
 # Unless static is forced, use shared suffix and 'LIBRARY' class
 # Build system will automatically adjust suffix when required
 ifeq ("$(force_static)","1")
-LOCAL_MODULE_CLASS := STATIC_LIBRARY
-LOCAL_EXPORT_LDLIBS += $(LOCAL_LDLIBS)
-suffix := $(TARGET_STATIC_LIB_SUFFIX)
+  LOCAL_MODULE_CLASS := STATIC_LIBRARY
+  LOCAL_EXPORT_LDLIBS += $(LOCAL_LDLIBS)
+  suffix := $(TARGET_STATIC_LIB_SUFFIX)
 else
-LOCAL_MODULE_CLASS := LIBRARY
-suffix := $(TARGET_SHARED_LIB_SUFFIX)
+  LOCAL_MODULE_CLASS := LIBRARY
+  suffix := $(TARGET_SHARED_LIB_SUFFIX)
 endif
 
 ifeq ("$(LOCAL_DESTDIR)","")
-LOCAL_DESTDIR := $(TARGET_DEFAULT_LIB_DESTDIR)
+  ifeq ("$(TARGET_OS)","windows")
+    ifeq ("$(force_static)","1")
+      LOCAL_DESTDIR := $(TARGET_DEFAULT_LIB_DESTDIR)
+    else
+      LOCAL_DESTDIR := $(TARGET_DEFAULT_BIN_DESTDIR)
+    endif
+  else
+    LOCAL_DESTDIR := $(TARGET_DEFAULT_LIB_DESTDIR)
+  endif
 endif
 
 ifeq ("$(LOCAL_MODULE_FILENAME)","")

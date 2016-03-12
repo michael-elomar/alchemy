@@ -42,9 +42,11 @@ LOCAL_BUILD_MODULE := $(call module-get-build-filename,$(LOCAL_MODULE))
 # Full path to staging module
 LOCAL_STAGING_MODULE := $(call module-get-staging-filename,$(LOCAL_MODULE))
 
+# Handle static library for mixed mode. If shared has been put in bin dir (windows)
+# force putting the static in lib dir
 ifeq ("$(LOCAL_MODULE_CLASS)","LIBRARY")
-LOCAL_BUILD_MODULE_STATIC := $(LOCAL_BUILD_MODULE:$(TARGET_SHARED_LIB_SUFFIX)=$(TARGET_STATIC_LIB_SUFFIX))
-LOCAL_STAGING_MODULE_STATIC := $(LOCAL_STAGING_MODULE:$(TARGET_SHARED_LIB_SUFFIX)=$(TARGET_STATIC_LIB_SUFFIX))
+  LOCAL_BUILD_MODULE_STATIC := $(call module-get-static-lib-build-filename,$(LOCAL_MODULE))
+  LOCAL_STAGING_MODULE_STATIC := $(call module-get-static-lib-staging-filename,$(LOCAL_MODULE))
 endif
 
 # Assemble the list of targets to create PRIVATE_ variables for.
@@ -204,23 +206,19 @@ all_depends_build_filename := \
 
 all_static_libs_filename := \
 	$(foreach __lib,$(all_static_libs), \
-		$(eval __class := $(__modules.$(__lib).MODULE_CLASS)) \
-		$(eval __fn := $(call module-get-staging-filename,$(__lib))) \
-		$(if $(call streq,$(__class),LIBRARY), \
-			$(__fn:$(TARGET_SHARED_LIB_SUFFIX)=$(TARGET_STATIC_LIB_SUFFIX)) \
+		$(if $(call streq,$(__modules.$(__lib).MODULE_CLASS),LIBRARY), \
+			$(call module-get-static-lib-staging-filename,$(__lib)) \
 			, \
-			$(__fn) \
+			$(call module-get-staging-filename,$(__lib)) \
 		) \
 	)
 
 all_whole_static_libs_filename := \
 	$(foreach __lib,$(all_whole_static_libs), \
-		$(eval __class := $(__modules.$(__lib).MODULE_CLASS)) \
-		$(eval __fn := $(call module-get-staging-filename,$(__lib))) \
-		$(if $(call streq,$(__class),LIBRARY), \
-			$(__fn:$(TARGET_SHARED_LIB_SUFFIX)=$(TARGET_STATIC_LIB_SUFFIX)) \
+		$(if $(call streq,$(__modules.$(__lib).MODULE_CLASS),LIBRARY), \
+			$(call module-get-static-lib-staging-filename,$(__lib)) \
 			, \
-			$(__fn) \
+			$(call module-get-staging-filename,$(__lib)) \
 		) \
 	)
 

@@ -31,7 +31,15 @@ suffix := $(TARGET_SHARED_LIB_SUFFIX)
 endif
 
 ifeq ("$(LOCAL_DESTDIR)","")
-  LOCAL_DESTDIR := $(TARGET_DEFAULT_LIB_DESTDIR)
+  ifeq ("$(TARGET_OS)","windows")
+    ifeq ("$(force_static)","1")
+      LOCAL_DESTDIR := $(TARGET_DEFAULT_LIB_DESTDIR)
+    else
+      LOCAL_DESTDIR := $(TARGET_DEFAULT_BIN_DESTDIR)
+    endif
+  else
+    LOCAL_DESTDIR := $(TARGET_DEFAULT_LIB_DESTDIR)
+  endif
 endif
 
 ifeq ("$(LOCAL_MODULE_FILENAME)","")
