@@ -61,7 +61,7 @@ EXCLUDE_FILTERS_ALWAYS = []
 
 # Patterns to exclude depending on mode
 EXCLUDE_FILTERS = {
-	MODE_FIRWMARE: EXCLUDE_FILTERS_ALWAYS + [".a", ".la"],
+	MODE_FIRWMARE: EXCLUDE_FILTERS_ALWAYS + [".a", ".la", ".o", ".lo"],
 	MODE_FULL: EXCLUDE_FILTERS_ALWAYS
 }
 
