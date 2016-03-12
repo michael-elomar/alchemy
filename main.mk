@@ -396,7 +396,7 @@ endif
 # If 'all' or 'check' is also given do not do the filter
 # For meta packages, also get config dependencies (for build/clean shortcuts)
 __modlist := $(empty)
-ifeq ("$(call is-targets-in-make-goals,all check)","")
+ifeq ("$(call is-targets-in-make-goals,all check all-clean all-dirclean)","")
 $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST), \
 	$(if $(call is-module-in-make-goals,$(__mod)), \
 		$(eval __modlist += $(__mod) $(call module-get-all-depends,$(__mod))) \
@@ -487,8 +487,8 @@ all-cloc: $(foreach __mod,$(ALL_BUILD_MODULES),$(if $(call is-module-prebuilt,$(
 	@echo "Done all-cloc"
 
 # Just to test clean target of all modules
-.PHONY: _clean
-_clean: $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST),$(__mod)-clean)
+.PHONY: all-clean
+all-clean: $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST),$(__mod)-clean)
 	$(Q)rm -f $(AUTOCONF_MERGE_FILE)
 	$(Q)rm -f $(USER_MAKEFILES_CACHE)
 	$(Q)[ ! -d $(TARGET_OUT_STAGING) ] || find $(TARGET_OUT_STAGING) -depth -type d -empty -delete
@@ -496,8 +496,8 @@ _clean: $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST),$(__mod)-
 	@echo "Done cleaning"
 
 # Just to test dirclean target of all modules
-.PHONY: _dirclean
-_dirclean: $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST),$(__mod)-dirclean)
+.PHONY: all-dirclean
+all-dirclean: $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST),$(__mod)-dirclean)
 	$(Q)rm -f $(AUTOCONF_MERGE_FILE)
 	$(Q)rm -f $(USER_MAKEFILES_CACHE)
 	$(Q)[ ! -d $(TARGET_OUT_STAGING) ] || find $(TARGET_OUT_STAGING) -depth -type d -empty -delete
@@ -506,7 +506,7 @@ _dirclean: $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST),$(__mo
 
 # Most users want a clobber when they ask for clean or dirclean
 # To really do clean or dirclean for EACH module (takes some time)
-# see _clean and _dirclean
+# see all-clean and all-dirclean
 .PHONY: clean
 .PHONY: dirclean
 clean: clobber
