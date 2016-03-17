@@ -109,11 +109,12 @@ endef
 
 endif
 
-# Export android NDK and SDK path
+# Export android NDK, SDK path and API level
 ifeq ("$(TARGET_OS_FLAVOUR)","android")
 QMAKE := ANDROID_NDK_ROOT=$(TARGET_ANDROID_NDK) \
     ANDROID_HOME=$(TARGET_ANDROID_SDK) \
     ANDROID_SDK_ROOT=$(TARGET_ANDROID_SDK) \
+    ANDROID_NDK_PLATFORM=android-$(TARGET_ANDROID_APILEVEL) \
     $(QMAKE)
 endif
 
