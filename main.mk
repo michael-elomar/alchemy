@@ -491,6 +491,8 @@ all-cloc: $(foreach __mod,$(ALL_BUILD_MODULES),$(if $(call is-module-prebuilt,$(
 all-clean: $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST),$(__mod)-clean)
 	$(Q)rm -f $(AUTOCONF_MERGE_FILE)
 	$(Q)rm -f $(USER_MAKEFILES_CACHE)
+	$(Q)[ ! -d $(TARGET_OUT_BUILD) ] || find $(TARGET_OUT_BUILD) -depth -type d -empty -delete
+	$(Q)[ ! -d $(HOST_OUT_BUILD) ] || find $(HOST_OUT_BUILD) -depth -type d -empty -delete
 	$(Q)[ ! -d $(TARGET_OUT_STAGING) ] || find $(TARGET_OUT_STAGING) -depth -type d -empty -delete
 	$(Q)[ ! -d $(HOST_OUT_STAGING) ] || find $(HOST_OUT_STAGING) -depth -type d -empty -delete
 	@echo "Done cleaning"
