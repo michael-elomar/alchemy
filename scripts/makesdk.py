@@ -225,7 +225,7 @@ def processModule(ctx, module, headersOnly=False):
 	modulePath = module.fields["PATH"]
 	moduleClass = module.fields["MODULE_CLASS"]
 
-	# Write verbatim some fields (and escape quotes)
+	# Write verbatim some fields
 	fields = ["DESCRIPTION", "CATEGORY_PATH",
 			"REVISION", "REVISION_DESCRIBE",
 			"FORCE_WHOLE_STATIC_LIBRARY",
