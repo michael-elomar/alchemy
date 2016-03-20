@@ -370,25 +370,12 @@ def writeSdkModulesConfigIn(outFile, modules):
 			outFile.write("\n")
 
 #===============================================================================
-# Write the config.in file for a module.
-# outFile : output file object.
-# module : module to generate.
-#===============================================================================
-def writeModuleConfigIn(outFile, module):
-	outFile.write("menu '%s'\n" % module.name)
-	if len(module.configInPathList) > 0:
-		for configInPath in module.configInPathList:
-			outFile.write("source \"%s\"\n" % configInPath)
-	outFile.write("endmenu\n")
-
-#===============================================================================
 # Write the config.in file for the full configuration. It recursively descends
 # in menu to create the file.
 # outFile : output file object.
 # menu : menu to process.
 #===============================================================================
 def writeFullConfigIn(outFile, menu):
-
 	# Start new menu
 	if menu.name != "":
 		outFile.write("menu '%s'\n" % menu.name)
@@ -480,21 +467,6 @@ def writeConfigSdkModules(outFile, modules):
 	for module in modules:
 		if module.sdk:
 			outFile.write("CONFIG_ALCHEMY_BUILD_%s=y\n" % getDefine(module.name))
-
-#===============================================================================
-# Copy configuration file to '.new' file for edition.
-# configName : configuration file name to copy.
-#===============================================================================
-def prepareConfig(configPath):
-	if os.path.exists(configPath):
-		shutil.copy(configPath, getEditConfigPath(configPath))
-
-#===============================================================================
-# Prepare a module config file for edition.
-# module : module to prepare.
-#===============================================================================
-def prepareModuleConfig(module):
-	prepareConfig(module.configPath)
 
 #===============================================================================
 # Write a menu of module configuration. It recursively descend in the tree.
@@ -977,47 +949,28 @@ def main():
 	# Build tree of menus of modules
 	menuRoot = buildMenuTree(modules)
 
-	# If only one module, check it has some configuration data
-	if options.main == None:
-		if len(modules[0].configInPathList) == 0:
-			message("Nothing to do for %s" % modules[0].name)
-			sys.exit(0)
-
 	# Create 'config.in' file
 	(configInFd, configInPath) = tempfile.mkstemp(suffix=TEMP_SUFFIX)
 	configInFile = os.fdopen(configInFd, "w")
-	if options.main == None:
-		logging.info("Generating %s 'config.in' file as %s",
-			 modules[0].name, configInPath)
-		writeTargetVarConfigIn(configInFile)
-		writeModuleConfigIn(configInFile, modules[0])
-		writeSdkModulesConfigIn(configInFile, modules)
-	else:
-		logging.info("Generating full 'config.in' file as %s", configInPath)
-		writeTargetVarConfigIn(configInFile)
-		writeFullConfigIn(configInFile, menuRoot)
-		writeSdkModulesConfigIn(configInFile, modules)
+	logging.info("Generating full 'config.in' file as %s", configInPath)
+	writeTargetVarConfigIn(configInFile)
+	writeFullConfigIn(configInFile, menuRoot)
+	writeSdkModulesConfigIn(configInFile, modules)
 	configInFile.close()
 
-	# prepare input config file
-	if options.main == None:
-		moduleEditConfigPath = getEditConfigPath(modules[0].configPath)
-		prepareModuleConfig(modules[0])
-	else:
-		# Create full '.config' file
-		(fullConfigFd, fullConfigPath) = tempfile.mkstemp(suffix=TEMP_SUFFIX)
-		fullConfigFile = os.fdopen(fullConfigFd, "w")
-		logging.info("Generating full '.config' file as %s", fullConfigPath)
-		prepareFullConfig(fullConfigFile, menuRoot, options.main, modules)
-		fullConfigFile.close()
+	# Create full '.config' file
+	(fullConfigFd, fullConfigPath) = tempfile.mkstemp(suffix=TEMP_SUFFIX)
+	fullConfigFile = os.fdopen(fullConfigFd, "w")
+	logging.info("Generating full '.config' file as %s", fullConfigPath)
+	prepareFullConfig(fullConfigFile, menuRoot, options.main, modules)
+	fullConfigFile.close()
 
 	# Cleanup function (in main context)
 	def cleanup():
 		logging.info("Cleanup before exit")
 		# Delete temp files
 		safeUnlink(configInPath)
-		if options.main != None:
-			safeUnlink(fullConfigPath)
+		safeUnlink(fullConfigPath)
 		# Delete all module edition files
 		for module in modules:
 			if len(module.configInPathList) > 0:
@@ -1033,34 +986,22 @@ def main():
 	signal.signal(signal.SIGINT, signalHandler)
 	signal.signal(signal.SIGTERM, signalHandler)
 
-	# Configure only one module config
-	if options.main == None:
-		# Display UI or execute action in silence
-		if action == ACTION_CONFIG:
-			execConfUi(options.ui, configInPath, moduleEditConfigPath)
-		else:
-			execConf(configInPath, moduleEditConfigPath)
-		# Check/Update result
-		if action == ACTION_CHECK:
-			result = checkModuleConfig(modules[0], options.diff)
-		else:
-			updateModuleConfig(modules[0])
-	# Configure the full config
+	# Display UI or execute action in silence
+	if action == ACTION_CONFIG:
+		execConfUi(options.ui, configInPath, fullConfigPath)
 	else:
-		# Display UI or execute action in silence
-		if action == ACTION_CONFIG:
-			execConfUi(options.ui, configInPath, fullConfigPath)
-		else:
-			execConf(configInPath, fullConfigPath)
-		# Process resulting full config
-		configFullFile = open(fullConfigPath, "r")
-		processFullConfig(configFullFile, modules, options.main)
-		configFullFile.close()
-		# Check/Update result
-		if action == ACTION_CHECK:
-			result = checkFullConfig(modules, options.main, options.diff)
-		else:
-			updateFullConfig(modules, options.main)
+		execConf(configInPath, fullConfigPath)
+
+	# Process resulting full config
+	configFullFile = open(fullConfigPath, "r")
+	processFullConfig(configFullFile, modules, options.main)
+	configFullFile.close()
+
+	# Check/Update result
+	if action == ACTION_CHECK:
+		result = checkFullConfig(modules, options.main, options.diff)
+	else:
+		updateFullConfig(modules, options.main)
 
 	# Do some cleanup and then exit with status=1 in case checking failed 
 	cleanup()
@@ -1113,8 +1054,8 @@ def parseArgs():
 		sys.exit(0)
 	elif args[0] not in ACTIONS:
 		parser.error("Bad action: %s (%s)" %(args[0], expandListStr(ACTIONS)))
-	elif len(args) > 2 and options.main == None:
-		parser.error("Main configuration file required if more than one module")
+	elif options.main == None:
+		parser.error("Main configuration file required")
 	return (options, args)
 
 #===============================================================================
