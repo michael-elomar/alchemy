@@ -429,7 +429,7 @@ __modlist := $(sort $(__modlist))
 # prerequisites
 $(foreach __mod,$(sort $(__modlist) $(__modules-with-global-prerequisites)), \
 	$(eval LOCAL_MODULE := $(__mod)) \
-	$(eval include $(BUILD_SYSTEM)/module.mk) \
+	$(eval include $(BUILD_SYSTEM)/classes/rules.mk) \
 )
 
 ifneq ("$(V)","0")

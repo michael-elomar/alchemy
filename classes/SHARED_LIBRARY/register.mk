@@ -3,7 +3,7 @@
 ## @author Y.M. Morgan
 ## @date 2011/05/14
 ##
-## Build a shared library.
+## Register SHARED_LIBRARY modules.
 ###############################################################################
 
 # Set also LOCAL_MODULE so that everything works correctly
@@ -13,7 +13,9 @@ endif
 
 # check if we want to force static libraries
 force_static := 0
-ifeq ("$(TARGET_FORCE_STATIC)","1")
+ifneq ("$(LOCAL_HOST_MODULE)","")
+  force_static := 1
+else ifeq ("$(TARGET_FORCE_STATIC)","1")
   force_static := 1
 else ifeq ("$(TARGET_PBUILD_FORCE_STATIC)","1")
   ifeq ("$(LOCAL_PBUILD_ALLOW_FORCE_STATIC)","1")
@@ -56,4 +58,5 @@ else
   LOCAL_MODULE_FILENAME := $(LOCAL_MODULE_FILENAME:.so=$(TARGET_SHARED_LIB_SUFFIX))
 endif
 
+# Register in the system
 $(module-add)

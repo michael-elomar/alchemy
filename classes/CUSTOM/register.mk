@@ -3,7 +3,7 @@
 ## @author Y.M. Morgan
 ## @date 2012/12/07
 ##
-## Handle modules using custom rules.
+## Register CUSTOM modules.
 ###############################################################################
 
 # Set also LOCAL_MODULE so that everything works correctly
@@ -17,4 +17,5 @@ LOCAL_MODULE_CLASS := CUSTOM
 # A flag will then be set to indicate that the module will probably not
 # create a .done file
 
+# Register in the system
 $(module-add)

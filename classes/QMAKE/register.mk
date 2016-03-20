@@ -3,7 +3,7 @@
 ## @author Y.M. Morgan
 ## @date 2014/01/08
 ##
-## Handle modules using qmake.
+## Register QMAKE modules.
 ###############################################################################
 
 # Set also LOCAL_MODULE so that everything works correctly
@@ -20,4 +20,5 @@ endif
 LOCAL_MODULE_FILENAME := $(LOCAL_MODULE).done
 LOCAL_DONE_FILES += $(LOCAL_MODULE).done
 
+# Register in the system
 $(module-add)

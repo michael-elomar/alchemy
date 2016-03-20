@@ -213,9 +213,12 @@ module-add = \
 	$(if $(LOCAL_HOST_MODULE), \
 		$(if $(or $(call streq,$(LOCAL_MODULE_CLASS),AUTOTOOLS), \
 				$(call streq,$(LOCAL_MODULE_CLASS),CUSTOM), \
+				$(call streq,$(LOCAL_MODULE_CLASS),EXECUTABLE), \
+				$(call streq,$(LOCAL_MODULE_CLASS),LIBRARY), \
+				$(call streq,$(LOCAL_MODULE_CLASS),STATIC_LIBRARY), \
 				$(call streq,$(LOCAL_MODULE_CLASS),PREBUILT)), \
 			$(eval LOCAL_MODULE := host.$(LOCAL_MODULE)), \
-			$(error $(LOCAL_PATH): Only AUTOTOOLS/CUSTOM/PREBUILT supported for host modules) \
+			$(error $(LOCAL_PATH): Only AUTOTOOLS/CUSTOM/PREBUILT/EXECUTABLE/LIBRARY supported for host modules) \
 		) \
 	) \
 	$(eval __mod := $(LOCAL_MODULE)) \
@@ -321,6 +324,8 @@ is-module-external = $(strip \
 		$(call streq,$(__class),GENERIC), \
 		$(call streq,$(__class),CUSTOM) \
 		$(call streq,$(__class),META_PACKAGE) \
+		$(call streq,$(__class),LINUX) \
+		$(call streq,$(__class),LINUX_MODULE) \
 	))
 
 ###############################################################################
@@ -376,6 +381,8 @@ __modules-get-required-host-direct = $(strip $(sort \
 ## not actually in it).
 ## If no global configuration file present, always return true (unless if was
 ## forcibly disabled).
+## FIXME: do NOT require module to be registered (in some cases it can be called
+## before the module is registered)
 ###############################################################################
 is-module-in-build-config = $(strip \
 	$(if $(call is-module-registered,$1), \
@@ -878,8 +885,14 @@ module-get-build-dir = $(strip \
 	))
 
 # Get build directory of a host module
-# $1 : nomalized host moduel (without 'host.' prefix)
+# $1 : normalized host module (without 'host.' prefix)
 module-get-build-dir-host = $(strip $(HOST_OUT_BUILD)/$1)
+
+
+# Get build directory of a module
+# It handle host/target modules
+# $2: name to retreive (built, installed...)
+module-get-stamp-file = $(call module-get-build-dir,$1)/$1.$2.stamp
 
 # Get build file name of a module
 # It handle host/target modules
@@ -904,7 +917,7 @@ module-get-staging-filename = $(strip \
 		) \
 	))
 
-# Get build file name for the static lib when the module is a generic libr (both shared/static).
+# Get build file name for the static lib when the module is a generic lib (both shared/static).
 module-get-static-lib-build-filename = $(strip \
 	$(subst $(TARGET_SHARED_LIB_SUFFIX),$(TARGET_STATIC_LIB_SUFFIX), \
 		$(call module-get-build-filename,$1) \
@@ -1167,7 +1180,7 @@ normalize-system-c-includes = $(strip \
 		$(call normalize-c-includes,$1), \
 		\
 		$(foreach __inc,$1, \
-			$(addprefix -isystem,$(patsubst -I%,%,$(__inc))) \
+			$(addprefix -isystem ,$(patsubst -I%,%,$(__inc))) \
 		)) \
 	)
 
@@ -1320,6 +1333,8 @@ macro-exec-cmd = \
 		$($(__var)), \
 		$(if $2,$($2)) \
 	)
+
+macro-has-cmd = $(or $(value __modules.$(PRIVATE_MODULE).$1),$(value $2))
 
 ###############################################################################
 ## Call custom macros.
@@ -1538,6 +1553,13 @@ define copy-license-files
 )
 endef
 
+define delete-license-files
+@( \
+	files="$(wildcard $(addprefix $1/,$(__license-pattern)))"; \
+	if [ "$${files}" != "" ]; then rm -f $${files}; fi; \
+)
+endef
+
 ###############################################################################
 ## Fix a .d file with compilation dependencies.
 ## It will ensure that full paths are specified.
@@ -1549,6 +1571,22 @@ define fix-deps-file
 		-e 's| \([^/\\: ]\)| $(TOP_DIR)/\1|g' \
 		-e 's|^\([^/\\: ]\)|$(TOP_DIR)/\1|g' \
 		$1 && rm -f $1.bak) \
+)
+endef
+
+###############################################################################
+## Update a file with another one if it does not exists or the contents has
+## changed.
+## $1 : file to create.
+## $2 : other file with new contents.
+###############################################################################
+define update-file-if-needed
+@( \
+	mkdir -p $(dir $1); \
+	if [ ! -f $1 ]; then mv $2 $1; \
+	elif ! diff -q $2 $1 &>/dev/null; then mv $2 $1; \
+	else rm -f $2; \
+	fi; \
 )
 endef
 

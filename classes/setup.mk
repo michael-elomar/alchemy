@@ -33,10 +33,11 @@ _classes := \
 	$(_classes_internal) \
 	$(_classes_external)
 
+include $(BUILD_SYSTEM)/classes/GENERIC/setup.mk
 include $(BUILD_SYSTEM)/classes/BINARY/setup.mk
 
 # Setup the BUILD_XXX variable with the name of the makefile for registration
-# Also include the makefile for classs specific setup (optional)
+# Also include the makefile for class specific setup (optional)
 $(foreach _cls,$(_classes), \
 	$(eval BUILD_$(_cls) := $(BUILD_SYSTEM)/classes/$(_cls)/register.mk) \
 	$(eval -include $(BUILD_SYSTEM)/classes/$(_cls)/setup.mk) \

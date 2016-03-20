@@ -2,6 +2,8 @@
 ## @file classes/AUTOTOOLS/setup.mk
 ## @author Y.M. Morgan
 ## @date 2012/09/21
+##
+## Setup AUTOTOOLS modules.
 ###############################################################################
 
 ###############################################################################
@@ -10,16 +12,16 @@
 
 # Get path to 'install' binary so we can override it in configure environment
 # (we add the -p option to preserve timestamp of installed files)
-__autotools-install-bin := $(shell which install 2>/dev/null)
+_autotools_install_bin := $(shell which install 2>/dev/null)
 
 ## Get path to 'pkg-config' binary
-__autotools-pkg-config-bin := $(shell which pkg-config 2>/dev/null)
+_autotools_pkg_config_bin := $(shell which pkg-config 2>/dev/null)
 
 # Update host compilation path
-__autotools-host-path := $(HOST_OUT_STAGING)/bin:$(HOST_OUT_STAGING)/usr/bin:$(PATH)
+_autotools_host_path := $(HOST_OUT_STAGING)/bin:$(HOST_OUT_STAGING)/usr/bin:$(PATH)
 
 # Update target compilation path
-__autotools-target-path := $(HOST_OUT_STAGING)/bin:$(HOST_OUT_STAGING)/usr/bin:$(PATH)
+_autotools_target_path := $(HOST_OUT_STAGING)/bin:$(HOST_OUT_STAGING)/usr/bin:$(PATH)
 
 # Common arguments to configure
 # * Avoid triggering regeneration of configure/Makefile.in. The regeneration
@@ -28,7 +30,7 @@ __autotools-target-path := $(HOST_OUT_STAGING)/bin:$(HOST_OUT_STAGING)/usr/bin:$
 # * Disable documentation.
 # * Don't display warning for unrecognized options (other disabled options may
 #   not be actually supported).
-__autotools-configure-args := \
+_autotools_configure_args := \
 	--disable-maintainer-mode \
 	--disable-nls \
 	--disable-gtk-doc \
@@ -40,7 +42,76 @@ __autotools-configure-args := \
 	--disable-option-checking
 
 # Cache file for target
-__autotools-target-cache-file := $(TARGET_OUT_BUILD)/autotools.cache
+_autotools_target_cache_file := $(TARGET_OUT_BUILD)/autotools.cache
+
+# Patch libtool to make it work properly for cross-compilation.
+# Modify the libdir in .la files installed in staging dir so that they reference
+# the staging dir and not the final dir. Do this only if dest dir is not empty
+# (in native build staging dir is the final dir specified in configure script).
+# Use -rpath-link instead of -rpath to avoid hardcoding host path in binaries.
+# See this link for more information :
+# http://www.metastatic.org/text/libtool.html
+define _autotools-libtool-patch
+	$(Q) for f in `find $(PRIVATE_OBJ_DIR) -name libtool -o -name ltmain.sh`; do \
+		echo "Patching $$f"; \
+		$(if $($(PRIVATE_MODE)_AUTOTOOLS_INSTALL_DESTDIR), \
+			sed -i.bak -e "s|^libdir='\$$install_libdir'|libdir='\$${install_libdir:\+$($(PRIVATE_MODE)_OUT_STAGING)\$$install_libdir}'|1" $$f; \
+		) \
+		sed -i.bak \
+			-e 's|\({\?wl}\?\)-\+rpath|\1-rpath-link|1' \
+			-e 's|need_relink=yes|need_relink=no|1' \
+			$$f; \
+		rm -f $$f.bak; \
+	done
+endef
+
+# Simulate that some files are up to date to avoid internal reconfiguration
+# that will likely fail because env or libtool patches are not correct
+define _autotools-hook-pre-clean
+	$(Q) if [ -d $(PRIVATE_OBJ_DIR) ]; then find $(PRIVATE_OBJ_DIR) -name config.status -exec touch {} \; ; fi
+	$(Q) if [ -d $(PRIVATE_OBJ_DIR) ]; then find $(PRIVATE_OBJ_DIR) -name Makefile -exec touch {} \; ; fi
+endef
+
+ifneq ("$(USE_AUTOTOOLS_CACHE)","0")
+  _autotools-target-copy-cache = @cp -af $(_autotools-target-cache-file) $(PRIVATE_OBJ_DIR)/config.cache
+else
+  _autotools-target-copy-cache =
+endif
+
+define _autotools-def-cmd-configure
+	$(if $(call streq,$(PRIVATE_MODE),TARGET),$(_autotools-target-copy-cache))
+	$(Q) cd $(PRIVATE_OBJ_DIR) && \
+		$($(PRIVATE_MODE)_AUTOTOOLS_CONFIGURE_ENV) $(PRIVATE_CONFIGURE_ENV) \
+		$(PRIVATE_SRC_DIR)/$(PRIVATE_CONFIGURE_SCRIPT) \
+		$($(PRIVATE_MODE)_AUTOTOOLS_CONFIGURE_ARGS) $(PRIVATE_CONFIGURE_ARGS)
+endef
+
+define _autotools-def-cmd-build
+	$(Q) $($(PRIVATE_MODE)_AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_BUILD_ENV) \
+		$(MAKE) -C $(PRIVATE_OBJ_DIR) \
+		$($(PRIVATE_MODE)_AUTOTOOLS_MAKE_ARGS) $(PRIVATE_MAKE_BUILD_ARGS)
+endef
+
+define _autotools-def-cmd-install
+	$(Q) $($(PRIVATE_MODE)_AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) \
+		$(MAKE) -C $(PRIVATE_OBJ_DIR) \
+		$($(PRIVATE_MODE)_AUTOTOOLS_MAKE_ARGS) $(PRIVATE_MAKE_INSTALL_ARGS) install
+endef
+
+# Force success for command in case "uninstall" or "clean" is not supported
+# or Makefile not present
+define _autotools-def-cmd-clean
+	$(Q) if [ -f $(PRIVATE_OBJ_DIR)/Makefile ]; then \
+		$($(PRIVATE_MODE)_AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) \
+			$(MAKE) --keep-going --ignore-errors -C $(PRIVATE_OBJ_DIR) \
+			$($(PRIVATE_MODE)_AUTOTOOLS_MAKE_ARGS) $(PRIVATE_MAKE_INSTALL_ARGS) \
+			uninstall || echo "Ignoring uninstall errors"; \
+		$($(PRIVATE_MODE)_AUTOTOOLS_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) \
+			$(MAKE) --keep-going --ignore-errors -C $(PRIVATE_OBJ_DIR) \
+			$($(PRIVATE_MODE)_AUTOTOOLS_MAKE_ARGS) \
+			clean || echo "Ignoring clean errors"; \
+	fi;
+endef
 
 ###############################################################################
 ## Variable used for autotools on host modules.
@@ -55,13 +126,13 @@ HOST_AUTOTOOLS_CXXFLAGS := $(filter-out -std=%,$(HOST_AUTOTOOLS_CFLAGS)) $(HOST_
 # Setup pkg-config
 # Use packages from both HOST_OUT_STAGING and standard places
 HOST_PKG_CONFIG_ENV := \
-	PKG_CONFIG="$(__autotools-pkg-config-bin)" \
+	PKG_CONFIG="$(_autotools_pkg_config_bin)" \
 	PKG_CONFIG_PATH="$(HOST_OUT_STAGING)/usr/lib/pkgconfig:$(HOST_OUT_STAGING)/lib/pkgconfig" \
 	PKG_CONFIG_SYSROOT_DIR=""
 
 # Environment to use when executing configure script
 HOST_AUTOTOOLS_CONFIGURE_ENV := \
-	PATH="$(__autotools-host-path)" \
+	PATH="$(_autotools_host_path)" \
 	AR="$(HOST_AR)" \
 	AS="$(HOST_AS)" \
 	LD="$(HOST_LD)" \
@@ -74,7 +145,7 @@ HOST_AUTOTOOLS_CONFIGURE_ENV := \
 	STRIP="$(HOST_STRIP)" \
 	OBJCOPY="$(HOST_OBJCOPY)" \
 	OBJDUMP="$(HOST_OBJDUMP)" \
-	INSTALL="$(__autotools-install-bin) -p" \
+	INSTALL="$(_autotools_install_bin) -p" \
 	MANIFEST_TOOL=":" \
 	ASFLAGS="$(HOST_AUTOTOOLS_ASFLAGS)" \
 	CPPFLAGS="$(HOST_AUTOTOOLS_CPPFLAGS)" \
@@ -101,12 +172,12 @@ HOST_AUTOTOOLS_CONFIGURE_ARGS += \
 
 # Finally, add common arguments
 HOST_AUTOTOOLS_CONFIGURE_ARGS += \
-	$(__autotools-configure-args)
+	$(_autotools_configure_args)
 
 # Environment to use when executing make
 # Use PKG_CONFIG_ENV in case a package needs automatic reconfiguration
 HOST_AUTOTOOLS_MAKE_ENV := \
-	PATH="$(__autotools-host-path)" \
+	PATH="$(_autotools_host_path)" \
 	XDG_DATA_DIRS=$(HOST_XDG_DATA_DIRS) \
 	$(HOST_PKG_CONFIG_ENV)
 
@@ -131,19 +202,19 @@ TARGET_AUTOTOOLS_CXXFLAGS := $(filter-out -std=%,$(TARGET_AUTOTOOLS_CFLAGS)) $(T
 TARGET_AUTOTOOLS_LDFLAGS := $(TARGET_GLOBAL_LDFLAGS) $(TARGET_GLOBAL_LDLIBS) $(TARGET_GLOBAL_LDFLAGS_$(TARGET_CC_FLAVOUR))
 TARGET_AUTOTOOLS_DYN_LDFLAGS := $(TARGET_GLOBAL_LDFLAGS_SHARED) $(TARGET_GLOBAL_LDLIBS_SHARED)
 
-__target_pkg_config_path :=
+_target_pkg_config_path :=
 $(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
-	$(eval __target_pkg_config_path := $(__target_pkg_config_path):$(__dir)/usr/lib/pkgconfig) \
-	$(eval __target_pkg_config_path := $(__target_pkg_config_path):$(__dir)/lib/pkgconfig) \
-	$(eval __target_pkg_config_path := $(__target_pkg_config_path):$(__dir)/usr/share/pkgconfig) \
-	$(eval __target_pkg_config_path := $(__target_pkg_config_path):$(__dir)/usr/lib/$(TARGET_TOOLCHAIN_TRIPLET)/pkgconfig) \
+	$(eval _target_pkg_config_path := $(_target_pkg_config_path):$(__dir)/usr/lib/pkgconfig) \
+	$(eval _target_pkg_config_path := $(_target_pkg_config_path):$(__dir)/lib/pkgconfig) \
+	$(eval _target_pkg_config_path := $(_target_pkg_config_path):$(__dir)/usr/share/pkgconfig) \
+	$(eval _target_pkg_config_path := $(_target_pkg_config_path):$(__dir)/usr/lib/$(TARGET_TOOLCHAIN_TRIPLET)/pkgconfig) \
 )
 
 # Setup pkg-config
 # Only use packages found in TARGET_OUT_STAGING by setting PKG_CONFIG_LIBDIR empty
 TARGET_PKG_CONFIG_ENV := \
-	PKG_CONFIG="$(__autotools-pkg-config-bin)" \
-	PKG_CONFIG_PATH="$(__target_pkg_config_path)"
+	PKG_CONFIG="$(_autotools_pkg_config_bin)" \
+	PKG_CONFIG_PATH="$(_target_pkg_config_path)"
 ifeq ("$(TARGET_OS_FLAVOUR)","native")
   TARGET_PKG_CONFIG_ENV += PKG_CONFIG_SYSROOT_DIR=""
 else
@@ -153,7 +224,7 @@ endif
 
 # Environment to use when executing configure script
 TARGET_AUTOTOOLS_CONFIGURE_ENV := \
-	PATH="$(__autotools-target-path)" \
+	PATH="$(_autotools_target_path)" \
 	AR="$(TARGET_AR)" \
 	AS="$(TARGET_AS)" \
 	LD="$(TARGET_LD)" \
@@ -166,7 +237,7 @@ TARGET_AUTOTOOLS_CONFIGURE_ENV := \
 	STRIP="$(TARGET_STRIP)" \
 	OBJCOPY="$(TARGET_OBJCOPY)" \
 	OBJDUMP="$(TARGET_OBJDUMP)" \
-	INSTALL="$(__autotools-install-bin) -p" \
+	INSTALL="$(_autotools_install_bin) -p" \
 	MANIFEST_TOOL=":" \
 	CC_FOR_BUILD="$(HOST_CC)" \
 	CPPFLAGS="$(TARGET_AUTOTOOLS_CPPFLAGS)" \
@@ -258,12 +329,12 @@ endif
 
 # Finally, add common arguments
 TARGET_AUTOTOOLS_CONFIGURE_ARGS += \
-	$(__autotools-configure-args)
+	$(_autotools_configure_args)
 
 # Environment to use when executing make
 # Use PKG_CONFIG_ENV in case a package needs automatic reconfiguration
 TARGET_AUTOTOOLS_MAKE_ENV := \
-	PATH="$(__autotools-host-path)" \
+	PATH="$(_autotools_host_path)" \
 	XDG_DATA_DIRS=$(TARGET_XDG_DATA_DIRS) \
 	$(TARGET_PKG_CONFIG_ENV)
 
@@ -281,7 +352,7 @@ endif
 ## Cache generation.
 ###############################################################################
 
-$(__autotools-target-cache-file): $(BUILD_SYSTEM)/autotools-cache/configure
+$(_autotools_target_cache_file): $(BUILD_SYSTEM)/autotools-cache/configure
 	@echo "Generating $(call path-from-top,$@)..."
 	@mkdir -p $(TARGET_OUT_BUILD)/autotools-cache
 	@rm -f $(TARGET_OUT_BUILD)/autotools-cache/config.cache
@@ -294,10 +365,10 @@ $(__autotools-target-cache-file): $(BUILD_SYSTEM)/autotools-cache/configure
 		$(TARGET_OUT_BUILD)/autotools-cache/config.cache \
 		> $@
 
-autotools-target-cache-file-clean:
-	@rm -f $(__autotools-target-cache-file)
+_autotools-target-cache-file-clean:
+	@rm -f $(_autotools_target_cache_file)
 
-clobber: autotools-target-cache-file-clean
+clobber: _autotools-target-cache-file-clean
 
 ###############################################################################
 ## For compatibility.

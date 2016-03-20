@@ -3,7 +3,7 @@
 ## @author Y.M. Morgan
 ## @date 2011/05/14
 ##
-## Build an executable.
+## Register EXECUTABLE modules.
 ###############################################################################
 
 # Set also LOCAL_MODULE so that everything works correctly
@@ -14,14 +14,14 @@ endif
 LOCAL_MODULE_CLASS := EXECUTABLE
 
 ifeq ("$(LOCAL_DESTDIR)","")
-LOCAL_DESTDIR := $(TARGET_DEFAULT_BIN_DESTDIR)
+  LOCAL_DESTDIR := $(TARGET_DEFAULT_BIN_DESTDIR)
 endif
 
 ifeq ("$(LOCAL_MODULE_FILENAME)","")
-LOCAL_MODULE_FILENAME := $(LOCAL_MODULE)$(TARGET_EXE_SUFFIX)
+  LOCAL_MODULE_FILENAME := $(LOCAL_MODULE)$(TARGET_EXE_SUFFIX)
 endif
 
-# on toolchain arm-2012.03 for static binaries
+# On toolchain arm-2012.03 for static binaries
 # force link with libc-arm-2012-03-fix.a to override libc symbols
 ifneq ("$(call str-starts-with,$(TARGET_CC_PATH),/opt/arm-2012.03)","")
 ifneq ("$(findstring -static,$(LOCAL_LDFLAGS))","")
@@ -29,4 +29,5 @@ ifneq ("$(findstring -static,$(LOCAL_LDFLAGS))","")
 endif
 endif
 
+# Register in the system
 $(module-add)

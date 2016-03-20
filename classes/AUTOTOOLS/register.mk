@@ -3,7 +3,7 @@
 ## @author Y.M. Morgan
 ## @date 2012/07/13
 ##
-## Handle modules using autotools.
+## Register AUTOTOOLS modules.
 ###############################################################################
 
 # Set also LOCAL_MODULE so that everything works correctly
@@ -24,5 +24,14 @@ LOCAL_ARCHIVE_PATCHES := $(LOCAL_AUTOTOOLS_PATCHES)
 LOCAL_COPY_TO_BUILD_DIR := $(LOCAL_AUTOTOOLS_COPY_TO_BUILD_DIR)
 $(call macro-copy,LOCAL_ARCHIVE_CMD_UNPACK,LOCAL_AUTOTOOLS_CMD_UNPACK)
 $(call macro-copy,LOCAL_ARCHIVE_CMD_POST_UNPACK,LOCAL_AUTOTOOLS_CMD_POST_UNPACK)
+$(call macro-copy,LOCAL_CMD_CONFIGURE,LOCAL_AUTOTOOLS_CMD_CONFIGURE)
+$(call macro-copy,LOCAL_CMD_BUILD,LOCAL_AUTOTOOLS_CMD_BUILD)
+$(call macro-copy,LOCAL_CMD_INSTALL,LOCAL_AUTOTOOLS_CMD_INSTALL)
+$(call macro-copy,LOCAL_CMD_CLEAN,LOCAL_AUTOTOOLS_CMD_CLEAN)
+$(call macro-copy,LOCAL_CMD_POST_CONFIGURE,LOCAL_AUTOTOOLS_CMD_POST_CONFIGURE)
+$(call macro-copy,LOCAL_CMD_POST_BUILD,LOCAL_AUTOTOOLS_CMD_POST_BUILD)
+$(call macro-copy,LOCAL_CMD_POST_INSTALL,LOCAL_AUTOTOOLS_CMD_POST_INSTALL)
+$(call macro-copy,LOCAL_CMD_POST_CLEAN,LOCAL_AUTOTOOLS_CMD_POST_CLEAN)
 
+# Register in the system
 $(module-add)

@@ -1,158 +1,206 @@
 ###############################################################################
 ## @file classes/GENERIC/rules.mk
 ## @author Y.M. Morgan
-## @date 2013/24/13
+## @date 2016/03/20
 ##
-## Build a module using generic rules.
+## Rules for GENERIC modules.
 ###############################################################################
 
-# Name of files indicating steps done
-# Using version allow to switch without having some dependencies troubles
-ifneq ("$(LOCAL_ARCHIVE_VERSION)","")
-  configured_file := $(build_dir)/$(LOCAL_MODULE)-$(LOCAL_ARCHIVE_VERSION).configured
-  built_file := $(build_dir)/$(LOCAL_MODULE)-$(LOCAL_ARCHIVE_VERSION).built
-  installed_file := $(build_dir)/$(LOCAL_MODULE)-$(LOCAL_ARCHIVE_VERSION).installed
-  post_installed_file := $(build_dir)/$(LOCAL_MODULE)-$(LOCAL_ARCHIVE_VERSION).post-installed
-else
-  configured_file := $(build_dir)/$(LOCAL_MODULE).configured
-  built_file := $(build_dir)/$(LOCAL_MODULE).built
-  installed_file := $(build_dir)/$(LOCAL_MODULE).installed
-  post_installed_file := $(build_dir)/$(LOCAL_MODULE).post-installed
-endif
-
 # Where the source will actually be found once unpacked (or copied)
-ifneq ("$(LOCAL_ARCHIVE)","")
-  src_dir := $(unpack_dir)/$(LOCAL_ARCHIVE_SUBDIR)
+ifneq ("$(_module_archive_file)","")
+  _generic_src_dir := $(_module_build_dir)/$(LOCAL_ARCHIVE_SUBDIR)
 else ifeq ("$(LOCAL_COPY_TO_BUILD_DIR)","1")
-  src_dir := $(build_dir)
+  _generic_src_dir := $(_module_build_dir)
 else
-  src_dir := $(LOCAL_PATH)
+  _generic_src_dir := $(LOCAL_PATH)
 endif
 
 # Where the package will be configured and built
-# TODO: try to build outside source even for unpacked archives
-ifneq ("$(LOCAL_ARCHIVE)","")
-  ifeq ("$(generic-build-out-of-src)","0")
-    obj_dir := $(src_dir)
+# Because autootools are widely used for generic build to not try to support
+# out ouf source build for unpacked autotools archives
+# TODO: try to build outside source even for unpacked autotools archives
+ifneq ("$(_module_archive_file)","")
+  ifeq ("$(LOCAL_MODULE_CLASS)","AUTOTOOLS")
+    _generic_obj_dir := $(_generic_src_dir)
   else
-    obj_dir := $(build_dir)/obj
+    _generic_obj_dir := $(_module_build_dir)/obj
   endif
 else
-  obj_dir := $(build_dir)/obj
+  _generic_obj_dir := $(_module_build_dir)/obj
 endif
 
-# Delete some additionnal 'done' files if a skip of external checks is not done
-ifeq ("$(skip_ext_checks)","0")
-$(call delete-one-done-file,$(built_file))
-$(call delete-one-done-file,$(installed_file))
+###############################################################################
+###############################################################################
+
+ifneq ("$(_module_revision_h_file)","")
+$(_module_revision_h_file): .FORCE
+	@mkdir -p $(dir $@)
+	@( \
+		var="$(call module-get-define,$(PRIVATE_MODULE))"; \
+		val="$(call module-get-revision,$(PRIVATE_MODULE))"; \
+		val2="$(call module-get-revision-describe,$(PRIVATE_MODULE))"; \
+		echo "#define ALCHEMY_REVISION_$${var} \"$${val}\""; \
+		echo "#define ALCHEMY_REVISION_DESCRIBE_$${var} \"$${val2}\""; \
+	) > $@.tmp
+	$(call update-file-if-needed,$@,$@.tmp)
 endif
 
-# Display a message
-# $1 : message
-__generic-msg = \
-	$(call print-banner2,$(PRIVATE_MSG),$(PRIVATE_MODULE),$1)
+###############################################################################
+###############################################################################
+
+ifneq ("$(_module_autoconf_file)","")
+$(_module_autoconf_file): $(_module_build_config_file)
+	@$(call generate-autoconf-file,$<,$@)
+
+# Copy config file in build dir if not done yet by load-config
+ifneq ("$(wildcard $(_module_orig_config_file))","")
+# Original config file exists, copy it with optional sed files applied
+$(_module_build_config_file): $(_module_orig_config_file)
+	$(call __config-apply-sed,$(PRIVATE_MODULE),$@,$<)
+else
+# No Original config file, simply create an empty one in build dir
+$(_module_build_config_file):
+	@mkdir -p $(dir $@)
+	@touch $@
+endif
+
+endif
 
 ###############################################################################
-## Rules.
-## Note : use '+' to make sure sub-make is properly managed, this avoid:
-## warning: jobserver unavailable: using -j1.  Add `+' to parent make rule.
 ###############################################################################
+
+# TODO: do we really need the license also in archive subdir ?
+$(_module_unpacked_stamp_file): $(_module_archive_file)
+ifneq ("$(_module_archive_file)","")
+	$(call _generic-msg,Unpacking)
+	@mkdir -p $(PRIVATE_ARCHIVE_UNPACK_DIR)
+	+$(call macro-exec-cmd,ARCHIVE_CMD_UNPACK,_generic-def-cmd-unpack)
+	$(call copy-license-files,$(PRIVATE_PATH),$(PRIVATE_ARCHIVE_UNPACK_DIR)/$(PRIVATE_ARCHIVE_SUBDIR))
+endif
+	$(call copy-license-files,$(PRIVATE_PATH),$(PRIVATE_BUILD_DIR))
+	@mkdir -p $(dir $@)
+	@touch $@
+
+# TODO: ARCHIVE_CMD_POST_UNPACK is always called here for compatibility
+$(_module_patched_stamp_file): $(_module_unpacked_stamp_file) $(addprefix $(LOCAL_PATH)/,$(_module_archive_patches))
+ifneq ("$(_module_archive_patches)","")
+	$(call _generic-msg,Patching)
+	$(_generic-apply-patches)
+endif
+	+$(call macro-exec-cmd,ARCHIVE_CMD_POST_UNPACK,empty)
+	@mkdir -p $(dir $@)
+	@touch $@
+
+###############################################################################
+###############################################################################
+
+$(_module_bootstrapped_stamp_file): $(_module_patched_stamp_file)
+	+$(call _generic-exec-step,BOOTSTRAP,Bootstrapping)
+	@mkdir -p $(dir $@)
+	@touch $@
+
+$(_module_configured_stamp_file): $(_module_bootstrapped_stamp_file)
+	+$(call _generic-exec-step,CONFIGURE,Configuring)
+	@mkdir -p $(dir $@)
+	@touch $@
+
+# Make sure that the 'build-filename' file will be created for external module
+# TODO warn if file was not created ?
+$(_module_built_stamp_file): $(_module_configured_stamp_file)
+	+$(call _generic-exec-step,BUILD,Building)
+	@mkdir -p $(dir $@)
+	$(if $(call is-module-external,$(PRIVATE_MODULE)), \
+		@touch $(call module-get-build-filename,$(PRIVATE_MODULE)) \
+	)
+	@touch $@
+
+$(_module_installed_stamp_file): $(_module_built_stamp_file)
+	+$(call _generic-exec-step,INSTALL,Installing)
+	@$(call generate-last-revision-file,$(PRIVATE_MODULE),$(PRIVATE_REV_FILE))
+	@mkdir -p $(dir $@)
+	@touch $@
+
+$(_module_done_stamp_file): $(_module_installed_stamp_file)
+	@mkdir -p $(dir $@)
+	@touch $@
+
+.PHONY: $(LOCAL_MODULE)-clean-generic
+$(LOCAL_MODULE)-clean-generic: $(LOCAL_MODULE)-clean-common
+	+$(call _generic-exec-step,CLEAN,$(empty))
+	$(call delete-license-files,$(PRIVATE_BUILD_DIR))
+
+$(LOCAL_MODULE)-clean: $(LOCAL_MODULE)-clean-generic
+
+###############################################################################
+###############################################################################
+
+# Patching may require copy in build directory
+$(_module_patched_stamp_file): $(_module_copy_to_build_dir_dst_files)
+
+# Bootstrapping may requires all prerequisites
+# But do NOT force recompilation (order only)
+$(_module_bootstrapped_stamp_file): | $(all_prerequisites)
 
 # Make sure all prerequisites files are generated first
 # But do NOT force recompilation (order only)
-$(configured_file): | $(all_prerequisites) $(all_depends_build_filename) $(all_link_libs_filenames)
+# TODO: only for external modules
+$(_module_configured_stamp_file): | $(all_depends_installed_stamp) $(all_link_libs_filenames)
+
+# If the user makefile is changed, restart at the configure step
+ifneq ("$(wildcard $(LOCAL_PATH)/$(USER_MAKEFILE_NAME))","")
+$(_module_configured_stamp_file): $(LOCAL_PATH)/$(USER_MAKEFILE_NAME)
+endif
 
 # If an autoconf file has changed, restart at the configure step
-$(configured_file): $(all_autoconf)
+$(_module_configured_stamp_file): $(all_autoconf)
 
 # Restart build if any of dependencies have changed
-$(built_file): $(all_depends_build_filename) $(all_link_libs_filenames)
+$(_module_built_stamp_file): $(all_depends_installed_stamp) $(all_link_libs_filenames)
 
-# Configuration
-# If the user makefile is changed, restart at the configure step
-$(configured_file): $(LOCAL_PATH)/$(USER_MAKEFILE_NAME) $(unpacked_file)
-	$(call __generic-msg,Configuring)
-	@mkdir -p $(PRIVATE_OBJ_DIR)
-	+$(if $(PRIVATE_HOOK_PRE_CONFIGURE),$(call $(PRIVATE_HOOK_PRE_CONFIGURE)))
-	+$(call macro-exec-cmd,$(PRIVATE_CMD_PREFIX)_CMD_CONFIGURE,$(PRIVATE_DEFAULT_CMD_CONFIGURE))
-	+$(call macro-exec-cmd,$(PRIVATE_CMD_PREFIX)_CMD_POST_CONFIGURE,empty)
-	+$(if $(PRIVATE_HOOK_POST_CONFIGURE),$(call $(PRIVATE_HOOK_POST_CONFIGURE)))
-	@mkdir -p $(dir $@)
-	@touch $@
+# Insert build module between configured and built steps
+$(LOCAL_BUILD_MODULE): $(_module_configured_stamp_file)
+$(_module_built_stamp_file): $(LOCAL_BUILD_MODULE)
 
-# Build
-$(built_file): $(configured_file)
-	$(call __generic-msg,Building)
-	@mkdir -p $(PRIVATE_OBJ_DIR)
-	+$(if $(PRIVATE_HOOK_PRE_BUILD),$(call $(PRIVATE_HOOK_PRE_BUILD)))
-	+$(call macro-exec-cmd,$(PRIVATE_CMD_PREFIX)_CMD_BUILD,$(PRIVATE_DEFAULT_CMD_BUILD))
-	+$(call macro-exec-cmd,$(PRIVATE_CMD_PREFIX)_CMD_POST_BUILD,empty)
-	+$(if $(PRIVATE_HOOK_POST_BUILD),$(call $(PRIVATE_HOOK_POST_BUILD)))
-	@mkdir -p $(dir $@)
-	@touch $@
+# This will force to recheck this module if one of its dependencies is changed.
+$(LOCAL_BUILD_MODULE): $(all_depends_installed_stamp)
+$(LOCAL_CUSTOM_TARGETS): $(all_depends_installed_stamp)
 
-# Installation
-$(installed_file): $(built_file)
-	$(call __generic-msg,Installing)
-	+$(if $(PRIVATE_HOOK_PRE_INSTALL),$(call $(PRIVATE_HOOK_PRE_INSTALL)))
-	+$(call macro-exec-cmd,$(PRIVATE_CMD_PREFIX)_CMD_INSTALL,$(PRIVATE_DEFAULT_CMD_INSTALL))
-	@mkdir -p $(dir $@)
-	@touch $@
+# Prerequisites that are not ours
+all_external_prerequisites := $(filter-out \
+	$(LOCAL_CUSTOM_TARGETS) \
+	$(LOCAL_PREREQUISITES) \
+	$(LOCAL_EXPORT_PREREQUISITES), $(all_prerequisites))
+$(LOCAL_CUSTOM_TARGETS): | $(all_external_prerequisites)
+$(LOCAL_PREREQUISITES): | $(all_external_prerequisites)
+$(LOCAL_EXPORT_PREREQUISITES): | $(all_external_prerequisites)
 
-$(post_installed_file): $(installed_file)
-	+$(call macro-exec-cmd,$(PRIVATE_CMD_PREFIX)_CMD_POST_INSTALL,empty)
-	+$(if $(PRIVATE_HOOK_POST_INSTALL),$(call $(PRIVATE_HOOK_POST_INSTALL)))
-	@mkdir -p $(dir $@)
-	@touch $@
-
-# Done (copy license files in obj dir if different from src dir)
-$(LOCAL_BUILD_MODULE): $(post_installed_file)
-	@mkdir -p $(dir $@)
-ifneq ("$(src_dir)","$(obj_dir)")
-	$(call copy-license-files,$(PRIVATE_PATH),$(PRIVATE_OBJ_DIR))
-endif
-	@$(call generate-last-revision-file,$(PRIVATE_MODULE),$(PRIVATE_REV_FILE))
-	@touch $@
-
-# Clean targets additional commands
-$(LOCAL_MODULE)-clean:
-	+$(if $(PRIVATE_HOOK_PRE_CLEAN),$(call $(PRIVATE_HOOK_PRE_CLEAN)))
-	+$(call macro-exec-cmd,$(PRIVATE_CMD_PREFIX)_CMD_CLEAN,$(PRIVATE_DEFAULT_CMD_CLEAN))
-	+$(call macro-exec-cmd,$(PRIVATE_CMD_PREFIX)_CMD_POST_CLEAN,empty)
-	+$(if $(PRIVATE_HOOK_POST_CLEAN),$(call $(PRIVATE_HOOK_POST_CLEAN)))
+# This explicit rule avoids dependency error when the module has nothing to build
+# (prebuilt, sdk, custom...)
+$(LOCAL_BUILD_MODULE):
 
 ###############################################################################
-## Rule-specific variable definitions.
 ###############################################################################
 
-# clean targets additional variables
-# To NOT put build dir in PRIVATE_CLEAN_DIRS
-# we need to call some makefiles during our custom clean
-$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(post_installed_file)
-$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(installed_file)
-$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(built_file)
-
-# We don't create target-specific variables for macros because it does not
-# work when created with 'define ... endef'. They will be accessed directly
-# from module database
-$(LOCAL_TARGETS): PRIVATE_SRC_DIR := $(src_dir)
-$(LOCAL_TARGETS): PRIVATE_OBJ_DIR := $(obj_dir)
+$(LOCAL_TARGETS): PRIVATE_SRC_DIR := $(_generic_src_dir)
+$(LOCAL_TARGETS): PRIVATE_OBJ_DIR := $(_generic_obj_dir)
 
 # Commands
-$(LOCAL_TARGETS): PRIVATE_MSG := Generic
-$(LOCAL_TARGETS): PRIVATE_CMD_PREFIX := GENERIC
-$(LOCAL_TARGETS): PRIVATE_DEFAULT_CMD_CONFIGURE := empty
-$(LOCAL_TARGETS): PRIVATE_DEFAULT_CMD_BUILD := empty
-$(LOCAL_TARGETS): PRIVATE_DEFAULT_CMD_INSTALL := empty
-$(LOCAL_TARGETS): PRIVATE_DEFAULT_CMD_CLEAN := empty
+$(LOCAL_TARGETS): PRIVATE_MSG := $(_module_msg)
+$(LOCAL_TARGETS): PRIVATE_CMD_PREFIX := $(_module_cmd_prefix)
+$(LOCAL_TARGETS): PRIVATE_DEF_CMD_BOOTSTRAP := $(_module_def_cmd_bootstrap)
+$(LOCAL_TARGETS): PRIVATE_DEF_CMD_CONFIGURE := $(_module_def_cmd_configure)
+$(LOCAL_TARGETS): PRIVATE_DEF_CMD_BUILD := $(_module_def_cmd_build)
+$(LOCAL_TARGETS): PRIVATE_DEF_CMD_INSTALL := $(_module_def_cmd_install)
+$(LOCAL_TARGETS): PRIVATE_DEF_CMD_CLEAN := $(_module_def_cmd_clean)
 
 # Internal hooks to be applied before/after steps.
-$(LOCAL_TARGETS): PRIVATE_HOOK_PRE_CONFIGURE :=
-$(LOCAL_TARGETS): PRIVATE_HOOK_POST_CONFIGURE :=
-$(LOCAL_TARGETS): PRIVATE_HOOK_PRE_BUILD :=
-$(LOCAL_TARGETS): PRIVATE_HOOK_POST_BUILD :=
-$(LOCAL_TARGETS): PRIVATE_HOOK_PRE_INSTALL :=
-$(LOCAL_TARGETS): PRIVATE_HOOK_POST_INSTALL :=
-$(LOCAL_TARGETS): PRIVATE_HOOK_PRE_CLEAN :=
-$(LOCAL_TARGETS): PRIVATE_HOOK_POST_CLEAN :=
-
+$(LOCAL_TARGETS): PRIVATE_HOOK_PRE_BOOTSTRAP := $(_module_hook_pre_bootstrap)
+$(LOCAL_TARGETS): PRIVATE_HOOK_POST_BOOTSTRAP := $(_module_hook_post_bootstrap)
+$(LOCAL_TARGETS): PRIVATE_HOOK_PRE_CONFIGURE := $(_module_hook_pre_configure)
+$(LOCAL_TARGETS): PRIVATE_HOOK_POST_CONFIGURE := $(_module_hook_post_configure)
+$(LOCAL_TARGETS): PRIVATE_HOOK_PRE_BUILD := $(_module_hook_pre_build)
+$(LOCAL_TARGETS): PRIVATE_HOOK_POST_BUILD := $(_module_hook_post_build)
+$(LOCAL_TARGETS): PRIVATE_HOOK_PRE_INSTALL := $(_module_hook_pre_install)
+$(LOCAL_TARGETS): PRIVATE_HOOK_POST_INSTALL := $(_module_hook_post_install)
+$(LOCAL_TARGETS): PRIVATE_HOOK_PRE_CLEAN := $(_module_hook_pre_clean)
+$(LOCAL_TARGETS): PRIVATE_HOOK_POST_CLEAN := $(_module_hook_post_clean)

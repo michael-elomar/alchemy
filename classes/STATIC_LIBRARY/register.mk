@@ -3,7 +3,7 @@
 ## @author Y.M. Morgan
 ## @date 2011/05/14
 ##
-## Build a static library.
+## Register STATIC_LIBRARY modules.
 ###############################################################################
 
 # Set also LOCAL_MODULE so that everything works correctly
@@ -25,4 +25,5 @@ ifeq ("$(LOCAL_MODULE_FILENAME)","")
   endif
 endif
 
+# Register in the system
 $(module-add)

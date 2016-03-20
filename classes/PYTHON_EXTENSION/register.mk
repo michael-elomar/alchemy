@@ -3,7 +3,7 @@
 ## @author Y.M. Morgan
 ## @date 2014/07/31
 ##
-## Build a python extension.
+## Register PYTHON_EXTENSION modules.
 ###############################################################################
 
 # Set also LOCAL_MODULE so that everything works correctly
@@ -16,4 +16,5 @@ LOCAL_MODULE_CLASS := PYTHON_EXTENSION
 LOCAL_MODULE_FILENAME := $(LOCAL_MODULE).done
 LOCAL_DONE_FILES += $(LOCAL_MODULE).done
 
+# Register in the system
 $(module-add)
