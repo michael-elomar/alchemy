@@ -55,6 +55,11 @@ else
   Q :=
 endif
 
+# Remove --warn-undefined-variables flags for sub-make invocations
+ifdef MAKEFLAGS
+  override MAKEFLAGS := $(filter-out --warn-undefined-variables,$(MAKEFLAGS))
+endif
+
 # This is the default target.  It must be the first declared target.
 all:
 
