@@ -72,8 +72,12 @@ HOST_GLOBAL_ARFLAGS += rcs
 TARGET_GLOBAL_CFLAGS += \
 	-pipe \
 	-g -O2 \
-	-ffunction-sections \
 	-fno-short-enums
+
+# -ffunction-sections is not compatible with clang's -fembed-bitcode
+ifeq ("$(filter -fembed-bitcode,$(TARGET_GLOBAL_CFLAGS))","")
+  TARGET_GLOBAL_CFLAGS += -ffunction-sections
+endif
 
 ifeq ("$(TARGET_USE_CXX_EXCEPTIONS)","0")
   TARGET_GLOBAL_CXXFLAGS += -fno-exceptions
