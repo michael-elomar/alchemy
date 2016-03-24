@@ -10,8 +10,8 @@ TARGET_STATIC_LIB_SUFFIX := .a
 TARGET_SHARED_LIB_SUFFIX := .so.a
 TARGET_EXE_SUFFIX := .elf
 
-# Force arm mode (disable thumb)
-TARGET_DEFAULT_ARM_MODE := arm
+# Select arm mode only (no thumb) by default
+TARGET_DEFAULT_ARM_MODE ?= arm
 
 # Force static compilation
 TARGET_FORCE_STATIC := 1
