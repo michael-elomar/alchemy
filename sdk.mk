@@ -17,10 +17,19 @@ endif
 .PHONY: sdk
 sdk: dump-xml
 	@echo "Sdk: start"
+	@rm -f $(SDK_TGZ)
+	$(Q) $(MAKESDK_SCRIPT) $(DUMP_DATABASE_XML_FILE) \
+		$(HOST_OUT_BUILD) $(HOST_OUT_STAGING) \
+		$(TARGET_OUT_BUILD) $(TARGET_OUT_STAGING) $(SDK_TGZ)
+	@echo "Sdk: done -> $(SDK_TGZ)"
+
+.PHONY: sdk-keep-dir
+sdk-keep-dir: dump-xml
+	@echo "Sdk: start"
+	@rm -f $(SDK_TGZ)
 	$(Q) $(MAKESDK_SCRIPT) $(DUMP_DATABASE_XML_FILE) \
 		$(HOST_OUT_BUILD) $(HOST_OUT_STAGING) \
 		$(TARGET_OUT_BUILD) $(TARGET_OUT_STAGING) $(SDK_DIR)
-	@rm -f $(SDK_TGZ)
 	$(Q) tar -C $(dir $(SDK_DIR)) -czf $(SDK_TGZ) $(notdir $(SDK_DIR))
 	@echo "Sdk: done -> $(SDK_DIR) ($(SDK_TGZ))"
 
@@ -31,4 +40,5 @@ sdk-clean:
 
 # Setup dependencies
 sdk: post-build
+sdk-keep-dir: post-build
 clobber: sdk-clean
