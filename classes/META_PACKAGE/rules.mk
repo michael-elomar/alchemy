@@ -17,6 +17,9 @@ define _meta-package-dep
 $1: $2
 $1-clean: $2-clean
 $1-dirclean: $2-dirclean
+$1-codecheck: $2-codecheck
+$1-doc: $2-doc
+$1-cloc: $2-cloc
 endef
 
 # Add deps for build, clean, dirclean
