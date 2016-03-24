@@ -61,6 +61,8 @@ $(call fix-deps-file,$(2:.o=.d))
 endef
 
 transform-cpp-to-o = $(call _internal-transform-cpp-to-o,$(PRIVATE_MODE),$@,$<)
+transform-cxx-to-o = $(call _internal-transform-cpp-to-o,$(PRIVATE_MODE),$@,$<)
+transform-cc-to-o = $(call _internal-transform-cpp-to-o,$(PRIVATE_MODE),$@,$<)
 
 ###############################################################################
 ## Commands to compile a C file.
