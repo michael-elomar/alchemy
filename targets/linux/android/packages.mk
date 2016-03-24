@@ -15,4 +15,9 @@ ifdef USE_ALCHEMY_ANDROID_SDK
     LOCAL_MODULE := busybox
     include $(BUILD_PREBUILT)
   endif
+else
+  include $(CLEAR_VARS)
+    LOCAL_MODULE := zlib
+    LOCAL_EXPORT_LDLIBS := -lz
+    include $(BUILD_PREBUILT)
 endif
