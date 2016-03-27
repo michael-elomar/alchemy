@@ -389,7 +389,7 @@ is-module-in-build-config = $(strip \
 		$(if $(call is-module-prebuilt,$1), \
 			$(true) \
 			, \
-			$(if $(call streq,$(CONFIG_GLOBAL_FILE_AVAILABLE),1), \
+			$(if $(call streq,$(GLOBAL_CONFIG_FILE_AVAILABLE),1), \
 				$(eval __var := CONFIG_ALCHEMY_BUILD_$(call module-get-define,$1)) \
 				$(if $(call is-var-defined,$(__var)), \
 					$(if $($(__var)),$(true),$(false)) \

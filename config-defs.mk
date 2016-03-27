@@ -19,25 +19,20 @@ CONFWRAPPER_ENV := \
 # Tools
 CONFWRAPPER := $(CONFWRAPPER_ENV) $(BUILD_SYSTEM)/scripts/confwrapper.py
 
-# File where global configuration is stored
-ifndef CONFIG_GLOBAL_FILE
-  CONFIG_GLOBAL_FILE := $(TARGET_CONFIG_DIR)/global.config
-endif
-
 # Remember if the global config file is present or not
-ifeq ("$(wildcard $(CONFIG_GLOBAL_FILE))","")
-  CONFIG_GLOBAL_FILE_AVAILABLE := 0
+ifeq ("$(wildcard $(TARGET_GLOBAL_CONFIG_FILE))","")
+  GLOBAL_CONFIG_FILE_AVAILABLE := 0
 else
-  CONFIG_GLOBAL_FILE_AVAILABLE := 1
+  GLOBAL_CONFIG_FILE_AVAILABLE := 1
 endif
 
 # Include global config file, do not fail if it does not exists or we
 # are requested to skip checks.
-ifeq ("$(CONFIG_GLOBAL_FILE_AVAILABLE)","1")
+ifeq ("$(GLOBAL_CONFIG_FILE_AVAILABLE)","1")
   ifeq ("$(SKIP_CONFIG_CHECK)","0")
-    include $(CONFIG_GLOBAL_FILE)
+    include $(TARGET_GLOBAL_CONFIG_FILE)
   else
-    -include $(CONFIG_GLOBAL_FILE)
+    -include $(TARGET_GLOBAL_CONFIG_FILE)
   endif
 endif
 

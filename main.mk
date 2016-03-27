@@ -322,7 +322,7 @@ ALL_BUILD_MODULES := $(strip \
 	))
 
 # If no config file available, remove modules with unknown dependencies
-ifeq ("$(CONFIG_GLOBAL_FILE_AVAILABLE)","0")
+ifeq ("$(GLOBAL_CONFIG_FILE_AVAILABLE)","0")
 $(foreach __mod,$(ALL_BUILD_MODULES), \
 	$(foreach __lib,$(call module-get-all-depends,$(__mod)), \
 		$(if $(call is-module-registered,$(__lib)),$(empty), \
