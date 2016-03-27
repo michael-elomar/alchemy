@@ -1399,21 +1399,11 @@ check-custom-macro = \
 ## message displayed when used while TARGET_DEFAULT_ARM_MODE is 'arm'.
 ###############################################################################
 
-# Old variables still suported but no more in vars-LOCAL or macros-LOCAL
-__compat-vars-LOCAL := \
-	AUTOTOOLS_ARCHIVE \
-	AUTOTOOLS_VERSION \
-	AUTOTOOLS_SUBDIR \
-	AUTOTOOLS_PATCHES \
-	AUTOTOOLS_CMD_UNPACK \
-	AUTOTOOLS_CMD_POST_UNPACK \
-	AUTOTOOLS_COPY_TO_BUILD_DIR \
-
 # All allowed variables
 __all-vars-LOCAL := \
 	$(vars-LOCAL) \
 	$(macros-LOCAL) \
-	$(__compat-vars-LOCAL)
+	$(compat-vars-LOCAL)
 
 # Get all defined LOCAL_XXX variables
 __get-defined-local-vars = $(filter LOCAL_%,$(.VARIABLES))
@@ -1518,24 +1508,6 @@ $(eval __depsdata := $(subst $(space),\n,$(strip $(__depsdata))))
 	$(PRIVATE_OBJCOPY) --add-section \
 		$(TARGET_DEPENDS_SECTION_NAME)=$${__tmpfile} $@; \
 	rm -f $${__tmpfile}; \
-)
-endef
-
-###############################################################################
-## Add a section in a binary with a build id.
-## This is a `sha1` of all sections that are loadable at runtime and with data
-## in the binary. This section is kept after stripping and the `sha1` can be
-## recomputed on the original and stripped binary and still produce the same
-## `sha1`. This can be used to identify the non-stripped binary based on the
-## stripped one.
-## Note : shall only be used in a rule because it uses $@
-###############################################################################
-
-define add-buildid-section
-@( \
-	$(BUILD_SYSTEM)/scripts/addbuildid.py \
-	--objcopy=$(PRIVATE_OBJCOPY) \
-	--section-name=$(TARGET_BUILDID_SECTION_NAME) $@ \
 )
 endef
 
