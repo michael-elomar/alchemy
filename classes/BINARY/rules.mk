@@ -37,11 +37,9 @@ obj_dir := $(_module_build_dir)/$(obj_subdir)
 ## List of sources, objects and libraries.
 ###############################################################################
 
-extensions := cpp cxx cc c cu m s S
-
 all_gen_sources :=
 all_objects :=
-$(foreach __e,$(extensions), \
+$(foreach __e,$(_binary_extensions), \
 	$(eval $(__e)_sources := $(filter %.$(__e),$(LOCAL_SRC_FILES))) \
 	$(eval $(__e)_objects := $(addprefix $(obj_dir)/,$($(__e)_sources:.$(__e)=.$(__e).o))) \
 	$(eval gen_$(__e)_sources := $(filter %.$(__e),$(LOCAL_GENERATED_SRC_FILES))) \
@@ -77,12 +75,15 @@ endif
 all_internal_depends := $(LOCAL_PATH)/$(USER_MAKEFILE_NAME)
 all_internal_depends += $(all_autoconf)
 
+# File with compilation flags to detect modifications
+all_internal_depends += $(_module_build_dir)/$(LOCAL_MODULE).objects.flags
+
 ###############################################################################
 ## Actual rules.
 ###############################################################################
 
 # $1 : extension
-define _binary-transform-to-o
+define _binary-rules-transform-to-o
 ifneq ("$(strip $($1_objects))","")
 $($1_objects): $(obj_dir)/%.$1.o: $(LOCAL_PATH)/%.$1
 	$$(transform-$1-to-o)
@@ -93,7 +94,7 @@ endif
 endef
 
 # $1 : extension
-define _binary-gen-transform-to-o
+define _binary-rules-transform-gen-to-o
 ifneq ("$(strip $(gen_$1_objects))","")
 $(gen_$1_objects): $(obj_dir)/%.$1.o: $(_module_build_dir)/%.$1
 	$$(transform-$1-to-o)
@@ -103,10 +104,26 @@ endif
 endif
 endef
 
-$(foreach __e,$(extensions), \
-	$(eval $(call _binary-transform-to-o,$(__e))) \
-	$(eval $(call _binary-gen-transform-to-o,$(__e))) \
+$(foreach __e,$(_binary_extensions), \
+	$(eval $(call _binary-rules-transform-to-o,$(__e))) \
+	$(eval $(call _binary-rules-transform-gen-to-o,$(__e))) \
 )
+
+# File with compilation flags
+$(_module_build_dir)/$(LOCAL_MODULE).objects.flags: .FORCE
+	@mkdir -p $(dir $@)
+	@( \
+		$(foreach __v,$(_binary-global-object-flags), \
+			echo 'GLOBAL_$(__v) := $($(PRIVATE_MODE)_GLOBAL_$(__v))'; \
+		) \
+		$(foreach __v,$(_binary-warnings-object-flags), \
+			echo 'WARNINGS_$(__v) := $(WARNINGS_$(__v))'; \
+		) \
+		$(foreach __v,$(_binary-private-object-flags), \
+			echo 'PRIVATE_$(__v) := $(PRIVATE_$(__v))'; \
+		) \
+	) > $@.tmp
+	$(call update-file-if-needed,$@,$@.tmp)
 
 ###############################################################################
 ## vala rules (.vala files are in LOCAL_PATH, generated .c and .o are in build dir)
@@ -136,6 +153,13 @@ $(foreach __f,$(vala_c_sources), \
 # Do the copy before compiling (completely arbitrary)
 $(vala_objects): $(vala_staging_c_sources)
 
+$(vala_done_file): | $(filter-out $(vala_header_file) $(vala_vapi_file),$(all_prerequisites))
+$(vala_done_file): $(all_internal_depends)
+
+$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(vala_done_file)
+$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(vala_done_file).tmp
+$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(vala_staging_c_sources)
+
 ifneq ("$(skip_include_deps)","1")
   -include $(vala_objects:%.o=%.d)
   -include $(vala_deps_file)
@@ -162,7 +186,7 @@ ifneq ("$(all_prerequisites)","")
 $(gch_file): | $(all_prerequisites)
 endif
 
-# Force recompilation if internal dependencies are changes
+# Force recompilation if internal dependencies are changed
 $(gch_file): $(all_internal_depends)
 
 # Generate the precompiled file
@@ -207,15 +231,7 @@ $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(all_objects)
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(all_objects:%.o=%.d)
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(vala_c_sources)
 
-# Vala stuff
-ifneq ("$(vala_objects)","")
-$(vala_done_file): | $(filter-out $(vala_header_file) $(vala_vapi_file),$(all_prerequisites))
-$(vala_done_file): $(all_internal_depends)
-$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(vala_done_file)
-$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(vala_done_file).tmp
-$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(vala_staging_c_sources)
-endif
-
+$(LOCAL_TARGETS): PRIVATE_OBJ_DIR := $(obj_dir)
 $(LOCAL_TARGETS): PRIVATE_ASFLAGS := $(LOCAL_ASFLAGS)
 $(LOCAL_TARGETS): PRIVATE_CFLAGS := $(LOCAL_CFLAGS)
 $(LOCAL_TARGETS): PRIVATE_C_INCLUDES := $(LOCAL_C_INCLUDES)
