@@ -15,7 +15,7 @@ MODULE_NAME=$3
 OUT_DIR=$(dirname $4)
 DEPS_DATA=$5
 shift 5
-OBJECTS=$*
+OBJECTS="$@"
 
 OUT_SRC=${OUT_DIR}/pbuild_link_hook.cpp
 OUT_OBJ=${OUT_DIR}/pbuild_link_hook.o
@@ -133,9 +133,7 @@ if [ "${DEPS_DATA}" != "" ]; then
 	outwrite "static struct pal_lib_desc_data lib_desc_data[] = {"
 	for x in ${DEPS_DATA}; do
 		lib=$(echo "${x}" | cut -d: -f1)
-		path=$(echo "${x}" | cut -d: -f2)
-		pattern=$(echo "${lib}" | cut -d- -f1)
-		desc=$(cd ${path} && ${SCRIPT_PATH}/describe.sh)
+		desc=$(echo "${x}" | cut -d: -f2)
 		outwrite "    {\"${lib}\", \"${desc}\", 0},"
 	done
 	outwrite "    {0, 0, 0}"

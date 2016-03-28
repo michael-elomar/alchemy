@@ -1480,7 +1480,7 @@ link-hook = $(strip \
 		$(eval __depsdata := $(empty)) \
 		$(if $(call streq,$(TARGET_PBUILD_HOOK_USE_DESCRIBE),1), \
 			$(foreach __lib,$(sort $1 $(__modules.$1.depends.all)), \
-				$(eval __depsdata += $(__lib):$(__modules.$(__lib).PATH)) \
+				$(eval __depsdata += $(__lib):$(call module-get-revision-describe,$(__lib))) \
 			)\
 		) \
 		$(shell $(BUILD_SYSTEM)/pbuild-hook/pbuild-link-hook.sh \
