@@ -7,11 +7,23 @@ SCRIPT_PATH=$(cd $(dirname $0) && pwd -P)
 export ALCHEMY_HOME=${SCRIPT_PATH}/..
 export ALCHEMY_WORKSPACE_DIR=${SCRIPT_PATH}
 
+HOST_OS=$(${ALCHEMY_HOME}/scripts/host.py OS)
+HOST_ARCH=$(${ALCHEMY_HOME}/scripts/host.py ARCH)
+
+# Use gmake under bsd
+if [ "${MAKE}" = "" ]; then
+	case ${HOST_OS} in
+		*bsd*)
+			export MAKE=gmake
+		;;
+	esac
+fi
+
 # Autodetect target os/arch
-export TARGET_OS=$(${ALCHEMY_HOME}/scripts/host.py OS)
+export TARGET_OS=${HOST_OS}
 export TARGET_OS_FLAVOUR=native
 if [ "${TARGET_ARCH}" = "" ]; then
-	export TARGET_ARCH=$(${ALCHEMY_HOME}/scripts/host.py ARCH)
+	export TARGET_ARCH=${HOST_ARCH}
 fi
 export TARGET_OUT=${SCRIPT_PATH}/out/${TARGET_OS}-${TARGET_ARCH}
 export TARGET_DEFAULT_ARM_MODE=arm
