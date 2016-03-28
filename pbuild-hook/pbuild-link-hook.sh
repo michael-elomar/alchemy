@@ -1,12 +1,9 @@
-#!/bin/bash
+#!/bin/sh
 
 # Check argument count, do NOT display anything on stdout
 if [ $# -lt 5 ]; then
 	exit 0
 fi
-
-# Get full path to this script
-SCRIPT_PATH=$(cd $(dirname $0) && pwd)
 
 # Get parameters
 NM=$1
@@ -29,7 +26,7 @@ touch ${OUT_SRC}
 ###############################################################################
 ## Write in output.
 ###############################################################################
-function outwrite()
+outwrite()
 {
 	echo "$1" >> ${OUT_SRC}
 }
@@ -164,7 +161,6 @@ if [ "${DEPS_DATA}" != "" ]; then
 	# End of anonymous namespace
 	outwrite "}"
 	outwrite ""
-
 fi
 
 ###############################################################################
@@ -176,4 +172,3 @@ ${CC} -o ${OUT_OBJ} -c ${OUT_SRC}
 
 # Print it so it will be added in the link
 echo ${OUT_OBJ}
-

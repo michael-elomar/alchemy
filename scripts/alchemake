@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # simple shell wrapper around alchemake.py
 
 # Set our home
