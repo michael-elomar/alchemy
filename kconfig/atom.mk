@@ -34,13 +34,13 @@ $(PARSER_BUILD_DIR)/zconf.hash.c: $(LOCAL_PATH)/parser/zconf.gperf
 	@echo "Generating zconf.hash.c"
 	$(Q)gperf --readonly-tables --output-file=$@ $<
 
-ifeq ("$(BISON_PATH)","")
-  error "BISON_PATH empty, please install bison"
+ifeq ("$(BISON_BIN)","")
+  $(error 'bison' is required)
 endif
 $(PARSER_BUILD_DIR)/zconf.tab.c: $(LOCAL_PATH)/parser/zconf.y
 	@mkdir -p $(dir $@)
 	@echo "Generating zconf.tab.c"
-	$(Q)$(BISON_PATH) --debug --no-lines --name-prefix=zconf --output=$@ $<
+	$(Q)$(BISON_BIN) --debug --no-lines --name-prefix=zconf --output=$@ $<
 
 include $(BUILD_STATIC_LIBRARY)
 

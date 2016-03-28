@@ -14,9 +14,6 @@
 # (we add the -p option to preserve timestamp of installed files)
 _autotools_install_bin := $(shell which install 2>/dev/null)
 
-## Get path to 'pkg-config' binary
-_autotools_pkg_config_bin := $(shell which pkg-config 2>/dev/null)
-
 # Update host compilation path
 _autotools_host_path := $(HOST_OUT_STAGING)/bin:$(HOST_OUT_STAGING)/usr/bin:$(PATH)
 
@@ -126,7 +123,7 @@ HOST_AUTOTOOLS_CXXFLAGS := $(filter-out -std=%,$(HOST_AUTOTOOLS_CFLAGS)) $(HOST_
 # Setup pkg-config
 # Use packages from both HOST_OUT_STAGING and standard places
 HOST_PKG_CONFIG_ENV := \
-	PKG_CONFIG="$(_autotools_pkg_config_bin)" \
+	PKG_CONFIG="$(PKGCONFIG_BIN)" \
 	PKG_CONFIG_PATH="$(HOST_OUT_STAGING)/usr/lib/pkgconfig:$(HOST_OUT_STAGING)/lib/pkgconfig" \
 	PKG_CONFIG_SYSROOT_DIR=""
 
@@ -153,7 +150,7 @@ HOST_AUTOTOOLS_CONFIGURE_ENV := \
 	CXXFLAGS="$(HOST_AUTOTOOLS_CXXFLAGS)" \
 	LDFLAGS="$(HOST_GLOBAL_LDFLAGS) $(HOST_GLOBAL_LDLIBS)" \
 	DYN_LDFLAGS="$(HOST_GLOBAL_LDFLAGS_SHARED) $(HOST_GLOBAL_LDLIBS_SHARED)" \
-	BISON_PATH="$(BISON_PATH)" \
+	BISON_PATH="$(BISON_BIN)" \
 	XDG_DATA_DIRS=$(HOST_XDG_DATA_DIRS) \
 	$(HOST_PKG_CONFIG_ENV)
 
@@ -213,13 +210,13 @@ $(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
 # Setup pkg-config
 # Only use packages found in TARGET_OUT_STAGING by setting PKG_CONFIG_LIBDIR empty
 TARGET_PKG_CONFIG_ENV := \
-	PKG_CONFIG="$(_autotools_pkg_config_bin)" \
+	PKG_CONFIG="$(PKGCONFIG_BIN)" \
 	PKG_CONFIG_PATH="$(_target_pkg_config_path)"
 ifeq ("$(TARGET_OS_FLAVOUR)","native")
   TARGET_PKG_CONFIG_ENV += PKG_CONFIG_SYSROOT_DIR=""
 else
-  TARGET_PKG_CONFIG_ENV += PKG_CONFIG_SYSROOT_DIR="$(TARGET_OUT_STAGING)" \
-			   PKG_CONFIG_LIBDIR=""
+  TARGET_PKG_CONFIG_ENV += PKG_CONFIG_SYSROOT_DIR="$(TARGET_OUT_STAGING)"
+  TARGET_PKG_CONFIG_ENV += PKG_CONFIG_LIBDIR=""
 endif
 
 # Environment to use when executing configure script
@@ -245,7 +242,7 @@ TARGET_AUTOTOOLS_CONFIGURE_ENV := \
 	CXXFLAGS="$(TARGET_AUTOTOOLS_CXXFLAGS)" \
 	LDFLAGS="$(TARGET_AUTOTOOLS_LDFLAGS)" \
 	DYN_LDFLAGS="$(TARGET_AUTOTOOLS_DYN_LDFLAGS)" \
-	BISON_PATH="$(BISON_PATH)" \
+	BISON_PATH="$(BISON_BIN)" \
 	XDG_DATA_DIRS=$(TARGET_XDG_DATA_DIRS) \
 	$(TARGET_PKG_CONFIG_ENV)
 
@@ -311,11 +308,11 @@ else
   TARGET_AUTOTOOLS_INSTALL_DESTDIR := $(TARGET_OUT_STAGING)
 endif
 
-# FIXME YACC should be bison -y (and test that BISON_PATH is not empty)
+# FIXME YACC should be bison -y (and test that BISON_BIN is not empty)
 TARGET_AUTOTOOLS_CONFIGURE_ARGS += \
 	--prefix="$(TARGET_AUTOTOOLS_CONFIGURE_PREFIX)" \
 	--sysconfdir="$(TARGET_AUTOTOOLS_CONFIGURE_SYSCONFDIR)" \
-	ac_cv_prog_YACC=$(BISON_PATH)
+	ac_cv_prog_YACC=$(BISON_BIN)
 
 ifneq ("$(TARGET_DEFAULT_BIN_DESTDIR)","usr/bin")
 TARGET_AUTOTOOLS_CONFIGURE_ARGS += \
