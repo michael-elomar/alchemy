@@ -252,6 +252,11 @@ def processModule(ctx, module, headersOnly=False):
 	modulePath = module.fields["PATH"]
 	moduleClass = module.fields["MODULE_CLASS"]
 
+	if module.name.startswith("host."):
+		ctx.atom.write("LOCAL_HOST_MODULE := %s\n" % module.name[5:])
+	else:
+		ctx.atom.write("LOCAL_MODULE := %s\n" % module.name)
+
 	# Write verbatim some fields
 	fields = ["DESCRIPTION", "CATEGORY_PATH",
 			"REVISION", "REVISION_DESCRIBE",
@@ -260,11 +265,6 @@ def processModule(ctx, module, headersOnly=False):
 	for field in fields:
 		if field in module.fields and module.fields[field] :
 			ctx.atom.write("LOCAL_%s := %s\n" % (field, module.fields[field]))
-
-	if module.name.startswith("host."):
-		ctx.atom.write("LOCAL_HOST_MODULE := %s\n" % module.name[5:])
-	else:
-		ctx.atom.write("LOCAL_MODULE := %s\n" % module.name)
 
 	# Libraries
 	# If a module contains prelinked '.a' mentionned in its EXPORT_LDLIBS, copy
@@ -304,16 +304,30 @@ def processModule(ctx, module, headersOnly=False):
 		newIncludeDirs = []
 		for includeDir in includeDirs:
 			if includeDir.startswith(modulePath):
-				# TODO: simplify destination by remove extra 'include' and 'module name'
+				dstDir = None
 				relPath = os.path.relpath(includeDir, modulePath)
-				if relPath != ".":
+				entries = os.listdir(includeDir)
+				suffixesInc = ["include", "includes", "Include", "Includes"]
+				suffixesSrc = ["src", "source", "sources", "Source", "Sources"]
+
+				# Try to simplify destination if only one directory is exported and it
+				# ends with a standard name
+				if len(includeDirs) == 1 and os.path.split(relPath)[1] in suffixesInc:
+					if len(entries) == 1 and entries[0] not in suffixesSrc:
+						# Directly copy in usr/include
+						dstDir = os.path.join("usr", "include")
+					else:
+						# Copy in a sub dir with module name to avoid conflicts
+						dstDir = os.path.join("usr", "include", module.name)
+				elif relPath != "." and relPath != "":
 					dstDir = os.path.join("usr", "include", module.name,
 							relPath.replace("..", "dotdot"))
 				else:
 					dstDir = os.path.join("usr", "include", module.name)
 				# Copy headers and add new directory
 				copyHeaders(ctx, includeDir, os.path.join(ctx.outDir, dstDir))
-				newIncludeDirs.append("$(LOCAL_PATH)/" + dstDir)
+				if dstDir != "usr/include":
+					newIncludeDirs.append("$(LOCAL_PATH)/" + dstDir)
 			elif includeDir.startswith(os.path.join(ctx.buildDir, module.name)):
 				# TODO: simplify destination by remove extra 'include' and 'module name'
 				relPath = os.path.relpath(includeDir, os.path.join(ctx.buildDir, module.name))
