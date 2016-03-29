@@ -1055,7 +1055,7 @@ endef
 all-files-under = $(strip \
 	$(patsubst ./%,%, \
 		$(shell cd $(LOCAL_PATH); \
-			find $1 -name "*$2" -and -not -name ".*") \
+			find $1  -type f -name "*$2" -and -not -name ".*") \
 	))
 
 # $1 : directory relative to LOCAL_PATH to search
