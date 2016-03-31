@@ -122,13 +122,13 @@ $(_module_build_dir)/$(LOCAL_MODULE).objects.flags: .FORCE
 	@mkdir -p $(dir $@)
 	@( \
 		$(foreach __v,$(_binary-global-object-flags), \
-			echo 'GLOBAL_$(__v) := $($(PRIVATE_MODE)_GLOBAL_$(__v))'; \
+			echo -e "GLOBAL_$(__v) := $(call __echo-escape,$($(PRIVATE_MODE)_GLOBAL_$(__v)))"; \
 		) \
 		$(foreach __v,$(_binary-warnings-object-flags), \
-			echo 'WARNINGS_$(__v) := $(WARNINGS_$(__v))'; \
+			echo -e "WARNINGS_$(__v) := $(call __echo-escape,$(WARNINGS_$(__v)))"; \
 		) \
 		$(foreach __v,$(_binary-private-object-flags), \
-			echo 'PRIVATE_$(__v) := $(PRIVATE_$(__v))'; \
+			echo -e "PRIVATE_$(__v) := $(call __echo-escape,$(PRIVATE_$(__v)))"; \
 		) \
 	) > $@.tmp
 	$(call update-file-if-needed,$@,$@.tmp)
