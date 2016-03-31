@@ -75,7 +75,7 @@ endif
 ifndef TARGET_QMAKE
   ifdef QTSDK_QMAKE
     # Compatibility
-    $(warning Please use TARGET_QMAKE insstead of QTSDK_QMAKE)
+    $(warning Please use TARGET_QMAKE instead of QTSDK_QMAKE)
     TARGET_QMAKE := $(QTSDK_QMAKE)
   else ifneq ("$(TARGET_QT_SDK)","")
     TARGET_QMAKE := $(TARGET_QT_SDK)/bin/qmake
