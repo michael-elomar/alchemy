@@ -495,8 +495,10 @@ $(foreach __pair,$(LOCAL_COPY_FILES), \
 )
 
 # Add an order-only dependency between sources and prerequisites
+# Also make sure bootstrap si done
 _module_all_copy_files_prerequisites := \
-	$(filter-out $(_module_all_copy_files_src) $(_module_all_copy_files_dst),$(all_prerequisites))
+	$(filter-out $(_module_all_copy_files_src) $(_module_all_copy_files_dst),$(all_prerequisites)) \
+	$(_module_bootstrapped_stamp_file)
 $(foreach __src,$(_module_all_copy_files_src), \
 	$(if $(filter $(__src),$(all_prerequisites)),$(empty), \
 		$(eval $(__src): | $(_module_all_copy_files_prerequisites)) \
