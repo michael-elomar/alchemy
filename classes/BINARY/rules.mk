@@ -220,7 +220,8 @@ $(all_objects): | $(all_prerequisites) $(vala_header_file)
 
 # Generated sources will depends on bootstrap and force
 # recompilation in this case (NOT an order-only in here)
-$(addprefix $(_module_build_dir)/,$(all_gen_sources)): $(_module_bootstrapped_stamp_file)
+# Remove prerequisites from this list, to avoid circulat dependencies
+$(filter-out $(all_prerequisites),$(addprefix $(_module_build_dir)/,$(all_gen_sources))): $(_module_bootstrapped_stamp_file)
 
 # Force recompilation if internal dependencies are changed
 $(all_objects): $(all_internal_depends)
