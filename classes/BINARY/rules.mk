@@ -9,6 +9,14 @@
 # Prepend some directories in include list
 LOCAL_C_INCLUDES := $(_module_build_dir) $(LOCAL_PATH) $(LOCAL_C_INCLUDES)
 
+# TODO : remove this when all libraries have removed their dependencies toward
+# config.h and autoconf.h
+# force unsigned char always (default on arm, but not on PC_Linux)
+ifneq ("$(strip $(LOCAL_PBUILD_HOOK))","")
+  LOCAL_C_INCLUDES += $(BUILD_SYSTEM)/pbuild-hook
+  LOCAL_CFLAGS += -funsigned-char
+endif
+
 # Sub-directory inside module build directory where object files will be put
 obj_subdir := obj
 
