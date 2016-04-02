@@ -31,6 +31,9 @@ class Context(object):
 		elif args[5].endswith(".tar.bz2"):
 			self.tarFile = tarfile.open(os.path.abspath(args[5]), "w:bz2")
 			self.outDir = "sdk"
+		elif args[5].endswith(".tar"):
+			self.tarFile = tarfile.open(os.path.abspath(args[5]), "w")
+			self.outDir = "sdk"
 		else:
 			self.tarFile = None
 			self.outDir = os.path.abspath(args[5])
