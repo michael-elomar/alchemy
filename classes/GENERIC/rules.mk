@@ -67,10 +67,11 @@ endif
 endif
 
 ###############################################################################
+# Unpack is force if patches are changed to make sure they are corrcetmy applied
 ###############################################################################
 
 # TODO: do we really need the license also in archive subdir ?
-$(_module_unpacked_stamp_file): $(_module_archive_file)
+$(_module_unpacked_stamp_file): $(_module_archive_file) $(addprefix $(LOCAL_PATH)/,$(_module_archive_patches))
 ifneq ("$(_module_archive_file)","")
 	$(call _generic-msg,Unpacking)
 	@mkdir -p $(PRIVATE_ARCHIVE_UNPACK_DIR)
@@ -82,7 +83,7 @@ endif
 	@touch $@
 
 # TODO: ARCHIVE_CMD_POST_UNPACK is always called here for compatibility
-$(_module_patched_stamp_file): $(_module_unpacked_stamp_file) $(addprefix $(LOCAL_PATH)/,$(_module_archive_patches))
+$(_module_patched_stamp_file): $(_module_unpacked_stamp_file)
 ifneq ("$(_module_archive_patches)","")
 	$(call _generic-msg,Patching)
 	$(_generic-apply-patches)
