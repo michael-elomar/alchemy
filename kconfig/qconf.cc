@@ -218,6 +218,7 @@ void ConfigItem::testUpdateMenu(bool v)
 	ConfigItem* i;
 
 	visible = v;
+	setForeground(0, visible ? QBrush(Qt::black) : QBrush(Qt::gray)); /* YMM */
 	if (!menu)
 		return;
 
@@ -237,6 +238,7 @@ void ConfigItem::testUpdateMenu(bool v)
  */
 void ConfigItem::init(void)
 {
+	setForeground(0, visible ? QBrush(Qt::black) : QBrush(Qt::gray)); /* YMM */
 	if (menu) {
 		ConfigList* list = listView();
 		nextItem = (ConfigItem*)menu->data;
@@ -412,7 +414,7 @@ void ConfigList::updateSelection(void)
 	if (!menu)
 		return;
 	type = menu->prompt ? menu->prompt->type : P_UNKNOWN;
-	if (mode == menuMode && type == P_MENU)
+	if (mode == menuMode /*&& type == P_MENU*/ /* YMM */)
 		emit menuSelected(menu);
 }
 
@@ -534,8 +536,8 @@ void ConfigList::setRootMenu(struct menu *menu)
 	if (rootEntry == menu)
 		return;
 	type = menu && menu->prompt ? menu->prompt->type : P_UNKNOWN;
-	if (type != P_MENU)
-		return;
+	/*if (type != P_MENU)
+		return;*/ /* YMM */
 	updateMenuList(this, 0);
 	rootEntry = menu;
 	updateListAll();
@@ -918,7 +920,8 @@ ConfigView::ConfigView(QWidget* parent, const char *name)
 	QVBoxLayout *verticalLayout = new QVBoxLayout(this);
 	verticalLayout->setContentsMargins(0, 0, 0, 0);
 
-	list = new ConfigList(this);
+	/* YMM */
+	list = new ConfigList(this, name);
 	verticalLayout->addWidget(list);
 	lineEdit = new ConfigLineEdit(this);
 	lineEdit->hide();
@@ -1051,6 +1054,39 @@ void ConfigInfoView::setInfo(struct menu *m)
 		clear();
 	else
 		menuInfo();
+}
+
+/* YMM */
+void ConfigInfoView::setSource(const QString& name)
+{
+	_menu = NULL;
+	sym = NULL;
+
+	switch (name[0].toLatin1()) {
+	case 'm':
+		struct menu *m;
+
+		if (sscanf(name.toLatin1().constData(), "m%p", &m) == 1 && _menu != m) {
+			_menu = m;
+			menuInfo();
+			emit menuSelected(_menu);
+		}
+		break;
+	case 's':
+		struct symbol *s;
+
+		if (sscanf(name.toLatin1().constData(), "s%p", &s) == 1 && sym != s) {
+			sym = s;
+			symbolInfo();
+		}
+		break;
+	}
+}
+
+/* YMM */
+void ConfigInfoView::setSource(const QUrl& name)
+{
+	setSource(name.toString());
 }
 
 void ConfigInfoView::symbolInfo(void)
@@ -1238,7 +1274,9 @@ QMenu* ConfigInfoView::createStandardContextMenu(const QPoint & pos)
 
 void ConfigInfoView::contextMenuEvent(QContextMenuEvent *e)
 {
-	Parent::contextMenuEvent(e);
+	/*YMM */
+	QMenu *menu = createStandardContextMenu(e->globalPos());
+	menu->exec(e->globalPos());
 }
 
 ConfigSearchWindow::ConfigSearchWindow(ConfigMainWindow* parent, const char *name)

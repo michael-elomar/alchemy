@@ -6,6 +6,16 @@
 #ifndef LKC_H
 #define LKC_H
 
+/*
+ * YMM
+ * GLIBC v2.14__GNUC__ has introduced a new symbol version of memcy, forcing
+ * binaries to use GLIBC >= 2.14. Restore previous version of symbol so
+ * it can run on older systems
+ */
+#if defined(__GNUC__) && defined(__amd64__) && defined(__linux__)
+__asm__(".symver memcpy,memcpy@GLIBC_2.2.5");
+#endif /* __GNUC__ */
+
 #include "expr.h"
 
 #ifndef KBUILD_NO_NLS

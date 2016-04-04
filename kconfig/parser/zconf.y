@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 #include "lkc.h"
 
@@ -496,13 +497,15 @@ word_opt: /* empty */			{ $$ = NULL; }
 void conf_parse(const char *name)
 {
 	struct symbol *sym;
+	char *title; /* YMM */
 	int i;
 
 	zconf_initscan(name);
 
 	sym_init();
 	_menu_init();
-	rootmenu.prompt = menu_add_prompt(P_MENU, "Linux Kernel Configuration", NULL);
+	title = getenv("KCONFIG_TITLE"); /* YMM */
+	rootmenu.prompt = menu_add_prompt(P_MENU, title ? title : "Linux Kernel Configuration", NULL); /* YMM */
 
 	if (getenv("ZCONF_DEBUG"))
 		zconfdebug = 1;
@@ -734,9 +737,10 @@ void zconfdump(FILE *out)
 	}
 }
 
-#include "zconf.lex.c"
+/* YMM: files are compiled by atom.mk */
+/*#include "zconf.lex.c"
 #include "util.c"
 #include "confdata.c"
 #include "expr.c"
 #include "symbol.c"
-#include "menu.c"
+#include "menu.c"*/
