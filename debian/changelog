@@ -1,3 +1,19 @@
+parrot-tools-alchemy (1.2.4) unstable; urgency=low
+  * Improve QMake build output.
+  * Export local source files to private vars for use in custom rules
+  * Add armv7a cpu (without neon)
+  * Add stm32 cpu for capri and fix arm compilation
+  * Added active semi pac cpu for foc
+  * Make custom macros preserve colons in argument list
+  * Do not add -ffunction-sections if -fembed-bitcode is in c flags.
+  * Add zlib as prebuilt on android with ndk and for darwin non-native
+  * Generate ld.so.cache for all full linux system.
+  * Update all-files-under to list only files
+  * Pass android apilevel to qmake
+  * Remove some checks in alchemake scripts.
+
+ -- Yves-Marie Morgan (Parrot) <yves-marie.morgan@parrot.com>  Mon, 04 Apr 2016 11:35:19 +0200
+
 parrot-tools-alchemy (1.2.3) unstable; urgency=low
   * Export connector proc header.
   * Add global and local ASFLAGS to allow custom assembler flags
