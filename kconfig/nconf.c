@@ -468,8 +468,8 @@ static int process_special_keys(int *key, struct menu *menu)
 	}
 
 	for (i = 0; i < function_keys_num; i++) {
-		if (*key == KEY_F(function_keys[i].key) ||
-		    *key == '0' + function_keys[i].key){
+		if (*key == (int)KEY_F(function_keys[i].key) ||
+		    *key == '0' + (int)function_keys[i].key){
 			function_keys[i].handler(key, menu);
 			return 1;
 		}
@@ -631,11 +631,11 @@ static const char *set_config_filename(const char *config_filename)
 
 	size = snprintf(menu_backtitle, sizeof(menu_backtitle),
 			"%s - %s", config_filename, rootmenu.prompt->text);
-	if (size >= sizeof(menu_backtitle))
+	if (size >= (int)sizeof(menu_backtitle))
 		menu_backtitle[sizeof(menu_backtitle)-1] = '\0';
 
 	size = snprintf(filename, sizeof(filename), "%s", config_filename);
-	if (size >= sizeof(filename))
+	if (size >= (int)sizeof(filename))
 		filename[sizeof(filename)-1] = '\0';
 	return menu_backtitle;
 }

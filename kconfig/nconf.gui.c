@@ -370,7 +370,7 @@ int dialog_inputbox(WINDOW *main_window,
 	int cursor_form_win;
 	char *result = *resultp;
 
-	if (strlen(init)+1 > *result_len) {
+	if ((int)strlen(init)+1 > *result_len) {
 		*result_len = strlen(init)+1;
 		*resultp = result = realloc(result, *result_len);
 	}
@@ -384,7 +384,7 @@ int dialog_inputbox(WINDOW *main_window,
 	}
 
 	if (title)
-		prompt_width = max(prompt_width, strlen(title));
+		prompt_width = max(prompt_width, (int)strlen(title));
 
 	/* place dialog in middle of screen */
 	y = (getmaxy(stdscr)-(prompt_lines+4))/2;

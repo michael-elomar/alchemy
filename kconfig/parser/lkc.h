@@ -41,7 +41,11 @@ extern "C" {
 
 #define LOCALEDIR "/usr/share/locale"
 
-#define _(text) gettext(text)
+#ifndef KBUILD_NO_NLS
+#  define _(text) gettext(text)
+#else
+#  define _(text) (text)
+#endif
 #define N_(text) (text)
 
 #ifndef CONFIG_
@@ -118,7 +122,7 @@ void menu_add_expr(enum prop_type type, struct expr *expr, struct expr *dep);
 void menu_add_symbol(enum prop_type type, struct symbol *sym, struct expr *dep);
 void menu_add_option(int token, char *arg);
 void menu_finalize(struct menu *parent);
-void menu_set_type(int type);
+void menu_set_type(enum symbol_type type);
 
 /* util.c */
 struct file *file_lookup(const char *name);

@@ -312,8 +312,6 @@ ConfigList::ConfigList(ConfigView* p, const char *name)
 	  showName(false), showRange(false), showData(false), mode(singleMode), optMode(normalOpt),
 	  rootEntry(0), headerPopup(0)
 {
-	int i;
-
 	setObjectName(name);
 	setSortingEnabled(false);
 	setRootIsDecorated(true);
@@ -1855,7 +1853,7 @@ static const char *progname;
 
 static void usage(void)
 {
-	printf(_("%s [-s] <config>\n").toLatin1().constData(), progname);
+	printf("%s %s\n", progname, _("%[-s] <config>").toLatin1().constData());
 	exit(0);
 }
 

@@ -978,8 +978,8 @@ static int sym_rel_comp(const void *sym1, const void *sym2)
 	 * exactly; if this is the case, we can't decide which comes first,
 	 * and we fallback to sorting alphabetically.
 	 */
-	exact1 = (s1->eo - s1->so) == strlen(s1->sym->name);
-	exact2 = (s2->eo - s2->so) == strlen(s2->sym->name);
+	exact1 = (s1->eo - s1->so) == (int)strlen(s1->sym->name);
+	exact2 = (s2->eo - s2->so) == (int)strlen(s2->sym->name);
 	if (exact1 && !exact2)
 		return -1;
 	if (!exact1 && exact2)
