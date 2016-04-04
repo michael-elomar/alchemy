@@ -23,6 +23,9 @@
 
 #include "dialog.h"
 
+/* Needed in signal handler in mconf.c */
+int saved_x, saved_y;
+
 struct dialog_info dlg;
 
 static void set_mono_theme(void)
@@ -251,15 +254,56 @@ void attr_clear(WINDOW * win, int height, int width, chtype attr)
 
 void dialog_clear(void)
 {
-	attr_clear(stdscr, LINES, COLS, dlg.screen.atr);
+	int lines, columns;
+
+	lines = getmaxy(stdscr);
+	columns = getmaxx(stdscr);
+
+	attr_clear(stdscr, lines, columns, dlg.screen.atr);
 	/* Display background title if it exists ... - SLH */
 	if (dlg.backtitle != NULL) {
-		int i;
+		int i, len = 0, skip = 0;
+		struct subtitle_list *pos;
 
 		wattrset(stdscr, dlg.screen.atr);
 		mvwaddstr(stdscr, 0, 1, (char *)dlg.backtitle);
+
+		for (pos = dlg.subtitles; pos != NULL; pos = pos->next) {
+			/* 3 is for the arrow and spaces */
+			len += strlen(pos->text) + 3;
+		}
+
 		wmove(stdscr, 1, 1);
-		for (i = 1; i < COLS - 1; i++)
+		if (len > columns - 2) {
+			const char *ellipsis = "[...] ";
+			waddstr(stdscr, ellipsis);
+			skip = len - (columns - 2 - strlen(ellipsis));
+		}
+
+		for (pos = dlg.subtitles; pos != NULL; pos = pos->next) {
+			if (skip == 0)
+				waddch(stdscr, ACS_RARROW);
+			else
+				skip--;
+
+			if (skip == 0)
+				waddch(stdscr, ' ');
+			else
+				skip--;
+
+			if (skip < strlen(pos->text)) {
+				waddstr(stdscr, pos->text + skip);
+				skip = 0;
+			} else
+				skip -= strlen(pos->text);
+
+			if (skip == 0)
+				waddch(stdscr, ' ');
+			else
+				skip--;
+		}
+
+		for (i = len + 1; i < columns - 1; i++)
 			waddch(stdscr, ACS_HLINE);
 	}
 	wnoutrefresh(stdscr);
@@ -273,8 +317,12 @@ int init_dialog(const char *backtitle)
 	int height, width;
 
 	initscr();		/* Init curses */
+
+	/* Get current cursor position for signal handler in mconf.c */
+	getyx(stdscr, saved_y, saved_x);
+
 	getmaxyx(stdscr, height, width);
-	if (height < 19 || width < 80) {
+	if (height < WINDOW_HEIGTH_MIN || width < WINDOW_WIDTH_MIN) {
 		endwin();
 		return -ERRDISPLAYTOOSMALL;
 	}
@@ -295,6 +343,11 @@ void set_dialog_backtitle(const char *backtitle)
 	dlg.backtitle = backtitle;
 }
 
+void set_dialog_subtitles(struct subtitle_list *subtitles)
+{
+	dlg.subtitles = subtitles;
+}
+
 /*
  * End using dialog functions.
  */
@@ -312,7 +365,7 @@ void end_dialog(int x, int y)
 void print_title(WINDOW *dialog, const char *title, int width)
 {
 	if (title) {
-		int tlen = MIN(width - 2, (int)strlen(title));
+		int tlen = MIN(width - 2, strlen(title));
 		wattrset(dialog, dlg.title.atr);
 		mvwaddch(dialog, 0, (width - tlen) / 2 - 1, ' ');
 		mvwaddnstr(dialog, 0, (width - tlen)/2, title, tlen);
@@ -323,26 +376,18 @@ void print_title(WINDOW *dialog, const char *title, int width)
 /*
  * Print a string of text in a window, automatically wrap around to the
  * next line if the string is too long to fit on one line. Newline
- * characters '\n' are replaced by spaces.  We start on a new line
+ * characters '\n' are propperly processed.  We start on a new line
  * if there is no room for at least 4 nonblanks following a double-space.
  */
 void print_autowrap(WINDOW * win, const char *prompt, int width, int y, int x)
 {
 	int newl, cur_x, cur_y;
-	int i, prompt_len, room, wlen;
-	char tempstr[MAX_LEN + 1], *word, *sp, *sp2;
+	int prompt_len, room, wlen;
+	char tempstr[MAX_LEN + 1], *word, *sp, *sp2, *newline_separator = 0;
 
 	strcpy(tempstr, prompt);
 
 	prompt_len = strlen(tempstr);
-
-	/*
-	 * Remove newlines
-	 */
-	for (i = 0; i < prompt_len; i++) {
-		if (tempstr[i] == '\n')
-			tempstr[i] = ' ';
-	}
 
 	if (prompt_len <= width - x * 2) {	/* If prompt is short */
 		wmove(win, y, (width - prompt_len) / 2);
@@ -353,7 +398,10 @@ void print_autowrap(WINDOW * win, const char *prompt, int width, int y, int x)
 		newl = 1;
 		word = tempstr;
 		while (word && *word) {
-			sp = strchr(word, ' ');
+			sp = strpbrk(word, "\n ");
+			if (sp && *sp == '\n')
+				newline_separator = sp;
+
 			if (sp)
 				*sp++ = 0;
 
@@ -364,8 +412,8 @@ void print_autowrap(WINDOW * win, const char *prompt, int width, int y, int x)
 			wlen = strlen(word);
 			if (wlen > room ||
 			    (newl && wlen < 4 && sp
-			     && wlen + 1 + (int)strlen(sp) > room
-			     && (!(sp2 = strchr(sp, ' '))
+			     && wlen + 1 + strlen(sp) > room
+			     && (!(sp2 = strpbrk(sp, "\n "))
 				 || wlen + 1 + (sp2 - sp) > room))) {
 				cur_y++;
 				cur_x = x;
@@ -373,7 +421,15 @@ void print_autowrap(WINDOW * win, const char *prompt, int width, int y, int x)
 			wmove(win, cur_y, cur_x);
 			waddstr(win, word);
 			getyx(win, cur_y, cur_x);
-			cur_x++;
+
+			/* Move to the next line if the word separator was a newline */
+			if (newline_separator) {
+				cur_y++;
+				cur_x = x;
+				newline_separator = 0;
+			} else
+				cur_x++;
+
 			if (sp && *sp == ' ') {
 				cur_x++;	/* double space */
 				while (*++sp == ' ') ;
@@ -477,7 +533,7 @@ int first_alpha(const char *string, const char *exempt)
 {
 	int i, in_paren = 0, c;
 
-	for (i = 0; i < (int)strlen(string); i++) {
+	for (i = 0; i < strlen(string); i++) {
 		c = tolower(string[i]);
 
 		if (strchr("<[(", c))
@@ -567,7 +623,7 @@ void item_make(const char *fmt, ...)
 void item_add_str(const char *fmt, ...)
 {
 	va_list ap;
-        size_t avail;
+	size_t avail;
 
 	avail = sizeof(item_cur->node.str) - strlen(item_cur->node.str);
 
