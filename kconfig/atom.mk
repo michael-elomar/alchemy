@@ -103,7 +103,7 @@ include $(BUILD_EXECUTABLE)
 ###############################################################################
 # qconf
 ###############################################################################
-QCONF_PKG := QtCore QtGui Qt3Support
+QCONF_PKG := QtCore QtGui
 
 ifeq ("$(shell pkg-config --exists $(QCONF_PKG); echo $$?)","0")
 
