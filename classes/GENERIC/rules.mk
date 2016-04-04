@@ -67,7 +67,7 @@ endif
 endif
 
 ###############################################################################
-# Unpack is force if patches are changed to make sure they are corrcetmy applied
+# Force unpack if patches are changed to make sure they are correctly applied
 ###############################################################################
 
 # TODO: do we really need the license also in archive subdir ?
