@@ -38,47 +38,53 @@ class Context(object):
 			self.tarFile = None
 			self.outDir = os.path.abspath(args[5])
 
-		self.atom = StringIO()
-		self.setup = StringIO()
-		self.atom.write("# GENERATED FILE, DO NOT EDIT\n\n")
-		self.atom.write("LOCAL_PATH := $(call my-dir)\n\n")
-		self.setup.write("# GENERATED FILE, DO NOT EDIT\n\n")
-		self.setup.write("LOCAL_PATH := $(call my-dir)\n\n")
-
 		self.sdkDirs = []
-		self.moduledb = None
 		self.headerLibs = []
 		self.files = {}
 
-	def finish(self):
-		if self.tarFile is not None:
-			# Write the atom.mk
-			info = tarfile.TarInfo(os.path.join(self.outDir, "atom.mk"))
-			info.size = self.atom.tell()
-			info.mtime = time.time()
-			info.mode = 0o644
-			info.type = tarfile.REGTYPE
-			self.atom.seek(0)
-			self.tarFile.addfile(info, self.atom)
+		# Load modules from xml
+		logging.info("Loading xml '%s'", self.dumpXmlPath)
+		try:
+			self.moduledb = moduledb.loadXml(self.dumpXmlPath)
+		except xml.parsers.expat.ExpatError as ex:
+			sys.stderr.write("Error while loading '%s':\n" % self.dumpXmlPath)
+			sys.stderr.write("  %s\n" % ex)
+			sys.exit(1)
 
-			# Write the setup.mk
-			info = tarfile.TarInfo(os.path.join(self.outDir, "setup.mk"))
-			info.size = self.setup.tell()
-			info.mtime = time.time()
-			info.mode = 0o644
-			info.type = tarfile.REGTYPE
-			self.setup.seek(0)
-			self.tarFile.addfile(info, self.setup)
+		self.atom = StringIO()
+		self.atom.write("# GENERATED FILE, DO NOT EDIT\n\n")
+		self.atom.write("LOCAL_PATH := $(call my-dir)\n\n")
 
-			self.tarFile.close()
+		self.setup = StringIO()
+		self.setup.write("# GENERATED FILE, DO NOT EDIT\n\n")
+		self.setup.write("LOCAL_PATH := $(call my-dir)\n\n")
+
+		if "OS_FLAVOUR" in self.moduledb.targetVars and \
+				self.moduledb.targetVars["OS_FLAVOUR"] == "android":
+			self.android = StringIO()
+			self.android.write("# GENERATED FILE, DO NOT EDIT\n\n")
+			self.android.write("LOCAL_PATH := $(call my-dir)\n\n")
 		else:
-			# Write the atom.mk
-			with open(os.path.join(self.outDir, "atom.mk"), "w") as atomFile:
-				atomFile.write(self.atom.getvalue())
+			self.android = None
 
-			# Write the setup.mk
-			with open(os.path.join(self.outDir, "setup.mk"), "w") as setupFile:
-				setupFile.write(self.setup.getvalue())
+	def finishFile(self, fileData, fileName):
+		if self.tarFile is not None:
+			info = tarfile.TarInfo(os.path.join(self.outDir, fileName))
+			info.size = fileData.tell()
+			info.mtime = time.time()
+			info.mode = 0o644
+			info.type = tarfile.REGTYPE
+			fileData.seek(0)
+			self.tarFile.addfile(info, fileData)
+		else:
+			with open(os.path.join(self.outDir, fileName), "w") as fileObj:
+				fileObj.write(fileData.getvalue())
+
+	def finish(self):
+		self.finishFile(self.atom, "atom.mk")
+		self.finishFile(self.setup, "setup.mk")
+		if self.android is not None:
+			self.finishFile(self.android, "Android.mk")
 
 	def addFile(self, srcFilePath, dstFilePath):
 		if dstFilePath in self.files:
@@ -235,6 +241,60 @@ def checkSymlinks(srcDir):
 
 #===============================================================================
 #===============================================================================
+def getExportedIncludes(ctx, module):
+	modulePath = module.fields["PATH"]
+	includeDirs = module.fields["EXPORT_C_INCLUDES"].split()
+	exportedIncludeDirs = []
+	for includeDir in includeDirs:
+		if includeDir.startswith(modulePath):
+			dstDir = None
+			relPath = os.path.relpath(includeDir, modulePath)
+			entries = os.listdir(includeDir)
+			suffixesInc = ["include", "includes", "Include", "Includes"]
+			suffixesSrc = ["src", "source", "sources", "Source", "Sources"]
+
+			# Try to simplify destination if only one directory is exported and it
+			# ends with a standard name
+			if len(includeDirs) == 1 and os.path.split(relPath)[1] in suffixesInc:
+				if len(entries) == 1 and entries[0] not in suffixesSrc:
+					# Directly copy in usr/include
+					dstDir = os.path.join("usr", "include")
+				else:
+					# Copy in a sub dir with module name to avoid conflicts
+					dstDir = os.path.join("usr", "include", module.name)
+			elif relPath != "." and relPath != "":
+				dstDir = os.path.join("usr", "include", module.name,
+						relPath.replace("..", "dotdot"))
+			else:
+				dstDir = os.path.join("usr", "include", module.name)
+			exportedIncludeDirs.append([includeDir, dstDir])
+		elif includeDir.startswith(os.path.join(ctx.buildDir, module.name)):
+			# TODO: simplify destination by remove extra 'include' and 'module name'
+			relPath = os.path.relpath(includeDir, os.path.join(ctx.buildDir, module.name))
+			if relPath != ".":
+				dstDir = os.path.join("usr", "include", module.name,
+						relPath.replace("..", "dotdot"))
+			else:
+				dstDir = os.path.join("usr", "include", module.name)
+			exportedIncludeDirs.append([includeDir, dstDir])
+		elif includeDir.startswith(ctx.stagingDir + "/"):
+			# No copy
+			relPath = os.path.relpath(includeDir, ctx.stagingDir)
+			exportedIncludeDirs.append([None, relPath])
+		elif includeDir.startswith(ctx.hostStagingDir + "/"):
+			# No copy
+			relPath = os.path.relpath(includeDir, ctx.hostStagingDir)
+			exportedIncludeDirs.append([None, os.path.join("host", relPath)])
+		elif includeDir.startswith("/opt/"):
+			# Assume it is a required host package installed externally
+			exportedIncludeDirs.append([None, includeDir])
+		else:
+			logging.warning("Ignoring include dir: '%s'", includeDir)
+
+	return exportedIncludeDirs
+
+#===============================================================================
+#===============================================================================
 def processModule(ctx, module, headersOnly=False):
 	# Skip module not built
 	if not module.build and not headersOnly:
@@ -302,65 +362,15 @@ def processModule(ctx, module, headersOnly=False):
 
 	# Include directories
 	if "EXPORT_C_INCLUDES" in module.fields:
-		includeDirs = module.fields["EXPORT_C_INCLUDES"].split()
-		# First, convert path
-		newIncludeDirs = []
-		for includeDir in includeDirs:
-			if includeDir.startswith(modulePath):
-				dstDir = None
-				relPath = os.path.relpath(includeDir, modulePath)
-				entries = os.listdir(includeDir)
-				suffixesInc = ["include", "includes", "Include", "Includes"]
-				suffixesSrc = ["src", "source", "sources", "Source", "Sources"]
-
-				# Try to simplify destination if only one directory is exported and it
-				# ends with a standard name
-				if len(includeDirs) == 1 and os.path.split(relPath)[1] in suffixesInc:
-					if len(entries) == 1 and entries[0] not in suffixesSrc:
-						# Directly copy in usr/include
-						dstDir = os.path.join("usr", "include")
-					else:
-						# Copy in a sub dir with module name to avoid conflicts
-						dstDir = os.path.join("usr", "include", module.name)
-				elif relPath != "." and relPath != "":
-					dstDir = os.path.join("usr", "include", module.name,
-							relPath.replace("..", "dotdot"))
-				else:
-					dstDir = os.path.join("usr", "include", module.name)
-				# Copy headers and add new directory
-				copyHeaders(ctx, includeDir, os.path.join(ctx.outDir, dstDir))
-				if dstDir != "usr/include":
-					newIncludeDirs.append("$(LOCAL_PATH)/" + dstDir)
-			elif includeDir.startswith(os.path.join(ctx.buildDir, module.name)):
-				# TODO: simplify destination by remove extra 'include' and 'module name'
-				relPath = os.path.relpath(includeDir, os.path.join(ctx.buildDir, module.name))
-				if relPath != ".":
-					dstDir = os.path.join("usr", "include", module.name,
-							relPath.replace("..", "dotdot"))
-				else:
-					dstDir = os.path.join("usr", "include", module.name)
-				# Copy headers and add new directory
-				copyHeaders(ctx, includeDir, os.path.join(ctx.outDir, dstDir))
-				newIncludeDirs.append("$(LOCAL_PATH)/" + dstDir)
-			elif includeDir.startswith(ctx.stagingDir + "/"):
-				relPath = os.path.relpath(includeDir, ctx.stagingDir)
-				# Only add existing directory that is not in a standard place
-				if relPath != "usr/include" and os.path.exists(includeDir):
-					newIncludeDirs.append("$(LOCAL_PATH)/" + relPath)
-			elif includeDir.startswith(ctx.hostStagingDir + "/"):
-				relPath = os.path.relpath(includeDir, ctx.hostStagingDir)
-				# Only add existing directory that is not in a standard place
-				if relPath != "usr/include" and os.path.exists(includeDir):
-					newIncludeDirs.append("$(LOCAL_PATH)/host/" + relPath)
-			elif includeDir.startswith("/opt/"):
-				# Assume it is a required host package installed externally
-				newIncludeDirs.append(includeDir)
-			else:
-				logging.warning("Ignoring include dir: '%s'", includeDir)
-		# Write path in a readable way
 		ctx.atom.write("LOCAL_EXPORT_C_INCLUDES :=")
-		for includeDir in newIncludeDirs:
-			ctx.atom.write(" \\\n\t%s" % includeDir)
+		exportedIncludeDirs = getExportedIncludes(ctx, module)
+		for exportedInclude in exportedIncludeDirs:
+			if exportedInclude[0] is not None:
+				copyHeaders(ctx, exportedInclude[0], os.path.join(ctx.outDir, exportedInclude[1]))
+			if os.path.isabs(exportedInclude[1]):
+				ctx.atom.write(" \\\n\t%s" % exportedInclude[1])
+			elif exportedInclude[1] != "usr/include":
+				ctx.atom.write(" \\\n\t$(LOCAL_PATH)/%s" % exportedInclude[1])
 		ctx.atom.write("\n")
 
 	# Config file
@@ -393,6 +403,88 @@ def processModule(ctx, module, headersOnly=False):
 
 	# End of module
 	ctx.atom.write("\n")
+
+#===============================================================================
+#===============================================================================
+def processModuleAndroidInternal(ctx, module, name, libPath, kind):
+	ctx.android.write("include $(CLEAR_VARS)\n")
+	ctx.android.write("LOCAL_MODULE := %s\n" % name)
+	ctx.android.write("LOCAL_SRC_FILES := $(LOCAL_PATH)/%s\n" % libPath)
+
+	# Exported flags
+	fields = {
+		"EXPORT_CFLAGS": "EXPORT_CFLAGS",
+		"EXPORT_CXXFLAGS": "EXPORT_CPPFLAGS",
+	}
+	for field in fields:
+		if field[0] in module.fields and module.fields[field[0]]:
+			ctx.android.write("LOCAL_%s := %s\n" % (field[1], module.fields[field[0]]))
+
+	# Exported includes, always put 'usr/include'
+	ctx.android.write("LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/usr/include")
+	if "EXPORT_C_INCLUDES" in module.fields:
+		exportedIncludeDirs = getExportedIncludes(ctx, module)
+		for exportedInclude in exportedIncludeDirs:
+			if exportedInclude[0] is not None:
+				copyHeaders(ctx, exportedInclude[0], os.path.join(ctx.outDir, exportedInclude[1]))
+			if os.path.isabs(exportedInclude[1]):
+				ctx.android.write(" \\\n\t%s" % exportedInclude[1])
+			elif exportedInclude[1] != "usr/include":
+				ctx.android.write(" \\\n\t$(LOCAL_PATH)/%s" % exportedInclude[1])
+	ctx.android.write("\n")
+
+	# End of module
+	ctx.android.write("include $(PREBUILT_%s_LIBRARY)\n" % kind)
+	ctx.android.write("\n")
+
+#===============================================================================
+#===============================================================================
+def processModuleAndroid(ctx, module):
+	# Ignore host modules
+	if module.name.startswith("host.") or not module.build:
+		return
+	moduleClass = module.fields["MODULE_CLASS"]
+
+	if moduleClass == "SHARED_LIBRARY":
+		# SHARED
+		libPath = module.fields["DESTDIR"] + "/" + module.fields["MODULE_FILENAME"]
+		processModuleAndroidInternal(ctx, module, module.name, libPath, "SHARED")
+	elif moduleClass == "STATIC_LIBRARY":
+		# STATIC
+		libPath = module.fields["DESTDIR"] + "/" + module.fields["MODULE_FILENAME"]
+		processModuleAndroidInternal(ctx, module, module.name, libPath, "STATIC")
+	elif moduleClass == "LIBRARY":
+		# Both SHARED and STATIC
+		libPath = module.fields["DESTDIR"] + "/" + module.fields["MODULE_FILENAME"]
+		processModuleAndroidInternal(ctx, module, module.name, libPath, "SHARED")
+		if libPath.endswith(".so"):
+			libPath = libPath[:-3] + ".a"
+			processModuleAndroidInternal(ctx, module, module.name + "-static", libPath, "STATIC")
+	elif "EXPORT_LDLIBS" in module.fields:
+		# Only register single libs
+		libNames = module.fields["EXPORT_LDLIBS"].split()
+		if len(libNames) == 1 and libNames[0].startswith("-l"):
+			libName = "lib" + libNames[0][2:]
+			libPathShared = None
+			libPathStatic = None
+			# Search shared/static lib path
+			for libDir in "lib", "usr/lib":
+				libPath = os.path.join(libDir, libName)
+				if os.path.exists(os.path.join(ctx.stagingDir, libPath) + ".so"):
+					libPathShared = libPath + ".so"
+				if os.path.exists(os.path.join(ctx.stagingDir, libPath) + ".a"):
+					libPathStatic = libPath + ".a"
+			# Register
+			if libPathShared is not None and libPathStatic is not None:
+				# Both SHARED and STATIC
+				processModuleAndroidInternal(ctx, module, module.name, libPathShared, "SHARED")
+				processModuleAndroidInternal(ctx, module, module.name + "-static", libPathStatic, "STATIC")
+			elif libPathShared is not None:
+				# SHARED
+				processModuleAndroidInternal(ctx, module, module.name, libPathShared, "SHARED")
+			elif libPathStatic is not None:
+				# STATIC
+				processModuleAndroidInternal(ctx, module, module.name, libPathStatic, "STATIC")
 
 #===============================================================================
 #===============================================================================
@@ -429,15 +521,6 @@ def main():
 
 	# Extract arguments
 	ctx = Context(args)
-
-	# Load modules from xml
-	logging.info("Loading xml '%s'", ctx.dumpXmlPath)
-	try:
-		ctx.moduledb = moduledb.loadXml(ctx.dumpXmlPath)
-	except xml.parsers.expat.ExpatError as ex:
-		sys.stderr.write("Error while loading '%s':\n" % ctx.dumpXmlPath)
-		sys.stderr.write("  %s\n" % ex)
-		sys.exit(1)
 
 	# List of previous sdk to merge with the new one
 	ctx.sdkDirs = ctx.moduledb.targetVars.get("SDK_DIRS", "").split()
@@ -478,6 +561,8 @@ def main():
 	# Process modules
 	for module in ctx.moduledb:
 		processModule(ctx, module)
+		if ctx.android is not None:
+			processModuleAndroid(ctx, module)
 
 	# Process modules not built but whose headers are required
 	for lib in ctx.headerLibs:
