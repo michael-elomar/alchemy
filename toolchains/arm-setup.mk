@@ -154,6 +154,14 @@ ifeq ("$(TARGET_CPU)", "m0")
   TARGET_FLOAT_ABI := soft
 endif
 
+ifeq ("$(TARGET_CPU)","a9s")
+  TARGET_GLOBAL_CFLAGS += $(cflags_armv7a_neon)
+  TARGET_GLOBAL_LDFLAGS += -Wl,--fix-cortex-a8
+  TARGET_CPU_ARMV7A_NEON := 1
+  TARGET_CPU_HAS_NEON := 1
+  TARGET_FLOAT_ABI ?= softfp
+endif
+
 # set float abi
 ifdef TARGET_FLOAT_ABI
   TARGET_GLOBAL_CFLAGS += -mfloat-abi=$(TARGET_FLOAT_ABI)
