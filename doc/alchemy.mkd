@@ -586,6 +586,7 @@ For each registered modules, following `make` targets will be available :
 * `make <module>-path` : will display the path of the module.
 * `make <module>-codecheck` : will check coding style of C source files.
 * `make <module>-cppcheck` : will check coding style of C++ source files.
+* `make <module>-valacheck` : will check coding style of Vala source files.
 * `make <module>-cloc` : will count the number of lines of code.
 
 ### Module registration
@@ -1456,6 +1457,34 @@ Ex:
 <pre>
 	static int my_function()
 	{  // NOLINT(whitespace/braces)
+</pre>
+
+## Valacheck false positives or intentional deviations
+
+You can ignore specific valacheck warnings in a Vala source code file by inserting
+a tag with the following syntax in a comment line to the line with the error:
+
+<pre>
+	NOLINT
+</pre>
+
+If you want to ignore multiple line you can use the following syntax:
+
+<pre>
+	NOLINT_START
+	...
+	NOLINT_STOP
+</pre>
+
+Ex:
+
+<pre>
+	static int my_function()
+	{  // NOLINT
+		int v1;
+	// NOLINT_START
+	int v2;
+	// NOLINT_STOP
 </pre>
 
 ## How to use it

@@ -649,6 +649,7 @@ unpacked sources and applied patches will be kept in the build directory.</li>
 <li><code>make &lt;module&gt;-path</code> : will display the path of the module.</li>
 <li><code>make &lt;module&gt;-codecheck</code> : will check coding style of C source files.</li>
 <li><code>make &lt;module&gt;-cppcheck</code> : will check coding style of C++ source files.</li>
+<li><code>make &lt;module&gt;-valacheck</code> : will check coding style of Vala source files.</li>
 <li><code>make &lt;module&gt;-cloc</code> : will count the number of lines of code.</li>
 </ul>
 
@@ -1575,6 +1576,34 @@ suppresses errors of all categories on that line.</p>
 <pre>
     static int my_function()
     {  // NOLINT(whitespace/braces)
+</pre>
+
+<h2>Valacheck false positives or intentional deviations</h2>
+
+<p>You can ignore specific valacheck warnings in a Vala source code file by inserting
+a tag with the following syntax in a comment line to the line with the error:</p>
+
+<pre>
+    NOLINT
+</pre>
+
+<p>If you want to ignore multiple line you can use the following syntax:</p>
+
+<pre>
+    NOLINT_START
+    ...
+    NOLINT_STOP
+</pre>
+
+<p>Ex:</p>
+
+<pre>
+    static int my_function()
+    {  // NOLINT
+        int v1;
+    // NOLINT_START
+    int v2;
+    // NOLINT_STOP
 </pre>
 
 <h2>How to use it</h2>
