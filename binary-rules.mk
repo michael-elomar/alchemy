@@ -409,8 +409,13 @@ endif
 # Give filtered flags directly to compiler (with -Xcompiler prefix)
 __nvcflags-all := $(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CFLAGS_$(TARGET_ARCH)) $(LOCAL_CFLAGS) \
 	$(TARGET_GLOBAL_CXXFLAGS) $(TARGET_GLOBAL_CXXFLAGS_$(TARGET_ARCH)) $(LOCAL_CXXFLAGS)
-__nvcflags-1 := $(subst -std,--std,$(__nvcflags-all))
-__nvcflags-1 := $(filter-out -pthread -pipe -f% -m% -O% -W%, $(__nvcflags-1))
+# collect -std* and --std* and keep only the latest like GCC
+# local flags can override global ones
+# also make sure it is named --std= not -std=
+__nvcflags-std := $(filter -std=% --std=%, $(__nvcflags-all))
+__nvcflags-all := $(filter-out $(__nvcflags-std),$(__nvcflags-all)) \
+		  $(subst -std,--std,$(lastword $(__nvcflags-std)))
+__nvcflags-1 := $(filter-out -pthread -pipe -f% -m% -O% -W%, $(__nvcflags-all))
 __nvcflags-2 := $(addprefix -Xcompiler ,$(filter -pthread -pipe -f% -m% -O%, $(__nvcflags-all)))
 $(LOCAL_TARGETS): PRIVATE_NVCFLAGS := $(__nvcflags-1) $(__nvcflags-2)
 
