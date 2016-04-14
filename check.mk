@@ -48,11 +48,11 @@ else
 endif
 
 ifneq ("$(BISON_BIN)","")
-  BISON_VERSION := $(shell $(BISON_BIN) --version | head -1 | perl -pe "s/.*?([0-9]+\.[0-9]+(\.[0-9]+)?(-[0-9]+)?)$$/\1/")
+  BISON_VERSION := $(shell $(BISON_BIN) --version | head -1 | sed -e 's/.* //g;s/-.*//g')
   ifeq ("$(call check-version,$(BISON_VERSION),2.5)","")
     BISON_BIN := $(wildcard /usr/bin/bison)
     ifneq ("$(BISON_BIN)","")
-      BISON_VERSION := $(shell $(BISON_BIN) --version | head -1 | perl -pe "s/.*?([0-9]+\.[0-9]+(\.[0-9]+)?(-[0-9]+)?)$$/\1/")
+      BISON_VERSION := $(shell $(BISON_BIN) --version | head -1 | sed -e 's/.* //g;s/-.*//g')
     endif
   endif
 endif
