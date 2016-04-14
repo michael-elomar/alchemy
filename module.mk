@@ -932,7 +932,6 @@ $(LOCAL_MODULE)-codecheck:
 	@echo "$(PRIVATE_MODULE): Checking files...";
 	@$(BUILD_SYSTEM)/scripts/checkpatch.pl \
 		--no-tree --no-summary --terse --show-types -f \
-		--ignore SPLIT_STRING \
 		$(PRIVATE_CODECHECK_ARGS) $(PRIVATE_CODECHECK_FILES) \
 	|| true;
 
@@ -971,6 +970,9 @@ $(LOCAL_MODULE)-codecheck: PRIVATE_MODULE := $(LOCAL_MODULE)
 $(LOCAL_MODULE)-codecheck: PRIVATE_BUILD_DIR := $(build_dir)
 $(LOCAL_MODULE)-codecheck: PRIVATE_CODECHECK_FILES := $(codecheck_files)
 $(LOCAL_MODULE)-codecheck: PRIVATE_CODECHECK_ARGS := $(LOCAL_CODECHECK_ARGS)
+ifneq ("$(LOCAL_MODULE)","linux")
+$(LOCAL_MODULE)-codecheck: PRIVATE_CODECHECK_ARGS += --ignore SPLIT_STRING,PREFER_ALIGNED
+endif
 
 $(LOCAL_MODULE)-cppcheck: PRIVATE_MODULE := $(LOCAL_MODULE)
 $(LOCAL_MODULE)-cppcheck: PRIVATE_BUILD_DIR := $(build_dir)
