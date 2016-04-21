@@ -57,9 +57,13 @@ ifeq ("$(wildcard $(TARGET_ANDROID_NDK))","")
   $(error No Android NDK found, use Alchemy-raptor package or set your Android NDK path in the TARGET_ANDROID_NDK variable)
 endif
 
+TARGET_ANDROID_TOOLCHAIN_VERSION ?= \
+	$(shell . $(TARGET_ANDROID_NDK)/build/tools/dev-defaults.sh && \
+		echo $$(get_default_gcc_version_for_arch $(ANDROID_ARCH)))
+
 TARGET_ANDROID_TOOLCHAIN ?= \
 	$(shell . $(TARGET_ANDROID_NDK)/build/tools/dev-defaults.sh && \
-		echo $$(get_default_toolchain_name_for_arch $(ANDROID_ARCH)))
+		echo $$(get_toolchain_name_for_arch $(ANDROID_ARCH) $(TARGET_ANDROID_TOOLCHAIN_VERSION)))
 ifeq ("$(TARGET_ANDROID_TOOLCHAIN)","")
   $(error Failed to detect Android toolchain, set the name of the toolchain in the TARGET_ANDROID_TOOLCHAIN variable)
 endif
