@@ -118,7 +118,18 @@ endif
 TARGET_CROSS := $(ANDROID_TOOLCHAIN_PATH)/bin/$(ANDROID_TOOLCHAIN_PREFIX)-
 
 ifeq ("$(TARGET_ARCH)","arm")
-  TARGET_DEFAULT_LIB_DESTDIR ?= libs/armeabi-v7a
+  # Ensure Android/Arm ABI compatibility. Supported ABIs are:
+  # 	- armeabi when TARGET_CPU=''
+  # 	- armeabi-v7a when TARGET_CPU='armv7a'
+  # 	- armeabi-v7a with NEON when TARGET_CPU='armv7a-neon'
+  # as indicated here: https://developer.android.com/ndk/guides/standalone_toolchain.html#abi
+  ifeq ("$(TARGET_CPU))", "")
+    TARGET_DEFAULT_LIB_DESTDIR ?= libs/armeabi
+  else ifeq ($(filter-out armv7a armv7a-neon,$(TARGET_CPU)),)
+    TARGET_DEFAULT_LIB_DESTDIR ?= libs/armeabi-v7a
+  else
+    $(error "Target CPU '${TARGET_CPU}' does not support Android ABI Compatibility for ARM.")
+  endif
 else ifeq ("$(TARGET_ARCH)","aarch64")
   TARGET_DEFAULT_LIB_DESTDIR ?= libs/arm64-v8a
 else ifeq ("$(TARGET_ARCH)","x86")
