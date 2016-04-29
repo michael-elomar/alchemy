@@ -136,6 +136,10 @@ endif
 # firmware: filtered according to internal heuristics suitable for embedded execution
 TARGET_FINAL_MODE ?= firmware
 
+ifeq ("$(TARGET_OS_FLAVOUR:-chroot=)","native")
+  TARGET_LINUX_RELEASE ?= $(shell uname -r)
+endif
+
 ###############################################################################
 ## Toolchain setup.
 ###############################################################################
