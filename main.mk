@@ -188,6 +188,7 @@ $(foreach __var,$(vars-TARGET_SETUP), \
 )
 
 # Setup configuration
+USER_MAKEFILE_NAME := atom.mk
 include $(BUILD_SYSTEM)/setup.mk
 
 ###############################################################################
@@ -306,7 +307,6 @@ AUTOCONF_MERGE_FILE := $(TARGET_OUT_BUILD)/autoconf-merge.h
 ###############################################################################
 
 # Makefile with the list of all makefiles available and include them
-USER_MAKEFILE_NAME := atom.mk
 USER_MAKEFILES_CACHE := $(TARGET_OUT_BUILD)/makefiles.mk
 USER_MAKEFILES :=
 
