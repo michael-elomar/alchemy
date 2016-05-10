@@ -48,7 +48,7 @@ $(LOCAL_TARGETS): PRIVATE_KBUILD := $(LINUX_MODULE_KBUILD)
 # LINUX_XXX variables can NOT be used here, they may not be defined yet
 # So the ARCH argument is given later when invoking make
 ifeq ("$(TARGET_OS_FLAVOUR:-chroot=)","native")
-$(LOCAL_TARGETS): PRIVATE_LINUX_BUILD_DIR := /lib/modules/$(shell uname -r)/build
+$(LOCAL_TARGETS): PRIVATE_LINUX_BUILD_DIR := /lib/modules/$(TARGET_LINUX_RELEASE)/build
 $(LOCAL_TARGETS): PRIVATE_KBUILD_FLAGS := \
 	INSTALL_MOD_PATH=$(TARGET_OUT_STAGING)
 else

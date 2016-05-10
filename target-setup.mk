@@ -245,6 +245,12 @@ TARGET_LINUX_MAKE_BUILD_ARGS ?=
 # Linux source directory (required by some kernel drivers)
 TARGET_LINUX_DIR ?=
 
+ifeq ("$(TARGET_OS_FLAVOUR:-chroot=)","native")
+  ifndef TARGET_LINUX_RELEASE
+    TARGET_LINUX_RELEASE := $(shell uname -r)
+  endif
+endif
+
 # Target image format (tar, cpio, ext2, ext3, ext4, plf)
 # It can optionaly be suffixed with .gz or .bz2 to compress the image
 TARGET_IMAGE_FORMAT ?= tar.gz

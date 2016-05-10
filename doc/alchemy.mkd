@@ -403,6 +403,9 @@ Mainly used by the android wrapper.
   * `firmware`: filtered according to internal heuristics suitable for embedded
     execution.
   </br>Default is `firmware`.
+* `TARGET_LINUX_RELEASE` : linux kernel release to build kernel modules against it.
+  This variable can be used only if building for `native` target.
+  </br>Default is `$(shell uname -r)`.
 
 * `USE_CLANG` : Use clang instead of gcc for compilation.
   </br>Default is `0`.
