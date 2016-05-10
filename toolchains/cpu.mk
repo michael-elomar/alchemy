@@ -97,6 +97,18 @@ ifeq ("$(TARGET_CPU)","tegrax1")
 endif
 
 ###############################################################################
+# Ambarella cpus
+###############################################################################
+
+ifeq ("$(TARGET_CPU)","a9s")
+  TARGET_GLOBAL_CFLAGS += $(cflags_armv7a_neon)
+  TARGET_GLOBAL_LDFLAGS += -Wl,--fix-cortex-a8
+  TARGET_CPU_ARMV7A_NEON := 1
+  TARGET_CPU_HAS_NEON := 1
+  TARGET_FLOAT_ABI ?= softfp
+endif
+
+###############################################################################
 # Generic cpus.
 ###############################################################################
 
