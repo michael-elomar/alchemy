@@ -170,6 +170,7 @@ transform-S-to-o = $(call _binary-cmd-s-to-o-internal,$(PRIVATE_MODE),$@,$<)
 ###############################################################################
 ## Command to compile a cu file (cuda).
 ## Note: Only available for target
+## NVCC dependencies generation have to be done in separate phase than compilation.
 ###############################################################################
 
 # $1 : mode (HOST / TARGET)
@@ -181,6 +182,15 @@ $(call _binary-print-banner1,Cuda,$3)
 $(call check-pwd-is-top-dir)
 $(if $(TARGET_NVCC), \
 $(Q) $(TARGET_NVCC) \
+	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
+	$(call normalize-system-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
+	$(TARGET_GLOBAL_NVCFLAGS) \
+	$(PRIVATE_NVCFLAGS) \
+	-ccbin $(TARGET_CC) \
+	-M -MT $(call path-from-top,$2) \
+	-o $(call path-from-top,$(2:.o=.d)) \
+	$(call path-from-top,$3); \
+$(TARGET_NVCC) \
 	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
 	$(call normalize-system-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(TARGET_GLOBAL_NVCFLAGS) \
