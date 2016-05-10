@@ -28,6 +28,7 @@ $(call register-prebuilt-pkg-config-module,sdl,sdl)
 $(call register-prebuilt-pkg-config-module,sdl-image,SDL_image)
 $(call register-prebuilt-pkg-config-module,freetype,freetype2)
 $(call register-prebuilt-pkg-config-module,libcrypto,libcrypto)
+$(call register-prebuilt-pkg-config-module,egl,egl)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := libjpeg-turbo
