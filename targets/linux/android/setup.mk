@@ -69,9 +69,22 @@ USE_AUTO_LIB_PREFIX := 1
 # Disable map file generation, it causes linker to crash
 USE_LINK_MAP_FILE := 0
 
+# Ensure Android/Arm ABI compatibility. Supported ABIs are
+# 	- armeabi when TARGET_CPU=''
+# 	- armeabi-v7a when TARGET_CPU='armv7a'
+# 	- armeabi-v7a with NEON when TARGET_CPU='armv7a-neon'
+# as indicated here: https://developer.android.com/ndk/guides/standalone_toolchain.html#abi
 ifndef TARGET_DEFAULT_LIB_DESTDIR
   ifeq ("$(TARGET_ARCH)","arm")
-    TARGET_DEFAULT_LIB_DESTDIR := libs/armeabi-v7a
+    ifeq ("$(TARGET_CPU)","")
+      TARGET_DEFAULT_LIB_DESTDIR := libs/armeabi
+    else ifeq ("$(TARGET_CPU)","armv5te")
+      TARGET_DEFAULT_LIB_DESTDIR := libs/armeabi
+    else ifeq ("$(filter-out armv7a armv7a-neon,$(TARGET_CPU))","")
+      TARGET_DEFAULT_LIB_DESTDIR := libs/armeabi-v7a
+    else
+      $(error "Target CPU '${TARGET_CPU}' does not support Android ABI Compatibility for ARM.")
+    endif
   else ifeq ("$(TARGET_ARCH)","aarch64")
     TARGET_DEFAULT_LIB_DESTDIR := libs/arm64-v8a
   else ifeq ("$(TARGET_ARCH)","x86")
