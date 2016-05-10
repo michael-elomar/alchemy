@@ -18,10 +18,15 @@ else
 endif
 
 # Choose Toolchain
+ifndef TARGET_ANDROID_TOOLCHAIN_VERSION
+TARGET_ANDROID_TOOLCHAIN_VERSION := \
+	$(shell . $(TARGET_ANDROID_NDK)/build/tools/dev-defaults.sh && \
+		echo $$(get_default_gcc_version_for_arch $(ANDROID_ARCH)))
+endif
 ifndef TARGET_ANDROID_TOOLCHAIN
 TARGET_ANDROID_TOOLCHAIN := \
 	$(shell . $(TARGET_ANDROID_NDK)/build/tools/dev-defaults.sh && \
-		echo $$(get_default_toolchain_name_for_arch $(ANDROID_ARCH)))
+		echo $$(get_toolchain_name_for_arch $(ANDROID_ARCH) $(TARGET_ANDROID_TOOLCHAIN_VERSION)))
 endif
 ifeq ("$(TARGET_ANDROID_TOOLCHAIN)","")
   $(error Failed to detect Android toolchain, set the name of the toolchain in the TARGET_ANDROID_TOOLCHAIN variable)
