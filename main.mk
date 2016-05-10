@@ -98,6 +98,7 @@ $(foreach __var,$(vars-TARGET), \
 	) \
 )
 
+USER_MAKEFILE_NAME := atom.mk
 include $(BUILD_SYSTEM)/target-setup.mk
 include $(BUILD_SYSTEM)/toolchain-setup.mk
 
@@ -191,7 +192,6 @@ endif
 ###############################################################################
 
 # Makefile with the list of all makefiles available and include them
-USER_MAKEFILE_NAME := atom.mk
 USER_MAKEFILES_CACHE := $(TARGET_OUT_BUILD)/makefiles.mk
 USER_MAKEFILES :=
 
