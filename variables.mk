@@ -259,6 +259,7 @@ vars-LOCAL += DOXYGEN_INPUT
 # Arguments to pass to code checker (linux checkpatch by default)
 vars-LOCAL += CODECHECK_ARGS
 vars-LOCAL += CPPCHECK_ARGS
+vars-LOCAL += VALACHECK_ARGS
 
 # Other variables used internally
 vars-LOCAL += BUILD_MODULE

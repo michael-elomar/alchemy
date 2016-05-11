@@ -70,7 +70,12 @@ LOCAL_TARGETS := \
 	$(LOCAL_MODULE) \
 	$(LOCAL_MODULE)-clean \
 	$(LOCAL_MODULE)-dirclean \
-	$(LOCAL_MODULE)-path
+	$(LOCAL_MODULE)-path \
+	$(LOCAL_MODULE)-doc \
+	$(LOCAL_MODULE)-codecheck \
+	$(LOCAL_MODULE)-cppcheck \
+	$(LOCAL_MODULE)-valacheck \
+	$(LOCAL_MODULE)-cloc
 
 # Configuration file.
 _module_orig_config_file := $(call __get-orig-module-config,$(LOCAL_MODULE))
@@ -629,6 +634,8 @@ $(LOCAL_MODULE)-clean-common:
 $(LOCAL_MODULE)-path:
 	@echo "$(PRIVATE_MODULE): $(PRIVATE_PATH)"
 
+include $(BUILD_SYSTEM)/classes/extra-rules.mk
+
 ###############################################################################
 ## Rule-specific variable definitions.
 ###############################################################################
@@ -649,6 +656,7 @@ $(LOCAL_TARGETS): PRIVATE_PATH := $(LOCAL_PATH)
 $(LOCAL_TARGETS): PRIVATE_MODULE := $(LOCAL_MODULE)
 $(LOCAL_TARGETS): PRIVATE_MODULE_FILENAME := $(LOCAL_MODULE_FILENAME)
 $(LOCAL_TARGETS): PRIVATE_MODULE_CLASS := $(LOCAL_MODULE_CLASS)
+$(LOCAL_TARGETS): PRIVATE_DESCRIPTION := $(LOCAL_DESCRIPTION)
 $(LOCAL_TARGETS): PRIVATE_BUILD_DIR := $(_module_build_dir)
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES := $(LOCAL_CLEAN_FILES)
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(_module_all_stamp_files)
