@@ -288,7 +288,7 @@ __nvcflags-all := \
 	$(LOCAL_CFLAGS) \
 	$(TARGET_GLOBAL_CXXFLAGS) \
 	$(TARGET_GLOBAL_CXXFLAGS_$(TARGET_CC_FLAVOUR)) \
-	$(TARGET_GLOBAL_CXXFLAGS_$(TARGET_ARCH)) \
+	$(TARGET_GLOBAL_CXXFLAGS) \
 	$(LOCAL_CXXFLAGS)
 
 # collect -std* and --std* and keep only the latest like GCC
