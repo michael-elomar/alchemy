@@ -80,7 +80,7 @@ ifndef TARGET_DEFAULT_LIB_DESTDIR
       TARGET_DEFAULT_LIB_DESTDIR := libs/armeabi
     else ifeq ("$(TARGET_CPU)","armv5te")
       TARGET_DEFAULT_LIB_DESTDIR := libs/armeabi
-    else ifeq ("$(filter-out armv7a armv7a-neon,$(TARGET_CPU))","")
+    else ifeq ("$(filter-out armv7a armv7a-neon p7,$(TARGET_CPU))","")
       TARGET_DEFAULT_LIB_DESTDIR := libs/armeabi-v7a
     else
       $(error "Target CPU '${TARGET_CPU}' does not support Android ABI Compatibility for ARM.")
