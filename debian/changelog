@@ -1,3 +1,22 @@
+parrot-tools-alchemy (1.2.5) unstable; urgency=low
+  * Pass android toolchain version to qmake
+  * eclipseproject generate project files in top source dir
+  * Add some filtered CXXFLAGS to NVCC
+  * Add dependencies generation for cuda files
+  * Add support for ambarella a9s processor.
+  * Add -march=armv7-a in ld flags to handle android gcc 'multilib' feature
+  * nvcc now keeps the latest -std=* compile options
+  * Add valacheck
+  * Add egl prebuilt for linux native
+  * Allow specifying Android toolchain version.
+  * Make possible to build kernel modules for different kernel release
+  * Make sure host dir from sdk are copied BEFORE anything
+  * Use proper flags for Android ARM ABI compatibility.
+  * Move final-clean condtional
+  * Add ubi image support
+
+ -- Yves-Marie Morgan (Parrot) <yves-marie.morgan@parrot.com>  Tue, 17 May 2016 16:01:54 +0200
+
 parrot-tools-alchemy (1.2.4) unstable; urgency=low
   * Improve QMake build output.
   * Export local source files to private vars for use in custom rules
