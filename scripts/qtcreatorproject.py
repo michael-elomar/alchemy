@@ -26,14 +26,14 @@ class Project(object):
 				fd.write("%s/%s\n" % (self.module.fields["PATH"], src))
 				sources.add(os.path.splitext(os.path.basename(src))[0])
 		headers = []
-                # Try to guess headers by adding those with the same name as source files
+		# Try to guess headers by adding those with the same name as source files
 		for path, dirnames, filenames in os.walk(self.module.fields["PATH"]):
 			for filename in filenames:
 				(prefix, ext) = os.path.splitext(os.path.basename(filename))
 				if prefix in sources and ext in [".h", ".hpp", ".hh"]:
 					headers.append(path + "/" + filename)
 		fd.write("\n".join(headers) + "\n")
-                fd.close()
+		fd.close()
 
 	def __genProjectIncludes(self, prefix, options):
 		filename = prefix + ".includes"
@@ -51,7 +51,7 @@ class Project(object):
 					self.modules.targetVars["OUT_BUILD"],
 					dep.name,
 					dep.fields["ARCHIVE_SUBDIR"]))
-                        else:
+			else:
 				includes.append(dep.fields["PATH"])
 		# Global include directories
 		includes += self.modules.targetVars["GLOBAL_C_INCLUDES"].split()
@@ -61,10 +61,10 @@ class Project(object):
 			if not inc in unique:
 				unique.add(inc)
 				fd.write(inc + "\n")
-                fd.close()
+		fd.close()
 
 	def __genProjectConfig(self, prefix, options):
-                config = "%s/%s/autoconf-%s.h" % (
+		config = "%s/%s/autoconf-%s.h" % (
 			self.modules.targetVars["OUT_BUILD"],
 			self.module.name,
 			self.module.name)
@@ -85,7 +85,7 @@ class Project(object):
 	def __genProjectCreatorUser(self, prefix, options):
 		profile_id = None
 		profile_path = os.environ["HOME"] + "/.config/QtProject/qtcreator/profiles.xml"
-                if not os.path.exists(profile_path):
+		if not os.path.exists(profile_path):
 			sys.stderr.write("Warning: QtCreator configuration not found, " +
 				"you should run qtcreator at least once before\n")
 		else:
@@ -96,7 +96,7 @@ class Project(object):
 
 		if profile_id is None:
 			sys.stderr.write("Warning: QtCreator Default Profile not found, " +
-			    "build commands won't be available\n")
+				"build commands won't be available\n")
 
 		filename = prefix + ".creator.shared"
 		sys.stderr.write("[%s]: generating '%s'\n" % (self.module.name, filename))
@@ -108,12 +108,12 @@ class Project(object):
 		fd.write('  <variable>ProjectExplorer.Project.ActiveTarget</variable>\n')
 		fd.write('  <value type="int">0</value>\n')
 		fd.write(' </data>\n')
-                fd.write(' <data>\n')
-                fd.write('  <variable>ProjectExplorer.Project.EditorSettings</variable>\n')
-                fd.write('  <valuemap type="QVariantMap">\n')
-                fd.write('   <value type="bool" key="EditorConfiguration.UseGlobal">false</value>\n')
-                fd.write('  </valuemap>\n')
-                fd.write(' </data>\n')
+		fd.write(' <data>\n')
+		fd.write('  <variable>ProjectExplorer.Project.EditorSettings</variable>\n')
+		fd.write('  <valuemap type="QVariantMap">\n')
+		fd.write('   <value type="bool" key="EditorConfiguration.UseGlobal">false</value>\n')
+		fd.write('  </valuemap>\n')
+		fd.write(' </data>\n')
 		fd.write(' <data>\n')
 		fd.write('  <variable>ProjectExplorer.Project.Target.0</variable>\n')
 		fd.write('  <valuemap type="QVariantMap">\n')
@@ -254,7 +254,7 @@ def parseArgs():
 	(options, args) = parser.parse_args()
 	if len(args) < 2:
 		parser.error("Bad number of arguments")
-        if not "ALCHEMY_HOME" in os.environ:
+	if not "ALCHEMY_HOME" in os.environ:
 		parser.error("ALCHEMY_HOME undefined")
 
 	return (options, args)

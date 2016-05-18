@@ -4,9 +4,14 @@ import sys, os, logging
 import optparse
 import shutil
 import fnmatch
+import tarfile
+import time
 import xml.parsers
 
-from cStringIO import StringIO
+try:
+	from cStringIO import StringIO
+except ImportError:
+	from io import StringIO
 
 import moduledb
 
@@ -19,68 +24,163 @@ class Context(object):
 		self.hostStagingDir = os.path.abspath(args[2])
 		self.buildDir = os.path.abspath(args[3])
 		self.stagingDir = os.path.abspath(args[4])
-		self.outDir = os.path.abspath(args[5])
-		self.atom = StringIO()
-		self.setup = StringIO()
-		self.sdkDirs = []
-		self.moduledb = None
-		self.headerLibs = []
 
-#===============================================================================
-# Similar to shutil.copytree but does not fail if destination exists
-# Also, the ignore argument is removed
-#===============================================================================
-def copyTree(src, dst, symlinks=False, exclude=None):
-	names = os.listdir(src)
-	if not os.path.exists(dst):
-		os.makedirs(dst, mode=0755)
-	errors = []
-	for name in names:
-		srcname = os.path.join(src, name)
-		dstname = os.path.join(dst, name)
-		try:
-			if symlinks and os.path.islink(srcname):
-				if not os.path.lexists(dstname):
-					linkto = os.readlink(srcname)
-					logging.debug("Link: '%s' -> '%s'", srcname, dstname)
-					os.symlink(linkto, dstname)
-			elif os.path.isdir(srcname):
-				copyTree(srcname, dstname, symlinks, exclude)
-			else:
-				# Will raise a SpecialFileError for unsupported file types
-				if exclude and any([fnmatch.fnmatch(os.path.basename(srcname), ext) for ext in exclude]):
-					# Ignore this file
-					pass
-				elif not os.path.lexists(dstname):
-					logging.debug("Copy: '%s' -> '%s'", srcname, dstname)
-					shutil.copy2(srcname, dstname)
-		# catch the Error from the recursive copyTree so that we can
-		# continue with other files
-		except shutil.Error, err:
-			errors.extend(err.args[0])
-		except EnvironmentError, why:
-			errors.append((srcname, dstname, str(why)))
-	try:
-		shutil.copystat(src, dst)
-	except OSError, why:
-		if shutil.WindowsError is not None and isinstance(why, shutil.WindowsError):
-			# Copying file access times may fail on Windows
-			pass
+		if args[5].endswith(".tar.gz"):
+			self.tarFile = tarfile.open(os.path.abspath(args[5]), "w:gz")
+			self.outDir = "sdk"
+		elif args[5].endswith(".tar.bz2"):
+			self.tarFile = tarfile.open(os.path.abspath(args[5]), "w:bz2")
+			self.outDir = "sdk"
+		elif args[5].endswith(".tar"):
+			self.tarFile = tarfile.open(os.path.abspath(args[5]), "w")
+			self.outDir = "sdk"
 		else:
-			errors.append((src, dst, str(why)))
-	if errors:
-		raise shutil.Error, errors
+			self.tarFile = None
+			self.outDir = os.path.abspath(args[5])
+
+		self.sdkDirs = []
+		self.headerLibs = []
+		self.files = {}
+
+		# Load modules from xml
+		logging.info("Loading xml '%s'", self.dumpXmlPath)
+		try:
+			self.moduledb = moduledb.loadXml(self.dumpXmlPath)
+		except xml.parsers.expat.ExpatError as ex:
+			sys.stderr.write("Error while loading '%s':\n" % self.dumpXmlPath)
+			sys.stderr.write("  %s\n" % ex)
+			sys.exit(1)
+
+		self.atom = StringIO()
+		self.atom.write("# GENERATED FILE, DO NOT EDIT\n\n")
+		self.atom.write("LOCAL_PATH := $(call my-dir)\n\n")
+
+		self.setup = StringIO()
+		self.setup.write("# GENERATED FILE, DO NOT EDIT\n\n")
+		self.setup.write("LOCAL_PATH := $(call my-dir)\n\n")
+
+		if "OS_FLAVOUR" in self.moduledb.targetVars and \
+				self.moduledb.targetVars["OS_FLAVOUR"] == "android":
+			self.android = StringIO()
+			self.android.write("# GENERATED FILE, DO NOT EDIT\n\n")
+			self.android.write("LOCAL_PATH := $(call my-dir)\n\n")
+		else:
+			self.android = None
+
+	def finishFile(self, fileData, fileName):
+		if self.tarFile is not None:
+			info = tarfile.TarInfo(os.path.join(self.outDir, fileName))
+			info.size = fileData.tell()
+			info.mtime = time.time()
+			info.mode = 0o644
+			info.type = tarfile.REGTYPE
+			fileData.seek(0)
+			self.tarFile.addfile(info, fileData)
+		else:
+			with open(os.path.join(self.outDir, fileName), "w") as fileObj:
+				fileObj.write(fileData.getvalue())
+
+	def finish(self):
+		self.finishFile(self.atom, "atom.mk")
+		self.finishFile(self.setup, "setup.mk")
+		if self.android is not None:
+			self.finishFile(self.android, "Android.mk")
+
+	def addFile(self, srcFilePath, dstFilePath):
+		if dstFilePath in self.files:
+			return
+		self.files[dstFilePath] = srcFilePath
+		if self.tarFile is not None:
+			if os.path.islink(srcFilePath):
+				# Link file, ignore absolute links
+				linkto = os.readlink(srcFilePath)
+				if not os.path.isabs(linkto):
+					logging.debug("Link: '%s' -> '%s'", srcFilePath, dstFilePath)
+					self.tarFile.add(srcFilePath, arcname=dstFilePath)
+			else:
+				# Regular file
+				logging.debug("Copy: '%s' -> '%s'", srcFilePath, dstFilePath)
+				self.tarFile.add(srcFilePath, arcname=dstFilePath)
+		else:
+			# Create missing directories
+			if not os.path.exists(os.path.dirname(dstFilePath)):
+				os.makedirs(os.path.dirname(dstFilePath), mode=0o755)
+			if os.path.islink(srcFilePath):
+				# Link file, ignore absolute links
+				if not os.path.lexists(dstFilePath):
+					linkto = os.readlink(srcFilePath)
+					if not os.path.isabs(linkto):
+						logging.debug("Link: '%s' -> '%s'", srcFilePath, dstFilePath)
+						os.symlink(linkto, dstFilePath)
+			else:
+				# Regular file, copy if source is newer in case destination exists
+				if not os.path.lexists(dstFilePath):
+					doCopy = True
+				else:
+					srcStat = os.stat(srcFilePath)
+					dstStat = os.stat(dstFilePath)
+					doCopy = srcStat.st_mtime > dstStat.st_mtime
+
+				if doCopy:
+					logging.debug("Copy: '%s' -> '%s'", srcFilePath, dstFilePath)
+					shutil.copy2(srcFilePath, dstFilePath)
+
+#===============================================================================
+# Copy elements based on their extensions and limiting to a max depth if any
+# If no extension is provided, any element will be took into account
+#===============================================================================
+def copyTree(ctx, srcDir, dstDir, includeExt=None, excludeExt=None, depth=-1):
+	# When executed with LANG=C (via alchemy) os.walk crashes when a path
+	# with accents is found. We force utf8 encoding to solve the issue.
+	srcDir = srcDir.encode("UTF-8")
+	dstDir = dstDir.encode("UTF-8")
+	rootDepth = os.path.normpath(srcDir).count(os.sep)
+	for (dirPath, dirNames, fileNames) in os.walk(srcDir):
+		# Check depth of directory
+		if depth >= 0:
+			curDepth = os.path.normpath(dirPath).count(os.sep)
+			if curDepth > rootDepth + depth:
+				continue
+
+		# A symlink to an existing directory is put in dirNames, not fileNames
+		# fix this (use a copy in for loop because we will modify dirNames)
+		for dirName in dirNames[:]:
+			if os.path.islink(os.path.normpath(os.path.join(dirPath, dirName))):
+				dirNames.remove(dirName)
+				fileNames.append(dirName)
+
+		for fileName in fileNames:
+			# Include file ?
+			if includeExt is None:
+				include = True
+			else:
+				include = any([fnmatch.fnmatch(fileName, ext.encode("UTF-8"))
+						for ext in includeExt])
+
+			# Exclude file ?
+			if excludeExt is None:
+				exclude = False
+			else:
+				exclude = any([fnmatch.fnmatch(fileName, ext.encode("UTF-8"))
+						for ext in excludeExt])
+
+			# Process file if needed
+			if include and not exclude:
+				filePath = os.path.normpath(os.path.join(dirPath, fileName))
+				relPath = os.path.relpath(filePath, srcDir)
+				dstFilePath = os.path.normpath(os.path.join(dstDir, relPath))
+				ctx.addFile(filePath, dstFilePath)
 
 #===============================================================================
 #===============================================================================
-def copyHostStaging(srcDir, dstDir):
+def copyHostStaging(ctx, srcDir, dstDir):
 	logging.debug("Copy host staging: '%s' -> '%s'", srcDir, dstDir)
 	exclude = ["*.la"]
-	copyTree(srcDir, dstDir, symlinks=True, exclude=exclude)
+	copyTree(ctx, srcDir, dstDir, excludeExt=exclude)
 
 #===============================================================================
 #===============================================================================
-def copyStaging(srcDir, dstDir):
+def copyStaging(ctx, srcDir, dstDir):
 	logging.debug("Copy staging: '%s' -> '%s'", srcDir, dstDir)
 	dirs_to_keep = ["lib" ,
 		os.path.join("etc", "alternatives"),
@@ -96,92 +196,31 @@ def copyStaging(srcDir, dstDir):
 	]
 	exclude = ["*.la"]
 	for dirName in dirs_to_keep:
-		if os.path.exists(os.path.join(srcDir, dirName)):
-			srcDirPath=os.path.normpath(os.path.join(srcDir, dirName))
-			dstDirPath=os.path.normpath(os.path.join(dstDir, dirName))
-			copyTree(srcDirPath, dstDirPath, symlinks=True, exclude=exclude)
+		srcDirPath = os.path.normpath(os.path.join(srcDir, dirName))
+		if os.path.exists(srcDirPath):
+			dstDirPath = os.path.normpath(os.path.join(dstDir, dirName))
+			copyTree(ctx, srcDirPath, dstDirPath, excludeExt=exclude)
 
 #===============================================================================
 #===============================================================================
-def copySdk(srcDir, dstDir):
+def copySdk(ctx, srcDir, dstDir):
 	logging.debug("Copy sdk: '%s' -> '%s'", srcDir, dstDir)
-	copyStaging(srcDir, dstDir)
+	copyStaging(ctx, srcDir, dstDir)
 
 #===============================================================================
 #===============================================================================
-def copyHeaders(srcDir, dstDir):
+def copyHeaders(ctx, srcDir, dstDir):
 	logging.debug("Copy headers: '%s' -> '%s'", srcDir, dstDir)
-	extensions = ["*.h", "*.hpp", "*.hh", "*.hxx", "*.doxygen", "*.inl"]
-	copyElements(srcDir, dstDir, extensions)
+	include = ["*.h", "*.hpp", "*.hh", "*.hxx", "*.doxygen", "*.inl"]
+	copyTree(ctx, srcDir, dstDir, includeExt=include)
 
 #===============================================================================
 #===============================================================================
-def copyLibs(srcDir, dstDir):
+def copyLibs(ctx, srcDir, dstDir):
 	logging.debug("Copy libs: '%s' -> '%s'", srcDir, dstDir)
-	extensions = ["*.a"]
+	include = ["*.a"]
 	# Limit the copy to the base of the module
-	copyElements(srcDir, dstDir, extensions, depth=1)
-
-#===============================================================================
-# Copy elements based on their extensions and limiting to a max depth if any
-# If no extension is provided, any element will be took into account
-#===============================================================================
-def copyElement(srcPath, dstPath, keepLinks=False):
-	if not os.path.exists(os.path.dirname(dstPath)):
-		os.makedirs(os.path.dirname(dstPath), mode=0755)
-
-	# Set the function to use for copy
-	if os.path.isdir(srcPath):
-		copy_func = { "function":copyTree, "description":"Copy"}
-	else:
-		copy_func = { "function":shutil.copy2, "description":"Copy"}
-
-	if os.path.islink(srcPath):
-		# We voluntarily make no normalization of path
-		# as the final environment may be peculiar
-		srcPath = os.readlink(srcPath)
-		# If asked to keep links instead of hard copy,
-		# change the function to use
-		if keepLinks:
-			copy_func = { "function":os.symlink, "description":"Link"}
-	# Do the copy/symlink
-	if not os.path.lexists(dstPath):
-		logging.debug("%s: '%s' -> '%s'", copy_func["description"], srcPath, dstPath)
-		copy_func["function"](srcPath, dstPath)
-
-#===============================================================================
-#===============================================================================
-def copyElements(srcDir, dstDir, extensions=["*"], depth=0,
-		keepLinks=False, keepInclude=False, scanDirs=False):
-	if not os.path.exists(srcDir):
-		logging.warning("Missing directory: '%s'", srcDir)
-
-	# Manage depth only if provided or different than 0
-	if depth is None or depth == 0:
-		current_depth = None
-	else:
-		# Save the current level
-		current_depth = os.path.normpath(srcDir).count(os.sep)
-
-	# When executed with LANG=C (via alchemy) os.walk crashes when a path
-	# with accents is found. We force utf8 encoding to solve the issue.
-	srcDir = srcDir.encode("utf-8")
-	dstDir = dstDir.encode("utf-8")
-	for (dirPath, dirNames, fileNames) in os.walk(srcDir):
-		# Aren't we deep enough to parse the content of the files
-		if current_depth:
-			# We use continue instead of break,
-			# In order not to skip potentials remaining directories
-			if os.path.normpath(dirPath).count(os.sep) > (current_depth + depth):
-				continue
-
-		for fileName in fileNames:
-			# Get normalized path for src and dst
-			srcFilePath = os.path.normpath(os.path.join(dirPath, fileName))
-			relPath = os.path.relpath(srcFilePath, srcDir)
-			dstFilePath = os.path.normpath(os.path.join(dstDir, relPath))
-			if any([fnmatch.fnmatch(os.path.basename(srcFilePath), ext) for ext in extensions]):
-				copyElement(srcFilePath, dstFilePath, keepLinks=keepLinks)
+	copyTree(ctx, srcDir, dstDir, includeExt=include, depth=1)
 
 #===============================================================================
 # Remove symlinks whose target does not exists or is an absolute path.
@@ -199,6 +238,60 @@ def checkSymlinks(srcDir):
 			elif os.path.isabs(os.readlink(srcFilePath)):
 				logging.info("Removing absolute symlink: '%s'", srcFilePath)
 				os.unlink(srcFilePath)
+
+#===============================================================================
+#===============================================================================
+def getExportedIncludes(ctx, module):
+	modulePath = module.fields["PATH"]
+	includeDirs = module.fields["EXPORT_C_INCLUDES"].split()
+	exportedIncludeDirs = []
+	for includeDir in includeDirs:
+		if includeDir.startswith(modulePath):
+			dstDir = None
+			relPath = os.path.relpath(includeDir, modulePath)
+			entries = os.listdir(includeDir)
+			suffixesInc = ["include", "includes", "Include", "Includes"]
+			suffixesSrc = ["src", "source", "sources", "Source", "Sources"]
+
+			# Try to simplify destination if only one directory is exported and it
+			# ends with a standard name
+			if len(includeDirs) == 1 and os.path.split(relPath)[1] in suffixesInc:
+				if len(entries) == 1 and entries[0] not in suffixesSrc:
+					# Directly copy in usr/include
+					dstDir = os.path.join("usr", "include")
+				else:
+					# Copy in a sub dir with module name to avoid conflicts
+					dstDir = os.path.join("usr", "include", module.name)
+			elif relPath != "." and relPath != "":
+				dstDir = os.path.join("usr", "include", module.name,
+						relPath.replace("..", "dotdot"))
+			else:
+				dstDir = os.path.join("usr", "include", module.name)
+			exportedIncludeDirs.append([includeDir, dstDir])
+		elif includeDir.startswith(os.path.join(ctx.buildDir, module.name)):
+			# TODO: simplify destination by remove extra 'include' and 'module name'
+			relPath = os.path.relpath(includeDir, os.path.join(ctx.buildDir, module.name))
+			if relPath != ".":
+				dstDir = os.path.join("usr", "include", module.name,
+						relPath.replace("..", "dotdot"))
+			else:
+				dstDir = os.path.join("usr", "include", module.name)
+			exportedIncludeDirs.append([includeDir, dstDir])
+		elif includeDir.startswith(ctx.stagingDir + "/"):
+			# No copy
+			relPath = os.path.relpath(includeDir, ctx.stagingDir)
+			exportedIncludeDirs.append([None, relPath])
+		elif includeDir.startswith(ctx.hostStagingDir + "/"):
+			# No copy
+			relPath = os.path.relpath(includeDir, ctx.hostStagingDir)
+			exportedIncludeDirs.append([None, os.path.join("host", relPath)])
+		elif includeDir.startswith("/opt/"):
+			# Assume it is a required host package installed externally
+			exportedIncludeDirs.append([None, includeDir])
+		else:
+			logging.warning("Ignoring include dir: '%s'", includeDir)
+
+	return exportedIncludeDirs
 
 #===============================================================================
 #===============================================================================
@@ -222,7 +315,12 @@ def processModule(ctx, module, headersOnly=False):
 	modulePath = module.fields["PATH"]
 	moduleClass = module.fields["MODULE_CLASS"]
 
-	# Write verbatim some fields (and escape quotes)
+	if module.name.startswith("host."):
+		ctx.atom.write("LOCAL_HOST_MODULE := %s\n" % module.name[5:])
+	else:
+		ctx.atom.write("LOCAL_MODULE := %s\n" % module.name)
+
+	# Write verbatim some fields
 	fields = ["DESCRIPTION", "CATEGORY_PATH",
 			"REVISION", "REVISION_DESCRIBE",
 			"FORCE_WHOLE_STATIC_LIBRARY",
@@ -231,14 +329,9 @@ def processModule(ctx, module, headersOnly=False):
 		if field in module.fields and module.fields[field] :
 			ctx.atom.write("LOCAL_%s := %s\n" % (field, module.fields[field]))
 
-	if module.name.startswith("host."):
-		ctx.atom.write("LOCAL_HOST_MODULE := %s\n" % module.name[5:])
-	else:
-		ctx.atom.write("LOCAL_MODULE := %s\n" % module.name)
-
 	# Libraries
 	# If a module contains prelinked '.a' mentionned in its EXPORT_LDLIBS, copy
-	# them and uptade the variable
+	# them and update the variable
 	if not headersOnly and "EXPORT_LDLIBS" in module.fields:
 		libs = module.fields["EXPORT_LDLIBS"].split()
 		newLibs = []
@@ -251,11 +344,9 @@ def processModule(ctx, module, headersOnly=False):
 					dstDir = os.path.join("usr", "lib", module.name, relPath)
 				else:
 					dstDir = os.path.join("usr", "lib", module.name)
-				# Copy libs and add new directory only if files have actually
-				# been copied (ie directory was created)
-				copyLibs(libDir, os.path.join(ctx.outDir, dstDir))
-				if os.path.exists(os.path.normpath(os.path.join(ctx.outDir, dstDir))):
-					newLibs.append("-L$(LOCAL_PATH)/" + dstDir)
+				# Copy libs and add new directory
+				copyLibs(ctx, libDir, os.path.join(ctx.outDir, dstDir))
+				newLibs.append("-L$(LOCAL_PATH)/" + dstDir)
 			elif lib.startswith(ctx.stagingDir):
 				# Some module directly reference a path in staging, simply update
 				# path, normally the file is already copied
@@ -271,55 +362,15 @@ def processModule(ctx, module, headersOnly=False):
 
 	# Include directories
 	if "EXPORT_C_INCLUDES" in module.fields:
-		includeDirs = module.fields["EXPORT_C_INCLUDES"].split()
-		# First, convert path
-		newIncludeDirs = []
-		for includeDir in includeDirs:
-			if includeDir.startswith(modulePath):
-				# TODO: simplify destination by remove extra 'include' and 'module name'
-				relPath = os.path.relpath(includeDir, modulePath)
-				if relPath != ".":
-					dstDir = os.path.join("usr", "include", module.name,
-							relPath.replace("..", "dotdot"))
-				else:
-					dstDir = os.path.join("usr", "include", module.name)
-				# Copy headers and add new directory only if files have actually
-				# been copied (ie directory was created)
-				copyHeaders(includeDir, os.path.join(ctx.outDir, dstDir))
-				if os.path.exists(os.path.normpath(os.path.join(ctx.outDir, dstDir))):
-					newIncludeDirs.append("$(LOCAL_PATH)/" + dstDir)
-			elif includeDir.startswith(os.path.join(ctx.buildDir, module.name)):
-				# TODO: simplify destination by remove extra 'include' and 'module name'
-				relPath = os.path.relpath(includeDir, os.path.join(ctx.buildDir, module.name))
-				if relPath != ".":
-					dstDir = os.path.join("usr", "include", module.name,
-							relPath.replace("..", "dotdot"))
-				else:
-					dstDir = os.path.join("usr", "include", module.name)
-				# Copy headers and add new directory only if files have actually
-				# been copied (ie directory was created)
-				copyHeaders(includeDir, os.path.join(ctx.outDir, dstDir))
-				if os.path.exists(os.path.normpath(os.path.join(ctx.outDir, dstDir))):
-					newIncludeDirs.append("$(LOCAL_PATH)/" + dstDir)
-			elif includeDir.startswith(ctx.stagingDir + "/"):
-				relPath = os.path.relpath(includeDir, ctx.stagingDir)
-				# Only add existing directory that is not in a standard place
-				if relPath != "usr/include" and os.path.exists(includeDir):
-					newIncludeDirs.append("$(LOCAL_PATH)/" + relPath)
-			elif includeDir.startswith(ctx.hostStagingDir + "/"):
-				relPath = os.path.relpath(includeDir, ctx.hostStagingDir)
-				# Only add existing directory that is not in a standard place
-				if relPath != "usr/include" and os.path.exists(includeDir):
-					newIncludeDirs.append("$(LOCAL_PATH)/host/" + relPath)
-			elif includeDir.startswith("/opt/"):
-				# Assume it is a required host package installed externally
-				newIncludeDirs.append(includeDir)
-			else:
-				logging.warning("Ignoring include dir: '%s'", includeDir)
-		# Write path in a readable way
 		ctx.atom.write("LOCAL_EXPORT_C_INCLUDES :=")
-		for includeDir in newIncludeDirs:
-			ctx.atom.write(" \\\n\t%s" % includeDir)
+		exportedIncludeDirs = getExportedIncludes(ctx, module)
+		for exportedInclude in exportedIncludeDirs:
+			if exportedInclude[0] is not None:
+				copyHeaders(ctx, exportedInclude[0], os.path.join(ctx.outDir, exportedInclude[1]))
+			if os.path.isabs(exportedInclude[1]):
+				ctx.atom.write(" \\\n\t%s" % exportedInclude[1])
+			elif exportedInclude[1] != "usr/include":
+				ctx.atom.write(" \\\n\t$(LOCAL_PATH)/%s" % exportedInclude[1])
 		ctx.atom.write("\n")
 
 	# Config file
@@ -328,11 +379,9 @@ def processModule(ctx, module, headersOnly=False):
 	if "CONFIG_FILES" in module.fields:
 		configFileName = "%s.config" % module.name
 		srcFilePath = os.path.join(ctx.buildDir, module.name, configFileName)
-		dstDirPath = os.path.join(ctx.outDir, "config")
+		dstFilePath = os.path.join(ctx.outDir, "config", configFileName)
 		if os.path.exists(srcFilePath):
-			if not os.path.exists(dstDirPath):
-				os.makedirs(dstDirPath, mode=0755)
-			shutil.copy2(srcFilePath, os.path.join(dstDirPath, configFileName))
+			ctx.addFile(srcFilePath, dstFilePath)
 			ctx.atom.write("LOCAL_CONFIG_FILES := 1\n")
 			ctx.atom.write("sdk.%s.config := $(LOCAL_PATH)/config/%s\n" % (
 					module.name, configFileName))
@@ -354,6 +403,88 @@ def processModule(ctx, module, headersOnly=False):
 
 	# End of module
 	ctx.atom.write("\n")
+
+#===============================================================================
+#===============================================================================
+def processModuleAndroidInternal(ctx, module, name, libPath, kind):
+	ctx.android.write("include $(CLEAR_VARS)\n")
+	ctx.android.write("LOCAL_MODULE := %s\n" % name)
+	ctx.android.write("LOCAL_SRC_FILES := $(LOCAL_PATH)/%s\n" % libPath)
+
+	# Exported flags
+	fields = {
+		"EXPORT_CFLAGS": "EXPORT_CFLAGS",
+		"EXPORT_CXXFLAGS": "EXPORT_CPPFLAGS",
+	}
+	for field in fields:
+		if field[0] in module.fields and module.fields[field[0]]:
+			ctx.android.write("LOCAL_%s := %s\n" % (field[1], module.fields[field[0]]))
+
+	# Exported includes, always put 'usr/include'
+	ctx.android.write("LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/usr/include")
+	if "EXPORT_C_INCLUDES" in module.fields:
+		exportedIncludeDirs = getExportedIncludes(ctx, module)
+		for exportedInclude in exportedIncludeDirs:
+			if exportedInclude[0] is not None:
+				copyHeaders(ctx, exportedInclude[0], os.path.join(ctx.outDir, exportedInclude[1]))
+			if os.path.isabs(exportedInclude[1]):
+				ctx.android.write(" \\\n\t%s" % exportedInclude[1])
+			elif exportedInclude[1] != "usr/include":
+				ctx.android.write(" \\\n\t$(LOCAL_PATH)/%s" % exportedInclude[1])
+	ctx.android.write("\n")
+
+	# End of module
+	ctx.android.write("include $(PREBUILT_%s_LIBRARY)\n" % kind)
+	ctx.android.write("\n")
+
+#===============================================================================
+#===============================================================================
+def processModuleAndroid(ctx, module):
+	# Ignore host modules
+	if module.name.startswith("host.") or not module.build:
+		return
+	moduleClass = module.fields["MODULE_CLASS"]
+
+	if moduleClass == "SHARED_LIBRARY":
+		# SHARED
+		libPath = module.fields["DESTDIR"] + "/" + module.fields["MODULE_FILENAME"]
+		processModuleAndroidInternal(ctx, module, module.name, libPath, "SHARED")
+	elif moduleClass == "STATIC_LIBRARY":
+		# STATIC
+		libPath = module.fields["DESTDIR"] + "/" + module.fields["MODULE_FILENAME"]
+		processModuleAndroidInternal(ctx, module, module.name, libPath, "STATIC")
+	elif moduleClass == "LIBRARY":
+		# Both SHARED and STATIC
+		libPath = module.fields["DESTDIR"] + "/" + module.fields["MODULE_FILENAME"]
+		processModuleAndroidInternal(ctx, module, module.name, libPath, "SHARED")
+		if libPath.endswith(".so"):
+			libPath = libPath[:-3] + ".a"
+			processModuleAndroidInternal(ctx, module, module.name + "-static", libPath, "STATIC")
+	elif "EXPORT_LDLIBS" in module.fields:
+		# Only register single libs
+		libNames = module.fields["EXPORT_LDLIBS"].split()
+		if len(libNames) == 1 and libNames[0].startswith("-l"):
+			libName = "lib" + libNames[0][2:]
+			libPathShared = None
+			libPathStatic = None
+			# Search shared/static lib path
+			for libDir in "lib", "usr/lib":
+				libPath = os.path.join(libDir, libName)
+				if os.path.exists(os.path.join(ctx.stagingDir, libPath) + ".so"):
+					libPathShared = libPath + ".so"
+				if os.path.exists(os.path.join(ctx.stagingDir, libPath) + ".a"):
+					libPathStatic = libPath + ".a"
+			# Register
+			if libPathShared is not None and libPathStatic is not None:
+				# Both SHARED and STATIC
+				processModuleAndroidInternal(ctx, module, module.name, libPathShared, "SHARED")
+				processModuleAndroidInternal(ctx, module, module.name + "-static", libPathStatic, "STATIC")
+			elif libPathShared is not None:
+				# SHARED
+				processModuleAndroidInternal(ctx, module, module.name, libPathShared, "SHARED")
+			elif libPathStatic is not None:
+				# STATIC
+				processModuleAndroidInternal(ctx, module, module.name, libPathStatic, "STATIC")
 
 #===============================================================================
 #===============================================================================
@@ -391,41 +522,33 @@ def main():
 	# Extract arguments
 	ctx = Context(args)
 
-	# Load modules from xml
-	logging.info("Loading xml '%s'", ctx.dumpXmlPath)
-	try:
-		ctx.moduledb = moduledb.loadXml(ctx.dumpXmlPath)
-	except xml.parsers.expat.ExpatError as ex:
-		sys.stderr.write("Error while loading '%s':\n" % ctx.dumpXmlPath)
-		sys.stderr.write("  %s\n" % ex)
-		sys.exit(1)
-
 	# List of previous sdk to merge with the new one
 	ctx.sdkDirs = ctx.moduledb.targetVars.get("SDK_DIRS", "").split()
 
 	# Setup output directory
-	logging.info("Initializing output directory '%s'", ctx.outDir)
-	if os.path.exists(ctx.outDir):
-		shutil.rmtree(ctx.outDir)
-	os.makedirs(ctx.outDir, mode=0755)
+	if ctx.tarFile is None:
+		logging.info("Initializing output directory '%s'", ctx.outDir)
+		if os.path.exists(ctx.outDir):
+			shutil.rmtree(ctx.outDir)
+		os.makedirs(ctx.outDir, mode=0o755)
 
 	# Copy content of host staging directory
 	if os.path.exists(ctx.hostStagingDir):
 		logging.info("Copying host staging directory")
-		copyHostStaging(ctx.hostStagingDir, os.path.join(ctx.outDir, "host"))
+		copyHostStaging(ctx, ctx.hostStagingDir, os.path.join(ctx.outDir, "host"))
 
 	# Copy content of staging directory
 	logging.info("Copying staging directory")
-	copyStaging(ctx.stagingDir, ctx.outDir)
+	copyStaging(ctx, ctx.stagingDir, ctx.outDir)
 
 	# Copy content of previous sdk
 	for srcDir in ctx.sdkDirs:
-		copySdk(srcDir, ctx.outDir)
+		copySdk(ctx, srcDir, ctx.outDir)
 
 	# Add some TARGET_XXX variables checks to make sure that the sdk is used
 	# in the correct environment
 	target_elements = [
-		 "OS", "OS_FLAVOUR",
+		"OS", "OS_FLAVOUR",
 		"ARCH", "CPU", "CROSS",
 		"LIBC", "DEFAULT_ARM_MODE" ]
 	for element_to_check in target_elements:
@@ -438,13 +561,16 @@ def main():
 	# Process modules
 	for module in ctx.moduledb:
 		processModule(ctx, module)
+		if ctx.android is not None:
+			processModuleAndroid(ctx, module)
 
 	# Process modules not built but whose headers are required
 	for lib in ctx.headerLibs:
 		processModule(ctx, ctx.moduledb[lib], headersOnly=True)
 
 	# Check  symlinks
-	checkSymlinks(ctx.outDir)
+	if ctx.tarFile is None:
+		checkSymlinks(ctx.outDir)
 
 	# Process custom macros
 	for macro in ctx.moduledb.customMacros.values():
@@ -453,18 +579,7 @@ def main():
 		ctx.atom.write("\nendef\n")
 		ctx.atom.write("$(call local-register-custom-macro,%s)\n" % macro.name)
 
-	# Write the atom.mk
-	with open(os.path.join(ctx.outDir, "atom.mk"), "w") as atomFile:
-		atomFile.write("# GENERATED FILE, DO NOT EDIT\n\n")
-		atomFile.write("LOCAL_PATH := $(call my-dir)\n\n")
-		atomFile.write(ctx.atom.getvalue())
-
-	# Write the setup.mk
-	with open(os.path.join(ctx.outDir, "setup.mk"), "w") as setupFile:
-		setupFile.write("# GENERATED FILE, DO NOT EDIT\n\n")
-		setupFile.write("LOCAL_PATH := $(call my-dir)\n\n")
-		setupFile.write(ctx.setup.getvalue())
-		setupFile.write("\n")
+	ctx.finish()
 
 #===============================================================================
 # Setup option parser and parse command line.
@@ -472,7 +587,7 @@ def main():
 def parseArgs():
 	# Setup parser
 	usage = "usage: %prog [options] <dump-xml> <host-build-dir>" \
-			" <host-staging-dir> <build-dir> <staging-dir> <out-dir>"
+			" <host-staging-dir> <build-dir> <staging-dir> <out-dir>|<out-file>"
 	parser = optparse.OptionParser(usage=usage)
 
 	# Main options

@@ -106,7 +106,8 @@ class Project(object):
 
 		if options.linkdeps and self.link_depends:
 			fd.write("\t<linkedResources>\n")
-			for src_dir, dep in self.link_depends.iteritems():
+			for src_dir in self.link_depends:
+				dep = self.link_depends[src_dir]
 				# exclude libboost
 				if dep.name == "libboost":
 					continue

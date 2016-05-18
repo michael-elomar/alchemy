@@ -40,7 +40,7 @@ class FsEntry(object):
 
     def getData(self):
         if stat.S_IFMT(self.st.st_mode) == stat.S_IFLNK:
-            return os.readlink(self.filePath)
+            return os.readlink(self.filePath).encode("UTF-8")
         elif stat.S_IFMT(self.st.st_mode) == stat.S_IFREG:
             try:
                 fin = open(self.filePath, "rb")
@@ -102,7 +102,7 @@ def addFsEntries(root):
         elif stat.S_IFMT(st.st_mode) == stat.S_IFLNK:
             # Symbolic link, data is link target
             linkTarget = os.readlink(filePath)
-            entry = FsEntry(filePath, len(linkTarget), st)
+            entry = FsEntry(filePath, len(linkTarget.encode("UTF-8")), st)
         else:
             # Ignore other entries
             continue

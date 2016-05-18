@@ -15,12 +15,12 @@ class Cpio(object):
 
     def align4(self):
         for _ in range(0, (4 - self.writeLen % 4) % 4):
-            self.fout.write("\0")
+            self.fout.write(b"\0")
             self.writeLen += 1
 
     def align512(self):
         for _ in range(0, (512 - self.writeLen % 512) % 512):
-            self.fout.write("\0")
+            self.fout.write(b"\0")
             self.writeLen += 1
 
     def write(self, buf):
@@ -42,8 +42,8 @@ class Cpio(object):
                 os.major(entry.st.st_dev),
                 os.minor(entry.st.st_dev),
                 len(entry.filePath) + 1, 0))
-        self.write(buf)
-        self.write(entry.filePath + "\0")
+        self.write(buf.encode("UTF-8"))
+        self.write((entry.filePath + "\0").encode("UTF-8"))
         self.align4()
         self.inode += 1
 
@@ -63,8 +63,8 @@ class Cpio(object):
                 0,
                 0,
                 len(filePath) + 1, 0))
-        self.write(buf)
-        self.write(filePath + "\0")
+        self.write(buf.encode("UTF-8"))
+        self.write((filePath + "\0").encode("UTF-8"))
         self.align512()
         self.inode += 1
 
