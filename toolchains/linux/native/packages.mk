@@ -88,6 +88,16 @@ LOCAL_EXPORT_LDLIBS := $(shell pkg-config --libs egl)
 $(call local-register-prebuilt-overridable)
 endif
 
+ifeq ("$(shell pkg-config --exists bluez; echo $$?)","0")
+include $(CLEAR_VARS)
+LOCAL_MODULE := bluez
+LOCAL_EXPORT_LDLIBS := $(shell pkg-config --libs bluez)
+LOCAL_EXPORT_CFLAGS := \
+	-D__BLUEZ__=$(shell pkg-config --modversion bluez | cut -f1 -d'.') \
+	-D__BLUEZ_MINOR__=$(shell pkg-config --modversion bluez | cut -f2 -d'.')
+$(call local-register-prebuilt-overridable)
+endif
+
 include $(CLEAR_VARS)
 LOCAL_MODULE := libjpeg-turbo
 LOCAL_EXPORT_LDLIBS := -ljpeg
