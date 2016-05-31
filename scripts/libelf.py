@@ -693,10 +693,10 @@ class Elf(object):
 		if offset >= shdrStr.sh_size:
 			return None
 		start = shdrStr.sh_offset + offset
-		end = self._data.find("\x00", start, start + shdrStr.sh_size)
+		end = self._data.find(b"\x00", start, start + shdrStr.sh_size)
 		if end == -1:
 			end = start + shdrStr.sh_size
-		return self._data[start:end]
+		return self._data[start:end].decode("UTF-8")
 
 	# Compute hash of elf for section that are loadable and with data in elf.
 	# @param hash : an object from 'hashlib' that support 'update' and

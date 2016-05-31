@@ -770,6 +770,7 @@ class Extfs(object):
     def addToDir(self, parent_inum, inum, name):
         parent_inode = self.getInode(parent_inum)
         inode = self.getInode(inum)
+        name = name.encode("UTF-8")
         nlen = len(name)
         reclen = EXTFS_DIRENTRY_STRUCT_NO_NAME_SIZE + (nlen + 3) & (~3)
         # Search a free entry in last block
@@ -937,4 +938,8 @@ def genImage(image, root, version=2):
     fs = Extfs(buf, blockCount, inodeCount, reservedBlockCount, version)
     fs.populate(EXTFS_ROOT_INO, root)
     fs.finalize()
-    buf.close()
+    try:
+        buf.close()
+    except BufferError as ex:
+        # FIXME: 'cannot close exported pointers exist' with python3
+        pass

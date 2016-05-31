@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Is there a configure script ?
 if [ -f configure ]; then

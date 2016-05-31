@@ -213,9 +213,12 @@ module-add = \
 	$(if $(LOCAL_HOST_MODULE), \
 		$(if $(or $(call streq,$(LOCAL_MODULE_CLASS),AUTOTOOLS), \
 				$(call streq,$(LOCAL_MODULE_CLASS),CUSTOM), \
+				$(call streq,$(LOCAL_MODULE_CLASS),EXECUTABLE), \
+				$(call streq,$(LOCAL_MODULE_CLASS),LIBRARY), \
+				$(call streq,$(LOCAL_MODULE_CLASS),STATIC_LIBRARY), \
 				$(call streq,$(LOCAL_MODULE_CLASS),PREBUILT)), \
 			$(eval LOCAL_MODULE := host.$(LOCAL_MODULE)), \
-			$(error $(LOCAL_PATH): Only AUTOTOOLS/CUSTOM/PREBUILT supported for host modules) \
+			$(error $(LOCAL_PATH): Only AUTOTOOLS/CUSTOM/PREBUILT/EXECUTABLE/LIBRARY supported for host modules) \
 		) \
 	) \
 	$(eval __mod := $(LOCAL_MODULE)) \
@@ -321,6 +324,8 @@ is-module-external = $(strip \
 		$(call streq,$(__class),GENERIC), \
 		$(call streq,$(__class),CUSTOM) \
 		$(call streq,$(__class),META_PACKAGE) \
+		$(call streq,$(__class),LINUX) \
+		$(call streq,$(__class),LINUX_MODULE) \
 	))
 
 ###############################################################################
@@ -376,13 +381,15 @@ __modules-get-required-host-direct = $(strip $(sort \
 ## not actually in it).
 ## If no global configuration file present, always return true (unless if was
 ## forcibly disabled).
+## FIXME: do NOT require module to be registered (in some cases it can be called
+## before the module is registered)
 ###############################################################################
 is-module-in-build-config = $(strip \
 	$(if $(call is-module-registered,$1), \
 		$(if $(call is-module-prebuilt,$1), \
 			$(true) \
 			, \
-			$(if $(call streq,$(CONFIG_GLOBAL_FILE_AVAILABLE),1), \
+			$(if $(call streq,$(GLOBAL_CONFIG_FILE_AVAILABLE),1), \
 				$(eval __var := CONFIG_ALCHEMY_BUILD_$(call module-get-define,$1)) \
 				$(if $(call is-var-defined,$(__var)), \
 					$(if $($(__var)),$(true),$(false)) \
@@ -734,14 +741,14 @@ __module-compute-depends-static-internal = \
 
 # When forcing static libraries, take into account external libraries as well
 # Otherwise assume they are mostly shared libraries
-ifeq ("$(TARGET_FORCE_STATIC)","1")
 __module-compute-depends-static-internal += \
-	$(foreach __mod,$(__modules.$1.EXTERNAL_LIBRARIES), \
-		$(if $(call is-module-registered,$(__mod)), \
-			$(call __module-compute-depends-static,$(__mod),$2) \
+	$(if $(call streq,$(TARGET_FORCE_STATIC),1), \
+		$(foreach __mod,$(__modules.$1.EXTERNAL_LIBRARIES), \
+			$(if $(call is-module-registered,$(__mod)), \
+				$(call __module-compute-depends-static,$(__mod),$2) \
+			) \
 		) \
 	)
-endif
 
 # Compute dependencies for link. It simply aggregate (and sort) dependencies
 # $1 : module name.
@@ -878,8 +885,14 @@ module-get-build-dir = $(strip \
 	))
 
 # Get build directory of a host module
-# $1 : nomalized host moduel (without 'host.' prefix)
+# $1 : normalized host module (without 'host.' prefix)
 module-get-build-dir-host = $(strip $(HOST_OUT_BUILD)/$1)
+
+
+# Get build directory of a module
+# It handle host/target modules
+# $2: name to retreive (built, installed...)
+module-get-stamp-file = $(call module-get-build-dir,$1)/$1.$2.stamp
 
 # Get build file name of a module
 # It handle host/target modules
@@ -901,6 +914,25 @@ module-get-staging-filename = $(strip \
 		$(if $(__modules.$1.SDK), \
 			$(__modules.$1.SDK)/$(__modules.$1.DESTDIR)/$(__modules.$1.MODULE_FILENAME), \
 			$(TARGET_OUT_STAGING)/$(__modules.$1.DESTDIR)/$(__modules.$1.MODULE_FILENAME) \
+		) \
+	))
+
+# Get build file name for the static lib when the module is a generic lib (both shared/static).
+module-get-static-lib-build-filename = $(strip \
+	$(subst $(TARGET_SHARED_LIB_SUFFIX),$(TARGET_STATIC_LIB_SUFFIX), \
+		$(call module-get-build-filename,$1) \
+	))
+
+# Get staging file name for the static lib when the module is a generic lib (both shared/static).
+module-get-static-lib-staging-filename = $(strip \
+	$(if $(call streq,$(__modules.$1.DESTDIR),$(TARGET_DEFAULT_BIN_DESTDIR)), \
+		$(subst $(TARGET_DEFAULT_BIN_DESTDIR),$(TARGET_DEFAULT_LIB_DESTDIR), \
+			$(subst $(TARGET_SHARED_LIB_SUFFIX),$(TARGET_STATIC_LIB_SUFFIX), \
+				$(call module-get-staging-filename,$1) \
+			) \
+		), \
+		$(subst $(TARGET_SHARED_LIB_SUFFIX),$(TARGET_STATIC_LIB_SUFFIX), \
+			$(call module-get-staging-filename,$1) \
 		) \
 	))
 
@@ -1020,6 +1052,20 @@ generate-last-revision-file = \
 endif
 
 ###############################################################################
+## Register a prebuilt module using pkg-config
+## $1 : name of the alchemy module
+## $2 : name of the pkg-config module (can specify several separaed by space)
+###############################################################################
+register-prebuilt-pkg-config-module = \
+	$(if $(call streq,$(shell pkg-config --exists $2; echo $$?),0), \
+		$(eval include $(CLEAR_VARS)) \
+		$(eval LOCAL_MODULE := $1) \
+		$(eval LOCAL_EXPORT_CFLAGS := $(shell pkg-config --cflags $2)) \
+		$(eval LOCAL_EXPORT_LDLIBS := $(shell pkg-config --libs $2)) \
+		$(call local-register-prebuilt-overridable) \
+	)
+
+###############################################################################
 ## Generate autoconf.h file from config file.
 ## $1 : input config file.
 ## $2 : output autoconf.h file.
@@ -1129,6 +1175,8 @@ normalize-c-includes-rel = $(strip \
 
 # Same as normalize-c-includes but uses the -isystem instead of -I flag
 # Note gcc 4.4.3 of android seems to mess things up when this flag is uses in C++
+# FIXME : adding a space between -isystem an the patch causes troubles when invoking
+# clangs' cpp (preprocessor) under darwin at least.
 normalize-system-c-includes = $(strip \
 	$(if $(call streq,$(TARGET_CC_VERSION),4.4.3), \
 		$(call normalize-c-includes,$1), \
@@ -1140,6 +1188,8 @@ normalize-system-c-includes = $(strip \
 
 # Same as normalize-c-includes-rel but uses the -isystem instead of -I flag
 # Note gcc 4.4.3 of android seems to mess things up when this flag is uses in C++
+# FIXME : the extra space does not cause too much troubles for relative path it is
+# not used with the preprocessor (autotools only)
 normalize-system-c-includes-rel = $(strip \
 	$(if $(call streq,$(TARGET_CC_VERSION),4.4.3), \
 		$(call normalize-c-includes-rel,$1), \
@@ -1288,6 +1338,8 @@ macro-exec-cmd = \
 		$(if $2,$($2)) \
 	)
 
+macro-has-cmd = $(or $(value __modules.$(PRIVATE_MODULE).$1),$(value $2))
+
 ###############################################################################
 ## Call custom macros.
 ## $1 : module name
@@ -1347,21 +1399,11 @@ check-custom-macro = \
 ## message displayed when used while TARGET_DEFAULT_ARM_MODE is 'arm'.
 ###############################################################################
 
-# Old variables still suported but no more in vars-LOCAL or macros-LOCAL
-__compat-vars-LOCAL := \
-	AUTOTOOLS_ARCHIVE \
-	AUTOTOOLS_VERSION \
-	AUTOTOOLS_SUBDIR \
-	AUTOTOOLS_PATCHES \
-	AUTOTOOLS_CMD_UNPACK \
-	AUTOTOOLS_CMD_POST_UNPACK \
-	AUTOTOOLS_COPY_TO_BUILD_DIR \
-
 # All allowed variables
 __all-vars-LOCAL := \
 	$(vars-LOCAL) \
 	$(macros-LOCAL) \
-	$(__compat-vars-LOCAL)
+	$(compat-vars-LOCAL)
 
 # Get all defined LOCAL_XXX variables
 __get-defined-local-vars = $(filter LOCAL_%,$(.VARIABLES))
@@ -1438,7 +1480,7 @@ link-hook = $(strip \
 		$(eval __depsdata := $(empty)) \
 		$(if $(call streq,$(TARGET_PBUILD_HOOK_USE_DESCRIBE),1), \
 			$(foreach __lib,$(sort $1 $(__modules.$1.depends.all)), \
-				$(eval __depsdata += $(__lib):$(__modules.$(__lib).PATH)) \
+				$(eval __depsdata += $(__lib):$(call module-get-revision-describe,$(__lib))) \
 			)\
 		) \
 		$(shell $(BUILD_SYSTEM)/pbuild-hook/pbuild-link-hook.sh \
@@ -1470,24 +1512,6 @@ $(eval __depsdata := $(subst $(space),\n,$(strip $(__depsdata))))
 endef
 
 ###############################################################################
-## Add a section in a binary with a build id.
-## This is a `sha1` of all sections that are loadable at runtime and with data
-## in the binary. This section is kept after stripping and the `sha1` can be
-## recomputed on the original and stripped binary and still produce the same
-## `sha1`. This can be used to identify the non-stripped binary based on the
-## stripped one.
-## Note : shall only be used in a rule because it uses $@
-###############################################################################
-
-define add-buildid-section
-@( \
-	$(BUILD_SYSTEM)/scripts/addbuildid.py \
-	--objcopy=$(PRIVATE_OBJCOPY) \
-	--section-name=$(TARGET_BUILDID_SECTION_NAME) $@ \
-)
-endef
-
-###############################################################################
 ## Copy license files from $1 to $2.
 ## It will copy [.]MODULE_LICENSE* and [.]MODULE_NAME* files, as well as
 ## NOTICE or COPYING files to help police.
@@ -1504,6 +1528,13 @@ define copy-license-files
 )
 endef
 
+define delete-license-files
+@( \
+	files="$(wildcard $(addprefix $1/,$(__license-pattern)))"; \
+	if [ "$${files}" != "" ]; then rm -f $${files}; fi; \
+)
+endef
+
 ###############################################################################
 ## Fix a .d file with compilation dependencies.
 ## It will ensure that full paths are specified.
@@ -1515,6 +1546,22 @@ define fix-deps-file
 		-e 's| \([^/\\: ]\)| $(TOP_DIR)/\1|g' \
 		-e 's|^\([^/\\: ]\)|$(TOP_DIR)/\1|g' \
 		$1 && rm -f $1.bak) \
+)
+endef
+
+###############################################################################
+## Update a file with another one if it does not exists or the contents has
+## changed.
+## $1 : file to create.
+## $2 : other file with new contents.
+###############################################################################
+define update-file-if-needed
+@( \
+	mkdir -p $(dir $1); \
+	if [ ! -f $1 ]; then mv $2 $1; \
+	elif ! diff -q $2 $1 &>/dev/null; then mv $2 $1; \
+	else rm -f $2; \
+	fi; \
 )
 endef
 

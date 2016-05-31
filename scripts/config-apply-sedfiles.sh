@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/bin/sh
 
-function usage()
+usage()
 {
 	echo ""
 	echo "Apply a set of sed files to a config."
@@ -34,7 +34,7 @@ shift 2
 readonly CONFIG_OUT_FILE_TMP=$(mktemp tmp.XXXXXXXXXX)
 
 # Log something if verbose mode is activated
-function logv()
+logv()
 {
 	if [ "${VERBOSE}" != "0" ]; then
 		echo "$@" >&2
@@ -45,7 +45,7 @@ function logv()
 cp -f ${CONFIG_IN_FILE} ${CONFIG_OUT_FILE_TMP}
 
 # Apply sed files
-for f in $*; do
+for f in "$@"; do
 	logv "Apply $f on ${CONFIG_IN_FILE} to ${CONFIG_OUT_FILE}"
 	sed --file=$f -i.bak ${CONFIG_OUT_FILE_TMP}
 	rm -f ${CONFIG_OUT_FILE_TMP}.bak
@@ -66,4 +66,3 @@ else
 	logv "Output is the same"
 	rm -f ${CONFIG_OUT_FILE_TMP}
 fi
-

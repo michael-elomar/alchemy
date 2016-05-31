@@ -12,8 +12,8 @@
 
 # Alchemy version
 ALCHEMY_VERSION_MAJOR := 1
-ALCHEMY_VERSION_MINOR := 2
-ALCHEMY_VERSION_REV   := 5
+ALCHEMY_VERSION_MINOR := 3
+ALCHEMY_VERSION_REV   := 0
 ALCHEMY_VERSION := $(ALCHEMY_VERSION_MAJOR).$(ALCHEMY_VERSION_MINOR).$(ALCHEMY_VERSION_REV)
 
 # Make sure SHELL is correctly set
@@ -44,8 +44,7 @@ USE_AUTOTOOLS_CACHE ?= 0
 USE_AUTO_LIB_PREFIX ?= 0
 USE_LINK_MAP_FILE ?= 1
 
-# The host module feature might break temporatily some atom/mk, add a flag
-# so it can be checked
+# TODO: remove any reference to this in atom.mk
 ALCHEMY_SUPPORT_HOST_MODULE := 1
 
 # Quiet command if V is 0
@@ -55,6 +54,12 @@ ifeq ("$(V)","0")
 else
   Q :=
 endif
+
+# Remove --warn-undefined-variables flags for sub-make invocations
+# FIXME: this has the side effect of disabling other stuff as well (like -j)...
+#ifdef MAKEFLAGS
+#  override MAKEFLAGS := $(filter-out --warn-undefined-variables,$(MAKEFLAGS))
+#endif
 
 # This is the default target.  It must be the first declared target.
 all:
@@ -67,72 +72,61 @@ MAKECMDGOALS ?= all
 .FORCE:
 
 ###############################################################################
-## The following 2 macros can NOT be put in defs.mk as it will be included
-## only after.
 ###############################################################################
 
 # Figure out where we are
 # It returns the full path without trailing '/'
 my-dir = $(abspath $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST)))))
+BUILD_SYSTEM := $(call my-dir)
 
-###############################################################################
-## Env system setup.
-###############################################################################
-
-# Directories (full and real path)
-ALCHEMY_WORKSPACE_DIR ?= $(shell pwd)
-TOP_DIR := $(realpath $(ALCHEMY_WORKSPACE_DIR))
-
-# Import target product from env
-ifdef ALCHEMY_TARGET_PRODUCT
-  TARGET_PRODUCT := $(ALCHEMY_TARGET_PRODUCT)
-endif
-
-# Import target product variant from env
-ifdef ALCHEMY_TARGET_PRODUCT_VARIANT
-  TARGET_PRODUCT_VARIANT := $(ALCHEMY_TARGET_PRODUCT_VARIANT)
-endif
-
-# Import target config dir from env
-ifdef ALCHEMY_TARGET_CONFIG_DIR
-  TARGET_CONFIG_DIR := $(ALCHEMY_TARGET_CONFIG_DIR)
-endif
-
-# Import target out dir from env
-ifdef ALCHEMY_TARGET_OUT
-  TARGET_OUT := $(ALCHEMY_TARGET_OUT)
-endif
-
-# Import skel dis from env
-ifdef ALCHEMY_TARGET_SKEL_DIRS
-  TARGET_SKEL_DIRS := $(ALCHEMY_TARGET_SKEL_DIRS)
-endif
-
-# Import scan add dirs from env
-ifdef ALCHEMY_TARGET_SCAN_ADD_DIRS
-  TARGET_SCAN_ADD_DIRS := $(ALCHEMY_TARGET_SCAN_ADD_DIRS)
-endif
-
-# Import scan prune dirs from env
-ifdef ALCHEMY_TARGET_SCAN_PRUNE_DIRS
-  TARGET_SCAN_PRUNE_DIRS := $(ALCHEMY_TARGET_SCAN_PRUNE_DIRS)
-endif
-
-# Import sdk dirs from env
-ifdef ALCHEMY_TARGET_SDK_DIRS
-  TARGET_SDK_DIRS := $(ALCHEMY_TARGET_SDK_DIRS)
-endif
-
-# Import use colors from env
+# Import use colors from env (required before including defs.mk)
 ifdef ALCHEMY_USE_COLORS
   USE_COLORS := $(ALCHEMY_USE_COLORS)
 endif
 
 ###############################################################################
+## Env system setup.
+###############################################################################
+include $(BUILD_SYSTEM)/variables.mk
+include $(BUILD_SYSTEM)/defs.mk
+
+# Make sure all TARGET_xxx variables that we received does not have trailing
+# spaces or end of line
+$(foreach __var,$(vars-TARGET), \
+	$(if $(call is-var-defined,TARGET_$(__var)), \
+		$(eval TARGET_$(__var) := $(strip $(TARGET_$(__var)))) \
+	) \
+)
+
+USER_MAKEFILE_NAME := atom.mk
+include $(BUILD_SYSTEM)/target-setup.mk
+include $(BUILD_SYSTEM)/toolchain-setup.mk
+
+###############################################################################
+## Display configuration.
+###############################################################################
+msg = $(info $(CLR_CYAN)$1$(CLR_DEFAULT))
+$(info ----------------------------------------------------------------------)
+$(call msg,+ ALCHEMY_WORKSPACE_DIR = $(ALCHEMY_WORKSPACE_DIR))
+$(call msg,+ TARGET_PRODUCT = $(TARGET_PRODUCT))
+$(call msg,+ TARGET_PRODUCT_VARIANT = $(TARGET_PRODUCT_VARIANT))
+$(call msg,+ TARGET_OS = $(TARGET_OS))
+$(call msg,+ TARGET_OS_FLAVOUR = $(TARGET_OS_FLAVOUR))
+$(call msg,+ TARGET_LIBC = $(TARGET_LIBC))
+$(call msg,+ TARGET_ARCH = $(TARGET_ARCH))
+$(call msg,+ TARGET_CPU = $(TARGET_CPU))
+$(call msg,+ TARGET_OUT = $(TARGET_OUT))
+$(call msg,+ TARGET_CONFIG_DIR = $(TARGET_CONFIG_DIR))
+$(call msg,+ TARGET_CC_PATH = $(TARGET_CC_PATH))
+$(call msg,+ TARGET_CC_VERSION = $(TARGET_CC_VERSION))
+$(info ----------------------------------------------------------------------)
+
+# Do some checking
+include $(BUILD_SYSTEM)/check.mk
+
+###############################################################################
 ## Build system setup.
 ###############################################################################
-
-BUILD_SYSTEM := $(call my-dir)
 
 # Set this variable to 1 to skip a lot of things like dependencies check and
 # config check. Useful if user only want some internal query or configure
@@ -147,53 +141,17 @@ SKIP_EXT_DEPS_AND_CHECKS := 0
 # Silently skip config check (in contrast to USE_CONFIG_CHECK that warn)
 SKIP_CONFIG_CHECK := 0
 
-# Include product env file
-ifdef TARGET_CONFIG_DIR
--include $(TARGET_CONFIG_DIR)/product.mk
-endif
+# Register and setup all module classes
+include $(BUILD_SYSTEM)/classes/setup.mk
 
-# Setup macros definitions
-include $(BUILD_SYSTEM)/variables.mk
-include $(BUILD_SYSTEM)/defs.mk
+# Setup configuration definitions
+include $(BUILD_SYSTEM)/config-defs.mk
 
-# Make sure all TARGET_xxx variables that we received does not have trailing
-# spaces or end of line
-$(foreach __var,$(vars-TARGET), \
-	$(if $(call is-var-defined,TARGET_$(__var)), \
-		$(eval TARGET_$(__var) := $(strip $(TARGET_$(__var)))) \
-	) \
-)
+# Makefile that will clear all LOCAL_XXX variable before registering a new module
+CLEAR_VARS := $(BUILD_SYSTEM)/clearvars.mk
 
-# If a sdk has a setup.mk file, include it
-TARGET_SDK_DIRS ?=
-$(foreach __dir,$(TARGET_SDK_DIRS), \
-	$(eval -include $(__dir)/setup.mk) \
-)
-
-# Remember all TARGET_XXX variables from external setup
-# FIXME: using := causes trouble if one of the sdk setup file has done a +=
-# on a TARGET variable and used a not yet defined variable
-#
-# For example:
-# TARGET_GLOBAL_LDFLAGS += \
-#     -L$(TARGET_OUT_STAGING)/usr/lib/arm-linux-gnueabihf/tegra
-# TARGET_OUT_STAGING is NOT yet defined, it will be below
-#
-# It works because the var will be recursive and not immediate
-# So we use macro-copy and after full setup value will be correct.
-$(foreach __var,$(vars-TARGET_SETUP), \
-	$(if $(call is-var-defined,TARGET_$(__var)), \
-		$(call macro-copy,TARGET_SETUP_$(__var),TARGET_$(__var)) \
-	) \
-)
-
-# Setup configuration
-USER_MAKEFILE_NAME := atom.mk
-include $(BUILD_SYSTEM)/setup.mk
-
-###############################################################################
-# Optimizations for some goals.
-###############################################################################
+# Shall be defined before including user makefiles
+AUTOCONF_MERGE_FILE := $(TARGET_OUT_BUILD)/autoconf-merge.h
 
 # Define some target class
 __clobber-targets := clobber clean dirclean
@@ -228,79 +186,6 @@ endif
 ifneq ("$(SKIP_DEPS_AND_CHECKS)","0")
   SKIP_EXT_DEPS_AND_CHECKS := 1
 endif
-
-###############################################################################
-## Display configuration.
-###############################################################################
-msg = $(info $(CLR_CYAN)$1$(CLR_DEFAULT))
-$(info ----------------------------------------------------------------------)
-$(call msg,+ ALCHEMY_WORKSPACE_DIR = $(ALCHEMY_WORKSPACE_DIR))
-$(call msg,+ TARGET_PRODUCT = $(TARGET_PRODUCT))
-$(call msg,+ TARGET_PRODUCT_VARIANT = $(TARGET_PRODUCT_VARIANT))
-$(call msg,+ TARGET_OS = $(TARGET_OS))
-$(call msg,+ TARGET_OS_FLAVOUR = $(TARGET_OS_FLAVOUR))
-$(call msg,+ TARGET_LIBC = $(TARGET_LIBC))
-$(call msg,+ TARGET_ARCH = $(TARGET_ARCH))
-$(call msg,+ TARGET_CPU = $(TARGET_CPU))
-$(call msg,+ TARGET_OUT = $(TARGET_OUT))
-$(call msg,+ TARGET_CONFIG_DIR = $(TARGET_CONFIG_DIR))
-$(call msg,+ TARGET_CC_PATH = $(TARGET_CC_PATH))
-$(call msg,+ TARGET_CC_VERSION = $(TARGET_CC_VERSION))
-$(info ----------------------------------------------------------------------)
-
-# Do some checking
-include $(BUILD_SYSTEM)/check.mk
-
-###############################################################################
-## Setup part2 (may use optimization flags from above).
-###############################################################################
-
-# Setup internal build definitions
-include $(BUILD_SYSTEM)/binary-setup.mk
-
-# Setup autotools definitions (shall be after inclusion of defs.mk)
-include $(BUILD_SYSTEM)/autotools-setup.mk
-
-# Setup CMake definitions
-include $(BUILD_SYSTEM)/cmake-setup.mk
-
-# Setup QMake definitions
-include $(BUILD_SYSTEM)/qmake-setup.mk
-
-# Setup warnings flags
-include $(BUILD_SYSTEM)/warnings.mk
-
-# Setup configuration definitions
-include $(BUILD_SYSTEM)/config-defs.mk
-
-# User specific debug setup makefile
-debug-setup-makefile := Alchemy-debug-setup.mk
-ifneq ("$(wildcard $(TOP_DIR)/$(debug-setup-makefile))","")
-  ifneq ("$(V)","0")
-    $(info Including debug setup makefile)
-  endif
-  include $(TOP_DIR)/$(debug-setup-makefile)
-endif
-
-# Names of makefiles that can be included by user Makefiles
-CLEAR_VARS := $(BUILD_SYSTEM)/clearvars.mk
-BUILD_STATIC_LIBRARY := $(BUILD_SYSTEM)/static.mk
-BUILD_SHARED_LIBRARY := $(BUILD_SYSTEM)/shared.mk
-BUILD_LIBRARY := $(BUILD_SYSTEM)/library.mk
-BUILD_EXECUTABLE := $(BUILD_SYSTEM)/executable.mk
-BUILD_AUTOTOOLS := $(BUILD_SYSTEM)/autotools.mk
-BUILD_CMAKE := $(BUILD_SYSTEM)/cmake.mk
-BUILD_QMAKE := $(BUILD_SYSTEM)/qmake.mk
-BUILD_PYTHON_EXTENSION := $(BUILD_SYSTEM)/python-ext.mk
-BUILD_CUSTOM := $(BUILD_SYSTEM)/custom.mk
-BUILD_META_PACKAGE := $(BUILD_SYSTEM)/meta.mk
-BUILD_LINUX := $(BUILD_SYSTEM)/linuxkernel.mk
-BUILD_PREBUILT := $(BUILD_SYSTEM)/prebuilt.mk
-BUILD_LINUX_MODULE := $(BUILD_SYSTEM)/linuxkernelmodule.mk
-BUILD_GI_TYPELIB := $(BUILD_SYSTEM)/gobject-introspection.mk
-
-# Shall be defined before including user makefiles
-AUTOCONF_MERGE_FILE := $(TARGET_OUT_BUILD)/autoconf-merge.h
 
 ###############################################################################
 ## Makefile scan and includes.
@@ -341,7 +226,8 @@ create-user-makefiles-cache = \
 	touch $(USER_MAKEFILES_CACHE); \
 	( \
 		files="$(addsuffix /$(USER_MAKEFILE_NAME),$(TARGET_SDK_DIRS)) \
-			$(BUILD_SYSTEM)/toolchains/toolchains-packages.mk \
+			$(BUILD_SYSTEM)/targets/packages.mk \
+			$(BUILD_SYSTEM)/toolchains/packages.mk \
 		"; \
 		for f in $$files `$(find-cmd)`; do \
 			echo "USER_MAKEFILES += $$f"; \
@@ -437,7 +323,7 @@ ALL_BUILD_MODULES := $(strip \
 	))
 
 # If no config file available, remove modules with unknown dependencies
-ifeq ("$(CONFIG_GLOBAL_FILE_AVAILABLE)","0")
+ifeq ("$(GLOBAL_CONFIG_FILE_AVAILABLE)","0")
 $(foreach __mod,$(ALL_BUILD_MODULES), \
 	$(foreach __lib,$(call module-get-all-depends,$(__mod)), \
 		$(if $(call is-module-registered,$(__lib)),$(empty), \
@@ -516,7 +402,7 @@ endif
 # If 'all' or 'check' is also given do not do the filter
 # For meta packages, also get config dependencies (for build/clean shortcuts)
 __modlist := $(empty)
-ifeq ("$(call is-targets-in-make-goals,all check)","")
+ifeq ("$(call is-targets-in-make-goals,all check all-clean all-dirclean)","")
 $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST), \
 	$(if $(call is-module-in-make-goals,$(__mod)), \
 		$(eval __modlist += $(__mod) $(call module-get-all-depends,$(__mod))) \
@@ -549,7 +435,7 @@ __modlist := $(sort $(__modlist))
 # prerequisites
 $(foreach __mod,$(sort $(__modlist) $(__modules-with-global-prerequisites)), \
 	$(eval LOCAL_MODULE := $(__mod)) \
-	$(eval include $(BUILD_SYSTEM)/module.mk) \
+	$(eval include $(BUILD_SYSTEM)/classes/rules.mk) \
 )
 
 ifneq ("$(V)","0")
@@ -607,17 +493,19 @@ all-cloc: $(foreach __mod,$(ALL_BUILD_MODULES),$(if $(call is-module-prebuilt,$(
 	@echo "Done all-cloc"
 
 # Just to test clean target of all modules
-.PHONY: _clean
-_clean: $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST),$(__mod)-clean)
+.PHONY: all-clean
+all-clean: $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST),$(__mod)-clean)
 	$(Q)rm -f $(AUTOCONF_MERGE_FILE)
 	$(Q)rm -f $(USER_MAKEFILES_CACHE)
+	$(Q)[ ! -d $(TARGET_OUT_BUILD) ] || find $(TARGET_OUT_BUILD) -depth -type d -empty -delete
+	$(Q)[ ! -d $(HOST_OUT_BUILD) ] || find $(HOST_OUT_BUILD) -depth -type d -empty -delete
 	$(Q)[ ! -d $(TARGET_OUT_STAGING) ] || find $(TARGET_OUT_STAGING) -depth -type d -empty -delete
 	$(Q)[ ! -d $(HOST_OUT_STAGING) ] || find $(HOST_OUT_STAGING) -depth -type d -empty -delete
 	@echo "Done cleaning"
 
 # Just to test dirclean target of all modules
-.PHONY: _dirclean
-_dirclean: $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST),$(__mod)-dirclean)
+.PHONY: all-dirclean
+all-dirclean: $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST),$(__mod)-dirclean)
 	$(Q)rm -f $(AUTOCONF_MERGE_FILE)
 	$(Q)rm -f $(USER_MAKEFILES_CACHE)
 	$(Q)[ ! -d $(TARGET_OUT_STAGING) ] || find $(TARGET_OUT_STAGING) -depth -type d -empty -delete
@@ -626,7 +514,7 @@ _dirclean: $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST),$(__mo
 
 # Most users want a clobber when they ask for clean or dirclean
 # To really do clean or dirclean for EACH module (takes some time)
-# see _clean and _dirclean
+# see all-clean and all-dirclean
 .PHONY: clean
 .PHONY: dirclean
 clean: clobber
