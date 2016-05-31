@@ -332,6 +332,10 @@ all_autoconf := $(call module-get-listed-autoconf, \
 	$(call filter-get-internal-modules,$(all_depends)) $(LOCAL_MODULE))
 endif
 
+# Add autoconf of modules listed in LOCAL_DEPENDS_HEADERS
+all_autoconf += $(call module-get-listed-autoconf, \
+	$(LOCAL_DEPENDS_HEADERS))
+
 # Force their inclusion (space after -include and before comma is important)
 LOCAL_CFLAGS += $(addprefix -include ,$(all_autoconf))
 
