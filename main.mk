@@ -154,7 +154,7 @@ CLEAR_VARS := $(BUILD_SYSTEM)/clearvars.mk
 AUTOCONF_MERGE_FILE := $(TARGET_OUT_BUILD)/autoconf-merge.h
 
 # Define some target class
-__clobber-targets := clobber clean dirclean
+__clobber-targets := clobber clean dirclean final-clean
 __query-targets := scan help help-modules dump dump-depends dump-xml build-graph
 __config-targets := config config-check config-update xconfig menuconfig nconfig
 
