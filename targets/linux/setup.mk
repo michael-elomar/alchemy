@@ -13,3 +13,5 @@ TARGET_EXE_SUFFIX :=
 ifneq ("$(TARGET_OS_FLAVOUR)","")
   -include $(BUILD_SYSTEM)/targets/$(TARGET_OS)/$(TARGET_OS_FLAVOUR)/setup.mk
 endif
+
+TARGET_LIBC ?= eglibc
