@@ -79,6 +79,7 @@ include $(BUILD_SYSTEM)/classes/GENERIC/rules.mk
 # ourself that the configure file is newer.
 ifneq ("$(wildcard $(_generic_src_dir)/$(LOCAL_AUTOTOOLS_CONFIGURE_SCRIPT))","")
 $(_module_configured_stamp_file): $(_generic_src_dir)/$(LOCAL_AUTOTOOLS_CONFIGURE_SCRIPT)
+$(_generic_src_dir)/$(LOCAL_AUTOTOOLS_CONFIGURE_SCRIPT): $(_module_bootstrapped_stamp_file)
 endif
 
 # TODO
