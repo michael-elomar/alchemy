@@ -183,7 +183,7 @@ _qmake-gen-deps = $(if $(call streq,$($(PRIVATE_MODE)_OS),darwin), \
 define _qmake-def-cmd-build
 	$(_qmake-gen-deps)
 	$(Q) cd $(PRIVATE_BUILD_DIR) \
-		&& $(TARGET_QMAKE_ENV) $(TARGET_QMAKE) $(TARGET_QMAKE_ARG) \
+		&& $(TARGET_QMAKE_ENV) $(QMAKE) $(TARGET_QMAKE_ARG) \
 			$(if $(call is-path-absolute,$(PRIVATE_QMAKE_PRO_FILE)), \
 				$(PRIVATE_QMAKE_PRO_FILE) \
 				, \
