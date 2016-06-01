@@ -6,6 +6,8 @@
 ## Setup variables for linux/yocto target.
 ###############################################################################
 
+TARGET_LIBC := yocto
+
 YOCTO_SDK_DEFAULT_PATHS := \
 	/opt/poky* \
 	~/Library/poky* \
