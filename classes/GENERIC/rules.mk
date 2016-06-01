@@ -116,6 +116,7 @@ $(_module_built_stamp_file): $(_module_configured_stamp_file)
 	@touch $@
 
 $(_module_installed_stamp_file): $(_module_built_stamp_file)
+	+$(call macro-exec-cmd,CMD_PRE_INSTALL,empty)
 	+$(call _generic-exec-step,INSTALL,Installing)
 	@$(call generate-last-revision-file,$(PRIVATE_MODULE),$(PRIVATE_REV_FILE))
 	@mkdir -p $(dir $@)
