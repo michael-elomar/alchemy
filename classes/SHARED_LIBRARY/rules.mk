@@ -6,7 +6,11 @@
 ## Rules for SHARED_LIBRARY modules.
 ###############################################################################
 
-ifeq ("$(LOCAL_SDK)","")
+ifneq ("$(LOCAL_SDK)","")
+
+include $(BUILD_SYSTEM)/classes/GENERIC/rules.mk
+
+else
 
 _module_msg := $(if $(_mode_host),Host )SharedLib
 
