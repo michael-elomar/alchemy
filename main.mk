@@ -103,6 +103,15 @@ include $(BUILD_SYSTEM)/target-setup.mk
 include $(BUILD_SYSTEM)/toolchain-setup.mk
 
 ###############################################################################
+## Default rules of makefile add TARGET_ARCH in CFLAGS.
+## As it is not the way we use it, prevent export of this variable
+###############################################################################
+# Unexport does not work when TARGET_ARCH is set on command line, force clearing it
+MAKEOVERRIDES ?=
+MAKEOVERRIDES := $(filter-out TARGET_ARCH=%,$(MAKEOVERRIDES))
+unexport TARGET_ARCH
+
+###############################################################################
 ## Display configuration.
 ###############################################################################
 msg = $(info $(CLR_CYAN)$1$(CLR_DEFAULT))

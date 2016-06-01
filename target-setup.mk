@@ -269,15 +269,6 @@ TARGET_FINAL_MODE ?= firmware
 TARGET_LDCONFIG_DIRS ?=
 
 ###############################################################################
-## Default rules of makefile add TARGET_ARCH in CFLAGS.
-## As it is not the way we use it, prevent export of this variable
-###############################################################################
-# Unexport does not work when TARGET_ARCH is set on command line, force clearing it
-MAKEOVERRIDES ?=
-MAKEOVERRIDES := $(filter-out TARGET_ARCH=%,$(MAKEOVERRIDES))
-unexport TARGET_ARCH
-
-###############################################################################
 ## gobject-introspection setup.
 ###############################################################################
 TARGET_XDG_DATA_DIRS := $(TARGET_OUT_STAGING)/usr/share
