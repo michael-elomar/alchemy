@@ -714,4 +714,8 @@ _module_hook_post_install := empty
 _module_hook_pre_clean := empty
 _module_hook_post_clean := empty
 
+ifeq ("$(LOCAL_MODULE_CLASS)","")
+$(error $(LOCAL_MODULE): LOCAL_MODULE_CLASS is empty)
+endif
+
 include $(BUILD_SYSTEM)/classes/$(LOCAL_MODULE_CLASS)/rules.mk
