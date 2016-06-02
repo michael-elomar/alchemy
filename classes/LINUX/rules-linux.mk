@@ -243,7 +243,7 @@ endif
 ifneq ("$(TARGET_LINUX_DEVICE_TREE_NAMES)","")
 	$(foreach __f,$(TARGET_LINUX_DEVICE_TREE_NAMES), \
 		$(Q) cp -af $(LINUX_BUILD_DIR)/arch/$(LINUX_SRCARCH)/boot/dts/$(__f) \
-			$(TARGET_OUT_STAGING)/boot/$(__f)$(endl) \
+			$(TARGET_OUT_STAGING)/boot/$(endl) \
 	)
 endif
 	$(Q) cp -af $(LINUX_BUILD_DIR)/vmlinux $(TARGET_OUT_STAGING)/boot
