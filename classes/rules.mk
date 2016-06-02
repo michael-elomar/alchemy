@@ -614,6 +614,10 @@ endif
 .PHONY: $(LOCAL_MODULE)
 $(LOCAL_MODULE): $(_module_done_stamp_file)
 
+# Add direct dependencies. Mainly used for copy to staging/final dir to get
+# everything built for the module
+$(LOCAL_MODULE): $(call module-get-depends,$(LOCAL_MODULE))
+
 # Clean module (do NOT put any commands to allow customisation by module)
 .PHONY: $(LOCAL_MODULE)-clean
 $(LOCAL_MODULE)-clean: $(LOCAL_MODULE)-clean-common

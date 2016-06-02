@@ -415,12 +415,14 @@ $3: $2
 endef
 
 _binary-copy-to-staging = \
-	$(eval $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $3) \
-	$(eval $(_module_installed_stamp_file): $3) \
-	$(eval $(call copy-one-file,$2,$3))
+	$(if $(call strneq,$(LOCAL_NO_COPY_TO_STAGING),1), \
+		$(eval $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $3) \
+		$(eval $(_module_installed_stamp_file): $3) \
+		$(eval $(call copy-one-file,$2,$3)) \
+	)
 
 _binary-copy-to-final = \
-	$(if $(and $(call streq,$1,TARGET),$(wildcard $(TARGET_OUT_FINAL))), \
+	$(if $(and $(call strneq,$(LOCAL_NO_COPY_TO_STAGING),1),$(call streq,$1,TARGET),$(wildcard $(TARGET_OUT_FINAL))), \
 		$(eval $(LOCAL_MODULE): $3) \
 		$(if $(or $(call streq,$(TARGET_NOSTRIP_FINAL),1),$(filter $(TARGET_STRIP_FILTER),$(notdir $2))), \
 			$(eval $(call copy-one-file,$2,$3)) \
