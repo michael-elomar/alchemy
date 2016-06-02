@@ -414,10 +414,14 @@ __modlist := $(empty)
 ifeq ("$(call is-targets-in-make-goals,all check all-clean all-dirclean)","")
 $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST), \
 	$(if $(call is-module-in-make-goals,$(__mod)), \
-		$(eval __modlist += $(__mod) $(call module-get-all-depends,$(__mod))) \
+		$(eval __modlist += $(__mod)) \
+		$(eval __modlist += $(call module-get-all-depends,$(__mod))) \
+		$(eval __modlist += $(call module-get-headers-depends,$(__mod))) \
 		$(if $(call is-module-meta-package,$(__mod)), \
 			$(foreach __mod2,$(call module-get-config-depends,$(__mod)), \
-				$(eval __modlist += $(__mod2) $(call module-get-all-depends,$(__mod2))) \
+				$(eval __modlist += $(__mod2)) \
+				$(eval __modlist += $(call module-get-all-depends,$(__mod2))) \
+				$(eval __modlist += $(call module-get-headers-depends,$(__mod2))) \
 			) \
 		) \
 	) \

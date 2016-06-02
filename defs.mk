@@ -861,6 +861,10 @@ module-get-link-depends = \
 module-get-all-depends = \
 	$(__modules.$1.depends.all)
 
+# Get headers dependencies
+module-get-headers-depends = \
+	$(__modules.$1.depends.headers)
+
 # Get direct dependencies
 module-get-depends = \
 	$(__modules.$1.depends)
