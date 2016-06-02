@@ -432,7 +432,7 @@ module-restore-locals = \
 # a sdk.
 modules-check-depends = \
 	$(foreach __mod,$(__modules), \
-		$(if $(or $(call is-module-in-build-config,$(__mod)),$(call is-module-in-make-goals,$(__mod))), \
+		$(if $(call is-module-in-build-config,$(__mod)), \
 			$(if $(__modules.$(__mod).SDK),$(empty), \
 				$(call __module-check-depends,$(__mod)) \
 			) \
