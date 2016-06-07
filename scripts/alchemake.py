@@ -228,7 +228,7 @@ def main():
 	while True:
 		try:
 			# Empty line means EOF detected, so exit loop
-			line = jobCtrl.job.process.stderr.readline().decode("UTF-8")
+			line = jobCtrl.job.process.stderr.readline()
 			if len(line) == 0:
 				logging.debug("EOF detected")
 				break
