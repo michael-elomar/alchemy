@@ -69,6 +69,11 @@ USE_AUTO_LIB_PREFIX := 1
 # Disable map file generation, it causes linker to crash
 USE_LINK_MAP_FILE := 0
 
+# Handle STL link issues: either force static or link with STL's dynamic library
+ifneq ("$(TARGET_ANDROID_SHARED_STL)","1")
+  TARGET_PBUILD_FORCE_STATIC := 1
+endif
+
 # Ensure Android/Arm ABI compatibility. Supported ABIs are
 # 	- armeabi when TARGET_CPU=''
 # 	- armeabi-v7a when TARGET_CPU='armv7a'
