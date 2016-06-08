@@ -13,7 +13,7 @@ usage()
 }
 
 # Activate verbose mode
-if [ "$1" == "-v" ]; then
+if [ "$1" = "-v" ]; then
 	readonly VERBOSE=1
 	shift
 else
