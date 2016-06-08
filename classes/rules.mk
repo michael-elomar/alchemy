@@ -67,6 +67,7 @@ LOCAL_STAGING_MODULE := $(call module-get-staging-filename,$(LOCAL_MODULE))
 LOCAL_TARGETS := \
 	$(_module_all_stamp_files) \
 	$(LOCAL_CUSTOM_TARGETS) \
+	$(LOCAL_BUILD_MODULE) \
 	$(LOCAL_MODULE) \
 	$(LOCAL_MODULE)-clean \
 	$(LOCAL_MODULE)-dirclean \
