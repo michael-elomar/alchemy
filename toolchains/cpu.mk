@@ -109,6 +109,18 @@ ifeq ("$(TARGET_CPU)","a9s")
 endif
 
 ###############################################################################
+# Apq8009 cpus
+###############################################################################
+
+ifeq ("$(TARGET_CPU)","apq8009")
+  TARGET_GLOBAL_CFLAGS += $(cflags_armv7a_neon)
+  TARGET_GLOBAL_CFLAGS += -march=armv7ve -mtune=cortex-a7 -mcpu=cortex-a7
+  TARGET_CPU_ARMV7A_NEON := 1
+  TARGET_CPU_HAS_NEON := 1
+  TARGET_FLOAT_ABI ?= hard
+endif
+
+###############################################################################
 # Generic cpus.
 ###############################################################################
 
