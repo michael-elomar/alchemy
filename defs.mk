@@ -967,16 +967,19 @@ __git-rev-compute = \
 	$(eval __data := $(shell cd $1 && git rev-parse --show-toplevel HEAD 2>/dev/null)) \
 	$(eval __top-level := $(word 1,$(__data))) \
 	$(eval __sha1 := $(word 2,$(__data))) \
+	$(eval __url := $(shell cd $1 && git ls-remote --get-url $$(git remote | head -n1))) \
 	$(if $(__top-level), \
 		$(eval __desc := $(shell cd $(__top-level) && git describe --tags --always 2>/dev/null)) \
 		$(if $(wildcard $(__top-level)/.gitmodules),$(empty), \
 			$(eval __git-rev-cache.$(__top-level).sha1 := $(__sha1)) \
 			$(eval __git-rev-cache.$(__top-level).desc := $(__desc)) \
+			$(eval __git-rev-cache.$(__top-level).url := $(__url)) \
 			$(eval __git-rev-cache += $(__top-level)) \
 		) \
 		, \
 		$(eval __sha1 := $(empty)) \
 		$(eval __desc := $(empty)) \
+		$(eval __url := $(empty)) \
 	)
 
 # Search in cache if directory has already on of its parent in the cache
@@ -991,6 +994,7 @@ __git-rev-get = \
 					$(call not,$(patsubst $(__top-level)/%,,$1/))), \
 				$(eval __sha1 := $(__git-rev-cache.$(__top-level).sha1)) \
 				$(eval __desc := $(__git-rev-cache.$(__top-level).desc)) \
+				$(eval __url := $(__git-rev-cache.$(__top-level).url)) \
 				$(eval __found := $(true)) \
 			) \
 		) \
@@ -1011,8 +1015,10 @@ module-compute-revision = \
 		$(call __git-rev-get,$(__path)) \
 		$(if $(__sha1),$(empty),$(eval __sha1 := unknown)) \
 		$(if $(__desc),$(empty),$(eval __desc := unknown)) \
+		$(if $(__url),$(empty),$(eval __url := unknown)) \
 		$(eval __modules.$1.REVISION := $(__sha1)) \
 		$(eval __modules.$1.REVISION_DESCRIBE := $(__desc)) \
+		$(eval __modules.$1.REVISION_URL := $(__url)) \
 		$(if $(call strneq,$(V),0),$(info Revision of $1: $(__sha1) / $(__desc))) \
 	) \
 
@@ -1023,6 +1029,10 @@ module-get-revision = $(strip $(module-compute-revision)$(__modules.$1.REVISION)
 # Get revision (with git describe) of one module
 # $1 : module name.
 module-get-revision-describe = $(strip $(module-compute-revision)$(__modules.$1.REVISION_DESCRIBE))
+
+# Get revision url of one module
+# $1 : module name.
+module-get-revision-url = $(strip $(module-compute-revision)$(__modules.$1.REVISION_URL))
 
 # Get last revision of one module. It is found in a generated file that may
 # not exist so the result can be empty.
