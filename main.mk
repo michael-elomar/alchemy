@@ -423,6 +423,12 @@ $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST), \
 				$(eval __modlist += $(call module-get-all-depends,$(__mod2))) \
 				$(eval __modlist += $(call module-get-headers-depends,$(__mod2))) \
 			) \
+			$(foreach __mod2,$(sort $(__modlist)), \
+				$(if $(call is-module-registered,$(__mod2)),$(empty), \
+					$(info Meta package $(__mod) requires unknown module $(__mod2)) \
+					$(eval __modlist := $(filter-out $(__mod2),$(__modlist))) \
+				) \
+			) \
 		) \
 	) \
 )
