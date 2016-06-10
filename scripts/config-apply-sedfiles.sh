@@ -57,7 +57,7 @@ if ! test -f ${CONFIG_OUT_FILE} ; then
 	# Output does not exist
 	logv "Output does not exist"
 	mv -f ${CONFIG_OUT_FILE_TMP} ${CONFIG_OUT_FILE}
-elif ! cmp ${CONFIG_OUT_FILE_TMP} ${CONFIG_OUT_FILE} &>/dev/null ; then
+elif ! cmp ${CONFIG_OUT_FILE_TMP} ${CONFIG_OUT_FILE} >/dev/null 2>&1 ; then
 	# Output has changed since last time
 	logv "Output has changed"
 	mv -f ${CONFIG_OUT_FILE_TMP} ${CONFIG_OUT_FILE}
