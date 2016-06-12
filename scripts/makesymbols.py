@@ -42,7 +42,7 @@ def getFileList(stagingDir):
 
 #===============================================================================
 #===============================================================================
-def createTarFile(outTarFile, fileList, stagingDir, symbolsRoot):
+def createTarFile(outTarFile, fileList, stagingDir):
     # Create tar file
     try:
         tarfd = tarfile.open(outTarFile, "w")
@@ -51,10 +51,9 @@ def createTarFile(outTarFile, fileList, stagingDir, symbolsRoot):
             outTarFile, ex.errno, ex.strerror)
         sys.exit(1)
 
-    symbolsRoot = symbolsRoot.strip("/")
     for filePath in fileList:
         fileRelPath = os.path.relpath(filePath, stagingDir)
-        fileName = os.path.join("symbols", symbolsRoot, fileRelPath)
+        fileName = os.path.join("symbols", fileRelPath)
         logging.info("Adding %s", fileRelPath)
         tarfd.add(name=filePath, arcname=fileName)
 
@@ -71,7 +70,7 @@ def main():
     outTarFile = args[1]
 
     fileList = getFileList(stagingDir)
-    createTarFile(outTarFile, fileList, stagingDir, options.symbolsRoot)
+    createTarFile(outTarFile, fileList, stagingDir)
 
 #===============================================================================
 # Setup option parser and parse command line.
@@ -80,12 +79,6 @@ def parseArgs():
     # Setup parser
     usage = "usage: %prog [options] <staging-dir> <out-tar-file>"
     parser = optparse.OptionParser(usage=usage)
-
-    # Main options
-    parser.add_option("--symbols-root",
-        dest="symbolsRoot",
-        default="",
-        help="Extra root directory name to add in tar file")
 
     # Other options
     parser.add_option("-q",

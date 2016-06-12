@@ -394,26 +394,6 @@ final directory.</li>
 <li><code>TARGET_CHROOT</code> : Set to 1 if the result of the compilation will be executed
 in a chroot environment. Used by some modules to adapt their configuration.
 </br>Default is <code>0</code>.</li>
-<li><code>TARGET_IMAGE_PATH_MAP_FILE</code> : File containing path mapping to be used when
-generating the image (plf). Used by chroot targets that are not flashed in the
-same root as the build. Format of this file is lines with 3 columns :
-<code>dir target-dir mount-point</code>
-<ul>
-<li><code>dir</code> : directory prefix of chroot target.</li>
-<li><code>target-dir</code> : real target directory.</li>
-<li><code>mount-point</code> : directory where <code>target-dir</code> will be mounted. As it is a
-first match list, more specific names shall be first. Example :
-<pre>
-/data /data/pulsar    /system/pulsar/data
-/     /system/pulsar  /system/pulsar
-</pre></li>
-<li>The root of the final tree will actually be flashed in /system/pulsar (3rd
-column is not useful here).</li>
-<li>The /data directory of the final tree will actually be flashed in /data/pulsar
-At runtime the /data/pulsar will be mounted in /system/pulsar/data so this
-directory needs to be created as well. Finally when the target will be executed
-in its chroot environment, the final tree will be found correctly.</li>
-</ul></li>
 <li><code>TARGET_BUILD_PROPERTIES</code> : list of properties to put in file build.prop
 loaded by boxinit at startup. The format is a list of <code>&lt;key&gt;=&lt;value&gt;</code> pair.
 Default contains some <code>ro.build</code> keys that alchemy will put.

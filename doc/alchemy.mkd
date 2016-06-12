@@ -344,24 +344,6 @@ Mainly used by the android wrapper.
 * `TARGET_CHROOT` : Set to 1 if the result of the compilation will be executed
   in a chroot environment. Used by some modules to adapt their configuration.
   </br>Default is `0`.
-* `TARGET_IMAGE_PATH_MAP_FILE` : File containing path mapping to be used when
-  generating the image (plf). Used by chroot targets that are not flashed in the
-  same root as the build. Format of this file is lines with 3 columns :
-  `dir target-dir mount-point`
-  * `dir` : directory prefix of chroot target.
-  * `target-dir` : real target directory.
-  * `mount-point` : directory where `target-dir` will be mounted. As it is a
-    first match list, more specific names shall be first. Example :
-  <pre>
-    /data /data/pulsar    /system/pulsar/data
-    /     /system/pulsar  /system/pulsar
-  </pre>
-  * The root of the final tree will actually be flashed in /system/pulsar (3rd
-    column is not useful here).
-  * The /data directory of the final tree will actually be flashed in /data/pulsar
-  At runtime the /data/pulsar will be mounted in /system/pulsar/data so this
-  directory needs to be created as well. Finally when the target will be executed
-  in its chroot environment, the final tree will be found correctly.
 * `TARGET_BUILD_PROPERTIES` : list of properties to put in file build.prop
   loaded by boxinit at startup. The format is a list of `<key>=<value>` pair.
   Default contains some `ro.build` keys that alchemy will put.

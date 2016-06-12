@@ -209,10 +209,9 @@ TARGET_PERMISSIONS_FILES ?=
 # environment. Used by some modules to adapt their configuration
 TARGET_CHROOT ?= 0
 
-# File containing path mapping to be used when generating image (plf for example)
-# Used by chroot target that are not flashed in the same root as the build.
-# See documentation for format of file.
-TARGET_IMAGE_PATH_MAP_FILE ?=
+ifdef TARGET_IMAGE_PATH_MAP_FILE
+$(error TARGET_IMAGE_PATH_MAP_FILE is no more supported)
+endif
 
 # List of target wise build properties to be put in build.prop file
 TARGET_BUILD_PROPERTIES ?=

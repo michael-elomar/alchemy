@@ -73,10 +73,6 @@ define gen-image-plf
 	$(Q) cd $(TARGET_OUT_FINAL); \
 		find . -path './boot/*' -a ! -name '*.dtb' -prune -o ! -name '.' -printf '%P\n' \
 			| $(FIXSTAT) | plfbatch '-a u_unixfile="&"' $1
-ifneq ("$(TARGET_IMAGE_PATH_MAP_FILE)","")
-	$(Q) PLFTOOL=$(PLFTOOL) $(BUILD_SYSTEM)/scripts/plfremap.py \
-		$(TARGET_IMAGE_PATH_MAP_FILE) $1
-endif
 endef
 
 ###############################################################################
