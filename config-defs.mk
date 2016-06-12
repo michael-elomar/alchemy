@@ -165,18 +165,18 @@ __config-apply-sed = \
 	$(eval __cas_src_file := $3) \
 	$(eval __cas_dst_file := $2) \
 	$(if $(call is-var-defined,custom.$1.config.sedfiles), \
-	$(foreach __f,$(custom.$1.config.sedfiles), \
-		$(info Apply $(__f) on '$1' config) \
-	) \
-	$(eval __out := $(shell $(__apply-sed-script) \
-		$(__cas_src_file) \
-		$(__cas_dst_file) \
-		$(custom.$1.config.sedfiles) \
-	)) \
-	, \
-	$(shell mkdir -p $(dir $(__cas_dst_file))) \
-	$(shell cp -af $(__cas_src_file) $(__cas_dst_file)) \
-)
+		$(foreach __f,$(custom.$1.config.sedfiles), \
+			$(info Apply $(__f) on '$1' config) \
+		) \
+		$(eval __out := $(shell $(__apply-sed-script) \
+			$(__cas_src_file) \
+			$(__cas_dst_file) \
+			$(custom.$1.config.sedfiles) \
+		)) \
+		, \
+		$(shell mkdir -p $(dir $(__cas_dst_file))) \
+		$(shell cp -af $(__cas_src_file) $(__cas_dst_file)) \
+	)
 
 # $1: module name
 define __load-config-internal
