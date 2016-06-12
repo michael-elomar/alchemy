@@ -18,8 +18,6 @@ import optparse
 import re
 import fnmatch
 
-import addbuildid
-
 #===============================================================================
 # Global variables.
 #===============================================================================
@@ -245,24 +243,6 @@ def getRealPath(finalDir, path):
 	return os.path.abspath(path)
 
 #===============================================================================
-#===============================================================================
-def addBuildId(filePath, options):
-	class AddBuildIdOptions(object):
-		def __init__(self):
-			if filePath.endswith(".ko") and options.buildIdObjcopyKernel != None:
-				self.objcopy = options.buildIdObjcopyKernel
-			else:
-				self.objcopy = options.buildIdObjcopy
-			self.sectionName = options.buildIdSectionName
-			self.dryRun = False
-	# Only if really required by options
-	if not options.buildId:
-		return
-	if not addbuildid.isElf(filePath):
-		return
-	addbuildid.processFile(AddBuildIdOptions(), filePath)
-
-#===============================================================================
 # Get the commands to be executed for the copy.
 #===============================================================================
 def getCopyCmds(dstFileName, srcFileName, options, doStrip=False):
@@ -433,8 +413,6 @@ def processDir(rootDir, options, withEmptyDir, copyType, forceCopy=False):
 				or (copyType == CopyType.NO_LINKS and not os.path.islink(srcFileName)) \
 				or (copyType == CopyType.ONLY_LINKS and os.path.islink(srcFileName)):
 				dstFileName = getRealPath(options.finalDir, relPath)
-				if not os.path.islink(srcFileName):
-					addBuildId(srcFileName, options)
 				doCopy(dstFileName, srcFileName, options, forceCopy=forceCopy)
 
 #===============================================================================
@@ -560,23 +538,6 @@ def parseArgs():
 		action="store_true",
 		default=False,
 		help="Remove write access for group and other on all copied files")
-	parser.add_option("--build-id",
-		dest="buildId",
-		action="store_true",
-		default=None,
-		help="Add a build id section in executables and shared libraries")
-	parser.add_option("--build-id-objcopy",
-		dest="buildIdObjcopy",
-		default=None,
-		help="objcopy program to use to add build id section")
-	parser.add_option("--build-id-objcopy-kernel",
-		dest="buildIdObjcopyKernel",
-		default=None,
-		help="objcopy program to use to add build id section in kernel modules")
-	parser.add_option("--build-id-section-name",
-		dest="buildIdSectionName",
-		default=None,
-		help="name of build id section to add")
 	parser.add_option("--filelist",
 		dest="fileListPath",
 		default=None,

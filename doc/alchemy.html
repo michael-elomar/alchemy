@@ -377,17 +377,6 @@ contains the revision of the linked module itself.
 </br>Default is <code>0</code>.</li>
 <li><code>TARGET_DEPENDS_SECTION_NAME</code> : Name of the section with dependencies
 </br>Default is <code>.alchemy.depends</code>.</li>
-<li><code>TARGET_ADD_BUILDID_SECTION</code> : Add a <code>build-id</code> section in all binaries. This
-is a <code>sha1</code> of all sections that are loadable at runtime and with data in the
-binary. This section is kept after stripping and the <code>sha1</code> can be recomputed
-on the original and stripped binary and still produce the same <code>sha1</code>. This can
-be used to identify the non-stripped binary based on the stripped one. This is
-a feature similar to the <code>--build-id</code> option of <code>ld</code> but fixes a bug present
-on some toolchain (arm-2009q1 for example) in which only the header of
-sections is used, not the data of the sections.
-</br>Default is <code>0</code>.</li>
-<li><code>TARGET_BUILDID_SECTION_NAME</code> : Name of the section with <code>build-id</code>
-Default is <code>.alchemy.build-id</code>.</li>
 <li><code>TARGET_SDK_DIRS</code> : List of directories where to find <code>SDK</code> previously
 generated. Default is empty.</li>
 <li><code>TARGET_PERMISSIONS_FILES</code> : List of files containing permissions to apply to

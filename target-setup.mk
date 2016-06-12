@@ -188,10 +188,11 @@ ifeq ("$(USE_GIT_REV)","0")
 endif
 endif
 
-# Add a section in executable/shared library with a sha1 of loadable sections
-# of binary
-TARGET_ADD_BUILDID_SECTION ?= 0
-TARGET_BUILDID_SECTION_NAME ?= .alchemy.build-id
+ifdef TARGET_ADD_BUILDID_SECTION
+ifneq ("$(TARGET_ADD_BUILDID_SECTION)","0")
+$(warning TARGET_ADD_BUILDID_SECTION is no more supported)
+endif
+endif
 
 # List of filenames to filter during strip (no wildcard allowed here because
 # module.mk will also look in this list to filter, not only final.mk)

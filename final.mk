@@ -75,25 +75,6 @@ MAKEFINAL_ARGS += \
 	--mode=$(TARGET_FINAL_MODE)
 
 ###############################################################################
-## Add a build-id section to all binaries in staging dir before copying them
-## in final tree. This section is similar to what ld -Wl,--build-id would do
-## but fixes a bug present on some version of toolchain we use (arm-20009q1 for
-## example).
-###############################################################################
-ifneq ("$(TARGET_ADD_BUILDID_SECTION)","0")
-MAKEFINAL_ARGS += \
-	--build-id \
-	--build-id-objcopy="$(TARGET_CROSS)objcopy" \
-	--build-id-section-name="$(TARGET_BUILDID_SECTION_NAME)"
-ifneq ("$(TARGET_LINUX_CROSS)","")
-ifneq ("$(TARGET_LINUX_CROSS)","$(TARGET_CROSS)")
-MAKEFINAL_ARGS += \
-	--build-id-objcopy-kernel="$(TARGET_LINUX_CROSS)objcopy"
-endif
-endif
-endif
-
-###############################################################################
 ## Internal generation of final tree.
 ##
 ## Create /etc/ld.so.conf and create cache with ldconfig

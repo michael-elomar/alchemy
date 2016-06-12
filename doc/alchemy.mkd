@@ -329,17 +329,6 @@ Mainly used by the android wrapper.
   </br>Default is `0`.
 * `TARGET_DEPENDS_SECTION_NAME` : Name of the section with dependencies
   </br>Default is `.alchemy.depends`.
-* `TARGET_ADD_BUILDID_SECTION` : Add a `build-id` section in all binaries. This
-  is a `sha1` of all sections that are loadable at runtime and with data in the
-  binary. This section is kept after stripping and the `sha1` can be recomputed
-  on the original and stripped binary and still produce the same `sha1`. This can
-  be used to identify the non-stripped binary based on the stripped one. This is
-  a feature similar to the `--build-id` option of `ld` but fixes a bug present
-  on some toolchain (arm-2009q1 for example) in which only the header of
-  sections is used, not the data of the sections.
-  </br>Default is `0`.
-* `TARGET_BUILDID_SECTION_NAME` : Name of the section with `build-id`
-  Default is `.alchemy.build-id`.
 * `TARGET_SDK_DIRS` : List of directories where to find `SDK` previously
   generated. Default is empty.
 * `TARGET_PERMISSIONS_FILES` : List of files containing permissions to apply to
