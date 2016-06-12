@@ -21,6 +21,8 @@ comma := ,
 colon := :
 left-paren := (
 right-paren := )
+percent := %
+currency := $(shell echo $$'\xa4')
 
 # True/False values. Any non-empty test is considered as True
 true := T
@@ -136,6 +138,27 @@ str-ends-with = $(strip $(call not,$(patsubst %$2,,$1)))
 # Remove trailing '/' from a path
 # $1 : input string
 remove-trailing-slash = $(strip $(patsubst %/,%,$1))
+
+###############################################################################
+## Call a function(macro) for each variable in a variable list.
+## A variable list is a list of ';' separated <var>=<value> pairs.
+## $1 : variable list
+## $2 : function(macro) to call.
+##      First argument will be <var>, second will be <value>
+##
+## How it works:
+## - We replace spaces by a special character (currency).
+## - then we replace ';' by space and do a foreach on it.
+## - We spit the <var>=<value> pairs at the '=' to get the 2 components.
+## - We call the provided function(macro) with the 2 components.
+###############################################################################
+var-list-foreach = \
+	$(foreach __vlf_entry,$(subst ;,$(space),$(subst $(space),$(currency),$1)), \
+		$(eval __vlf_entry2 := $(subst $(currency),$(space),$(__vlf_entry))) \
+		$(eval __vlf_w1 := $(firstword $(subst =,$(space),$(__vlf_entry2)))) \
+		$(eval __vlf_w2 := $(patsubst $(__vlf_w1)=%,%,$(__vlf_entry2))) \
+		$(call $2,$(__vlf_w1),$(__vlf_w2)) \
+	)
 
 ###############################################################################
 ## Use some colors if requested.

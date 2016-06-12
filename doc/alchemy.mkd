@@ -857,6 +857,16 @@ For `external` modules it is a mean to instruct the build system how to link
 with them. It is however not needed to specify include directories that are
 globally available like `$(TARGET_OUT_STAGING)/usr/include`.
 
+#### `LOCAL_EXPORT_CUSTOM_VARIABLES`
+
+This variable can be used to export custom variables to be used by modules
+depending on this one. This is a list of `;` separated `<key>=<value>` pairs.
+The exported variables can be retrieved in commands of custom rules as
+`PRIVATE_CUSTOM_<key>`
+
+**Note** : If you want to use exported variables in `LOCAL_xxx` variables, you
+need to use `%{CUSTOM_<key>}` and set `LOCAL_EXPAND_CUSTOM_VARIABLES` to `1`.
+
 #### `LOCAL_ARCHIVE` `LOCAL_ARCHIVE_VERSION` `LOCAL_ARCHIVE_SUBDIR` `LOCAL_ARCHIVE_PATCHES` `LOCAL_ARCHIVE_CMD_UNPACK` `LOCAL_ARCHIVE_CMD_POST_UNPACK`
 
 `Alchemy` offer the possibility to have the source code in an archive. This is

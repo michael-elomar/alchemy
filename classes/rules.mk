@@ -98,6 +98,28 @@ ifneq ("$(USE_GIT_REV)","0")
   -include $(_module_revision_file)
 endif
 
+# Get all modules we depend on (fully recursive)
+all_depends := $(call module-get-all-depends,$(LOCAL_MODULE))
+
+# Imported custom variables
+imported_CUSTOM_VARIABLES := $(call module-get-listed-export,$(all_depends),CUSTOM_VARIABLES)
+
+###############################################################################
+## Expand exported custom variables if requested in all LOCAL_xxx variables.
+###############################################################################
+ifeq ("$(LOCAL_EXPAND_CUSTOM_VARIABLES)","1")
+expand-custom = \
+	$(foreach __var,$(sort $(vars-LOCAL)), \
+		$(if $(findstring $(percent){CUSTOM_$1},$(LOCAL_$(__var))), \
+			$(if $(call strneq,$(V),0), \
+				$(info $(LOCAL_MODULE): Expanding CUSTOM_$1 in LOCAL_$(__var)) \
+			) \
+			$(eval LOCAL_$(__var) := $(subst $(percent){CUSTOM_$1},$2,$(LOCAL_$(__var)))) \
+		) \
+	)
+$(call var-list-foreach,$(imported_CUSTOM_VARIABLES),expand-custom)
+endif
+
 ###############################################################################
 ## ARM specific checks.
 ###############################################################################
@@ -165,9 +187,6 @@ $(call check-flags,LOCAL_EXPORT_CXXFLAGS,$(check-flags-arch-cpu),$(check-flags-a
 ###############################################################################
 ## Dependencies.
 ###############################################################################
-
-# Get all modules we depend on (fully recursive)
-all_depends := $(call module-get-all-depends,$(LOCAL_MODULE))
 
 # Get libraries used by us and static libraries
 all_external_libs := \
@@ -693,13 +712,22 @@ $(LOCAL_TARGETS): PRIVATE_ARCHIVE_UNPACK_DIR := $(_module_build_dir)
 $(LOCAL_TARGETS): PRIVATE_ARCHIVE_SUBDIR := $(LOCAL_ARCHIVE_SUBDIR)
 $(LOCAL_TARGETS): PRIVATE_ARCHIVE_PATCHES := $(LOCAL_ARCHIVE_PATCHES)
 
+# Setup custom variables.
+# The first loop is to clear content for current module.
+# The second loop uses += to accumulate values from different imported modules.
+private-custom-clear = $(eval $(LOCAL_TARGETS): PRIVATE_CUSTOM_$1 :=)
+private-custom-set = $(eval $(LOCAL_TARGETS): PRIVATE_CUSTOM_$1 := $2)
+$(call var-list-foreach,$(imported_CUSTOM_VARIABLES),private-custom-clear)
+$(call var-list-foreach,$(imported_CUSTOM_VARIABLES),private-custom-set)
+
 # This is for police hooks
 $(LOCAL_TARGETS): export MODULE_NAME := $(LOCAL_MODULE)
 
 ###############################################################################
 ###############################################################################
 
-# Each module class can fill one of this to setup default commands and internal pre/post hooks
+# Each module class can fill one of these to setup default commands and internal
+# pre/post hooks
 _module_msg := $(if $(_mode_host),Host )Generic
 _module_cmd_prefix :=
 

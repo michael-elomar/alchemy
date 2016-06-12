@@ -213,6 +213,10 @@ vars-LOCAL += EXPORT_CFLAGS
 vars-LOCAL += EXPORT_CXXFLAGS
 vars-LOCAL += EXPORT_LDLIBS
 vars-LOCAL += EXPORT_PREREQUISITES
+vars-LOCAL += EXPORT_CUSTOM_VARIABLES
+
+# Inform that some exported variables need to be expanded in this module variables
+vars-LOCAL += EXPAND_CUSTOM_VARIABLES
 
 # Module class :
 # STATIC_LIBRARY

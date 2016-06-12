@@ -932,6 +932,16 @@ system knows how to link with it and hence it is not needed to explicitly do so.
 with them. It is however not needed to specify include directories that are
 globally available like <code>$(TARGET_OUT_STAGING)/usr/include</code>.</p>
 
+<h4><code>LOCAL_EXPORT_CUSTOM_VARIABLES</code></h4>
+
+<p>This variable can be used to export custom variables to be used by modules
+depending on this one. This is a list of <code>;</code> separated <code>&lt;key&gt;=&lt;value&gt;</code> pairs.
+The exported variables can be retrieved in commands of custom rules as
+<code>PRIVATE_CUSTOM_&lt;key&gt;</code></p>
+
+<p><strong>Note</strong> : If you want to use exported variables in <code>LOCAL_xxx</code> variables, you
+need to use <code>%{CUSTOM_&lt;key&gt;}</code> and set <code>LOCAL_EXPAND_CUSTOM_VARIABLES</code> to <code>1</code>.</p>
+
 <h4><code>LOCAL_ARCHIVE</code> <code>LOCAL_ARCHIVE_VERSION</code> <code>LOCAL_ARCHIVE_SUBDIR</code> <code>LOCAL_ARCHIVE_PATCHES</code> <code>LOCAL_ARCHIVE_CMD_UNPACK</code> <code>LOCAL_ARCHIVE_CMD_POST_UNPACK</code></h4>
 
 <p><code>Alchemy</code> offer the possibility to have the source code in an archive. This is
