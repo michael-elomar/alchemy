@@ -16,7 +16,7 @@ _binary_extensions := cpp cxx cc c cu m s S
 _binary-print-banner1 = \
 	$(call print-banner1,"$(PRIVATE_MODE_MSG)$(PRIVATE_ARCH) $1",$(PRIVATE_MODULE),$(call path-from-top,$2))
 
-# List of compilation flags that will be stored i a file used as dependency
+# List of compilation flags that will be stored in a file used as dependency
 # Whenever on of those flags changed, it will retrigger compilations
 # Shall be = and not := because reference to some variables needs to be done during expansion
 
