@@ -248,6 +248,7 @@ module-add = \
 		) \
 	) \
 	$(if $(call streq,$(__add),1), \
+		$(compat-check) \
 		$(eval __modules += $(__mod)) \
 		$(foreach __local,$(vars-LOCAL), \
 			$(eval __modules.$(__mod).$(__local) := $(LOCAL_$(__local))) \
@@ -1282,6 +1283,44 @@ conditional-libraries-setup = \
 			) \
 		) \
 	)
+
+###############################################################################
+## Check compatibility variables
+###############################################################################
+compat-check = \
+	$(call __compat-check-var,AUTOTOOLS_ARCHIVE,ARCHIVE) \
+	$(call __compat-check-var,AUTOTOOLS_VERSION,ARCHIVE_VERSION) \
+	$(call __compat-check-var,AUTOTOOLS_SUBDIR,ARCHIVE_SUBDIR) \
+	$(call __compat-check-var,AUTOTOOLS_PATCHES,ARCHIVE_PATCHES) \
+	$(call __compat-check-var,AUTOTOOLS_COPY_TO_BUILD_DIR,COPY_TO_BUILD_DIR) \
+	$(call __compat-check-macro,AUTOTOOLS_CMD_UNPACK,ARCHIVE_CMD_UNPACK) \
+	$(call __compat-check-macro,AUTOTOOLS_CMD_POST_UNPACK,ARCHIVE_CMD_POST_UNPACK) \
+	$(call __compat-check-macro,AUTOTOOLS_CMD_CONFIGURE,CMD_CONFIGURE) \
+	$(call __compat-check-macro,AUTOTOOLS_CMD_BUILD,CMD_BUILD) \
+	$(call __compat-check-macro,AUTOTOOLS_CMD_INSTALL,CMD_INSTALL) \
+	$(call __compat-check-macro,AUTOTOOLS_CMD_CLEAN,CMD_CLEAN) \
+	$(call __compat-check-macro,AUTOTOOLS_CMD_POST_CONFIGURE,CMD_POST_CONFIGURE) \
+	$(call __compat-check-macro,AUTOTOOLS_CMD_POST_BUILD,CMD_POST_BUILD) \
+	$(call __compat-check-macro,AUTOTOOLS_CMD_POST_INSTALL,CMD_POST_INSTALL) \
+	$(call __compat-check-macro,AUTOTOOLS_CMD_POST_CLEAN,CMD_POST_CLEAN) \
+	$(call __compat-check-macro,CMAKE_CMD_CONFIGURE,CMD_CONFIGURE) \
+	$(call __compat-check-macro,CMAKE_CMD_BUILD,CMD_BUILD) \
+	$(call __compat-check-macro,CMAKE_CMD_INSTALL,CMD_INSTALL) \
+	$(call __compat-check-macro,CMAKE_CMD_CLEAN,CMD_CLEAN) \
+	$(call __compat-check-macro,CMAKE_CMD_POST_CONFIGURE,CMD_POST_CONFIGURE) \
+	$(call __compat-check-macro,CMAKE_CMD_POST_BUILD,CMD_POST_BUILD) \
+	$(call __compat-check-macro,CMAKE_CMD_POST_INSTALL,CMD_POST_INSTALL) \
+	$(call __compat-check-macro,CMAKE_CMD_POST_CLEAN,CMD_POST_CLEAN) \
+
+# $1 : compat variable to check
+# $2 : new variable name
+__compat-check-var = \
+	$(if $(LOCAL_$1),$(eval LOCAL_$2 := $(LOCAL_$1)))
+
+# $1 : compat macro to check
+# $2 : new macro name
+__compat-check-macro = \
+	$(if $(value LOCAL_$1),$(call macro-copy,LOCAL_$2,LOCAL_$1))
 
 ###############################################################################
 ## Filter a list of modules tp keep only internal or external ones.
