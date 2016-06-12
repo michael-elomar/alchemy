@@ -8,6 +8,14 @@ if [ -f configure ]; then
 	fi
 fi
 
+# Is this a linux module ?
+if [ "$1" = "linux" -a -f Makefile ]; then
+	major=$(grep "^VERSION = " Makefile | sed "s/VERSION = \(.*\)/\1/g")
+	minor=$(grep "^PATCHLEVEL = " Makefile | sed "s/PATCHLEVEL = \(.*\)/\1/g")
+	level=$(grep "^SUBLEVEL = " Makefile | sed "s/SUBLEVEL = \(.*\)/\1/g")
+	version="${major}.${minor}.${level}"
+fi
+
 if [ "${version}" = "" ]; then
 	version="unknown"
 fi
