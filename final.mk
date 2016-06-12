@@ -102,9 +102,9 @@ ifeq ("$(TARGET_OS)","linux")
 ifeq ("$(is-full-system)","1")
 	@if [ ! -e $(TARGET_OUT_FINAL)/etc/ld.so.conf ]; then \
 		( \
-			echo "/lib/$(TOOLCHAIN_TARGET_NAME)"; \
+			echo "/lib/$(TARGET_TOOLCHAIN_TRIPLET)"; \
 			echo "/lib"; \
-			echo "/usr/lib/$(TOOLCHAIN_TARGET_NAME)"; \
+			echo "/usr/lib/$(TARGET_TOOLCHAIN_TRIPLET)"; \
 			echo "/usr/lib"; \
 			$(foreach __d,$(TARGET_LDCONFIG_DIRS),echo "$(__d)";) \
 		) >> $(TARGET_OUT_FINAL)/etc/ld.so.conf; \
