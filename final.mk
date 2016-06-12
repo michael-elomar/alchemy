@@ -129,23 +129,6 @@ final-clean:
 	$(Q)rm -f $(TARGET_OUT)/final.mk
 
 ###############################################################################
-## Script for fixing permissions on-the-fly in native final tree.
-###############################################################################
-ifeq ("$(TARGET_OS_FLAVOUR)","native-chroot")
-
-.PHONY: native-fix-script
-native-fix-script: __final-internal fixstat-script
-	$(Q) cd $(TARGET_OUT_FINAL); \
-			cat $(TARGET_OUT)/filelist.txt | \
-			$(TARGET_OUT)/fixstat.sh --generate-fix-script > \
-			$(TARGET_OUT_FINAL)/native-fixperms.sh
-	@chmod +x $(TARGET_OUT_FINAL)/native-fixperms.sh
-
-final: native-fix-script
-
-endif
-
-###############################################################################
 ## Setup dependencies.
 ## Do not clean when in native or native-chroot mode
 ###############################################################################

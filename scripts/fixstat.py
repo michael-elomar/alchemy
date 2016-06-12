@@ -180,30 +180,6 @@ def fixstat(ctx, filePath, st):
 	return st
 
 #===============================================================================
-# Generate shell script for fixing native final tree ownership/permissions
-#===============================================================================
-def generateFixScript(ctx):
-	sys.stdout.write("#!/bin/sh\n")
-	count = 0
-	# Read file names on stdin
-	for line in sys.stdin:
-		filePath = line.rstrip("\n")
-		st = fixstat(ctx, filePath, MyStat(os.lstat(filePath)))
-		# generate fix commands only for non-root owned files/dirs
-		if (st.uid == 0 and st.gid == 0) or stat.S_ISLNK(st.mode):
-			continue
-		if count == 0:
-			sys.stdout.write("chmod go+rwX ")
-		buf = " \\\n'%s'" % filePath
-		logging.debug("%s", filePath)
-		sys.stdout.write(buf)
-		count += 1
-		if count >= 64:
-			sys.stdout.write("\n")
-			count = 0
-	sys.stdout.write("\n")
-
-#===============================================================================
 # Main function.
 #===============================================================================
 def main():
@@ -222,10 +198,6 @@ def main():
 	if options.useDefault:
 		for line in DEFAULT_PERMISSIONS:
 			parsePermissionLine(ctx, "", 0, line, True)
-
-	if options.generateFixScript:
-		generateFixScript(ctx)
-		return
 
 	# Read file names on stdin
 	for line in sys.stdin:
@@ -260,11 +232,6 @@ def parseArgs():
 		action="append",
 		default=[],
 		help="Path to permissions file. Several allowed")
-	parser.add_option("--generate-fix-script",
-		dest="generateFixScript",
-		action="store_true",
-		default=False,
-		help="Generate script for fixing final tree. For native-chroot target.")
 
 	parser.add_option("-q",
 		dest="quiet",
