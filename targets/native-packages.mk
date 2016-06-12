@@ -17,6 +17,6 @@ ifeq ("$(call is-module-registered,ncurses)","")
     include $(CLEAR_VARS)
     LOCAL_MODULE := ncurses
     LOCAL_EXPORT_LDLIBS := -lncurses
-    include $(BUILD_PREBUILT)
+    $(call local-register-prebuilt-overridable)
   endif
 endif
