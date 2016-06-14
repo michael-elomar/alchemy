@@ -322,7 +322,7 @@ def processModule(ctx, module, headersOnly=False):
 
 	# Write verbatim some fields
 	fields = ["DESCRIPTION", "CATEGORY_PATH",
-			"REVISION", "REVISION_DESCRIBE",
+			"REVISION", "REVISION_DESCRIBE", "REVISION_URL",
 			"FORCE_WHOLE_STATIC_LIBRARY",
 			"EXPORT_CFLAGS", "EXPORT_CXXFLAGS"]
 	for field in fields:
