@@ -260,10 +260,21 @@ vars-LOCAL += DOXYFILE
 # is given, LOCAL_PATH will be added automatically
 vars-LOCAL += DOXYGEN_INPUT
 
-# Arguments to pass to code checker (linux checkpatch by default)
-vars-LOCAL += CODECHECK_ARGS
-vars-LOCAL += CPPCHECK_ARGS
-vars-LOCAL += VALACHECK_ARGS
+# Code check to use (depending on source code kind)
+# If empty or 'default' an internal default with be used
+# If 'none', it will disable code check
+vars-LOCAL += CODECHECK_AS
+vars-LOCAL += CODECHECK_C
+vars-LOCAL += CODECHECK_CXX
+vars-LOCAL += CODECHECK_OBJC
+vars-LOCAL += CODECHECK_VALA
+
+# Arguments to give to code checker
+vars-LOCAL += CODECHECK_AS_ARGS
+vars-LOCAL += CODECHECK_C_ARGS
+vars-LOCAL += CODECHECK_CXX_ARGS
+vars-LOCAL += CODECHECK_OBJC_ARGS
+vars-LOCAL += CODECHECK_VALA_ARGS
 
 # Other variables used internally
 vars-LOCAL += BUILD_MODULE
@@ -305,7 +316,10 @@ compat-vars-LOCAL := \
 	CMAKE_CMD_POST_CONFIGURE \
 	CMAKE_CMD_POST_BUILD \
 	CMAKE_CMD_POST_INSTALL \
-	CMAKE_CMD_POST_CLEAN
+	CMAKE_CMD_POST_CLEAN \
+	CODECHECK_ARGS \
+	CPPCHECK_ARGS \
+	VALACHECK_ARGS
 
 ###############################################################################
 ## List of TARGET_XXX variables that can be used by makefiles.

@@ -324,7 +324,8 @@ is-targets-in-make-goals = $(strip \
 ## $1 : module to check.
 ###############################################################################
 is-module-in-make-goals = $(strip \
-	$(call is-targets-in-make-goals,$1 $1-clean $1-dirclean $1-path $1-codecheck $1-cloc $1-doc $1-cppcheck $1-valacheck))
+	$(call is-targets-in-make-goals,$1 $1-clean $1-dirclean $1-path $1-cloc $1-doc \
+		$(call codecheck-get-targets,$1)))
 
 ###############################################################################
 ## Check if a module is registered. It simply verifies that the variable
@@ -1334,6 +1335,9 @@ compat-check = \
 	$(call __compat-check-macro,CMAKE_CMD_POST_BUILD,CMD_POST_BUILD) \
 	$(call __compat-check-macro,CMAKE_CMD_POST_INSTALL,CMD_POST_INSTALL) \
 	$(call __compat-check-macro,CMAKE_CMD_POST_CLEAN,CMD_POST_CLEAN) \
+	$(call __compat-check-var,CODECHECK_ARGS,CODECHECK_C_ARGS) \
+	$(call __compat-check-var,CPPCHECK_ARGS,CODECHECK_CXX_ARGS) \
+	$(call __compat-check-var,VALACHECK_ARGS,CODECHECK_VALA_ARGS)
 
 # $1 : compat variable to check
 # $2 : new variable name

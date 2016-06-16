@@ -620,9 +620,7 @@ unpacked sources and applied patches will be kept in the build directory.</li>
 <li><code>make &lt;module&gt;-dirclean</code> : will remove the build directory of the module.</li>
 <li><code>make &lt;module&gt;-doc</code> : will generate the documentation for the module.</li>
 <li><code>make &lt;module&gt;-path</code> : will display the path of the module.</li>
-<li><code>make &lt;module&gt;-codecheck</code> : will check coding style of C source files.</li>
-<li><code>make &lt;module&gt;-cppcheck</code> : will check coding style of C++ source files.</li>
-<li><code>make &lt;module&gt;-valacheck</code> : will check coding style of Vala source files.</li>
+<li><code>make &lt;module&gt;-codecheck</code> : will check coding style of source files.</li>
 <li><code>make &lt;module&gt;-cloc</code> : will count the number of lines of code.</li>
 </ul>
 
@@ -970,6 +968,27 @@ accepts either full path or relative path to LOCAL_PATH.</p>
 before the configure step. This allows modules to execute autoreconf out of the
 original source tree.</p>
 
+<h4><code>LOCAL_CODECHECK_xxx</code> <code>LOCAL_CODECHECK_xxx_ARGS</code></h4>
+
+<p>It is possible to customize the checker used to verify source code style.</p>
+
+<p><code>LOCAL_CODECHECK_xxx</code> can be used to specify either an internal checker name or
+a custom script to use.</p>
+
+<p>If an external script is used, it will be given extra argument as its first
+argument and the list of files to check as its second argument.</p>
+
+<p>If <code>none</code> is given, the specified language check will be disabled.</p>
+
+<p><code>LOCAL_CODECHECK_xxx_ARGS</code> can be used to pass extra argument to the checker script.</p>
+
+<p>Available languages:
+* <code>AS</code>: default checker is <code>none</code>.
+* <code>C</code>: default checker is <code>linux</code>.
+* <code>CXX</code>: default checker is <code>cpplint</code>.
+* <code>OBJC</code>: default checker is <code>linux</code>.
+* <code>VALA</code>: default checker is <code>valastyle</code>.</p>
+
 <h3>Internal modules</h3>
 
 <p>Defining an <code>internal</code> module is the preferred way of registering a module. It
@@ -983,7 +1002,7 @@ flags.</p>
 
 <p>List of files to be compiled. The path shall be relative to <code>LOCAL_PATH</code>. The
 following file  extension are recognized : <code>.c, .cc, .cxx, .cpp, .s .S</code>.
- Other files will be ignored.</p>
+Other files will be ignored.</p>
 
 <p>The build system checks that files actually exist and issue a warning if not.</p>
 
@@ -1520,9 +1539,9 @@ transparent for users, dependencies shall be specified in the same way. The only
 difference is that modules from <code>SDK</code> won't appear in global config and will not
 be built.</p>
 
-<h2>Codecheck false positives or intentional deviations</h2>
+<h2>Codecheck for C false positives or intentional deviations</h2>
 
-<p>You can ignore specific codecheck warnings in a C source code file by inserting
+<p>You can ignore specific C codecheck warnings in a C source code file by inserting
 a tag with the following syntax in a comment line just preceding the line with
 the error:</p>
 
@@ -1530,7 +1549,7 @@ the error:</p>
     codecheck_ignore[TYPE1(,TYPE2...)]
 </pre>
 
-<p>Where TYPE is the message type returned by <code>make &lt;module&gt;-codecheck</code>
+<p>Where TYPE is the message type returned by <code>make &lt;module&gt;-codecheck-c</code>
 (for example <code>LONG_LINE</code>, <code>NEW_TYPEDEFS</code>, etc).</p>
 
 <p>Ex:</p>
@@ -1540,9 +1559,9 @@ the error:</p>
     typedef struct _CustomTypedef CustomTypedef; /* custom typedef for consistency with other GObjects */
 </pre>
 
-<h2>Cppcheck false positives or intentional deviations</h2>
+<h2>Codecheck for C++ false positives or intentional deviations</h2>
 
-<p>You can ignore specific cppcheck warnings in a C++ source code file by inserting
+<p>You can ignore specific c++ codecheck warnings in a C++ source code file by inserting
 a tag with the following syntax in a comment line to the line with
 the error:</p>
 
@@ -1550,7 +1569,7 @@ the error:</p>
     NOLINT(category)
 </pre>
 
-<p>Where category is the message returned by <code>make &lt;module&gt;-cppcheck</code>
+<p>Where category is the message returned by <code>make &lt;module&gt;-codecheck-cxx</code>
 (for example <code>whitespace/braces</code>, etc).  NOLINT or NOLINT(*)
 suppresses errors of all categories on that line.</p>
 
@@ -1561,9 +1580,9 @@ suppresses errors of all categories on that line.</p>
     {  // NOLINT(whitespace/braces)
 </pre>
 
-<h2>Valacheck false positives or intentional deviations</h2>
+<h2>Codecheck for Vala false positives or intentional deviations</h2>
 
-<p>You can ignore specific valacheck warnings in a Vala source code file by inserting
+<p>You can ignore specific vala codecheck warnings in a Vala source code file by inserting
 a tag with the following syntax in a comment line to the line with the error:</p>
 
 <pre>

@@ -560,9 +560,7 @@ For each registered modules, following `make` targets will be available :
 * `make <module>-dirclean` : will remove the build directory of the module.
 * `make <module>-doc` : will generate the documentation for the module.
 * `make <module>-path` : will display the path of the module.
-* `make <module>-codecheck` : will check coding style of C source files.
-* `make <module>-cppcheck` : will check coding style of C++ source files.
-* `make <module>-valacheck` : will check coding style of Vala source files.
+* `make <module>-codecheck` : will check coding style of source files.
 * `make <module>-cloc` : will count the number of lines of code.
 
 ### Module registration
@@ -895,6 +893,27 @@ If set to 1, all files under LOCAL_PATH will be copied to the build directory
 before the configure step. This allows modules to execute autoreconf out of the
 original source tree.
 
+#### `LOCAL_CODECHECK_xxx` `LOCAL_CODECHECK_xxx_ARGS`
+
+It is possible to customize the checker used to verify source code style.
+
+`LOCAL_CODECHECK_xxx` can be used to specify either an internal checker name or
+a custom script to use.
+
+If an external script is used, it will be given extra argument as its first
+argument and the list of files to check as its second argument.
+
+If `none` is given, the specified language check will be disabled.
+
+`LOCAL_CODECHECK_xxx_ARGS` can be used to pass extra argument to the checker script.
+
+Available languages:
+* `AS`: default checker is `none`.
+* `C`: default checker is `linux`.
+* `CXX`: default checker is `cpplint`.
+* `OBJC`: default checker is `linux`.
+* `VALA`: default checker is `valastyle`.
+
 ### Internal modules
 
 Defining an `internal` module is the preferred way of registering a module. It
@@ -908,7 +927,7 @@ Variable that can be set for internal modules :
 
 List of files to be compiled. The path shall be relative to `LOCAL_PATH`. The
 following file  extension are recognized : `.c, .cc, .cxx, .cpp, .s .S`.
- Other files will be ignored.
+Other files will be ignored.
 
 The build system checks that files actually exist and issue a warning if not.
 
@@ -1406,9 +1425,9 @@ transparent for users, dependencies shall be specified in the same way. The only
 difference is that modules from `SDK` won't appear in global config and will not
 be built.
 
-## Codecheck false positives or intentional deviations
+## Codecheck for C false positives or intentional deviations
 
-You can ignore specific codecheck warnings in a C source code file by inserting
+You can ignore specific C codecheck warnings in a C source code file by inserting
 a tag with the following syntax in a comment line just preceding the line with
 the error:
 
@@ -1416,7 +1435,7 @@ the error:
 	codecheck_ignore[TYPE1(,TYPE2...)]
 </pre>
 
-Where TYPE is the message type returned by `make <module>-codecheck`
+Where TYPE is the message type returned by `make <module>-codecheck-c`
 (for example `LONG_LINE`, `NEW_TYPEDEFS`, etc).
 
 Ex:
@@ -1425,9 +1444,9 @@ Ex:
 	typedef struct _CustomTypedef CustomTypedef; /* custom typedef for consistency with other GObjects */
 </pre>
 
-## Cppcheck false positives or intentional deviations
+## Codecheck for C++ false positives or intentional deviations
 
-You can ignore specific cppcheck warnings in a C++ source code file by inserting
+You can ignore specific c++ codecheck warnings in a C++ source code file by inserting
 a tag with the following syntax in a comment line to the line with
 the error:
 
@@ -1435,7 +1454,7 @@ the error:
 	NOLINT(category)
 </pre>
 
-Where category is the message returned by `make <module>-cppcheck`
+Where category is the message returned by `make <module>-codecheck-cxx`
 (for example `whitespace/braces`, etc).  NOLINT or NOLINT(*)
 suppresses errors of all categories on that line.
 
@@ -1445,9 +1464,9 @@ Ex:
 	{  // NOLINT(whitespace/braces)
 </pre>
 
-## Valacheck false positives or intentional deviations
+## Codecheck for Vala false positives or intentional deviations
 
-You can ignore specific valacheck warnings in a Vala source code file by inserting
+You can ignore specific vala codecheck warnings in a Vala source code file by inserting
 a tag with the following syntax in a comment line to the line with the error:
 
 <pre>

@@ -83,90 +83,20 @@ $(LOCAL_MODULE)-doc:
 endif
 
 ###############################################################################
-## Code check / cloc (count line of code) rules.
+## cloc (count line of code) rules.
 ###############################################################################
 
-# Original data before import
-_module_src_files := $(addprefix $(LOCAL_PATH)/,$(__modules.$(LOCAL_MODULE).SRC_FILES))
-_module_c_includes := $(__modules.$(LOCAL_MODULE).C_INCLUDES)
-_module_c_includes += $(__modules.$(LOCAL_MODULE).EXPORT_C_INCLUDES)
-_module_c_includes += $(LOCAL_PATH)
-
-# Search for include files in directories with source files
-_module_c_includes += $(sort $(foreach __src,$(_module_src_files),$(dir $(__src))))
-_module_c_includes := $(sort $(abspath $(_module_c_includes)))
-
-# Checkpatch is only for c files
-_codecheck_files := $(filter %.c,$(_module_src_files))
-_codecheck_files += $(foreach __inc,$(_module_c_includes),$(wildcard $(__inc)/*.h))
-
-# Cpplint is only for cpp files
-_cppcheck_files := $(filter %.cpp,$(_module_src_files))
-_cppcheck_files += $(filter %.cc,$(_module_src_files))
-_cppcheck_files += $(filter %.cxx,$(_module_src_files))
-_cppcheck_files += $(foreach __inc,$(_module_c_includes),$(wildcard $(__inc)/*.hpp))
-_cppcheck_files += $(foreach __inc,$(_module_c_includes),$(wildcard $(__inc)/*.hh))
-_cppcheck_files += $(foreach __inc,$(_module_c_includes),$(wildcard $(__inc)/*.hxx))
-
-# Checkvalastyle is only for vala files
-_valacheck_files := $(filter %.vala,$(_module_src_files))
-
-# Cloc
-_cloc_files := $(_module_src_files)
-_cloc_files += $(foreach __inc,$(_module_c_includes),$(wildcard $(__inc)/*.h))
-_cloc_files += $(foreach __inc,$(_module_c_includes),$(wildcard $(__inc)/*.hpp))
-_cloc_files += $(foreach __inc,$(_module_c_includes),$(wildcard $(__inc)/*.hh))
-_cloc_files += $(foreach __inc,$(_module_c_includes),$(wildcard $(__inc)/*.hxx))
+# Use codecheck source lists
+_cloc_files := $(_codecheck_as_files)
+_cloc_files += $(_codecheck_c_files)
+_cloc_files += $(_codecheck_cxx_files)
+_cloc_files += $(_codecheck_objc_files)
+_cloc_files += $(_codecheck_vala_files)
 
 # Sort to have unique names
-_codecheck_files := $(sort $(_codecheck_files))
-_cppcheck_files := $(sort $(_cppcheck_files))
-_valacheck_files := $(sort $(_valacheck_files))
 _cloc_files := $(sort $(_cloc_files))
 
-# Define target variables because we don't inherit from 'standard' targets
-$(LOCAL_MODULE)-codecheck: PRIVATE_CODECHECK_FILES := $(_codecheck_files)
-$(LOCAL_MODULE)-codecheck: PRIVATE_CODECHECK_ARGS := $(LOCAL_CODECHECK_ARGS)
-ifneq ("$(LOCAL_MODULE_CLASS)","LINUX")
-ifneq ("$(LOCAL_MODULE_CLASS)","LINUX_MODULE")
-$(LOCAL_MODULE)-codecheck: PRIVATE_CODECHECK_ARGS += --ignore SPLIT_STRING,PREFER_ALIGNED,PREFER_PACKED
-endif
-endif
-
-$(LOCAL_MODULE)-cppcheck: PRIVATE_CPPCHECK_FILES := $(_cppcheck_files)
-$(LOCAL_MODULE)-cppcheck: PRIVATE_CPPCHECK_ARGS := $(LOCAL_CPPCHECK_ARGS)
-
-$(LOCAL_MODULE)-valacheck: PRIVATE_VALACHECK_FILES := $(_valacheck_files)
-$(LOCAL_MODULE)-valacheck: PRIVATE_VALACHECK_ARGS := $(LOCAL_VALACHECK_ARGS)
-
 $(LOCAL_MODULE)-cloc: PRIVATE_CLOC_FILES := $(_cloc_files)
-
-.PHONY: $(LOCAL_MODULE)-codecheck
-$(LOCAL_MODULE)-codecheck:
-	@echo "$(PRIVATE_MODULE): Checking files...";
-	@$(BUILD_SYSTEM)/scripts/checkpatch.pl \
-		--no-tree --no-summary --terse --show-types -f \
-		$(PRIVATE_CODECHECK_ARGS) $(PRIVATE_CODECHECK_FILES) \
-	|| true;
-
-.PHONY: $(LOCAL_MODULE)-cppcheck
-$(LOCAL_MODULE)-cppcheck:
-	@echo "$(PRIVATE_MODULE): Checking files...";
-	@for f in $(PRIVATE_CPPCHECK_FILES); do \
-		echo "$(PRIVATE_MODULE): Checking file $${f#$(TOP_DIR)/}"; \
-		$(BUILD_SYSTEM)/scripts/cpplint.py \
-			--extension hpp,cpp,cxx,hxx,cc,hh \
-			--counting detailed --verbose 0 \
-			$(PRIVATE_CPPCHECK_ARGS) $$f \
-		|| true; \
-	done
-
-.PHONY: $(LOCAL_MODULE)-valacheck
-$(LOCAL_MODULE)-valacheck:
-	@echo "$(PRIVATE_MODULE): Checking files ...";
-	@$(BUILD_SYSTEM)/scripts/checkvalastyle.pl \
-		$(PRIVATE_VALACHECK_ARGS) $(PRIVATE_VALACHECK_FILES) \
-	|| true;
 
 .PHONY: $(LOCAL_MODULE)-cloc
 $(LOCAL_MODULE)-cloc:
