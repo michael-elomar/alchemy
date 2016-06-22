@@ -42,7 +42,7 @@ endif
 # Create a wrapper to be used in gdb with internal macro 'set-lib-path'
 $(GDB_WRAPPER_SCRIPT): .FORCE
 	@mkdir -p $(dir $@)
-	@rm -f $@ $@.tmp
+	@rm -f $@.tmp
 	@echo "Gdb wrapper: $@"
 	@echo "define set-lib-path" >> $@.tmp
 ifneq ("$(GDB_ABSOLUTE_PREFIX)","")
