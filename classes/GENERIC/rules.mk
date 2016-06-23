@@ -49,14 +49,13 @@ endif
 ###############################################################################
 
 ifneq ("$(_module_autoconf_file)","")
-$(_module_autoconf_file): $(_module_build_config_file)
-	@$(call generate-autoconf-file,$<,$@)
 
-# Copy config file in build dir if not done yet by load-config
 ifneq ("$(wildcard $(_module_orig_config_file))","")
 # Original config file exists, copy it with optional sed files applied
-$(_module_build_config_file): $(_module_orig_config_file)
-	$(call __config-apply-sed,$(PRIVATE_MODULE),$@,$<)
+$(_module_autoconf_file): PRIVATE_BUILD_CONFIG_FILE := $(_module_build_config_file)
+$(_module_autoconf_file): $(_module_orig_config_file)
+	$(call __config-apply-sed,$(PRIVATE_MODULE),$(PRIVATE_BUILD_CONFIG_FILE),$<)
+	@$(call generate-autoconf-file,$(PRIVATE_BUILD_CONFIG_FILE),$@)
 else
 # No Original config file, simply create an empty one in build dir
 $(_module_build_config_file):
