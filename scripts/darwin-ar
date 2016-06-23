@@ -32,7 +32,7 @@ else
 		# Extract the target-specific objects
 		arch_files=
 		for file in $files ; do
-			${LIPO} -thin ${arch $file} -output ${file%.o}.${arch}.o
+			${LIPO} -thin ${arch} ${file} -output ${file%.o}.${arch}.o
 			arch_files+=' '${file%.o}.${arch}.o
 		done
 
