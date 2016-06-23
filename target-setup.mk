@@ -92,7 +92,7 @@ ifdef TARGET_OS
   else ifneq ("$(filter $(TARGET_OS),iphone ios)","")
     override TARGET_OS := darwin
     override TARGET_OS_FLAVOUR := iphoneos
-  else ifeq ("$(filter $(TARGET_OS),iphonesimulator iossimulator)","")
+  else ifneq ("$(filter $(TARGET_OS),iphonesimulator iossimulator)","")
     override TARGET_OS := darwin
     override TARGET_OS_FLAVOUR := iphonesimulator
   else ifeq ("$(TARGET_OS)","macos")
