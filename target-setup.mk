@@ -89,12 +89,15 @@ ifdef TARGET_OS
   else ifeq ("$(TARGET_OS)","parrot")
     override TARGET_OS := linux
     override TARGET_OS_FLAVOUR := parrot
-  else ifeq ("$(TARGET_OS)","iphone")
+  else ifneq ("$(filter $(TARGET_OS),iphone ios)","")
     override TARGET_OS := darwin
     override TARGET_OS_FLAVOUR := iphoneos
-  else ifeq ("$(TARGET_OS)","iphonesimulator")
+  else ifeq ("$(filter $(TARGET_OS),iphonesimulator iossimulator)","")
     override TARGET_OS := darwin
     override TARGET_OS_FLAVOUR := iphonesimulator
+  else ifeq ("$(TARGET_OS)","macos")
+    override TARGET_OS := darwin
+    override TARGET_OS_FLAVOUR := native
   else ifeq ("$(TARGET_OS)","yocto")
     override TARGET_OS := linux
     override TARGET_OS_FLAVOUR := yocto
