@@ -129,7 +129,7 @@ define _internal-qmake-gen-deps-darwin
 		echo "DEPENDPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
 		echo "QMAKE_CFLAGS += $(TARGET_QMAKE_CFLAGS) $(PRIVATE_CFLAGS)"; \
 		echo "QMAKE_CXXFLAGS += $(filter-out -std=%,$(TARGET_QMAKE_CFLAGS)) $(TARGET_GLOBAL_CXXFLAGS) $(filter-out -std=%,$(PRIVATE_CFLAGS)) $(PRIVATE_CXXFLAGS)"; \
-		echo "LIBS += $(TARGET_QMAKE_LDFLAGS) $(PRIVATE_LDFLAGS)"; \
+		echo "LIBS += $(subst $(APPLE_ARCH),,$(TARGET_QMAKE_LDFLAGS) $(PRIVATE_LDFLAGS))"; \
 		echo "LIBS += $(foreach __lib, $(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES), -force_load $(__lib))"; \
 		echo "LIBS += $(PRIVATE_ALL_STATIC_LIBRARIES)"; \
 		echo "LIBS += $(PRIVATE_ALL_SHARED_LIBRARIES)"; \
