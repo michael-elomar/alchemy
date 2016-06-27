@@ -45,7 +45,7 @@ _codecheck-get-script = $(strip \
 ## $1 : language (in lower case)
 ## $2 : language (in uppercase case)
 ##
-## If LOCAL_CODECHECK_XXX is not empty and is a valid script file, assume ampty
+## If LOCAL_CODECHECK_XXX is not empty and is a valid script file, assume empty
 ## otherwise, LOCAL_CODECHECK_XXX is the checker to use.
 ## If LOCAL_CODECHECK_XXX is empty, use a default checker for the language.
 ###############################################################################

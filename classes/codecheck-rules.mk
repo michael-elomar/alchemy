@@ -46,7 +46,7 @@ _codecheck_objc_files := $(sort $(_codecheck_objc_files))
 _codecheck_vala_files := $(sort $(_codecheck_vala_files))
 
 # Ignore some defect when using linux checker but for code outside the kernel
-ifeq ("$(LOCAL_CODECHECK_C)","linux")
+ifeq ("$(call _codecheck-get-checker,c,C)","linux")
 ifneq ("$(LOCAL_MODULE_CLASS)","LINUX")
 ifneq ("$(LOCAL_MODULE_CLASS)","LINUX_MODULE")
 LOCAL_CODECHECK_C_ARGS += --ignore SPLIT_STRING,PREFER_ALIGNED,PREFER_PACKED
