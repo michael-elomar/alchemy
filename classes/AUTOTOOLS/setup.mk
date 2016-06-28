@@ -201,6 +201,7 @@ TARGET_AUTOTOOLS_DYN_LDFLAGS := $(TARGET_GLOBAL_LDFLAGS_SHARED) $(TARGET_GLOBAL_
 
 _target_pkg_config_path :=
 $(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
+	$(eval _target_pkg_config_path := $(_target_pkg_config_path):$(__dir)/$(TARGET_DEFAULT_LIB_DESTDIR)/pkgconfig) \
 	$(eval _target_pkg_config_path := $(_target_pkg_config_path):$(__dir)/usr/lib/pkgconfig) \
 	$(eval _target_pkg_config_path := $(_target_pkg_config_path):$(__dir)/lib/pkgconfig) \
 	$(eval _target_pkg_config_path := $(_target_pkg_config_path):$(__dir)/usr/share/pkgconfig) \
