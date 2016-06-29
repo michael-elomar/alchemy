@@ -27,8 +27,14 @@ ifeq ("$(TARGET_OS)-$(TARGET_OS_FLAVOUR)","$(HOST_OS)-native")
     TARGET_QT_PLATFORM ?= unknown
   endif
 else ifeq ("$(TARGET_OS)","linux")
-  ifeq ("$(TARGET_OS_FLAVOUR)","android")
+  ifeq ("$(TARGET_OS_FLAVOUR)-$(TARGET_ARCH)-$(TARGET_CPU)","android-arm-armv7a")
     TARGET_QT_PLATFORM ?= android_armv7
+  else ifeq ("$(TARGET_OS_FLAVOUR)-$(TARGET_ARCH)-$(TARGET_CPU)","android-arm-armv7a-neon")
+    TARGET_QT_PLATFORM ?= android_armv7
+  else ifeq ("$(TARGET_OS_FLAVOUR)-$(TARGET_ARCH)","android-arm")
+    TARGET_QT_PLATFORM ?= android_armv5
+  else ifeq ("$(TARGET_OS_FLAVOUR)-$(TARGET_ARCH)","android-x86")
+    TARGET_QT_PLATFORM ?= android_x86
   else ifeq ("$(TARGET_OS_FLAVOUR)-$(TARGET_ARCH)","native-x64")
     TARGET_QT_PLATFORM ?= linux_64
   else ifeq ("$(TARGET_OS_FLAVOUR)-$(TARGET_ARCH)","native-x86")
