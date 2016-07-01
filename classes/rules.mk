@@ -278,7 +278,9 @@ all_prerequisites += $(_module_revision_h_file)
 # PRIVATE_XXX variables leading to 'interresting' results
 LOCAL_TARGETS += \
 	$(LOCAL_PREREQUISITES) \
-	$(LOCAL_EXPORT_PREREQUISITES)
+	$(LOCAL_EXPORT_PREREQUISITES) \
+	$(_module_autoconf_file) \
+	$(_module_revision_h_file)
 
 # Host modules required
 all_prerequisites += \
