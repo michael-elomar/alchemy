@@ -1,9 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys, os, logging
 import optparse
 import struct
-from cStringIO import StringIO
+from io import StringIO
 
 from mkextfs import ExtfsSuperBlock, EXTFS_SUPER_BLOCK_STRUCT_SIZE
 from mkextfs import ExtfsGroupDescV2, EXTFS_GROUP_DESC_V2_STRUCT_SIZE
@@ -82,7 +82,7 @@ class Extfs(object):
         grp = (blockNum - self.firstDataBlock) // self.blocksPerGroup
         idx = (blockNum - self.firstDataBlock) % self.blocksPerGroup
         bbm = self.bbmList[grp]
-        return (ord(bbm[idx // 8]) & 1 << (idx % 8)) != 0
+        return (bbm[idx // 8] & 1 << (idx % 8)) != 0
 
     @staticmethod
     def load(fin):

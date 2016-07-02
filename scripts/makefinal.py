@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # @file makefinal.py
 # @author Y.M. Morgan
@@ -159,16 +159,14 @@ def executeCmd(cmd):
 # Determine if a file is an executable.
 #===============================================================================
 def isExec(filePath):
-    result = False
     try:
         with open(filePath, "rb") as fd:
-            header = str(fd.read(4))
-            if header.find("ELF") >= 0:
-                result = True
+            if fd.read(4) == b"\x7fELF":
+                return True
     except IOError as ex:
         logging.error("Failed to open file: %s ([err=%d] %s)",
             filePath, ex.errno, ex.strerror)
-    return result
+    return False
 
 #===============================================================================
 # Determine if a file can be stripped.

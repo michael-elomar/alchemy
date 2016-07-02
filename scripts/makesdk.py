@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys, os, logging
 import optparse
@@ -8,10 +8,7 @@ import tarfile
 import time
 import xml.parsers
 
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from io import StringIO
+from io import StringIO
 
 import moduledb
 
@@ -130,10 +127,6 @@ class Context(object):
 # If no extension is provided, any element will be took into account
 #===============================================================================
 def copyTree(ctx, srcDir, dstDir, includeExt=None, excludeExt=None, depth=-1):
-    # When executed with LANG=C (via alchemy) os.walk crashes when a path
-    # with accents is found. We force utf8 encoding to solve the issue.
-    srcDir = srcDir.encode("UTF-8")
-    dstDir = dstDir.encode("UTF-8")
     rootDepth = os.path.normpath(srcDir).count(os.sep)
     for (dirPath, dirNames, fileNames) in os.walk(srcDir):
         # Check depth of directory
@@ -154,15 +147,13 @@ def copyTree(ctx, srcDir, dstDir, includeExt=None, excludeExt=None, depth=-1):
             if includeExt is None:
                 include = True
             else:
-                include = any([fnmatch.fnmatch(fileName, ext.encode("UTF-8"))
-                        for ext in includeExt])
+                include = any([fnmatch.fnmatch(fileName, ext) for ext in includeExt])
 
             # Exclude file ?
             if excludeExt is None:
                 exclude = False
             else:
-                exclude = any([fnmatch.fnmatch(fileName, ext.encode("UTF-8"))
-                        for ext in excludeExt])
+                exclude = any([fnmatch.fnmatch(fileName, ext) for ext in excludeExt])
 
             # Process file if needed
             if include and not exclude:

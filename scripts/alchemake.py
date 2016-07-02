@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # This script wraps make to detect errors and interrupt make as soon as
 # possible.
@@ -85,7 +85,8 @@ class Job:
         # Start sub-process, see in header why we use a shell
         self.process = subprocess.Popen(cmdline,
                 stdin=stdin, stdout=stdout, stderr=stderr,
-                preexec_fn=self._preExec, shell=True, env=env)
+                preexec_fn=self._preExec, shell=True, env=env,
+                universal_newlines=True)
         # Get information (don't call os.getpgid() because of a race condition
         # with the child)
         self.pid = self.process.pid

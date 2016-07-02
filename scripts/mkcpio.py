@@ -35,7 +35,7 @@ class Cpio(object):
                 entry.st.st_uid,
                 entry.st.st_gid,
                 1,
-                entry.st.st_mtime,
+                int(entry.st.st_mtime),
                 entry.dataSize,
                 0,
                 0,

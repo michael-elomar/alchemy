@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys, os, logging
 import optparse
@@ -16,16 +16,14 @@ class Context(object):
 # Determine if a file is an elf file.
 #===============================================================================
 def isElf(filePath):
-    result = False
     try:
         with open(filePath, "rb") as fd:
-            header = str(fd.read(4))
-            if header.find("ELF") >= 0:
-                result = True
+            if fd.read(4) == b"\x7fELF":
+                return True
     except IOError as ex:
         logging.error("Failed to open file: %s ([err=%d] %s)",
             filePath, ex.errno, ex.strerror)
-    return result
+    return False
 
 #===============================================================================
 #===============================================================================
