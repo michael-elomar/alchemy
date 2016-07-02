@@ -9,10 +9,6 @@
 MKFS_SCRIPT := $(BUILD_SYSTEM)/scripts/mkfs.py
 SPARSE_SCRIPT := $(BUILD_SYSTEM)/scripts/sparse.py
 
-ifeq ("$(V)","1")
-  MKFS_SCRIPT += -v
-endif
-
 # Script that will modify mode/uid/gid of files while generating the image
 FIXSTAT := $(BUILD_SYSTEM)/scripts/fixstat.py \
 	--user-file=$(TARGET_OUT_FINAL)/etc/passwd \
@@ -25,6 +21,13 @@ FIXSTAT := $(BUILD_SYSTEM)/scripts/fixstat.py \
 ifneq ("$(TARGET_PERMISSIONS_FILES)","")
   FIXSTAT += --use-default
 endif
+
+ifeq ("$(V)","1")
+  MKFS_SCRIPT += -v
+  SPARSE_SCRIPT += -v
+  FIXSTAT += -v
+endif
+
 
 ###############################################################################
 ## Generic image generation macro.
