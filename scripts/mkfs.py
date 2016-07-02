@@ -62,7 +62,7 @@ class FsImage(object):
 #===============================================================================
 #===============================================================================
 def addFsEntry(root, entry):
-    #logging.debug("Adding entry '%s'", entry.filePath)
+    logging.debug("Adding entry '%s'", entry.filePath)
     parent = root
     components = entry.filePath.split(os.path.sep)
     for component in components[:-1]:

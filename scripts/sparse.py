@@ -330,7 +330,7 @@ class SparseFile(object):
         fileSize = fin.tell()
         fin.seek(0, os.SEEK_SET)
         logging.info("Read raw image: fileSize=%d blockSize=%d extf=%s",
-                blockSize, fileSize, extfs is not None)
+                fileSize, blockSize, extfs is not None)
 
         # Process input file
         self.header.blk_sz = blockSize
