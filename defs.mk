@@ -992,7 +992,7 @@ __git-rev-compute = \
 	$(eval __data := $(shell cd $1 && git rev-parse --show-toplevel HEAD 2>/dev/null)) \
 	$(eval __top-level := $(word 1,$(__data))) \
 	$(eval __sha1 := $(word 2,$(__data))) \
-	$(eval __url := $(shell cd $1 && git ls-remote --get-url $$(git remote | head -n1))) \
+	$(eval __url := $(shell cd $1 && git ls-remote --get-url $$(git remote 2>/dev/null | head -n1) 2>/dev/null)) \
 	$(if $(__top-level), \
 		$(eval __desc := $(shell cd $(__top-level) && git describe --tags --always 2>/dev/null)) \
 		$(if $(wildcard $(__top-level)/.gitmodules),$(empty), \
