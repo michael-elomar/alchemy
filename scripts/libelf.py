@@ -716,7 +716,7 @@ class Elf(object):
         return None
 
     def hasSection(self, name):
-        return self.getSection(name) != None
+        return self.getSection(name) is not None
 
     def __str__(self):
         return "\n".join(["ehdr=%s" % self.ehdr] + \

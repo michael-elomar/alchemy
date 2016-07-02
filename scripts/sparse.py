@@ -165,7 +165,7 @@ class SparseHeader(object):
 #===============================================================================
 class ChunkHeader(object):
     _FMT = "<HHII"
-    def __init__(self, headerSize = CHUNK_HEADER_SIZE):
+    def __init__(self, headerSize=CHUNK_HEADER_SIZE):
         self.headerSize = headerSize
         self.chunk_type = 0
         self.reserved1 = 0
@@ -203,7 +203,7 @@ class ChunkHeader(object):
 class Chunk(object):
     _COPY_SIZE = 65536
     _ZERO_BUF = "\x00" * 65536
-    def __init__(self, headerSize = CHUNK_HEADER_SIZE):
+    def __init__(self, headerSize=CHUNK_HEADER_SIZE):
         self.header = ChunkHeader(headerSize)
         self.value = 0
         self.offset = 0
@@ -445,7 +445,7 @@ def main():
         else:
             sparse2Raw(fin, fout)
     except ValueError as ex:
-        logging.error(ex.message)
+        logging.error(str(ex))
         sys.exit(1)
 
     fin.close()
@@ -456,7 +456,7 @@ def main():
 #===============================================================================
 def parseArgs():
     usage = "usage: %prog [options] <infile> <outfile>"
-    parser = optparse.OptionParser(usage = usage)
+    parser = optparse.OptionParser(usage=usage)
 
     parser.add_option("--sparse",
         dest="doSparse",
@@ -511,7 +511,7 @@ def setupLog(options):
     logging.addLevelName(logging.DEBUG, "D")
 
     # setup log level
-    if options.quiet == True:
+    if options.quiet:
         logging.getLogger().setLevel(logging.CRITICAL)
     elif options.verbose >= 2:
         logging.getLogger().setLevel(logging.DEBUG)

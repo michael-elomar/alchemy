@@ -23,11 +23,13 @@ def getinfo(name):
         return None
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        sys.stderr.write("Invalid number of arguments: %d\n" % (len(sys.argv) - 1))
-        sys.exit(1)
-    val = getinfo(sys.argv[1])
-    if val is None:
-        sys.stderr.write("Invalid argument '%s'\n" % sys.argv[1])
-        sys.exit(1)
-    print(val)
+    def main():
+        if len(sys.argv) != 2:
+            sys.stderr.write("Invalid number of arguments: %d\n" % (len(sys.argv) - 1))
+            sys.exit(1)
+        val = getinfo(sys.argv[1])
+        if val is None:
+            sys.stderr.write("Invalid argument '%s'\n" % sys.argv[1])
+            sys.exit(1)
+        print(val)
+    main()

@@ -18,11 +18,10 @@ class Context(object):
 def isElf(filePath):
     result = False
     try:
-        file = open(filePath, "rb")
-        header = str(file.read(4))
-        if header.find("ELF") >= 0:
-            result = True
-        file.close()
+        with open(filePath, "rb") as fd:
+            header = str(fd.read(4))
+            if header.find("ELF") >= 0:
+                result = True
     except IOError as ex:
         logging.error("Failed to open file: %s ([err=%d] %s)",
             filePath, ex.errno, ex.strerror)
@@ -81,15 +80,15 @@ def main():
                 ctx.libraries[fileName] = True
 
     # Print result
-    for lib in ctx.libraries:
-        if not ctx.libraries[lib]:
+    for library in ctx.libraries:
+        if not ctx.libraries[library]:
             # Only display the first binary that needs the library
             neededBy = None
-            for bin in ctx.binaries:
-                if lib in ctx.binaries[bin]:
-                    neededBy = bin
+            for binary in ctx.binaries:
+                if library in ctx.binaries[binary]:
+                    neededBy = binary
                     break
-            logging.warning("Missing library: '%s' needed by %s", lib, neededBy)
+            logging.warning("Missing library: '%s' needed by %s", library, neededBy)
 
 #===============================================================================
 # Setup option parser and parse command line.
@@ -126,8 +125,8 @@ def setupLog(options):
     logging.addLevelName(logging.INFO, "I")
     logging.addLevelName(logging.DEBUG, "D")
 
-    # setup log level
-    if options.quiet == True:
+    # Setup log level
+    if options.quiet:
         logging.getLogger().setLevel(logging.CRITICAL)
     elif options.verbose >= 2:
         logging.getLogger().setLevel(logging.DEBUG)

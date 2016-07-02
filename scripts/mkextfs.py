@@ -398,7 +398,7 @@ class ExtfsExtentHeader(ctypes.LittleEndianStructure):
 #===============================================================================
 class ExtfsJournalSuperBlock(ctypes.BigEndianStructure):
     _fields_ = [
-        ("magic" , ctypes.c_uint32),        #
+        ("magic", ctypes.c_uint32),         #
         ("blocktype", ctypes.c_uint32),     #
         ("sequence", ctypes.c_uint32),      #
         ("blocksize", ctypes.c_uint32),     # Journal device blocksize
@@ -974,6 +974,6 @@ def genImage(image, root, version=2):
     fs.finalize()
     try:
         buf.close()
-    except BufferError as ex:
+    except BufferError:
         # FIXME: 'cannot close exported pointers exist' with python3
         pass

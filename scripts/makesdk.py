@@ -182,7 +182,7 @@ def copyHostStaging(ctx, srcDir, dstDir):
 #===============================================================================
 def copyStaging(ctx, srcDir, dstDir):
     logging.debug("Copy staging: '%s' -> '%s'", srcDir, dstDir)
-    dirs_to_keep = ["lib" ,
+    dirs_to_keep = ["lib",
         os.path.join("etc", "alternatives"),
         os.path.join("usr", "lib"),
         os.path.join("usr", "include"),
@@ -326,7 +326,7 @@ def processModule(ctx, module, headersOnly=False):
             "FORCE_WHOLE_STATIC_LIBRARY",
             "EXPORT_CFLAGS", "EXPORT_CXXFLAGS"]
     for field in fields:
-        if field in module.fields and module.fields[field] :
+        if field in module.fields and module.fields[field]:
             ctx.atom.write("LOCAL_%s := %s\n" % (field, module.fields[field]))
 
     # Libraries
@@ -550,7 +550,8 @@ def main():
     target_elements = [
         "OS", "OS_FLAVOUR",
         "ARCH", "CPU", "CROSS",
-        "LIBC", "DEFAULT_ARM_MODE" ]
+        "LIBC", "DEFAULT_ARM_MODE"
+    ]
     for element_to_check in target_elements:
         checkTargetVar(ctx, element_to_check)
 
@@ -625,7 +626,7 @@ def setupLog(options):
     logging.addLevelName(logging.DEBUG, "D")
 
     # Setup log level
-    if options.quiet == True:
+    if options.quiet:
         logging.getLogger().setLevel(logging.CRITICAL)
     elif options.verbose >= 2:
         logging.getLogger().setLevel(logging.DEBUG)

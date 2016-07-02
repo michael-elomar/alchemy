@@ -5,7 +5,7 @@ import optparse
 import stat
 import re
 
-SPACE_PATTERN = re.compile("\s+")
+SPACE_PATTERN = re.compile(r"\s+")
 
 DEFAULT_PERMISSIONS = [
     r"/lib/ld-.*\.so.*  0755    root    root", # Linker shall be executable
@@ -67,9 +67,9 @@ def parseIdFile(filePath, kind):
                 try:
                     # Get name and id
                     name = fields[0]
-                    id = int(fields[2], base=10)
-                    logging.info("%s %d:%s", kind, id, name)
-                    ids[name] = id
+                    _id = int(fields[2], base=10)
+                    logging.info("%s %d:%s", kind, _id, name)
+                    ids[name] = _id
                 except ValueError as ex:
                     logging.error("%s:%d: %s", filePath, lineNum, ex)
             else:
@@ -89,7 +89,7 @@ def parsePermissionLine(ctx, filePath, lineNum, line, isDefault=False):
         if line.startswith('"'):
             # support space in filename
             file_end = line.index('"', 1) + 1
-            fields = [ line[0:file_end] ]
+            fields = [line[0:file_end]]
             fields.extend(re.sub(SPACE_PATTERN, " ", line[file_end:]).lstrip(' ').split(" "))
         else:
             fields = re.sub(SPACE_PATTERN, " ", line).split(" ")
@@ -212,7 +212,7 @@ def main():
 #===============================================================================
 def parseArgs():
     usage = "usage: %prog [options]"
-    parser = optparse.OptionParser(usage = usage)
+    parser = optparse.OptionParser(usage=usage)
 
     parser.add_option("--user-file",
         dest="userFile",
@@ -262,7 +262,7 @@ def setupLog(options):
     logging.addLevelName(logging.DEBUG, "D")
 
     # setup log level
-    if options.quiet == True:
+    if options.quiet:
         logging.getLogger().setLevel(logging.CRITICAL)
     elif options.verbose >= 2:
         logging.getLogger().setLevel(logging.DEBUG)

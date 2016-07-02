@@ -152,8 +152,8 @@ class Makefile(object):
 # Execute a command and get its output
 #==============================================================================
 def executeCmd(cmd):
-    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell = True)
-    return p.communicate()[0].rstrip("\n").split("\n")
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+    return process.communicate()[0].rstrip("\n").split("\n")
 
 #===============================================================================
 # Determine if a file is an executable.
@@ -161,11 +161,10 @@ def executeCmd(cmd):
 def isExec(filePath):
     result = False
     try:
-        file = open(filePath, "rb")
-        header = str(file.read(4))
-        if header.find("ELF") >= 0:
-            result = True
-        file.close()
+        with open(filePath, "rb") as fd:
+            header = str(fd.read(4))
+            if header.find("ELF") >= 0:
+                result = True
     except IOError as ex:
         logging.error("Failed to open file: %s ([err=%d] %s)",
             filePath, ex.errno, ex.strerror)
@@ -180,11 +179,11 @@ def canStrip(filePath):
     result = False
     try:
         # get error output from nm command to check for 'no symbols'
-        p = subprocess.Popen("nm %s" % filePath,
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell = True)
-        res = p.communicate()[1].decode("UTF-8").rstrip("\n").split("\n")
+        process = subprocess.Popen("nm %s" % filePath,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        res = process.communicate()[1].decode("UTF-8").rstrip("\n").split("\n")
         result = (len(res) == 0 or res[0].find("no symbols") < 0)
-    except IOError as ex:
+    except IOError:
         # assume not strippable if nm failed
         result = False
     return result
@@ -204,8 +203,7 @@ def resolveLink(finalDir, path):
         # Resolve where the link points to
         resolved = os.readlink(path)
         if not os.path.isabs(resolved):
-            dir = os.path.dirname(path)
-            path = os.path.normpath(os.path.join(dir, resolved))
+            path = os.path.normpath(os.path.join(os.path.dirname(path), resolved))
         elif resolved[0] == "/":
             # Remove leading '/' and join with final dir
             path = os.path.normpath(os.path.join(finalDir, resolved[1:]))
@@ -252,7 +250,7 @@ def getCopyCmds(dstFileName, srcFileName, options, doStrip=False):
         cmds.append("cp -af \"%s\" \"%s\"" % (srcFileName, dstFileName))
     else:
         if doStrip:
-            if srcFileName.endswith(".ko") and options.stripKernel != None:
+            if srcFileName.endswith(".ko") and options.stripKernel is not None:
                 cmds.append("%s -o \"%s\" \"%s\"" % \
                     (options.stripKernel, dstFileName, srcFileName))
             else:
@@ -285,7 +283,7 @@ def doCopyDirect(dstFileName, srcFileName, options, doStrip=False):
 #===============================================================================
 def addPathInFileList(relPath, isDir, options):
     # Nothing to do it option not given
-    if options.fileListFile == None:
+    if options.fileListFile is None:
         return
 
     # Make sure all path leading to this one is logged
@@ -310,10 +308,10 @@ def doCopy(dstFileName, srcFileName, options, forceCopy=False):
 
     # do we need to strip ?
     doStrip = False
-    if options.strip != None \
-        and not os.path.islink(srcFileName) \
-        and isExec(srcFileName) \
-        and canStrip(srcFileName):
+    if options.strip is not None \
+            and not os.path.islink(srcFileName) \
+            and isExec(srcFileName) \
+            and canStrip(srcFileName):
         doStrip = True
 
     # If the file to be stripped is in usr/lib/debug, simply skip it
@@ -344,7 +342,7 @@ def doCopy(dstFileName, srcFileName, options, forceCopy=False):
             doAction = True
 
     # nothing to do if destination is already OK
-    if doAction == False:
+    if not doAction:
         return
     if os.path.islink(srcFileName):
         logging.info("Link : %s", relPath)
@@ -357,7 +355,7 @@ def doCopy(dstFileName, srcFileName, options, forceCopy=False):
         os.makedirs(dstDirName, 0o755)
 
     # do the copy by wanted method (always process links directly)
-    if options.makefile != None and not os.path.islink(srcFileName):
+    if options.makefile is not None and not os.path.islink(srcFileName):
         doCopyByMakefile(dstFileName, srcFileName, options, doStrip)
     else:
         doCopyDirect(dstFileName, srcFileName, options, doStrip)
@@ -420,7 +418,7 @@ def processDir(rootDir, options, withEmptyDir, copyType, forceCopy=False):
 #===============================================================================
 def processLinuxBasicSkel(options):
     for entry in LINUX_BASIC_SKEL:
-        if entry[1] == None:
+        if entry[1] is None:
             dstDirName = getRealPath(options.finalDir, entry[0])
             if not os.path.lexists(dstDirName):
                 logging.info("Directory : %s", entry[0])
@@ -466,7 +464,7 @@ def main():
     # filelist file
     options.fileListFile = None
     options.fileListDirs = []
-    if options.fileListPath != None:
+    if options.fileListPath is not None:
         try:
             options.fileListFile = open(options.fileListPath, "w")
         except IOError as ex:
@@ -500,7 +498,7 @@ def main():
     if options.linuxBasicSkel:
         processLinuxBasicSkel(options)
 
-    if options.makefile != None:
+    if options.makefile is not None:
         options.makefile.write(options)
         options.makefile.fout.close()
 
@@ -509,7 +507,7 @@ def main():
 #===============================================================================
 def parseArgs():
     usage = "usage: %prog [options] <staging-dir> <final-dir> [<makefile>]"
-    parser = optparse.OptionParser(usage = usage)
+    parser = optparse.OptionParser(usage=usage)
     parser.add_option("--strip",
         dest="strip",
         default=None,
@@ -586,7 +584,7 @@ def setupLog(options):
     logging.addLevelName(logging.DEBUG, "D")
 
     # setup log level
-    if options.quiet == True:
+    if options.quiet:
         logging.getLogger().setLevel(logging.CRITICAL)
     elif options.verbose >= 2:
         logging.getLogger().setLevel(logging.DEBUG)

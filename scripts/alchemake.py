@@ -46,7 +46,6 @@
 #
 
 import sys, os, logging
-import optparse
 import subprocess
 import signal
 import time
@@ -60,7 +59,7 @@ class Job:
         self.process = None
         self.pid = -1
         self.pgid = -1
-        self.status = -1;
+        self.status = -1
         self.stopped = False
 
     # Called in child process before 'exec' is done
@@ -82,8 +81,7 @@ class Job:
         signal.signal(signal.SIGCONT, signal.SIG_DFL)
 
     # Launch the job process
-    def launch(self, cmdline,
-            stdin=None, stdout=None, stderr=None, env=None):
+    def launch(self, cmdline, stdin=None, stdout=None, stderr=None, env=None):
         # Start sub-process, see in header why we use a shell
         self.process = subprocess.Popen(cmdline,
                 stdin=stdin, stdout=stdout, stderr=stderr,
@@ -136,7 +134,7 @@ class JobCtrl:
         logging.debug("tcpgrp=%d foreground=%d", self.tcpgrp, self.foreground)
         self.job = Job(self)
 
-    def signalHandler(self, signo, frame):
+    def signalHandler(self, signo, _frame):
         logging.debug("signalHandler: signo=%d", signo)
         if signo == signal.SIGINT or signo == signal.SIGTERM:
             self.job.kill()
@@ -148,7 +146,7 @@ class JobCtrl:
                         os.WNOHANG + os.WCONTINUED + os.WUNTRACED)
             except OSError as ex:
                 # Simulate success in case of error (very rare case...)
-                logging.debug("waitpid: %s",  str(ex))
+                logging.debug("waitpid: %s", str(ex))
                 pid = self.job.pid
                 status = 512
             logging.debug("waitpid: pid=%d status=%s", pid, status)
@@ -239,7 +237,7 @@ def main():
                 logging.debug("error detected")
                 errorDetected = True
                 jobCtrl.job.kill()
-        except IOError as ex:
+        except IOError:
             # Will occur when interrupted during read, an EOF will be read next
             pass
 
@@ -256,7 +254,7 @@ def main():
         try:
             logging.debug("tcsetpgrp(0, %d)", jobCtrl.tcpgrp)
             os.tcsetpgrp(0, jobCtrl.tcpgrp)
-        except OSError as ex:
+        except OSError:
             # Seems to occurs when launched in background and initial foreground
             # process is not there anymore, just ignore
             pass

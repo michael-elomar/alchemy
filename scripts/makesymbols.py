@@ -47,8 +47,7 @@ def createTarFile(outTarFile, fileList, stagingDir):
     try:
         tarfd = tarfile.open(outTarFile, "w")
     except tarfile.TarError as ex:
-        logging.error("Failed to create file: %s ([err=%d] %s)",
-            outTarFile, ex.errno, ex.strerror)
+        logging.error("Failed to create file: %s (%s)", outTarFile, str(ex))
         sys.exit(1)
 
     for filePath in fileList:
@@ -113,7 +112,7 @@ def setupLog(options):
     logging.addLevelName(logging.DEBUG, "D")
 
     # Setup log level
-    if options.quiet == True:
+    if options.quiet:
         logging.getLogger().setLevel(logging.CRITICAL)
     elif options.verbose >= 2:
         logging.getLogger().setLevel(logging.DEBUG)

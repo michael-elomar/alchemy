@@ -67,12 +67,12 @@ def addFsEntry(root, entry):
     components = entry.filePath.split(os.path.sep)
     for component in components[:-1]:
         if component not in parent.children:
-            logging.warn("Missing parent for '%s' in '%s'",
+            logging.warning("Missing parent for '%s' in '%s'",
                     component, entry.filePath)
             return
         parent = parent.children[component]
     if entry.fileName in parent.children:
-        logging.warn("Entry already present : '%s'", entry.filePath)
+        logging.warning("Entry already present : '%s'", entry.filePath)
         return
     parent.children[entry.fileName] = entry
 
@@ -188,7 +188,7 @@ def main():
 #===============================================================================
 def parseArgs():
     usage = "usage: %prog [options] <imagefile>"
-    parser = optparse.OptionParser(usage = usage)
+    parser = optparse.OptionParser(usage=usage)
 
     parser.add_option("--fstype",
         dest="fstype",
@@ -220,7 +220,7 @@ def parseArgs():
     (options, args) = parser.parse_args()
     if len(args) != 1:
         parser.error("Missing <imagefile>")
-    if options.fstype == None:
+    if options.fstype is None:
         parser.error("Missing file system type")
     if options.fstype not in FS_LIST:
         parser.error("Invalid file system type : %s" % options.fstype)
@@ -241,7 +241,7 @@ def setupLog(options):
     logging.addLevelName(logging.DEBUG, "D")
 
     # setup log level
-    if options.quiet == True:
+    if options.quiet:
         logging.getLogger().setLevel(logging.CRITICAL)
     elif options.verbose >= 2:
         logging.getLogger().setLevel(logging.DEBUG)

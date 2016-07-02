@@ -61,7 +61,7 @@ class Menu:
         self.name = name
         self.subMenus = []
         self.modules = []
-        if parent != None:
+        if parent is not None:
             parent.subMenus.append(self)
 
     # Get sub-menu having given name, creating it if needed
@@ -210,7 +210,7 @@ def simplifyMenuTree(menu):
     # If we have no sub-menus and only one module, move up if no previous up
     # were done (name does not have '/' )
     if len(menu.subMenus) == 0 and len(menu.modules) == 1 \
-            and menu.name.find("/") < 0 and menu.parent != None:
+            and menu.name.find("/") < 0 and menu.parent is not None:
         menu.parent.modules.append(menu.modules[0])
         menu.parent.subMenus.remove(menu)
 
@@ -445,7 +445,7 @@ def writeConfigHeader(outFile, module=None):
 
     # Add module name if given. Required because we add an extra menu entry
     # when editing a single module (see writeModuleConfigIn)
-    if module != None:
+    if module is not None:
         outFile.write("\n")
         outFile.write("#\n")
         outFile.write("# %s\n" % module.name)
@@ -579,25 +579,25 @@ def processFullConfig(inFile, modules, mainConfigPath):
         if line.startswith("# CONFIG_ALCHEMY_BUILD_") \
                 or line.startswith("CONFIG_ALCHEMY_BUILD_"):
             # Clear current module
-            if moduleConfigFile != None:
+            if moduleConfigFile is not None:
                 moduleConfigFile.close()
             moduleConfigFile = None
             module = None
             # Get new module
             match = reConfigBuild.match(line)
-            if match == None:
+            if match is None:
                 logging.warning("Failed to extract module name from: %s", line)
             else:
                 module = findModule(modules, match.group(2))
-                if module == None:
+                if module is None:
                     logging.warning("Unknown module: %s", match.group(2))
                 else:
                     logging.debug("New module: %s", module.name)
-            if module != None:
+            if module is not None:
                 moduleStatus[module.name] = not line.startswith("#")
         # Get the name of the configuration file for the module
         elif line.startswith("CONFIG_ALCHEMY_FILE_"):
-            if moduleConfigFile != None:
+            if moduleConfigFile is not None:
                 moduleConfigFile.close()
             moduleConfigFile = None
             # Make sure it is for the current module...
@@ -606,7 +606,7 @@ def processFullConfig(inFile, modules, mainConfigPath):
             # CONFIG_ALCHEMY_FILE_ is (see writeConfigMenu)
             match = reConfigFile.match(line)
             idx = line.find("=")
-            if match == None:
+            if match is None:
                 modulefile = None
                 logging.warning("Failed to extract module name from: %s", line)
             else:
@@ -631,13 +631,13 @@ def processFullConfig(inFile, modules, mainConfigPath):
                                 ex.errno, ex.strerror)
         # End of file
         elif line.startswith("CONFIG_ALCHEMY_ENDFILE_"):
-            if moduleConfigFile != None:
+            if moduleConfigFile is not None:
                 moduleConfigFile.close()
             moduleConfigFile = None
-        elif moduleConfigFile != None:
+        elif moduleConfigFile is not None:
             moduleConfigFile.write(line + "\n")
         # Skip lines of disabled modules
-        elif module != None and not moduleStatus[module.name]:
+        elif module is not None and not moduleStatus[module.name]:
             pass
         # Ignore empty lines and comments silently (almost)
         elif len(line) == 0 or line.startswith("#"):
@@ -651,7 +651,7 @@ def processFullConfig(inFile, modules, mainConfigPath):
         lineIdx += 1
 
     # Close file
-    if moduleConfigFile != None:
+    if moduleConfigFile is not None:
         moduleConfigFile.close()
 
     # Create main configuration file
@@ -668,7 +668,7 @@ def processFullConfig(inFile, modules, mainConfigPath):
         # Skip modules from sdk
         if module and module.sdk:
             continue
-        if moduleStatus[key] == True:
+        if moduleStatus[key]:
             mainConfigFile.write("CONFIG_ALCHEMY_BUILD_%s=y\n" % \
                     getDefine(key))
         else:
@@ -740,7 +740,7 @@ def checkConfig(name, configPath, ignoreCommented):
         result = diff
 
     # Return result
-    if result == None:
+    if result is None:
         logging.debug("%s config is up to date", name)
     else:
         logging.debug("%s config is not up to date", name)
@@ -756,7 +756,7 @@ def updateConfig(name, configPath):
 
     # Check configuration, do NOT ignore commented lines for the update
     diff = checkConfig(name, configPath, False)
-    if diff == None:
+    if diff is None:
         # Delete new configuration
         logging.debug("Delete new %s config", name)
         safeUnlink(getEditConfigPath(configPath))
@@ -778,16 +778,16 @@ def checkModuleConfig(module, doWriteDiff):
         return True
     # Check config, ignore commented lines
     diff = checkConfig(module.name, module.configPath, True)
-    if diff != None and doWriteDiff:
+    if diff is not None and doWriteDiff:
         message("%s config is not up to date (%s), see diff in: %s",
                 module.name, module.configPath,
                 getDiffConfigPath(module.configPath))
         writeDiffConfig(module.configPath, diff)
-    elif diff != None:
+    elif diff is not None:
         message("%s config is not up to date (%s)", module.name, module.configPath)
     logging.debug("Delete %s", getEditConfigPath(module.configPath))
     safeUnlink(getEditConfigPath(module.configPath))
-    return (diff == None)
+    return diff is None
 
 #===============================================================================
 # Update a module config.
@@ -808,15 +808,15 @@ def updateModuleConfig(module):
 def checkMainConfig(mainConfigPath, doWriteDiff):
     # Check config, ignore commented lines
     diff = checkConfig("main", mainConfigPath, True)
-    if diff != None and doWriteDiff:
+    if diff is not None and doWriteDiff:
         message("%s config is not up to date (%s), see diff in: %s",
             "main", mainConfigPath, getDiffConfigPath(mainConfigPath))
         writeDiffConfig(mainConfigPath, diff)
-    elif diff != None:
+    elif diff is not None:
         message("%s config is not up to date (%s)", "main", mainConfigPath)
     logging.debug("Delete %s", getEditConfigPath(mainConfigPath))
     safeUnlink(getEditConfigPath(mainConfigPath))
-    return (diff == None)
+    return diff is None
 
 #===============================================================================
 # Update the main config.
@@ -977,7 +977,7 @@ def main():
                 safeUnlink(getEditConfigPath(module.configPath))
 
     # signal handler (in main context)
-    def signalHandler(sig, frame):
+    def signalHandler(sig, _frame):
         logging.info("Signal %d caught", sig)
         cleanup()
         sys.exit(1)
@@ -1003,7 +1003,7 @@ def main():
     else:
         updateFullConfig(modules, options.main)
 
-    # Do some cleanup and then exit with status=1 in case checking failed 
+    # Do some cleanup and then exit with status=1 in case checking failed
     cleanup()
     sys.exit(0 if result else 1)
 
@@ -1054,7 +1054,7 @@ def parseArgs():
         sys.exit(0)
     elif args[0] not in ACTIONS:
         parser.error("Bad action: %s (%s)" %(args[0], expandListStr(ACTIONS)))
-    elif options.main == None:
+    elif options.main is None:
         parser.error("Main configuration file required")
     return (options, args)
 
@@ -1073,7 +1073,7 @@ def setupLog(options):
     logging.addLevelName(logging.DEBUG, "D")
 
     # Setup log level
-    if options.quiet == True:
+    if options.quiet:
         logging.getLogger().setLevel(logging.CRITICAL)
     elif options.verbose >= 2:
         logging.getLogger().setLevel(logging.DEBUG)
