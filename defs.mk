@@ -1638,7 +1638,7 @@ define update-file-if-needed
 @( \
 	mkdir -p $(dir $1); \
 	if [ ! -f $1 ]; then mv $2 $1; \
-	elif ! diff -q $2 $1 &>/dev/null; then mv $2 $1; \
+	elif ! cmp -s $2 $1 &>/dev/null; then mv $2 $1; \
 	else rm -f $2; \
 	fi; \
 )
