@@ -13,7 +13,7 @@
 MAKEFINAL_SCRIPT := $(BUILD_SYSTEM)/scripts/makefinal.py
 LDCONFIG := $(BUILD_SYSTEM)/ldconfig/ldconfig
 
-ifeq ("$(V)","1")
+ifneq ("$(V)","0")
   MAKEFINAL_SCRIPT += -v
 endif
 

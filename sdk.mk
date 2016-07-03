@@ -12,7 +12,7 @@ SDK_TGZ := $(SDK_TAR).gz
 SDK_TBZ2 := $(SDK_TAR).bz2
 MAKESDK_SCRIPT := $(BUILD_SYSTEM)/scripts/makesdk.py
 
-ifeq ("$(V)","1")
+ifneq ("$(V)","0")
   MAKESDK_SCRIPT += -v
 endif
 

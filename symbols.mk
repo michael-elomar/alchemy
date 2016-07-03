@@ -9,6 +9,10 @@
 SYMBOLS_FILE := $(TARGET_OUT)/symbols-$(TARGET_PRODUCT_FULL_NAME).tar
 MAKESYMBOLS_SCRIPT := $(BUILD_SYSTEM)/scripts/makesymbols.py
 
+ifneq ("$(V)","0")
+  MAKESYMBOLS_SCRIPT += -v
+endif
+
 .PHONY: __symbols-tar-internal
 __symbols-tar-internal: symbols-clean
 	@echo "Symbols: start"

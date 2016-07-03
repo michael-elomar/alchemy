@@ -22,7 +22,7 @@ ifneq ("$(TARGET_PERMISSIONS_FILES)","")
   FIXSTAT += --use-default
 endif
 
-ifeq ("$(V)","1")
+ifneq ("$(V)","0")
   MKFS_SCRIPT += -v
   SPARSE_SCRIPT += -v
   FIXSTAT += -v
