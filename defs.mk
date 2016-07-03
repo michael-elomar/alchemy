@@ -237,11 +237,10 @@ module-add = \
 		$(if $(or $(call streq,$(LOCAL_MODULE_CLASS),AUTOTOOLS), \
 				$(call streq,$(LOCAL_MODULE_CLASS),CUSTOM), \
 				$(call streq,$(LOCAL_MODULE_CLASS),EXECUTABLE), \
-				$(call streq,$(LOCAL_MODULE_CLASS),LIBRARY), \
 				$(call streq,$(LOCAL_MODULE_CLASS),STATIC_LIBRARY), \
 				$(call streq,$(LOCAL_MODULE_CLASS),PREBUILT)), \
 			$(eval LOCAL_MODULE := host.$(LOCAL_MODULE)), \
-			$(error $(LOCAL_PATH): Only AUTOTOOLS/CUSTOM/PREBUILT/EXECUTABLE/LIBRARY supported for host modules) \
+			$(error $(LOCAL_PATH): Only AUTOTOOLS/CUSTOM/EXECUTABLE/STATIC_LIBRARY/PREBUILT supported for host modules) \
 		) \
 	) \
 	$(eval __mod := $(LOCAL_MODULE)) \

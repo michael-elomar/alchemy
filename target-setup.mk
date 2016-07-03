@@ -60,6 +60,14 @@ endif
 HOST_OS := $(shell $(BUILD_SYSTEM)/scripts/host.py OS)
 HOST_ARCH := $(shell $(BUILD_SYSTEM)/scripts/host.py ARCH)
 
+# No shared library for host modules
+HOST_STATIC_LIB_SUFFIX := .a
+ifeq ("$(HOST_OS)","windows")
+  HOST_EXE_SUFFIX := .exe
+else
+  HOST_EXE_SUFFIX :=
+endif
+
 ###############################################################################
 ###############################################################################
 

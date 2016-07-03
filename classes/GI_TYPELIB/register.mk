@@ -6,6 +6,10 @@
 ## Register GI_TYPELIB modules.
 ###############################################################################
 
+ifneq ("$(LOCAL_HOST_MODULE)","")
+  $(error $(LOCAL_PATH): GI_TYPELIB not supported for host modules)
+endif
+
 LOCAL_MODULE_CLASS := GI_TYPELIB
 
 ifeq ("$(LOCAL_GI_ID_PREFIX)","")

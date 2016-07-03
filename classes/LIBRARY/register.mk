@@ -9,6 +9,9 @@
 # Set also LOCAL_MODULE so that everything works correctly
 ifneq ("$(LOCAL_HOST_MODULE)","")
   LOCAL_MODULE := $(LOCAL_HOST_MODULE)
+  _mode_prefix := HOST
+else
+  _mode_prefix := TARGET
 endif
 
 # check if we want to force static libraries
@@ -28,21 +31,22 @@ endif
 ifeq ("$(force_static)","1")
   LOCAL_MODULE_CLASS := STATIC_LIBRARY
   LOCAL_EXPORT_LDLIBS += $(LOCAL_LDLIBS)
-  suffix := $(TARGET_STATIC_LIB_SUFFIX)
+  suffix := $($(_mode_prefix)_STATIC_LIB_SUFFIX)
 else
   LOCAL_MODULE_CLASS := LIBRARY
+  # Only target mode supported for mixed shared/static
   suffix := $(TARGET_SHARED_LIB_SUFFIX)
 endif
 
 ifeq ("$(LOCAL_DESTDIR)","")
-  ifeq ("$(TARGET_OS)","windows")
+  ifeq ("$($(_mode_prefix)_OS)","windows")
     ifeq ("$(force_static)","1")
-      LOCAL_DESTDIR := $(TARGET_DEFAULT_LIB_DESTDIR)
+      LOCAL_DESTDIR := $($(_mode_prefix)_DEFAULT_LIB_DESTDIR)
     else
-      LOCAL_DESTDIR := $(TARGET_DEFAULT_BIN_DESTDIR)
+      LOCAL_DESTDIR := $($(_mode_prefix)_DEFAULT_BIN_DESTDIR)
     endif
   else
-    LOCAL_DESTDIR := $(TARGET_DEFAULT_LIB_DESTDIR)
+    LOCAL_DESTDIR := $($(_mode_prefix)_DEFAULT_LIB_DESTDIR)
   endif
 endif
 
@@ -53,11 +57,12 @@ ifeq ("$(LOCAL_MODULE_FILENAME)","")
     LOCAL_MODULE_FILENAME := $(LOCAL_MODULE)$(suffix)
   endif
 else ifeq ("$(force_static)","1")
-  LOCAL_MODULE_FILENAME := $(LOCAL_MODULE_FILENAME:.so=$(TARGET_STATIC_LIB_SUFFIX))
-  LOCAL_MODULE_FILENAME := $(LOCAL_MODULE_FILENAME:$(TARGET_SHARED_LIB_SUFFIX)=$(TARGET_STATIC_LIB_SUFFIX))
+  # In case the module specified a .so extension, put the correct one
+  LOCAL_MODULE_FILENAME := $(LOCAL_MODULE_FILENAME:.so=$($(_mode_prefix)_STATIC_LIB_SUFFIX))
+  LOCAL_MODULE_FILENAME := $(LOCAL_MODULE_FILENAME:$($(_mode_prefix)_SHARED_LIB_SUFFIX)=$($(_mode_prefix)_STATIC_LIB_SUFFIX))
 else
   # In case the module specified a .so extension, put the correct one
-  LOCAL_MODULE_FILENAME := $(LOCAL_MODULE_FILENAME:.so=$(TARGET_SHARED_LIB_SUFFIX))
+  LOCAL_MODULE_FILENAME := $(LOCAL_MODULE_FILENAME:.so=$($(_mode_prefix)_SHARED_LIB_SUFFIX))
 endif
 
 # Register in the system

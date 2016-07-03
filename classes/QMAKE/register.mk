@@ -6,9 +6,8 @@
 ## Register QMAKE modules.
 ###############################################################################
 
-# Set also LOCAL_MODULE so that everything works correctly
 ifneq ("$(LOCAL_HOST_MODULE)","")
-  LOCAL_MODULE := $(LOCAL_HOST_MODULE)
+  $(error $(LOCAL_PATH): QMAKE not supported for host modules)
 endif
 
 LOCAL_MODULE_CLASS := QMAKE

@@ -9,16 +9,19 @@
 # Set also LOCAL_MODULE so that everything works correctly
 ifneq ("$(LOCAL_HOST_MODULE)","")
   LOCAL_MODULE := $(LOCAL_HOST_MODULE)
+  _mode_prefix := HOST
+else
+  _mode_prefix := TARGET
 endif
 
 LOCAL_MODULE_CLASS := EXECUTABLE
 
 ifeq ("$(LOCAL_DESTDIR)","")
-  LOCAL_DESTDIR := $(TARGET_DEFAULT_BIN_DESTDIR)
+  LOCAL_DESTDIR := $($(_mode_prefix)_DEFAULT_BIN_DESTDIR)
 endif
 
 ifeq ("$(LOCAL_MODULE_FILENAME)","")
-  LOCAL_MODULE_FILENAME := $(LOCAL_MODULE)$(TARGET_EXE_SUFFIX)
+  LOCAL_MODULE_FILENAME := $(LOCAL_MODULE)$($(_mode_prefix)_EXE_SUFFIX)
 endif
 
 # On toolchain arm-2012.03 for static binaries

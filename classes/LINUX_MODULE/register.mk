@@ -6,6 +6,10 @@
 ## Register LINUX_MODULE modules.
 ###############################################################################
 
+ifneq ("$(LOCAL_HOST_MODULE)","")
+  $(error $(LOCAL_PATH): LINUX_MODULE not supported for host modules)
+endif
+
 ifeq ("$(LOCAL_MODULE_FILENAME)","")
   LOCAL_MODULE_FILENAME := $(LOCAL_MODULE).ko
 endif
