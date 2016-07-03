@@ -41,6 +41,20 @@ _autotools_configure_args := \
 # Cache file for target
 _autotools_target_cache_file := $(TARGET_OUT_BUILD)/autotools.cache
 
+# Force timestamp ordering of some generated files to make sure an automatic
+# autoreconf is not triggered
+# Only do it if the source dir is not LOCAL_PATH (so either extracted from
+# archive or copied in build directory)
+define _autotools-hook-pre-configure
+	$(if $(call strneq,$(PRIVATE_SRC_DIR),$(PRIVATE_PATH)), \
+		$(Q) cd $(PRIVATE_SRC_DIR) && find -name Makefile.am -exec touch {} \;$(endl) \
+		$(Q) cd $(PRIVATE_SRC_DIR) && find -name configure.ac -exec touch {} \;$(endl) \
+		$(Q) cd $(PRIVATE_SRC_DIR) && find -name aclocal.m4 -exec touch {} \;$(endl) \
+		$(Q) cd $(PRIVATE_SRC_DIR) && find -name Makefile.in -exec touch {} \;$(endl) \
+		$(Q) cd $(PRIVATE_SRC_DIR) && find -name configure -exec touch {} \;$(endl) \
+	)
+endef
+
 # Patch libtool to make it work properly for cross-compilation.
 # Modify the libdir in .la files installed in staging dir so that they reference
 # the staging dir and not the final dir. Do this only if dest dir is not empty
