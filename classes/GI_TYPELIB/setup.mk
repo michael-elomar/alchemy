@@ -6,8 +6,8 @@
 ## Setup GI_TYPELIB modules.
 ###############################################################################
 
-g_ir_scanner := $(HOST_OUT_STAGING)/usr/bin/g-ir-scanner
-g_ir_compiler := $(HOST_OUT_STAGING)/usr/bin/g-ir-compiler
+g_ir_scanner := $(HOST_OUT_STAGING)/$(HOST_DEFAULT_BIN_DESTDIR)/g-ir-scanner
+g_ir_compiler := $(HOST_OUT_STAGING)/$(HOST_DEFAULT_BIN_DESTDIR)/g-ir-compiler
 
 define transform-c-to-gir
 @mkdir -p $(dir $@)
@@ -31,8 +31,8 @@ $(Q) cd $(PRIVATE_OBJ_DIR) && \
 		$(filter -L%,$(PRIVATE_LDFLAGS)) \
 		$(PRIVATE_LDLIBS) \
 		$(PRIVATE_ALL_SOURCES)
-@mkdir -p $(TARGET_OUT_STAGING)/usr/share/gir-1.0
-$(Q) cp -af $@ $(TARGET_OUT_STAGING)/usr/share/gir-1.0
+@mkdir -p $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/share/gir-1.0
+$(Q) cp -af $@ $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/share/gir-1.0
 endef
 
 define transform-gir-to-typelib

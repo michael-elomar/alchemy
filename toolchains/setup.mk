@@ -96,7 +96,7 @@ TARGET_LOADER ?=
 # TODO add SDK dirs
 __extra-host-c-includes := $(strip \
 	$(foreach __dir,$(HOST_OUT_STAGING), \
-		$(__dir)/usr/include \
+		$(__dir)/$(HOST_ROOT_DESTDIR)/include \
 	))
 HOST_GLOBAL_C_INCLUDES := $(__extra-host-c-includes) $(HOST_GLOBAL_C_INCLUDES)
 
@@ -107,13 +107,13 @@ HOST_GLOBAL_C_INCLUDES := $(__extra-host-c-includes) $(HOST_GLOBAL_C_INCLUDES)
 __extra-host-ldflags := $(strip \
 	$(foreach __dir,$(HOST_OUT_STAGING), \
 		-L$(__dir)/lib \
-		-L$(__dir)/usr/lib \
+		-L$(__dir)/$(HOST_DEFAULT_LIB_DESTDIR) \
 	))
 ifneq ("$(HOST_OS)","darwin")
 __extra-host-ldflags += $(strip \
 	$(foreach __dir,$(HOST_OUT_STAGING), \
 		-Wl,-rpath-link=$(__dir)/lib \
-		-Wl,-rpath-link=$(__dir)/usr/lib \
+		-Wl,-rpath-link=$(__dir)/$(HOST_DEFAULT_LIB_DESTDIR) \
 	))
 endif
 
@@ -125,15 +125,15 @@ HOST_GLOBAL_LDFLAGS_SHARED += $(__extra-host-ldflags)
 ###############################################################################
 
 # Make sure include path in staging directory exists
-$(shell mkdir -p $(TARGET_OUT_STAGING)/usr/include)
-$(shell mkdir -p $(TARGET_OUT_STAGING)/usr/include/$(TARGET_TOOLCHAIN_TRIPLET))
+$(shell mkdir -p $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/include)
+$(shell mkdir -p $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/include/$(TARGET_TOOLCHAIN_TRIPLET))
 
 # Make sure that staging dir are found first in case we want to override something
 __extra-target-c-includes := $(strip \
 	$(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
 		$(wildcard \
-			$(__dir)/usr/include \
-			$(__dir)/usr/include/$(TARGET_TOOLCHAIN_TRIPLET) \
+			$(__dir)/$(TARGET_ROOT_DESTDIR)/include/$(TARGET_TOOLCHAIN_TRIPLET) \
+			$(__dir)/$(TARGET_ROOT_DESTDIR)/include \
 		) \
 	))
 TARGET_GLOBAL_C_INCLUDES := $(__extra-target-c-includes) $(TARGET_GLOBAL_C_INCLUDES)
@@ -141,10 +141,9 @@ TARGET_GLOBAL_C_INCLUDES := $(__extra-target-c-includes) $(TARGET_GLOBAL_C_INCLU
 # Add staging/sdk dirs to linker
 # To make sure linker does not hardcode path to libs, set rpath-link
 __extra-target-ldflags-dirs := \
-	lib \
-	usr/lib \
 	lib/$(TARGET_TOOLCHAIN_TRIPLET) \
-	usr/lib/$(TARGET_TOOLCHAIN_TRIPLET) \
+	lib \
+	$(TARGET_DEFAULT_LIB_DESTDIR)/$(TARGET_TOOLCHAIN_TRIPLET) \
 	$(TARGET_DEFAULT_LIB_DESTDIR) \
 	$(TARGET_LDCONFIG_DIRS)
 __extra-target-ldflags := $(strip \

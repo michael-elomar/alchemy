@@ -242,7 +242,7 @@ transform-h-to-gch = $(call _internal-transform-h-to-gch,$(PRIVATE_MODE),$@,$<)
 define _internal-transform-vala-to-c
 $(call print-banner1,"$(PRIVATE_MODE_MSG)Valac",$(PRIVATE_MODULE),$(call path-from-top,$(PRIVATE_VALA_SOURCES)))
 $(call check-pwd-is-top-dir)
-$(Q) $(HOST_OUT_STAGING)/usr/bin/valac \
+$(Q) $(HOST_OUT_STAGING)/$(HOST_DEFAULT_BIN_DESTDIR)/valac \
 	$($1_GLOBAL_VALAFLAGS) \
 	$(PRIVATE_VALAFLAGS) \
 	-C -d $(PRIVATE_VALA_OUT_DIR) \

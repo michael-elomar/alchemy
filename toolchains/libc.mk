@@ -10,6 +10,11 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
+ifneq ("$(TARGET_ROOT_DESTDIR)","usr")
+  $(warning TARGET_ROOT_DESTDIR=$(TARGET_ROOT_DESTDIR))
+  $(error Installing libc is not supported if TARGET_ROOT_DESTDIR is not 'usr')
+endif
+
 LOCAL_MODULE := libc
 LOCAL_MODULE_FILENAME := $(LOCAL_MODULE).done
 

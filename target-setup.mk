@@ -68,6 +68,11 @@ else
   HOST_EXE_SUFFIX :=
 endif
 
+HOST_ROOT_DESTDIR := usr
+HOST_DEFAULT_BIN_DESTDIR := usr/bin
+HOST_DEFAULT_LIB_DESTDIR := usr/lib
+HOST_DEFAULT_ETC_DESTDIR := etc
+
 ###############################################################################
 ###############################################################################
 
@@ -126,6 +131,15 @@ TARGET_OUT_GCOV ?= $(TARGET_OUT)/gcov
 
 HOST_OUT_BUILD ?= $(TARGET_OUT)/build-host
 HOST_OUT_STAGING ?= $(TARGET_OUT)/staging-host
+
+# Make sure that TARGET_DEPLOY_ROOT is not TARGET_OUT_STAGING (or one of its subdir)
+ifdef TARGET_DEPLOY_ROOT
+  ifneq ("$(call str-starts-with,$(TARGET_DEPLOY_ROOT),$(TARGET_OUT_STAGING))","")
+    $(warning TARGET_DEPLOY_ROOT=$(TARGET_DEPLOY_ROOT))
+    $(warning TARGET_OUT_STAGING=$(TARGET_OUT_STAGING))
+    $(error TARGET_DEPLOY_ROOT should not starts with TARGET_OUT_STAGING)
+  endif
+endif
 
 TARGET_CONFIG_PREFIX ?= Alchemy-config/
 TARGET_CONFIG_DIR ?= $(TOP_DIR)/$(TARGET_CONFIG_PREFIX)$(TARGET_PRODUCT_FULL_NAME)
@@ -279,8 +293,21 @@ TARGET_FINAL_MODE ?= firmware
 # List of directories to add in ldconfig cache
 TARGET_LDCONFIG_DIRS ?=
 
+# Comptaiblity when TARGET_ROOT_DESTDIR is not 'usr'
+# Create a simlink from usr to the actual TARGET_ROOT_DESTDIR
+# Note: this does NOT work if TARGET_ROOT_DESTDIR is a subdir of 'usr' (for
+# example 'usr/local')
+ifneq ("$(TARGET_ROOT_DESTDIR)","usr")
+  ifneq ("$(patsubst usr/%,$(empty),$(TARGET_ROOT_DESTDIR))","")
+    $(shell mkdir -p $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR); \
+        rm -f $(TARGET_OUT_STAGING)/usr; \
+        ln -s $(TARGET_ROOT_DESTDIR) $(TARGET_OUT_STAGING)/usr; \
+    )
+  endif
+endif
+
 ###############################################################################
 ## gobject-introspection setup.
 ###############################################################################
-TARGET_XDG_DATA_DIRS := $(TARGET_OUT_STAGING)/usr/share
-HOST_XDG_DATA_DIRS := $(HOST_OUT_STAGING)/usr/share
+TARGET_XDG_DATA_DIRS := $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/share
+HOST_XDG_DATA_DIRS := $(HOST_OUT_STAGING)/$(HOST_ROOT_DESTDIR)/share

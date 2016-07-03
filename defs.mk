@@ -135,9 +135,17 @@ str-starts-with = $(strip $(call not,$(patsubst $2%,,$1)))
 # $2 : suffix to check
 str-ends-with = $(strip $(call not,$(patsubst %$2,,$1)))
 
+# Remove leading '/' from a path
+# $1 : input string
+remove-leading-slash = $(strip $(patsubst /%,%,$1))
+
 # Remove trailing '/' from a path
 # $1 : input string
 remove-trailing-slash = $(strip $(patsubst %/,%,$1))
+
+# Remove leading and trailing '/' from a path
+# $1 : input string
+remove-slash = $(strip $(patsubst /%,%,$(patsubst %/,%,$1)))
 
 ###############################################################################
 ## Call a function(macro) for each variable in a variable list.
@@ -1271,7 +1279,13 @@ install-headers-setup = \
 		$(eval __pair2 := $(subst :,$(space),$(__pair))) \
 		$(eval __w1 := $(word 1,$(__pair2))) \
 		$(eval __w2 := $(word 2,$(__pair2))) \
-		$(if $(__w2),$(empty),$(eval __w2 := usr/include/)) \
+		$(if $(__w2),$(empty), \
+			$(if $(call is-module-host,$1), \
+				$(eval __w2 := $(HOST_ROOT_DESTDIR)/include/) \
+				, \
+				$(eval __w2 := $(TARGET_ROOT_DESTDIR)/include/) \
+			) \
+		) \
 		$(eval __src := $(call copy-get-src-path,$(__w1))) \
 		$(if $(call is-module-host,$1), \
 			$(eval __dst := $(call copy-get-dst-path-host,$(__w2))), \

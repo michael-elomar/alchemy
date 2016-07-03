@@ -54,7 +54,7 @@ $(LOCAL_TARGETS): PRIVATE_KBUILD_FLAGS := \
 else
 $(LOCAL_TARGETS): PRIVATE_LINUX_BUILD_DIR := $(strip \
 	$(if $(__modules.linux.SDK), \
-		$(__modules.linux.SDK)/usr/src/linux-sdk \
+		$(__modules.linux.SDK)/$(TARGET_ROOT_DESTDIR)/src/linux-sdk \
 		, \
 		$(call module-get-build-dir,linux) \
 	))

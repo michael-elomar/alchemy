@@ -41,6 +41,8 @@ ifeq ("$(LOCAL_DESTDIR)","")
   else
     LOCAL_DESTDIR := $(TARGET_DEFAULT_LIB_DESTDIR)
   endif
+else ifneq ("$(TARGET_ROOT_DESTDIR)","usr")
+  LOCAL_DESTDIR := $(patsubst usr/%,$(TARGET_ROOT_DESTDIR)/%,$(LOCAL_DESTDIR))
 endif
 
 ifeq ("$(LOCAL_MODULE_FILENAME)","")

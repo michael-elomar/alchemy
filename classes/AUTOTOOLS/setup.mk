@@ -15,10 +15,10 @@
 _autotools_install_bin := $(shell which install 2>/dev/null)
 
 # Update host compilation path
-_autotools_host_path := $(HOST_OUT_STAGING)/bin:$(HOST_OUT_STAGING)/usr/bin:$(PATH)
+_autotools_host_path := $(HOST_OUT_STAGING)/bin:$(HOST_OUT_STAGING)/$(HOST_DEFAULT_BIN_DESTDIR):$(PATH)
 
-# Update target compilation path
-_autotools_target_path := $(HOST_OUT_STAGING)/bin:$(HOST_OUT_STAGING)/usr/bin:$(PATH)
+# Update target compilation path (use host binaries)
+_autotools_target_path := $(_autotools_host_path)
 
 # Common arguments to configure
 # * Avoid triggering regeneration of configure/Makefile.in. The regeneration
@@ -66,7 +66,7 @@ define _autotools-libtool-patch
 	$(Q) for f in `find $(PRIVATE_OBJ_DIR) -name libtool -o -name ltmain.sh`; do \
 		echo "Patching $$f"; \
 		$(if $($(PRIVATE_MODE)_AUTOTOOLS_INSTALL_DESTDIR), \
-			sed -i.bak -e "s|^libdir='\$$install_libdir'|libdir='\$${install_libdir:\+$($(PRIVATE_MODE)_OUT_STAGING)\$$install_libdir}'|1" $$f; \
+			sed -i.bak -e "s|^libdir='\$$install_libdir'|libdir='\$${install_libdir:\+$($(PRIVATE_MODE)_AUTOTOOLS_INSTALL_DESTDIR)\$$install_libdir}'|1" $$f; \
 		) \
 		sed -i.bak \
 			-e 's|\({\?wl}\?\)-\+rpath|\1-rpath-link|1' \
@@ -138,7 +138,7 @@ HOST_AUTOTOOLS_CXXFLAGS := $(filter-out -std=%,$(HOST_AUTOTOOLS_CFLAGS)) $(HOST_
 # Use packages from both HOST_OUT_STAGING and standard places
 HOST_PKG_CONFIG_ENV := \
 	PKG_CONFIG="$(PKGCONFIG_BIN)" \
-	PKG_CONFIG_PATH="$(HOST_OUT_STAGING)/usr/lib/pkgconfig:$(HOST_OUT_STAGING)/lib/pkgconfig" \
+	PKG_CONFIG_PATH="$(HOST_OUT_STAGING)/lib/pkgconfig:$(HOST_OUT_STAGING)/$(HOST_DEFAULT_LIB_DESTDIR)/pkgconfig" \
 	PKG_CONFIG_SYSROOT_DIR=""
 
 # Environment to use when executing configure script
@@ -168,8 +168,8 @@ HOST_AUTOTOOLS_CONFIGURE_ENV := \
 	XDG_DATA_DIRS=$(HOST_XDG_DATA_DIRS) \
 	$(HOST_PKG_CONFIG_ENV)
 
-HOST_AUTOTOOLS_CONFIGURE_PREFIX := $(HOST_OUT_STAGING)/usr
-HOST_AUTOTOOLS_CONFIGURE_SYSCONFDIR := $(HOST_OUT_STAGING)/etc
+HOST_AUTOTOOLS_CONFIGURE_PREFIX := $(HOST_OUT_STAGING)/$(HOST_ROOT_DESTDIR)
+HOST_AUTOTOOLS_CONFIGURE_SYSCONFDIR := $(HOST_OUT_STAGING)/$(HOST_DEFAULT_ETC_DESTDIR)
 HOST_AUTOTOOLS_INSTALL_DESTDIR :=
 
 HOST_AUTOTOOLS_CONFIGURE_ARGS += \
@@ -213,13 +213,18 @@ TARGET_AUTOTOOLS_CXXFLAGS := $(filter-out -std=%,$(TARGET_AUTOTOOLS_CFLAGS)) $(T
 TARGET_AUTOTOOLS_LDFLAGS := $(TARGET_GLOBAL_LDFLAGS) $(TARGET_GLOBAL_LDLIBS) $(TARGET_GLOBAL_LDFLAGS_$(TARGET_CC_FLAVOUR))
 TARGET_AUTOTOOLS_DYN_LDFLAGS := $(TARGET_GLOBAL_LDFLAGS_SHARED) $(TARGET_GLOBAL_LDLIBS_SHARED)
 
+_target_pkg_config_dirs := \
+	lib/$(TARGET_TOOLCHAIN_TRIPLET)/pkgconfig \
+	lib/pkgconfig \
+	$(TARGET_DEFAULT_LIB_DESTDIR)/$(TARGET_TOOLCHAIN_TRIPLET)/pkgconfig \
+	$(TARGET_DEFAULT_LIB_DESTDIR)/pkgconfig \
+	$(TARGET_DEFAULT_SHARE_DESTDIR)/pkgconfig
+
 _target_pkg_config_path :=
 $(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
-	$(eval _target_pkg_config_path := $(_target_pkg_config_path):$(__dir)/$(TARGET_DEFAULT_LIB_DESTDIR)/pkgconfig) \
-	$(eval _target_pkg_config_path := $(_target_pkg_config_path):$(__dir)/usr/lib/pkgconfig) \
-	$(eval _target_pkg_config_path := $(_target_pkg_config_path):$(__dir)/lib/pkgconfig) \
-	$(eval _target_pkg_config_path := $(_target_pkg_config_path):$(__dir)/usr/share/pkgconfig) \
-	$(eval _target_pkg_config_path := $(_target_pkg_config_path):$(__dir)/usr/lib/$(TARGET_TOOLCHAIN_TRIPLET)/pkgconfig) \
+	$(foreach __dir2,$(_target_pkg_config_dirs), \
+		$(eval _target_pkg_config_path := $(_target_pkg_config_path):$(__dir)/$(__dir2)) \
+	) \
 )
 
 # Setup pkg-config
@@ -294,30 +299,25 @@ ifeq ("$(TARGET_FORCE_STATIC)","1")
 	--disable-shared
 endif
 
-# For cross-compilation, use /usr as prefix and install in our staging dir
+# For cross-compilation, use /$(TARGET_ROOT_DESTDIR) as prefix and install in our staging dir
 # For native compilation, use staging as prefix and nothing for install dest dir
 ifeq ("$(TARGET_OS_FLAVOUR)","native")
   ifndef TARGET_DEPLOY_ROOT
-    TARGET_AUTOTOOLS_CONFIGURE_PREFIX := $(TARGET_OUT_STAGING)/usr
-    TARGET_AUTOTOOLS_CONFIGURE_SYSCONFDIR := $(TARGET_OUT_STAGING)/etc
+    TARGET_AUTOTOOLS_CONFIGURE_PREFIX := $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)
+    TARGET_AUTOTOOLS_CONFIGURE_SYSCONFDIR := $(TARGET_OUT_STAGING)/$(TARGET_DEFAULT_ETC_DESTDIR)
     TARGET_AUTOTOOLS_CONFIGURE_BINDIR := $(TARGET_OUT_STAGING)/$(TARGET_DEFAULT_BIN_DESTDIR)
     TARGET_AUTOTOOLS_CONFIGURE_LIBDIR := $(TARGET_OUT_STAGING)/$(TARGET_DEFAULT_LIB_DESTDIR)
     TARGET_AUTOTOOLS_INSTALL_DESTDIR :=
   else
-    __deploy-root := $(call remove-trailing-slash,$(TARGET_DEPLOY_ROOT))
-    TARGET_AUTOTOOLS_CONFIGURE_PREFIX := $(__deploy-root)/usr
-    TARGET_AUTOTOOLS_CONFIGURE_SYSCONFDIR := $(__deploy-root)/etc
-    TARGET_AUTOTOOLS_CONFIGURE_BINDIR := $(__deploy-root)/$(TARGET_DEFAULT_BIN_DESTDIR)
-    TARGET_AUTOTOOLS_CONFIGURE_LIBDIR := $(__deploy-root)/$(TARGET_DEFAULT_LIB_DESTDIR)
-    ifneq ("$(call str-starts-with,$(TARGET_DEPLOY_ROOT),$(TARGET_OUT_STAGING))","")
-      TARGET_AUTOTOOLS_INSTALL_DESTDIR :=
-    else
-      TARGET_AUTOTOOLS_INSTALL_DESTDIR := $(TARGET_OUT_STAGING)
-    endif
+    TARGET_AUTOTOOLS_CONFIGURE_PREFIX := /$(TARGET_ROOT_DESTDIR)
+    TARGET_AUTOTOOLS_CONFIGURE_SYSCONFDIR := /$(TARGET_DEFAULT_ETC_DESTDIR)
+    TARGET_AUTOTOOLS_CONFIGURE_BINDIR := /$(TARGET_DEFAULT_BIN_DESTDIR)
+    TARGET_AUTOTOOLS_CONFIGURE_LIBDIR := /$(TARGET_DEFAULT_LIB_DESTDIR)
+    TARGET_AUTOTOOLS_INSTALL_DESTDIR := $(TARGET_OUT_STAGING)
   endif
 else
-  TARGET_AUTOTOOLS_CONFIGURE_PREFIX := /usr
-  TARGET_AUTOTOOLS_CONFIGURE_SYSCONFDIR := /etc
+  TARGET_AUTOTOOLS_CONFIGURE_PREFIX := /$(TARGET_ROOT_DESTDIR)
+  TARGET_AUTOTOOLS_CONFIGURE_SYSCONFDIR := /$(TARGET_DEFAULT_ETC_DESTDIR)
   TARGET_AUTOTOOLS_CONFIGURE_BINDIR := /$(TARGET_DEFAULT_BIN_DESTDIR)
   TARGET_AUTOTOOLS_CONFIGURE_LIBDIR := /$(TARGET_DEFAULT_LIB_DESTDIR)
   TARGET_AUTOTOOLS_INSTALL_DESTDIR := $(TARGET_OUT_STAGING)
@@ -329,12 +329,12 @@ TARGET_AUTOTOOLS_CONFIGURE_ARGS += \
 	--sysconfdir="$(TARGET_AUTOTOOLS_CONFIGURE_SYSCONFDIR)" \
 	ac_cv_prog_YACC=$(BISON_BIN)
 
-ifneq ("$(TARGET_DEFAULT_BIN_DESTDIR)","usr/bin")
+ifneq ("$(TARGET_DEFAULT_BIN_DESTDIR)","$(TARGET_ROOT_DESTDIR)/bin")
 TARGET_AUTOTOOLS_CONFIGURE_ARGS += \
 	--bindir="$(TARGET_AUTOTOOLS_CONFIGURE_BINDIR)"
 endif
 
-ifneq ("$(TARGET_DEFAULT_LIB_DESTDIR)","usr/lib")
+ifneq ("$(TARGET_DEFAULT_LIB_DESTDIR)","$(TARGET_ROOT_DESTDIR)/lib")
 TARGET_AUTOTOOLS_CONFIGURE_ARGS += \
 	--libdir="$(TARGET_AUTOTOOLS_CONFIGURE_LIBDIR)"
 endif

@@ -66,7 +66,7 @@ ifneq ("$(vala_objects)","")
   vala_deps_file := $(obj_dir)/vala.d
   vala_header_file := $(_module_build_dir)/include/$(LOCAL_MODULE).vala.h
   vala_vapi_file := $(_module_build_dir)/include/$(LOCAL_MODULE).vapi
-  vala_staging_c_sources_dir := $($(_mode_prefix)_OUT_STAGING)/usr/src/vala/$(LOCAL_MODULE)
+  vala_staging_c_sources_dir := $($(_mode_prefix)_OUT_STAGING)/$($(_mode_prefix)_ROOT_DESTDIR)/src/vala/$(LOCAL_MODULE)
   vala_staging_c_sources :=
   LOCAL_VALAFLAGS += --header=$(vala_header_file) --vapi=$(vala_vapi_file)
   LOCAL_C_INCLUDES += $(_module_build_dir)/include

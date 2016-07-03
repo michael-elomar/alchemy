@@ -16,7 +16,7 @@ include $(BUILD_SYSTEM)/classes/GENERIC/rules.mk
 # Make sure this variable is defined (so make --warn-undefined-variables is quiet)
 # It can be defined by the user makefile to specify a list of headers to be
 # copied from linux source tree (list of absolute path)
-# They will be copied in $(TARGET_OUT_STAGING)/usr/include/linux
+# They will be copied in $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/include/linux
 ifndef LINUX_EXPORTED_HEADERS
   LINUX_EXPORTED_HEADERS :=
 endif
@@ -64,7 +64,7 @@ endif
 ###############################################################################
 ###############################################################################
 
-# Headers to be copied in $(TARGET_OUT_STAGING)/usr
+# Headers to be copied in $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)
 LINUX_EXPORTED_HEADERS_OVER := \
 	include/linux/media.h \
 	include/linux/videodev2.h \
@@ -180,7 +180,7 @@ endif # ifneq ("$(LINUX_CONFIG_FILE_IS_TARGET)","")
 
 # Generate everything for the sdk (so we can build external kernel modules from it)
 # Inspired from <linux>/scripts/package/builddeb, 'Build header package' section
-LINUX_SDK_DIR := $(TARGET_OUT_STAGING)/usr/src/linux-sdk
+LINUX_SDK_DIR := $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/src/linux-sdk
 define linux-gen-sdk
 	$(Q) :> $(LINUX_BUILD_DIR)/sdksrcfiles
 	$(Q) :> $(LINUX_BUILD_DIR)/sdkobjfiles
@@ -263,19 +263,19 @@ linux-headers: $(LINUX_HEADERS_DONE_FILE)
 $(LINUX_HEADERS_DONE_FILE): | $(LINUX_BUILD_DIR)/.config
 ifneq ("$(LINUX_ARCH)","um")
 	@mkdir -p $(LINUX_BUILD_DIR)
-	@mkdir -p $(TARGET_OUT_STAGING)/usr/src/linux-headers
+	@mkdir -p $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/src/linux-headers
 	@echo "Installing linux kernel headers"
 	$(Q) $(MAKE) $(LINUX_MAKE_ARGS) headers_install
-	@mkdir -p $(TARGET_OUT_STAGING)/usr/include/linux
-	@mkdir -p $(TARGET_OUT_STAGING)/usr/include/linux/spi
+	@mkdir -p $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/include/linux
+	@mkdir -p $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/include/linux/spi
 	$(foreach header,$(LINUX_EXPORTED_HEADERS), \
 		$(Q) install -m 0644 -p -D $(header) \
-			$(TARGET_OUT_STAGING)/usr/include/linux/$(notdir $(header))$(endl) \
+			$(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/include/linux/$(notdir $(header))$(endl) \
 	)
 	$(foreach header,$(LINUX_EXPORTED_HEADERS_OVER), \
-		$(Q) if [ -f $(TARGET_OUT_STAGING)/usr/src/linux-headers/$(header) ]; then \
-			install -m 0644 -p -D $(TARGET_OUT_STAGING)/usr/src/linux-headers/$(header) \
-				$(TARGET_OUT_STAGING)/usr/$(header); \
+		$(Q) if [ -f $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/src/linux-headers/$(header) ]; then \
+			install -m 0644 -p -D $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/src/linux-headers/$(header) \
+				$(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/$(header); \
 		fi$(endl) \
 	)
 endif
@@ -299,13 +299,13 @@ linux-clean:
 	$(Q) rm -f $(TARGET_OUT_STAGING)/boot/bzImage
 	$(Q) rm -f $(TARGET_OUT_STAGING)/boot/uImage
 	$(Q) rm -f $(LINUX_HEADERS_DONE_FILE)
-	$(Q) rm -rf $(TARGET_OUT_STAGING)/usr/src/linux-headers
+	$(Q) rm -rf $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/src/linux-headers
 	$(Q) rm -rf $(LINUX_SDK_DIR)
 	$(foreach header,$(LINUX_EXPORTED_HEADERS),\
-		$(Q) rm -f $(TARGET_OUT_STAGING)/usr/include/linux/$(notdir $(header))$(endl) \
+		$(Q) rm -f $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/include/linux/$(notdir $(header))$(endl) \
 	)
 	$(foreach header,$(LINUX_EXPORTED_HEADERS_OVER),\
-		$(Q) rm -f $(TARGET_OUT_STAGING)/usr/$(header)$(endl) \
+		$(Q) rm -f $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/$(header)$(endl) \
 	)
 ifneq ("$(TARGET_LINUX_LINK_CPIO_IMAGE)","0")
 	$(Q) rm -f $(LINUX_BUILD_DIR)/rootfs.cpio.gz

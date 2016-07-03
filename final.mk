@@ -97,17 +97,17 @@ endif
 	$(Q) $(MAKEFINAL_SCRIPT) $(MAKEFINAL_ARGS) \
 		$(TARGET_OUT_STAGING) $(TARGET_OUT_FINAL) $(TARGET_OUT)/final.mk
 	$(Q) $(MAKE) -f $(TARGET_OUT)/final.mk
-	@mkdir -p $(TARGET_OUT_FINAL)/etc
+	@mkdir -p $(TARGET_OUT_FINAL)/$(TARGET_DEFAULT_ETC_DESTDIR)
 ifeq ("$(TARGET_OS)","linux")
 ifeq ("$(is-full-system)","1")
-	@if [ ! -e $(TARGET_OUT_FINAL)/etc/ld.so.conf ]; then \
+	@if [ ! -e $(TARGET_OUT_FINAL)/$(TARGET_DEFAULT_ETC_DESTDIR)/ld.so.conf ]; then \
 		( \
 			echo "/lib/$(TARGET_TOOLCHAIN_TRIPLET)"; \
 			echo "/lib"; \
-			echo "/usr/lib/$(TARGET_TOOLCHAIN_TRIPLET)"; \
-			echo "/usr/lib"; \
+			echo "/$(TARGET_DEFAULT_LIB_DESTDIR)/$(TARGET_TOOLCHAIN_TRIPLET)"; \
+			echo "/$(TARGET_DEFAULT_LIB_DESTDIR)"; \
 			$(foreach __d,$(TARGET_LDCONFIG_DIRS),echo "$(__d)";) \
-		) >> $(TARGET_OUT_FINAL)/etc/ld.so.conf; \
+		) >> $(TARGET_OUT_FINAL)/$(TARGET_DEFAULT_ETC_DESTDIR)/ld.so.conf; \
 	fi
 	$(Q) $(LDCONFIG) -X -r $(TARGET_OUT_FINAL)
 endif
@@ -115,7 +115,7 @@ endif
 ifeq ("$(is-full-system)","1")
 	$(Q) $(BUILD_SYSTEM)/scripts/checkdyndeps.py $(TARGET_OUT_FINAL)
 endif
-	@echo `date +%s` > $(TARGET_OUT_FINAL)/etc/final.stamp
+	@echo `date +%s` > $(TARGET_OUT_FINAL)/$(TARGET_DEFAULT_ETC_DESTDIR)/final.stamp
 	@echo "Done generating final tree"
 
 .PHONY: final

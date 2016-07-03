@@ -24,7 +24,9 @@ LOCAL_DEPENDS_HOST_MODULES += host.gobject-introspection
 LOCAL_LIBRARIES += $(LOCAL_GI_LIBRARY)
 
 ifeq ("$(LOCAL_DESTDIR)","")
-  LOCAL_DESTDIR := usr/lib/girepository-1.0
+  LOCAL_DESTDIR := $(TARGET_DEFAULT_LIB_DESTDIR)/girepository-1.0
+else ifneq ("$(TARGET_ROOT_DESTDIR)","usr")
+  LOCAL_DESTDIR := $(patsubst usr/%,$(TARGET_ROOT_DESTDIR)/%,$(LOCAL_DESTDIR))
 endif
 
 # Register in the system

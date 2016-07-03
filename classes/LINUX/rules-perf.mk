@@ -26,8 +26,8 @@ $(LOCAL_BUILD_MODULE):
 	$(Q) $(PERF_MAKE_ENV) $(MAKE) $(PERF_MAKE_ARGS) \
 		ARCH=$(TARGET_ARCH) CROSS_COMPILE=$(TARGET_CROSS) \
 		O=$(PRIVATE_BUILD_DIR) -C $(PRIVATE_PATH)/tools/perf
-	$(Q) mkdir -p $(TARGET_OUT_STAGING)/usr/bin
-	$(Q) cp -af $(PRIVATE_BUILD_DIR)/perf $(TARGET_OUT_STAGING)/usr/bin
+	$(Q) mkdir -p $(TARGET_OUT_STAGING)/$(TARGET_DEFAULT_BIN_DESTDIR)
+	$(Q) cp -af $(PRIVATE_BUILD_DIR)/perf $(TARGET_OUT_STAGING)/$(TARGET_DEFAULT_BIN_DESTDIR)
 	@touch $@
 
 # Clean rule
@@ -39,4 +39,4 @@ perf-clean:
 			O=$(PRIVATE_BUILD_DIR) -C $(PRIVATE_PATH)/tools/perf --ignore-errors \
 			clean || echo "Ignoring clean errors"; \
 	fi
-	$(Q) rm -f $(TARGET_OUT_STAGING)/usr/bin/perf
+	$(Q) rm -f $(TARGET_OUT_STAGING)/$(TARGET_DEFAULT_BIN_DESTDIR)/perf

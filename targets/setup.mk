@@ -47,5 +47,23 @@ TARGET_STATIC_LIB_SUFFIX ?= .a
 TARGET_SHARED_LIB_SUFFIX ?= .so
 TARGET_EXE_SUFFIX ?=
 
-TARGET_DEFAULT_BIN_DESTDIR ?= usr/bin
-TARGET_DEFAULT_LIB_DESTDIR ?= usr/lib
+# The root for deployment
+ifdef TARGET_DEPLOY_ROOT
+  TARGET_ROOT_DESTDIR := $(call remove-slash,$(TARGET_DEPLOY_ROOT))
+else
+  TARGET_ROOT_DESTDIR ?= usr
+endif
+
+ifeq ("$(TARGET_ROOT_DESTDIR)","")
+  $(error TARGET_ROOT_DESTDIR is empty)
+endif
+
+# 'bin', 'lib', 'etc' directories
+TARGET_DEFAULT_BIN_DESTDIR ?= $(TARGET_ROOT_DESTDIR)/bin
+TARGET_DEFAULT_LIB_DESTDIR ?= $(TARGET_ROOT_DESTDIR)/lib
+ifeq ("$(TARGET_ROOT_DESTDIR)","usr")
+  # The 'etc' directory is NOT put under 'usr' by default, but as sibling
+  TARGET_DEFAULT_ETC_DESTDIR ?= etc
+else
+  TARGET_DEFAULT_ETC_DESTDIR ?= $(TARGET_ROOT_DESTDIR)/etc
+endif

@@ -8,7 +8,7 @@
 
 # Python executable
 ifneq ("$(call is-module-in-build-config,python3)","")
-  PYTHON := $(HOST_OUT_STAGING)/usr/bin/python3
+  PYTHON := $(HOST_OUT_STAGING)/$(HOST_DEFAULT_BIN_DESTDIR)/python3
 else ifeq ("$(TARGET_OS)-$(TARGET_OS_FLAVOUR)","$(HOST_OS)-native")
   PYTHON = $(shell which python 2>/dev/null)
 else
@@ -30,13 +30,13 @@ endif
 setup_py_env := \
 	$(TARGET_AUTOTOOLS_CONFIGURE_ENV) \
 	CROSS_COMPILING="yes" \
-	PYTHON_MODULES_INCLUDE="$(TARGET_OUT_STAGING)/usr/include" \
-	PYTHON_MODULES_LIB="$(TARGET_OUT_STAGING)/lib $(TARGET_OUT_STAGING)/usr/lib" \
+	PYTHON_MODULES_INCLUDE="$(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/include" \
+	PYTHON_MODULES_LIB="$(TARGET_OUT_STAGING)/lib $(TARGET_OUT_STAGING)/$(TARGET_DEFAULT_LIB_DESTDIR)" \
 	_PYTHON_HOST_PLATFORM="$(TARGET_TOOLCHAIN_TRIPLET)" \
 	PYTHONDONTWRITEBYTECODE=y \
 	_python_sysroot="$(TARGET_OUT_STAGING)" \
-	_python_prefix="/usr" \
-	_python_exec_prefix="/usr"
+	_python_prefix="/$(TARGET_ROOT_DESTDIR)" \
+	_python_exec_prefix="/$(TARGET_ROOT_DESTDIR)"
 
 # File recording list of installed files
 install_record_file := $(build_dir)/installed-files.txt
@@ -50,7 +50,7 @@ build_args := \
 
 # Install arguments
 install_args := \
-	--prefix="$(TARGET_OUT_STAGING)/usr" \
+	--prefix="$(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)" \
 	--record="$(install_record_file)"
 
 # Clean arguments
