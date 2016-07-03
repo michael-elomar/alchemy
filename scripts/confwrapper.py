@@ -3,7 +3,7 @@
 import sys, os, logging
 import platform
 import subprocess
-import optparse
+import argparse
 import tempfile
 import re
 import signal
@@ -937,14 +937,12 @@ def execConfUi(confUi, configInPath, configPath):
 #===============================================================================
 def main():
     result = True
-    (options, args) = parseArgs()
+    options = parseArgs()
     setupLog(options)
 
     # Extract arguments
-    action = args[0]
-    modules = []
-    for arg in args[1:]:
-        modules.append(Module(arg))
+    action = options.action
+    modules = [Module(_mod) for _mod in options.modules]
 
     # Build tree of menus of modules
     menuRoot = buildMenuTree(modules)
@@ -1012,51 +1010,49 @@ def main():
 #===============================================================================
 def parseArgs():
     # Setup parser
-    usage = "usage: %prog [options] <action> <modules>..."
-    parser = optparse.OptionParser(usage=usage)
+    parser = argparse.ArgumentParser()
+
+    # Positional arguments
+    parser.add_argument("action",
+            choices=ACTIONS,
+            help="Action to execute")
+
+    parser.add_argument("modules",
+            nargs="*",
+            help="Modules")
 
     # Main options
-    parser.add_option("--main",
+    parser.add_argument("--main",
         dest="main",
         action="store",
-        default=None,
         metavar="FILE",
+        required=True,
         help="Name of main configuration file")
-    parser.add_option("--diff",
+    parser.add_argument("--diff",
         dest="diff",
         action="store_true",
         default=False,
         help="Write diff file if configuration is not up to date after check")
-    parser.add_option("--ui",
+    parser.add_argument("--ui",
         dest="ui",
         default="qconf",
-        help="User interface to use: %s [default: %%default]" % expandListStr(UIS))
+        choices=UIS,
+        help="User interface to use (default is qconf)")
 
     # Other options
-    parser.add_option("-q",
+    parser.add_argument("-q",
         dest="quiet",
         action="store_true",
         default=False,
         help="be quiet")
-    parser.add_option("-v",
+    parser.add_argument("-v",
         dest="verbose",
         action="count",
         default=0,
         help="verbose output (more verbose if specified twice)")
 
-    # Parse arguments and check validity
-    (options, args) = parser.parse_args()
-    if len(args) < 1:
-        parser.error("Missing action")
-    elif len(args) < 2:
-        # Do not fail completely, display a message and exit with success
-        sys.stderr.write("No module given\n")
-        sys.exit(0)
-    elif args[0] not in ACTIONS:
-        parser.error("Bad action: %s (%s)" %(args[0], expandListStr(ACTIONS)))
-    elif options.main is None:
-        parser.error("Main configuration file required")
-    return (options, args)
+    # Parse arguments
+    return parser.parse_args()
 
 #===============================================================================
 # Setup logging system.

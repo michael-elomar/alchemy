@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import sys, os, logging
-import optparse
+import argparse
 import struct
 from io import StringIO
 
@@ -329,7 +329,7 @@ class SparseFile(object):
         fin.seek(0, os.SEEK_END)
         fileSize = fin.tell()
         fin.seek(0, os.SEEK_SET)
-        logging.info("Read raw image: fileSize=%d blockSize=%d extf=%s",
+        logging.info("Read raw image: fileSize=%d blockSize=%d extfs=%s",
                 fileSize, blockSize, extfs is not None)
 
         # Process input file
@@ -414,10 +414,10 @@ def sparse2Raw(fin, fout):
 # Main function.
 #===============================================================================
 def main():
-    (options, args) = parseArgs()
+    options = parseArgs()
     setupLog(options)
-    inFilePath = args[0]
-    outFilePath = args[1]
+    inFilePath = options.inFile
+    outFilePath = options.outFile
 
     # Open input image file
     try:
@@ -455,46 +455,42 @@ def main():
 # Setup option parser and parse command line.
 #===============================================================================
 def parseArgs():
-    usage = "usage: %prog [options] <infile> <outfile>"
-    parser = optparse.OptionParser(usage=usage)
+    parser = argparse.ArgumentParser()
 
-    parser.add_option("--sparse",
+    parser.add_argument("inFile", help="Input file")
+    parser.add_argument("outFile", help="Output file")
+
+    parser.add_argument("--sparse",
         dest="doSparse",
         action="store_true",
         default=True,
-        help="create a sparse image from a raw image")
+        help="create a sparse image from a raw image (default)")
 
-    parser.add_option("--unsparse",
+    parser.add_argument("--unsparse",
         dest="doSparse",
         action="store_false",
         default=True,
         help="create a raw image from a sparse image")
 
-    parser.add_option("--size",
+    parser.add_argument("--size",
         type=int,
         dest="blockSize",
         default=4096,
+        metavar="SIZE",
         help="block size (default: 4096 or auto for ext images)")
 
-    parser.add_option("-q",
+    parser.add_argument("-q",
         dest="quiet",
         action="store_true",
         default=False,
         help="be quiet")
-    parser.add_option("-v",
+    parser.add_argument("-v",
         dest="verbose",
         action="count",
         default=0,
         help="verbose output (more verbose if specified twice)")
 
-    (options, args) = parser.parse_args()
-    if len(args) == 0:
-        parser.error("Missing <infile> and <outfile>")
-    elif len(args) == 1:
-        parser.error("Missing <outfile>")
-    elif len(args) > 2:
-        parser.error("Too many arguments")
-    return (options, args)
+    return parser.parse_args()
 
 #===============================================================================
 # Setup logging system.

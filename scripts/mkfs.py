@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import sys, os, logging
-import optparse
+import argparse
 import re
 import stat
 import mktar, mkextfs, mkcpio
@@ -140,11 +140,11 @@ def addDevNodes(root, devNodes):
 # Main function.
 #===============================================================================
 def main():
-    (options, args) = parseArgs()
+    options = parseArgs()
     setupLog(options)
 
     # Open output image file (for reading and writing to be mapped)
-    outImagePath = args[0]
+    outImagePath = options.imageFile
     try:
         fout = open(outImagePath, "w+b")
     except IOError as ex:
@@ -187,44 +187,42 @@ def main():
 # Setup option parser and parse command line.
 #===============================================================================
 def parseArgs():
-    usage = "usage: %prog [options] <imagefile>"
-    parser = optparse.OptionParser(usage=usage)
+    parser = argparse.ArgumentParser()
 
-    parser.add_option("--fstype",
+    parser.add_argument("imageFile", help="image file path")
+
+    parser.add_argument("--fstype",
         dest="fstype",
         default=None,
-        help="file system type : " + ",".join(FS_LIST))
+        required=True,
+        choices=FS_LIST,
+        help="file system type")
 
-    parser.add_option("--size",
+    parser.add_argument("--size",
         dest="imageSize",
         default=_DEFAULT_IMAGE_SIZE,
+        metavar="SIZE",
         help="file system image size (in bytes, suffixes K,M,G allowed)")
 
-    parser.add_option("--devnode",
+    parser.add_argument("--devnode",
         dest="devNodes",
         action="append",
         default=[],
-        help="add a device node (format is name:mode:uid:gid:c|b:maj:min")
+        metavar="NODE",
+        help="add a device node (format is name:mode:uid:gid:c|b:maj:min)")
 
-    parser.add_option("-q",
+    parser.add_argument("-q",
         dest="quiet",
         action="store_true",
         default=False,
         help="be quiet")
-    parser.add_option("-v",
+    parser.add_argument("-v",
         dest="verbose",
         action="count",
         default=0,
         help="verbose output (more verbose if specified twice)")
 
-    (options, args) = parser.parse_args()
-    if len(args) != 1:
-        parser.error("Missing <imagefile>")
-    if options.fstype is None:
-        parser.error("Missing file system type")
-    if options.fstype not in FS_LIST:
-        parser.error("Invalid file system type : %s" % options.fstype)
-    return (options, args)
+    return parser.parse_args()
 
 #===============================================================================
 # Setup logging system.

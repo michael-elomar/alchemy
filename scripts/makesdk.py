@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 
 import sys, os, logging
-import optparse
+import argparse
 import shutil
 import fnmatch
 import tarfile
 import time
 import xml.parsers
-
 from io import StringIO
 
 import moduledb
@@ -15,25 +14,26 @@ import moduledb
 #===============================================================================
 #===============================================================================
 class Context(object):
-    def __init__(self, args):
-        self.dumpXmlPath = os.path.abspath(args[0])
-        self.hostBuildDir = os.path.abspath(args[1])
-        self.hostStagingDir = os.path.abspath(args[2])
-        self.buildDir = os.path.abspath(args[3])
-        self.stagingDir = os.path.abspath(args[4])
+    def __init__(self, options):
+        self.dumpXmlPath = os.path.abspath(options.dumpXml)
+        self.hostBuildDir = os.path.abspath(options.hostBuildDir)
+        self.hostStagingDir = os.path.abspath(options.hostStagingDir)
+        self.buildDir = os.path.abspath(options.buildDir)
+        self.stagingDir = os.path.abspath(options.stagingDir)
 
-        if args[5].endswith(".tar.gz"):
-            self.tarFile = tarfile.open(os.path.abspath(args[5]), "w:gz")
+        outDirOrArchive = os.path.abspath(options.outDirOrArchive)
+        if outDirOrArchive.endswith(".tar.gz"):
+            self.tarFile = tarfile.open(outDirOrArchive, "w:gz")
             self.outDir = "sdk"
-        elif args[5].endswith(".tar.bz2"):
-            self.tarFile = tarfile.open(os.path.abspath(args[5]), "w:bz2")
+        elif outDirOrArchive.endswith(".tar.bz2"):
+            self.tarFile = tarfile.open(outDirOrArchive, "w:bz2")
             self.outDir = "sdk"
-        elif args[5].endswith(".tar"):
-            self.tarFile = tarfile.open(os.path.abspath(args[5]), "w")
+        elif outDirOrArchive.endswith(".tar"):
+            self.tarFile = tarfile.open(outDirOrArchive, "w")
             self.outDir = "sdk"
         else:
             self.tarFile = None
-            self.outDir = os.path.abspath(args[5])
+            self.outDir = outDirOrArchive
 
         self.sdkDirs = []
         self.headerLibs = []
@@ -507,11 +507,11 @@ def writeTargetSetupVars(ctx, name):
 # Main function.
 #===============================================================================
 def main():
-    (options, args) = parseArgs()
+    options = parseArgs()
     setupLog(options)
 
     # Extract arguments
-    ctx = Context(args)
+    ctx = Context(options)
 
     # List of previous sdk to merge with the new one
     ctx.sdkDirs = ctx.moduledb.targetVars.get("SDK_DIRS", "").split()
@@ -578,29 +578,30 @@ def main():
 #===============================================================================
 def parseArgs():
     # Setup parser
-    usage = "usage: %prog [options] <dump-xml> <host-build-dir>" \
-            " <host-staging-dir> <build-dir> <staging-dir> <out-dir>|<out-file>"
-    parser = optparse.OptionParser(usage=usage)
+    parser = argparse.ArgumentParser()
 
-    # Main options
+    # Positional arguments
+    parser.add_argument("dumpXml", help="Xml dump")
+    parser.add_argument("hostBuildDir", help="Host build directory")
+    parser.add_argument("hostStagingDir", help="Host staging directory")
+    parser.add_argument("buildDir", help="build directory")
+    parser.add_argument("stagingDir", help="Staging directory")
+    parser.add_argument("outDirOrArchive", help="Output directory or archive")
 
     # Other options
-    parser.add_option("-q",
+    parser.add_argument("-q",
         dest="quiet",
         action="store_true",
         default=False,
         help="be quiet")
-    parser.add_option("-v",
+    parser.add_argument("-v",
         dest="verbose",
         action="count",
         default=0,
         help="verbose output (more verbose if specified twice)")
 
-    # Parse arguments and check validity
-    (options, args) = parser.parse_args()
-    if len(args) != 6:
-        parser.error("Bad number of arguments")
-    return (options, args)
+    # Parse arguments
+    return parser.parse_args()
 
 #===============================================================================
 # Setup logging system.

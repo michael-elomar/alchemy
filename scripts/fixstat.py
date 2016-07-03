@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import sys, os, logging
-import optparse
+import argparse
 import stat
 import re
 
@@ -183,7 +183,7 @@ def fixstat(ctx, filePath, st):
 # Main function.
 #===============================================================================
 def main():
-    (options, args) = parseArgs()
+    options = parseArgs()
     setupLog(options)
 
     ctx = Context()
@@ -211,41 +211,42 @@ def main():
 # Setup option parser and parse command line.
 #===============================================================================
 def parseArgs():
-    usage = "usage: %prog [options]"
-    parser = optparse.OptionParser(usage=usage)
+    parser = argparse.ArgumentParser()
 
-    parser.add_option("--user-file",
+    parser.add_argument("--user-file",
         dest="userFile",
         default=None,
+        metavar="FILE",
         help="Path to etc/passwd file with user <-> uid mapping")
-    parser.add_option("--group-file",
+    parser.add_argument("--group-file",
         dest="groupFile",
         default=None,
+        metavar="FILE",
         help="Path to etc/group file with group <-> group mapping")
-    parser.add_option("--use-default",
+    parser.add_argument("--use-default",
         dest="useDefault",
         action="store_true",
         default=False,
         help="Apply default rules")
-    parser.add_option("--permissions-file",
+    parser.add_argument("--permissions-file",
         dest="permissionsFiles",
         action="append",
         default=[],
+        metavar="FILE",
         help="Path to permissions file. Several allowed")
 
-    parser.add_option("-q",
+    parser.add_argument("-q",
         dest="quiet",
         action="store_true",
         default=False,
         help="be quiet")
-    parser.add_option("-v",
+    parser.add_argument("-v",
         dest="verbose",
         action="count",
         default=0,
         help="verbose output (more verbose if specified twice)")
 
-    (options, args) = parser.parse_args()
-    return (options, args)
+    return parser.parse_args()
 
 #===============================================================================
 # Setup logging system.

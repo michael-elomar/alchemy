@@ -14,7 +14,7 @@
 import sys, os, logging
 import stat
 import subprocess
-import optparse
+import argparse
 import re
 import fnmatch
 
@@ -430,30 +430,24 @@ def processLinuxBasicSkel(options):
 # Main function.
 #===============================================================================
 def main():
-    (options, args) = parseArgs()
+    options = parseArgs()
     setupLog(options)
 
     # get parameters
-    options.stagingDir = args[0]
-    options.finalDir = os.path.realpath(args[1])
+    options.stagingDir = os.path.realpath(options.stagingDir)
+    options.finalDir = os.path.realpath(options.finalDir)
     logging.info("staging-dir : %s", options.stagingDir)
     logging.info("final-dir : %s", options.finalDir)
 
     # do we need to output a makefile ?
-    options.makefile = None
-    if len(args) >= 3:
-        logging.info("makefile : %s", args[2])
+    makefilePath = options.makefile
+    if options.makefile is not None:
+        logging.info("makefile : %s", makefilePath)
         try:
-            options.makefile = Makefile(open(args[2], "w"))
+            options.makefile = Makefile(open(makefilePath, "w"))
         except IOError as ex:
             logging.error("Failed to create file: %s [err=%d %s]",
-                    args[2], ex.errno, ex.strerror)
-
-    # check mode
-    if options.mode not in MODES:
-        logging.error("Invalid mode '%s'. Available: %s", options.mode,
-            ", ".join(MODES))
-        sys.exit(1)
+                    makefilePath, ex.errno, ex.strerror)
 
     # update filter
     if options.mode != MODE_FULL and not options.keepPythonFiles:
@@ -504,68 +498,74 @@ def main():
 # Setup option parser and parse command line.
 #===============================================================================
 def parseArgs():
-    usage = "usage: %prog [options] <staging-dir> <final-dir> [<makefile>]"
-    parser = optparse.OptionParser(usage=usage)
-    parser.add_option("--strip",
+    parser = argparse.ArgumentParser()
+    parser.add_argument("stagingDir",
+            help="Staging directory.")
+    parser.add_argument("finalDir",
+            help="Final directory.")
+    parser.add_argument("makefile",
+            nargs="?",
+            help="Output makefile.")
+    parser.add_argument("--strip",
         dest="strip",
         default=None,
+        metavar="STRIP",
         help="strip program to use to remove symbols")
-    parser.add_option("--strip-kernel",
+    parser.add_argument("--strip-kernel",
         dest="stripKernel",
         default=None,
+        metavar="STRIP",
         help="strip program to use to remove symbols from kernel modules")
-    parser.add_option("--skel",
+    parser.add_argument("--skel",
         dest="skelDirs",
         default=[],
         action="append",
+        metavar="DIR",
         help="path to skeleton tree to merge in final tree")
-    parser.add_option("--linux-basic-skel",
+    parser.add_argument("--linux-basic-skel",
         dest="linuxBasicSkel",
         action="store_true",
         default=False,
         help="Create a basic linux skel (proc, dev, tmp...)")
-    parser.add_option("--strip-filter",
+    parser.add_argument("--strip-filter",
         dest="stripFilters",
         default=[],
         action="append",
+        metavar="FILTER",
         help="Filter of file names that will no be stripped (ex: ld-*.so)")
-    parser.add_option("--remove-wgo",
+    parser.add_argument("--remove-wgo",
         dest="removeWGO",
         action="store_true",
         default=False,
         help="Remove write access for group and other on all copied files")
-    parser.add_option("--filelist",
+    parser.add_argument("--filelist",
         dest="fileListPath",
         default=None,
+        metavar="FILE",
         help="file where to store list of installed files")
-    parser.add_option("--keep-python-files",
+    parser.add_argument("--keep-python-files",
         dest="keepPythonFiles",
         action="store_true",
         default=False,
         help="keep python files (*.py, *.pyc, *.pyo)")
-    parser.add_option("--mode",
+    parser.add_argument("--mode",
         dest="mode",
         default=MODE_DEFAULT,
-        help="generation mode (what to put/filter): %s (default is %s)" % (
-                ", ".join(MODES), MODE_DEFAULT))
+        choices=MODES,
+        help="generation mode (what to put/filter) (default is %s)" % MODE_DEFAULT)
 
-    parser.add_option("-q",
+    parser.add_argument("-q",
         dest="quiet",
         action="store_true",
         default=False,
         help="be quiet")
-    parser.add_option("-v",
+    parser.add_argument("-v",
         dest="verbose",
         action="count",
         default=0,
         help="verbose output (more verbose if specified twice)")
 
-    (options, args) = parser.parse_args()
-    if len(args) > 3:
-        parser.error("Too many parameters")
-    elif len(args) < 2:
-        parser.error("Not enough parameters")
-    return (options, args)
+    return parser.parse_args()
 
 #===============================================================================
 # Setup logging system.

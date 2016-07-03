@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import sys, os, logging
-import optparse
+import argparse
 import tarfile
 
 #===============================================================================
@@ -62,40 +62,37 @@ def createTarFile(outTarFile, fileList, stagingDir):
 # Main function.
 #===============================================================================
 def main():
-    (options, args) = parseArgs()
+    options = parseArgs()
     setupLog(options)
 
-    stagingDir = args[0]
-    outTarFile = args[1]
-
-    fileList = getFileList(stagingDir)
-    createTarFile(outTarFile, fileList, stagingDir)
+    fileList = getFileList(options.stagingDir)
+    createTarFile(options.outTarFile, fileList, options.stagingDir)
 
 #===============================================================================
 # Setup option parser and parse command line.
 #===============================================================================
 def parseArgs():
     # Setup parser
-    usage = "usage: %prog [options] <staging-dir> <out-tar-file>"
-    parser = optparse.OptionParser(usage=usage)
+    parser = argparse.ArgumentParser()
+
+    # Positional arguments
+    parser.add_argument("stagingDir", help="Staging directory")
+    parser.add_argument("outTarFile", help="OUtput tar file")
 
     # Other options
-    parser.add_option("-q",
+    parser.add_argument("-q",
         dest="quiet",
         action="store_true",
         default=False,
         help="be quiet")
-    parser.add_option("-v",
+    parser.add_argument("-v",
         dest="verbose",
         action="count",
         default=0,
         help="verbose output (more verbose if specified twice)")
 
-    # Parse arguments and check validity
-    (options, args) = parser.parse_args()
-    if len(args) != 2:
-        parser.error("Bad number of arguments")
-    return (options, args)
+    # Parse arguments
+    return parser.parse_args()
 
 #===============================================================================
 # Setup logging system.

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import sys, os, logging
-import optparse
+import argparse
 
 import libelf
 
@@ -51,17 +51,13 @@ def processFile(ctx, filePath):
 #===============================================================================
 #===============================================================================
 def main():
-    (options, args) = parseArgs()
+    options = parseArgs()
     setupLog(options)
 
     ctx = Context()
-    if not args:
-        rootDir = os.getcwd()
-    else:
-        rootDir = args[0]
 
     # Process all ELF files in given root directory
-    for (dirPath, dirNames, fileNames) in os.walk(rootDir):
+    for (dirPath, dirNames, fileNames) in os.walk(options.rootDir):
         for excludeDir in ["proc", "sys", "dev"]:
             if excludeDir in dirNames:
                 dirNames.remove(excludeDir)
@@ -72,7 +68,7 @@ def main():
             processFile(ctx, filePath)
 
     # Determine missing libraries
-    for (dirPath, dirNames, fileNames) in os.walk(rootDir):
+    for (dirPath, dirNames, fileNames) in os.walk(options.rootDir):
         for fileName in fileNames:
             if fileName in ctx.libraries:
                 ctx.libraries[fileName] = True
@@ -92,22 +88,25 @@ def main():
 # Setup option parser and parse command line.
 #===============================================================================
 def parseArgs():
-    usage = "usage: %prog [options] [<dir>]"
-    parser = optparse.OptionParser(usage = usage)
+    parser = argparse.ArgumentParser()
 
-    parser.add_option("-q",
+    parser.add_argument("rootDir",
+            nargs="?",
+            default=os.getcwd(),
+            help="Root directoty to check")
+
+    parser.add_argument("-q",
         dest="quiet",
         action="store_true",
         default=False,
         help="be quiet")
-    parser.add_option("-v",
+    parser.add_argument("-v",
         dest="verbose",
         action="count",
         default=0,
         help="verbose output (more verbose if specified twice)")
 
-    (options, args) = parser.parse_args()
-    return (options, args)
+    return parser.parse_args()
 
 #===============================================================================
 # Setup logging system.
