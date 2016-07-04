@@ -179,7 +179,7 @@ ifneq ("$(F)","0")
 endif
 
 # Global prerequisites (shall be used only by os makefile)
-TARGET_GLOBAL_PREREQUISITES :=
+TARGET_GLOBAL_PREREQUISITES ?=
 
 # Add a section in executable/shared library with dependencies used
 TARGET_ADD_DEPENDS_SECTION ?= 0
