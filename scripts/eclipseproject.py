@@ -1,13 +1,15 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys
 import os
-import optparse
+import argparse
 import xml.parsers
-import moduledb
 from xml.sax.saxutils import escape
 
+import moduledb
 
+#===============================================================================
+#===============================================================================
 def getRealSourceDir(src_dir):
     real_src_dir = src_dir
     (head, tail) = os.path.split(src_dir)
@@ -18,29 +20,6 @@ def getRealSourceDir(src_dir):
         real_src_dir = head
 
     return real_src_dir
-
-#===============================================================================
-# Get Module sources directories including generated files
-#===============================================================================
-def getModuleSourceDirs(self, module, build_dir):
-    dirs = []
-
-    # first get principal module source directory
-    if "ARCHIVE" in module.fields:
-        src_dir = build_dir + "/" + module.name + "/" + module.fields["ARCHIVE_SUBDIR"]
-    else:
-        src_dir = getRealSourceDir(module.fields["PATH"])
-
-    dirs.append(src_dir)
-
-    # get genereated source directories if exist
-    if "GENERATED_SRC_FILES" in module.fields:
-        for gen_dir in  module.fields["GENERATED_SRC_FILES"].split():
-            gen_dir = os.path.dirname(build_dir + "/" + gen_dir)
-            if gen_dir not in dirs:
-                dirs.append(gen_dir)
-
-    return dirs
 
 #===============================================================================
 #===============================================================================
@@ -66,7 +45,7 @@ class Project(object):
                 src_dir = getRealSourceDir(dep.fields["PATH"])
 
             addDepend = True
-            for d in self.link_depends.keys() + [getRealSourceDir(self.module.fields["PATH"])]:
+            for d in list(self.link_depends.keys()) + [getRealSourceDir(self.module.fields["PATH"])]:
                 if src_dir.startswith(d):
                     addDepend = False
                     break
@@ -114,7 +93,7 @@ class Project(object):
 
                 fd.write("\t\t<link>\n")
                 fd.write("\t\t\t<name>%s</name>\n" % dep.name)
-                fd.write("\t\t\t<type>2</type>\n")            
+                fd.write("\t\t\t<type>2</type>\n")
                 fd.write("\t\t\t<location>%s</location>\n" % src_dir)
                 fd.write("\t\t</link>\n")
 
@@ -144,7 +123,7 @@ class Project(object):
         if "CFLAGS" in self.module.fields:
             genMacros(self.module.fields["CFLAGS"])
         for dep in self.depends_all:
-                genMacros(dep.fields.get("EXPORT_CFLAGS", ""))
+            genMacros(dep.fields.get("EXPORT_CFLAGS", ""))
 
         # add cxx flags for C++
         if language == "C++":
@@ -333,17 +312,21 @@ class Project(object):
 #===============================================================================
 #===============================================================================
 def main():
-    (options, args) = parseArgs()
+    options = parseArgs()
+
+    # -f imply -d
+    if options.linkdeps_full:
+        options.linkdeps = True
 
     # Load modules from xml
     try:
-        modules = moduledb.loadXml(args[0])
+        modules = moduledb.loadXml(options.dumpXml)
     except xml.parsers.expat.ExpatError as ex:
-        sys.stderr.write("Error while loading '%s':\n" % args[0])
+        sys.stderr.write("Error while loading '%s':\n" % options.dumpXml)
         sys.stderr.write("  %s\n" % ex)
         sys.exit(1)
 
-    for name in args[1:]:
+    for name in options.modules:
         if name not in modules:
             sys.stderr.write("Error module '%s' not found:\n" % name)
         else:
@@ -354,43 +337,38 @@ def main():
 #===============================================================================
 def parseArgs():
     # Setup parser
-    usage = "usage: %prog [options] <dump-xml> <module1> <module2> ..."
-    parser = optparse.OptionParser(usage=usage)
+    parser = argparse.ArgumentParser()
+
+    # Positional arguments
+    parser.add_argument("dumpXml", help="Alchemy database dump in xml")
+    parser.add_argument("modules", nargs="*", help="Modules to generate")
 
     # Main option
-    parser.add_option("-d",
+    parser.add_argument("-d",
         "--link-dependencies",
         dest="linkdeps",
         action="store_true",
         default=False,
         help="Link direct dependencies sources in project.")
 
-    parser.add_option("-f",
+    parser.add_argument("-f",
         "--link-dependencies-full",
         dest="linkdeps_full",
         action="store_true",
         default=False,
         help="Link all dependencies sources in project.")
 
-    parser.add_option("-b",
+    parser.add_argument("-b",
         "--custom-build-args",
         dest="custom_build_args",
         default="${TARGET_PRODUCT} ${TARGET_PRODUCT_VARIANT}",
+        metavar="BUILDCMD",
         help="Custom build arguments.")
 
     # Parse arguments and check validity
-    (options, args) = parser.parse_args()
-    if len(args) < 2:
-        parser.error("Bad number of arguments")
-
-    # -f imply -d
-    if options.linkdeps_full:
-        options.linkdeps = True
-
-    return (options, args)
+    return parser.parse_args()
 
 #===============================================================================
 #===============================================================================
 if __name__ == "__main__":
     main()
-

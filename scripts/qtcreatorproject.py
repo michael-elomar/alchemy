@@ -1,12 +1,13 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys
 import os
 import shutil
-import optparse
+import argparse
 import xml.parsers
-import moduledb
 import xml.etree.ElementTree as ET
+
+import moduledb
 
 class Project(object):
     def __init__(self, name, modules, options):
@@ -58,7 +59,7 @@ class Project(object):
         fd = open(filename, "w")
         unique = set()
         for inc in includes:
-            if not inc in unique:
+            if inc not in unique:
                 unique.add(inc)
                 fd.write(inc + "\n")
         fd.close()
@@ -204,7 +205,7 @@ class Project(object):
             self.module.name)
         try:
             os.makedirs(prefix)
-        except:
+        except OSError:
             pass
         self.__genProjectFiles(prefix, options)
         self.__genProjectIncludes(prefix, options)
@@ -215,17 +216,17 @@ class Project(object):
 #===============================================================================
 #===============================================================================
 def main():
-    (options, args) = parseArgs()
+    options = parseArgs()
 
     # Load modules from xml
     try:
-        modules = moduledb.loadXml(args[0])
+        modules = moduledb.loadXml(options.dumpXml)
     except xml.parsers.expat.ExpatError as ex:
-        sys.stderr.write("Error while loading '%s':\n" % args[0])
+        sys.stderr.write("Error while loading '%s':\n" % options.dumpXml)
         sys.stderr.write("  %s\n" % ex)
         sys.exit(1)
 
-    for name in args[1:]:
+    for name in options.modulesOrDirs:
         if os.path.exists(name):
             for module in modules:
                 if os.path.abspath(module.fields["PATH"]) == os.path.abspath(name):
@@ -241,26 +242,23 @@ def main():
 #===============================================================================
 def parseArgs():
     # Setup parser
-    usage = "usage: %prog [options] <dump-xml> <module1|dir1> <module2|dir2> ..."
-    parser = optparse.OptionParser(usage=usage)
+    parser = argparse.ArgumentParser()
 
-    parser.add_option("-b",
+    parser.add_argument("dumpXml", help="Alchemy database dump in xml")
+    parser.add_argument("modulesOrDirs", nargs="*",
+            help="Modules or directories to generate")
+
+    parser.add_argument("-b",
         "--custom-build-args",
         dest="custom_build_args",
         default="",
+        metavar="BUILDCMD",
         help="Custom build arguments.")
 
-    # Parse arguments and check validity
-    (options, args) = parser.parse_args()
-    if len(args) < 2:
-        parser.error("Bad number of arguments")
-    if not "ALCHEMY_HOME" in os.environ:
-        parser.error("ALCHEMY_HOME undefined")
-
-    return (options, args)
+    # Parse arguments
+    return parser.parse_args()
 
 #===============================================================================
 #===============================================================================
 if __name__ == "__main__":
     main()
-
