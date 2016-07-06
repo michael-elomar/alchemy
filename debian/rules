@@ -1,8 +1,5 @@
 #!/usr/bin/make -f
 
-#DEB_SOURCE := $(shell dpkg-parsechangelog | sed -n 's/^Source: //p')
-#destdir:=$(shell pwd)/debian/$(DEB_SOURCE)
-
 build:
 	dh_testdir
 
@@ -12,26 +9,28 @@ clean:
 	dh_clean
 
 install:
+	dh_testdir
+	dh_testroot
+	dh_installdirs
 
 binary-indep:
-	dh_testdir -i
-	dh_testroot -i
+	dh_testdir --indep
+	dh_testroot --indep
 	dh_prep
 	dh_installdirs usr/bin usr/lib/Alchemy
-	dh_install -X./debian -X./test -X./kconfig * usr/lib/Alchemy
+	dh_install -X./debian * usr/lib/Alchemy
 	dh_install scripts/alchemake usr/bin
-	dh_installchangelogs -i
-	dh_python2 -i
-	dh_compress -i -X.txt
-	dh_fixperms -i
-	dh_installdeb -i
-	dh_shlibdeps -i
-	dh_gencontrol -i
-	dh_md5sums -i
-	dh_builddeb -i
+	dh_installchangelogs --indep
+	dh_python3 --indep
+	dh_compress --indep -X.txt
+	dh_fixperms --indep
+	dh_installdeb --indep
+	dh_gencontrol --indep
+	dh_md5sums --indep
+	dh_builddeb --indep
 
 binary-arch:
-	echo ""
 
-binary: binary-indep
-.PHONY: build clean binary-indep binary-arch binary install
+binary: binary-indep binary-arch
+
+.PHONY: build clean install binary-indep binary-arch binary
