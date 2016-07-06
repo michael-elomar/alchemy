@@ -222,13 +222,6 @@ find-cmd := $(BUILD_SYSTEM)/scripts/findfiles.py \
 	$(TOP_DIR) \
 	$(USER_MAKEFILE_NAME)
 
-# Summary of what we found
-display-user-makefiles-summary = \
-	$(if $(call strneq,$(V),0), \
-		$(foreach __f,$(USER_MAKEFILES),$(info $(__f))) \
-	) \
-	$(info Found $(words $(USER_MAKEFILES)) makefiles)
-
 # Create a file that will contain all user makefiles available
 # Make sure that atom.mk from sdk are included first so they can be overriden
 # Put target/os specific packages AFTER sdk for same reason
@@ -236,14 +229,17 @@ create-user-makefiles-cache = \
 	rm -f $(USER_MAKEFILES_CACHE); \
 	mkdir -p $(dir $(USER_MAKEFILES_CACHE)); \
 	touch $(USER_MAKEFILES_CACHE); \
+	files="$(addsuffix /$(USER_MAKEFILE_NAME),$(TARGET_SDK_DIRS)) \
+		$(BUILD_SYSTEM)/targets/packages.mk \
+		$(BUILD_SYSTEM)/toolchains/packages.mk \
+		`$(find-cmd)` \
+	"; \
 	( \
-		files="$(addsuffix /$(USER_MAKEFILE_NAME),$(TARGET_SDK_DIRS)) \
-			$(BUILD_SYSTEM)/targets/packages.mk \
-			$(BUILD_SYSTEM)/toolchains/packages.mk \
-		"; \
-		for f in $$files `$(find-cmd)`; do \
+		echo "\$$(info Found `echo $$files | wc -w` makefiles)"; \
+		for f in $$files; do \
 			echo "USER_MAKEFILES += $$f"; \
 			echo "\$$(call user-makefile-before-include,$$f)"; \
+			$(if $(call strneq,$(V),0),echo "\$$(info $$f)";) \
 			echo "include $$f"; \
 			echo "\$$(call user-makefile-after-include,$$f)"; \
 		done \
@@ -256,7 +252,7 @@ ifeq ("$(USE_SCAN_CACHE)","0")
 else ifneq ("$(call is-targets-in-make-goals,scan)","")
   do-create-cache := 1
 else
-  $(warning Using scan cache, some atom.mk might be missing...)
+  $(warning Using scan cache, some $(USER_MAKEFILE_NAME) might be missing...)
 endif
 
 ifneq ("$(do-create-cache)","0")
@@ -265,7 +261,6 @@ ifneq ("$(do-create-cache)","0")
 # Assignation to dummy variable is to ignore any output of shell command
 dummy := $(shell $(create-user-makefiles-cache))
 include $(USER_MAKEFILES_CACHE)
-$(call display-user-makefiles-summary)
 
 else
 
@@ -280,7 +275,6 @@ endif
 # If it does not exists, it will trigger its creation
 ifeq ("$(call is-targets-in-make-goals,scan $(__clobber-targets))","")
   -include $(USER_MAKEFILES_CACHE)
-  $(call display-user-makefiles-summary)
 endif
 
 endif
@@ -317,6 +311,7 @@ $(foreach __mod,$(__modules), \
 )
 
 # Recompute all dependencies between modules
+$(info Computing modules dependencies...)
 $(call modules-compute-depends)
 
 ifdef TARGET_TEST
@@ -365,6 +360,7 @@ $(foreach __mod,$(ALL_BUILD_MODULES_HOST), \
 # Check dependencies and variables of modules
 ifeq ("$(SKIP_DEPS_AND_CHECKS)","0")
 ifeq ("$(SKIP_CONFIG_CHECK)","0")
+  $(info Checking modules dependencies...)
   $(call modules-check-depends)
   $(call modules-check-variables)
 endif
@@ -405,9 +401,7 @@ $(foreach __mod,$(ALL_MODULES), \
 	) \
 )
 
-ifneq ("$(V)","0")
-  $(info Generating rules: start)
-endif
+$(info Generating rules...)
 
 # Determine the list of modules to really include
 # If a module is specified in goals, only include this one and its dependencies.
@@ -459,10 +453,6 @@ $(foreach __mod,$(sort $(__modlist) $(__modules-with-global-prerequisites)), \
 	$(eval LOCAL_MODULE := $(__mod)) \
 	$(eval include $(BUILD_SYSTEM)/classes/rules.mk) \
 )
-
-ifneq ("$(V)","0")
-  $(info Generating rules: done)
-endif
 
 endif
 
@@ -668,3 +658,5 @@ $(TARGET_OUT_STAGING)/THIS_IS_NOT_THE_DIRECTORY_FOR_NATIVE_CHROOT:
 	@echo "Please use the 'final' directory to launch native chroot" > $@
 
 endif
+
+$(info Processing rules...)
