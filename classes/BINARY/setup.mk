@@ -20,7 +20,7 @@ _binary-print-banner1 = \
 # Whenever on of those flags changed, it will retrigger compilations
 # Shall be = and not := because reference to some variables needs to be done during expansion
 
-_binary-global-object-flags = \
+_binary-global-objects-flags = \
 	C_INCLUDES \
 	ASFLAGS \
 	CFLAGS \
@@ -32,19 +32,30 @@ _binary-global-object-flags = \
 	OBJCFLAGS \
 	VALAFLAGS
 
-_binary-warnings-object-flags = \
+_binary-warnings-objects-flags = \
 	CFLAGS \
 	CFLAGS_$(PRIVATE_CC_FLAVOUR) \
 	CXXFLAGS \
 	CXXFLAGS_$(PRIVATE_CC_FLAVOUR)
 
-_binary-private-object-flags = \
+_binary-private-objects-flags = \
 	C_INCLUDES \
 	ASFLAGS \
 	CFLAGS \
 	CXXFLAGS \
 	OBJCFLAGS \
 	VALAFLAGS
+
+_binary-get-objects-flags = \
+	$(foreach __v,$(_binary-global-objects-flags), \
+		GLOBAL_$(__v) := $($(PRIVATE_MODE)_GLOBAL_$(__v))$(endl) \
+	) \
+	$(foreach __v,$(_binary-warnings-objects-flags), \
+		WARNINGS_$(__v) := $(WARNINGS_$(__v))$(endl) \
+	) \
+	$(foreach __v,$(_binary-private-objects-flags), \
+		PRIVATE_$(__v) := $(PRIVATE_$(__v))$(endl) \
+	)
 
 ###############################################################################
 ## Command to compile a C++ file.

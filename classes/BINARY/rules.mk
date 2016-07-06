@@ -117,21 +117,27 @@ $(foreach __e,$(_binary_extensions), \
 	$(eval $(call _binary-rules-transform-gen-to-o,$(__e))) \
 )
 
+###############################################################################
 # File with compilation flags
-$(_module_build_dir)/$(LOCAL_MODULE).objects.flags: .FORCE
-	@mkdir -p $(dir $@)
-	@( \
-		$(foreach __v,$(_binary-global-object-flags), \
-			echo -e "GLOBAL_$(__v) := $(call __echo-escape,$($(PRIVATE_MODE)_GLOBAL_$(__v)))"; \
-		) \
-		$(foreach __v,$(_binary-warnings-object-flags), \
-			echo -e "WARNINGS_$(__v) := $(call __echo-escape,$(WARNINGS_$(__v)))"; \
-		) \
-		$(foreach __v,$(_binary-private-object-flags), \
-			echo -e "PRIVATE_$(__v) := $(call __echo-escape,$(PRIVATE_$(__v)))"; \
-		) \
-	) > $@.tmp
+# The 'sed' command will remove leading spaces on each lines
+# If we have make 4.0, create the file internally. This requires the 'mkdir' to
+# be done in another rule to guarantee execution order
+###############################################################################
+
+_binary_objects_flags := $(_module_build_dir)/$(LOCAL_MODULE).objects.flags
+
+$(_binary_objects_flags): .FORCE | $(_binary_objects_flags)-dir
+ifeq ("$(MAKE_HAS_FILE_FUNC)","1")
+	$(file > $@.tmp,$(_binary-get-objects-flags))
+else
+	@echo -e "$(call __echo-escape,$(_binary-get-objects-flags))" > $@.tmp
+endif
+	@sed -i.bak -e 's/^ *//' $@.tmp && rm -f $@.tmp.bak
 	$(call update-file-if-needed,$@,$@.tmp)
+
+.PHONY: $(_binary_objects_flags)-dir
+$(_binary_objects_flags)-dir:
+	@mkdir -p $(dir $@)
 
 ###############################################################################
 ## vala rules (.vala files are in LOCAL_PATH, generated .c and .o are in build dir)

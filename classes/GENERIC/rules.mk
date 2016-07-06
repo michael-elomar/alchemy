@@ -30,19 +30,27 @@ else
 endif
 
 ###############################################################################
+# Generate header file with revision
+# The 'sed' command will remove leading spaces on each lines
+# If we have make 4.0, create the file internally. This requires the 'mkdir' to
+# be done in another rule to guarantee execution order
 ###############################################################################
 
 ifneq ("$(_module_revision_h_file)","")
-$(_module_revision_h_file): .FORCE
-	@mkdir -p $(dir $@)
-	@( \
-		var="$(call module-get-define,$(PRIVATE_MODULE))"; \
-		val="$(call module-get-revision,$(PRIVATE_MODULE))"; \
-		val2="$(call module-get-revision-describe,$(PRIVATE_MODULE))"; \
-		echo "#define ALCHEMY_REVISION_$${var} \"$${val}\""; \
-		echo "#define ALCHEMY_REVISION_DESCRIBE_$${var} \"$${val2}\""; \
-	) > $@.tmp
+
+$(_module_revision_h_file): .FORCE | $(_module_revision_h_file)-dir
+ifeq ("$(MAKE_HAS_FILE_FUNC)","1")
+	$(file > $@.tmp,$(_generic-get-revision-h))
+else
+	@echo -e "$(call __echo-escape,$(_generic-get-revision-h))" > $@.tmp
+endif
+	@sed -i.bak -e 's/^ *//' $@.tmp && rm -f $@.tmp.bak
 	$(call update-file-if-needed,$@,$@.tmp)
+
+.PHONY: $(_module_revision_h_file)-dir
+$(_module_revision_h_file)-dir:
+	@mkdir -p $(dir $@)
+
 endif
 
 ###############################################################################

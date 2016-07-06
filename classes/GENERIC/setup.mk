@@ -41,3 +41,10 @@ define _generic-exec-step
 	$(call macro-exec-cmd,$(PRIVATE_CMD_PREFIX)CMD_POST_$1,empty)
 	$(if $(PRIVATE_HOOK_POST_$1),$(call $(PRIVATE_HOOK_POST_$1)))
 endef
+
+_generic-get-revision-h = \
+	$(eval __var := $(call module-get-define,$(PRIVATE_MODULE))) \
+	$(eval __val1 := $(call module-get-revision,$(PRIVATE_MODULE))) \
+	$(eval __val2 := $(call module-get-revision-describe,$(PRIVATE_MODULE))) \
+	\#define ALCHEMY_REVISION_$(__var) "$(__val1)"$(endl) \
+	\#define ALCHEMY_REVISION_DESCRIBE_$(__var) "$(__val2)"$(endl)
