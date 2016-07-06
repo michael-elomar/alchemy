@@ -15,6 +15,13 @@ ifeq ("$(call check-version,$(MAKE_VERSION),3.81)","")
   $(error 'make' version >= 3.81 is required)
 endif
 
+# Detect if we have version 4.0 or up
+ifneq ("$(call check-version,$(MAKE_VERSION),4.0)","")
+  MAKE_HAS_FILE_FUNC := 1
+else
+  MAKE_HAS_FILE_FUNC := 0
+endif
+
 ###############################################################################
 ## pkg-config
 ## Need pkg-config v0.24 at least (for PKG_CONFIG_SYSROOT_DIR support)
