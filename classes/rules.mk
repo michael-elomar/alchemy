@@ -265,7 +265,7 @@ all_prerequisites += \
 # Remove our build module from the list of global deps to avoid circular chain
 # FIXME: do NOT add TARGET_GLOBAL_PREREQUISITES for host modules
 all_prerequisites += \
-	$(filter-out $(LOCAL_BUILD_MODULE),$(TARGET_GLOBAL_PREREQUISITES)) \
+	$(filter-out $(LOCAL_MODULE) $(LOCAL_BUILD_MODULE),$(TARGET_GLOBAL_PREREQUISITES)) \
 	$(LOCAL_PREREQUISITES) \
 	$(LOCAL_EXPORT_PREREQUISITES)
 
