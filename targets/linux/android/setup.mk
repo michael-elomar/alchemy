@@ -32,8 +32,7 @@ TARGET_ANDROID_APILEVEL ?= 17
 # Choose SDK
 ifndef TARGET_ANDROID_SDK
 TARGET_ANDROID_SDK := \
-	$(shell shopt -s nullglob ; \
-		for path in $(ANDROID_SDK_DEFAULT_PATHS) ; do \
+	$(shell for path in $(wildcard $(ANDROID_SDK_DEFAULT_PATHS)) ; do \
 			if [ -e $$path/platforms/android-$(TARGET_ANDROID_APILEVEL) ]; then \
 				cd $$path && pwd && break; \
 			fi; \
@@ -47,8 +46,7 @@ endif
 # Choose NDK
 ifndef TARGET_ANDROID_NDK
 TARGET_ANDROID_NDK := \
-	$(shell shopt -s nullglob ; \
-		for path in $(ANDROID_NDK_DEFAULT_PATHS) ; do \
+	$(shell for path in $(wildcard $(ANDROID_NDK_DEFAULT_PATHS)) ; do \
 			if [ -e $$path/platforms/android-$(TARGET_ANDROID_APILEVEL) ]; then \
 				cd $$path && pwd && break; \
 			fi; \
