@@ -212,7 +212,7 @@ def main():
     # wants to use the terminal, like ncurses)
     # Force locale to have english messages that we will try to detect
     env = os.environ
-    env["LANG"] = "C"
+    env['LANG'] = 'C.UTF-8'
     cmdline = makeProg
     for arg in sys.argv[1:]:
         cmdline += " " + arg
