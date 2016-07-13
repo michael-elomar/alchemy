@@ -87,7 +87,8 @@ LINUX_EXPORTED_HEADERS_OVER := \
 	include/linux/inet_diag.h \
 	include/linux/iio/events.h \
 	include/linux/iio/types.h \
-	include/linux/cn_proc.h
+	include/linux/cn_proc.h \
+	include/linux/prctl.h
 
 ###############################################################################
 ###############################################################################
