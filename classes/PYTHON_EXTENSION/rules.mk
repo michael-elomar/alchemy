@@ -39,14 +39,14 @@ setup_py_env := \
 	_python_exec_prefix="/$(TARGET_ROOT_DESTDIR)"
 
 # File recording list of installed files
-install_record_file := $(build_dir)/installed-files.txt
+install_record_file := $(_module_build_dir)/installed-files.txt
 
 # Build arguments
 build_args := \
-	--build-base="$(build_dir)" \
-	--build-lib="$(build_dir)/lib" \
-	--build-scripts="$(build_dir)/script" \
-	--build-temp="$(build_dir)/temp" \
+	--build-base="$(_module_build_dir)" \
+	--build-lib="$(_module_build_dir)/lib" \
+	--build-scripts="$(_module_build_dir)/script" \
+	--build-temp="$(_module_build_dir)/temp" \
 
 # Install arguments
 install_args := \
@@ -56,11 +56,11 @@ install_args := \
 # Clean arguments
 clean_args := \
 	--all \
-	--build-base="$(build_dir)" \
-	--build-lib="$(build_dir)/lib" \
-	--build-scripts="$(build_dir)/script" \
-	--build-temp="$(build_dir)/temp" \
-	--bdist-base="$(build_dir)/bdist"
+	--build-base="$(_module_build_dir)" \
+	--build-lib="$(_module_build_dir)/lib" \
+	--build-scripts="$(_module_build_dir)/script" \
+	--build-temp="$(_module_build_dir)/temp" \
+	--bdist-base="$(_module_build_dir)/bdist"
 
 _module_msg := $(if $(_mode_host),Host )PythonExt
 
