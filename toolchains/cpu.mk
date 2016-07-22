@@ -157,12 +157,14 @@ endif
 
 ifeq ("$(TARGET_CPU)", "stm32f3")
   TARGET_GLOBAL_CFLAGS += -mcpu=cortex-m4 -mfpu=fpv4-sp-d16
-  TARGET_GLOBAL_LDFLAGS += -mcpu=cortex-m4 -mfpu=fpv4-sp-d16
+  TARGET_GLOBAL_LDFLAGS += -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mthumb
+  TARGET_DEFAULT_ARM_MODE := thumb
   TARGET_FLOAT_ABI ?= hard
 endif
 
 ifeq ("$(TARGET_CPU)", "m0")
   TARGET_GLOBAL_CFLAGS += -mcpu=cortex-m0
-  TARGET_GLOBAL_LDFLAGS += -mcpu=cortex-m0
+  TARGET_GLOBAL_LDFLAGS += -mcpu=cortex-m0 -mthumb
+  TARGET_DEFAULT_ARM_MODE := thumb
   TARGET_FLOAT_ABI ?= soft
 endif
