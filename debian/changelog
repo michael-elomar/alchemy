@@ -1,3 +1,32 @@
+parrot-tools-alchemy (1.3.0) unstable; urgency=low
+  * Add bluez prebuilt for linux native.
+  * Add autoconf files of LOCAL_DEPENDS_HEADERS
+  * Rework setup.
+  * Update kconfig build.
+  * Update host os/arch detection in confwrapper.
+  * Reorganize module setup/register/rules
+  * Rework clang detection/selection
+  * Try to handle unknown TARGET_OS in native mode.
+  * Update makefinal.py to be better cross platform
+  * [windows] Put .dll in bin dir and .a in lib dir.
+  * Rewrite rule generation.
+  * Rework sdk generation.
+  * Force recompilation when compilation flags are changed.
+  * Avoid depending on /bin/bash if not required.
+  * Update kcongig with linux 4.6 rc2
+  * Add support for ext2/3/4 sparse images
+  * Various fixes for extfs images.
+  * Remove support for alchemy build-id section.
+  * Add LOCAL_EXPORT_CUSTOM_VARIABLES variable
+  * Update code style checkers.
+  * Support address, memory and thread sanitizer options.
+  * Add support for host binary/library compilation.
+  * Use python3 for scripts.
+  * Add kconfig binaries for arm and aarch64.
+  * ... and many more DEV and DEBUG...
+
+ -- Yves-Marie Morgan (Parrot) <yves-marie.morgan@parrot.com>  Fri, 22 Jul 2016 14:30:17 +0200
+
 parrot-tools-alchemy (1.2.5) unstable; urgency=low
   * Pass android toolchain version to qmake
   * eclipseproject generate project files in top source dir
