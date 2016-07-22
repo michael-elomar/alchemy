@@ -178,6 +178,8 @@ conflict with other build systems (android for example).
   </br>Default is `$(TARGET_CROSS)gcc`.
 * `TARGET_CXX` : full path to C++ compiler.
   </br>Default is `$(TARGET_CROSS)g++`.
+* `TARGET_FC` : full path to Fortran compiler.
+  </br>Default is `$(TARGET_CROSS)gfortran`.
 * `TARGET_AR` : full path to archive maker.
   </br>Default is `$(TARGET_CROSS)ar`.
 * `TARGET_LD` : full path to linker.
@@ -355,6 +357,8 @@ Mainly used by the android wrapper.
 * `TARGET_INCLUDE_TZDATA` : include time zone data from libc.
   </br>Default is `0`.
 * `TARGET_INCLUDE_GCONV` : include gconv libraries from libc.
+  </br>Default is `0`.
+* `TARGET_INCLUDE_GFORTRAN` : include Fortran libraries from toolchain.
   </br>Default is `0`.
 * `TARGET_USE_CXX_EXCEPTIONS` : enable c++ exceptions.
   </br>Default is `1`.

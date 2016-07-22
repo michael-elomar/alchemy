@@ -203,6 +203,8 @@ For example : <code>/opt/arm-eglibc/bin/arm-none-linux-gnueabi-</code>.
 </br>Default is <code>$(TARGET_CROSS)gcc</code>.</li>
 <li><code>TARGET_CXX</code> : full path to C++ compiler.
 </br>Default is <code>$(TARGET_CROSS)g++</code>.</li>
+<li><code>TARGET_FC</code> : full path to Fortran compiler.
+</br>Default is <code>$(TARGET_CROSS)gfortran</code>.</li>
 <li><code>TARGET_AR</code> : full path to archive maker.
 </br>Default is <code>$(TARGET_CROSS)ar</code>.</li>
 <li><code>TARGET_LD</code> : full path to linker.
@@ -405,6 +407,8 @@ final release packages.
 <li><code>TARGET_INCLUDE_TZDATA</code> : include time zone data from libc.
 </br>Default is <code>0</code>.</li>
 <li><code>TARGET_INCLUDE_GCONV</code> : include gconv libraries from libc.
+</br>Default is <code>0</code>.</li>
+<li><code>TARGET_INCLUDE_GFORTRAN</code> : include Fortran libraries from toolchain.
 </br>Default is <code>0</code>.</li>
 <li><code>TARGET_USE_CXX_EXCEPTIONS</code> : enable c++ exceptions.
 </br>Default is <code>1</code>.</li>

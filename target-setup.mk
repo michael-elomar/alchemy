@@ -247,6 +247,9 @@ TARGET_INCLUDE_TZDATA ?= 0
 # Include Gconv or not on the target
 TARGET_INCLUDE_GCONV ?= 0
 
+# Include libgfortran or not on the target
+TARGET_INCLUDE_GFORTRAN ?= 0
+
 # Enable c++ exceptions
 TARGET_USE_CXX_EXCEPTIONS ?= 1
 

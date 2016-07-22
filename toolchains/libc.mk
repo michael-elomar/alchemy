@@ -154,6 +154,12 @@ ifneq ("$(TARGET_INCLUDE_GCONV)","0")
   endif
 endif
 
+# Fortran libraries
+_libc_gfortran :=
+ifneq ("$(TARGET_INCLUDE_GFORTRAN)","0")
+  _libc_gfortran := $(wildcard $(_libc_support_dir)/libgfortran*.so*)
+endif
+
 # ldd
 _libc_ldd := $(wildcard $(_libc_sysroot)/usr/bin/ldd)
 
@@ -185,6 +191,9 @@ $(_libc_installed_file): $(BUILD_SYSTEM)/toolchains/libc.mk
 	$(if $(_libc_gconv), \
 		@mkdir -p $(TARGET_OUT_STAGING)/usr/lib/gconv$(endl) \
 		$(Q) cp -Raf $(_libc_gconv)/* $(TARGET_OUT_STAGING)/usr/lib/gconv$(endl) \
+	)
+	$(if $(_libc_gfortran), \
+		$(call _libc_copy_files,$(_libc_gfortran),lib) \
 	)
 	$(if $(_libc_ldd), \
 		@mkdir -p $(TARGET_OUT_STAGING)/usr/bin$(endl) \
