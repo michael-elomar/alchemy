@@ -79,7 +79,7 @@ $(Q) $(CCACHE) $(PRIVATE_CXX) \
 	$(filter-out -std=%,$($1_GLOBAL_CFLAGS_$(PRIVATE_ARCH)_$(PRIVATE_CC_FLAVOUR))) \
 	$(PRIVATE_PCH_INCLUDE) \
 	$(filter-out -std=%,$(PRIVATE_CFLAGS)) $(PRIVATE_CXXFLAGS) \
-	-MMD -MP -MF $(call path-from-top,$(2:.o=.d)) -MT $(call path-from-top,$2) \
+	-MD -MP -MF $(call path-from-top,$(2:.o=.d)) -MT $(call path-from-top,$2) \
 	-o $(call path-from-top,$2) \
 	-c $(call path-from-top,$3)
 $(call fix-deps-file,$(2:.o=.d))
@@ -109,7 +109,7 @@ $(Q) $(CCACHE) $(PRIVATE_CC) \
 	$($1_GLOBAL_CFLAGS_$(PRIVATE_ARCH)) \
 	$($1_GLOBAL_CFLAGS_$(PRIVATE_ARCH)_$(PRIVATE_CC_FLAVOUR)) \
 	$(PRIVATE_CFLAGS) \
-	-MMD -MP -MF $(call path-from-top,$(2:.o=.d)) -MT $(call path-from-top,$2) \
+	-MD -MP -MF $(call path-from-top,$(2:.o=.d)) -MT $(call path-from-top,$2) \
 	-o $(call path-from-top,$2) \
 	-c $(call path-from-top,$3)
 $(call fix-deps-file,$(2:.o=.d))
@@ -138,7 +138,7 @@ $(Q) $(CCACHE) $(PRIVATE_CC) \
 	$($1_GLOBAL_CFLAGS_$(PRIVATE_ARCH)_$(PRIVATE_CC_FLAVOUR)) \
 	$($1_GLOBAL_OBJCFLAGS) \
 	$(PRIVATE_CFLAGS) $(PRIVATE_OBJCFLAGS) \
-	-MMD -MP -MF $(call path-from-top,$(2:.o=.d)) -MT $(call path-from-top,$2) \
+	-MD -MP -MF $(call path-from-top,$(2:.o=.d)) -MT $(call path-from-top,$2) \
 	-o $(call path-from-top,$2) \
 	-c $(call path-from-top,$3)
 $(call fix-deps-file,$(2:.o=.d))
@@ -169,7 +169,7 @@ $(Q) $(CCACHE) $(PRIVATE_CC) \
 	$($1_GLOBAL_CFLAGS_$(PRIVATE_ARCH)_$(PRIVATE_CC_FLAVOUR)) \
 	$(PRIVATE_ASFLAGS) \
 	$(PRIVATE_CFLAGS) \
-	-MMD -MP -MF $(call path-from-top,$(2:.o=.d)) -MT $(call path-from-top,$2) \
+	-MD -MP -MF $(call path-from-top,$(2:.o=.d)) -MT $(call path-from-top,$2) \
 	-o $(call path-from-top,$2) \
 	-c $(call path-from-top,$3)
 $(call fix-deps-file,$(2:.o=.d))
@@ -238,7 +238,7 @@ $(Q) $(CCACHE) $(PRIVATE_CXX) \
 	$($1_GLOBAL_CFLAGS_$(PRIVATE_ARCH)) \
 	$($1_GLOBAL_CFLAGS_$(PRIVATE_ARCH)_$(PRIVATE_CC_FLAVOUR)) \
 	$(PRIVATE_CFLAGS) $(PRIVATE_CXXFLAGS) \
-	-MMD -MP -MF $(call path-from-top,$(2:.gch=.d)) -MT $(call path-from-top,$2) \
+	-MD -MP -MF $(call path-from-top,$(2:.gch=.d)) -MT $(call path-from-top,$2) \
 	-o $(call path-from-top,$2) \
 	$($1_GLOBAL_PCH_FLAGS) $(call path-from-top,$3)
 $(call fix-deps-file,$(2:.gch=.d))

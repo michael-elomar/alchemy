@@ -201,7 +201,7 @@ $(2): $(1)
 	$$(call print-banner1,"Host C",msgbuilder,$$(call path-from-top,$$<))
 	@mkdir -p $$(dir $$@)
 	$(Q)$(HOST_CC) $(MSGBUILDER_CKCM_CFLAGS) \
-		-c -MMD -MP -o $$@ $$(call path-from-top,$$<)
+		-c -MD -MP -o $$@ $$(call path-from-top,$$<)
 MSGBUILDER_OBJ += $(2)
 -include $(2:.o=.d)
 endef
