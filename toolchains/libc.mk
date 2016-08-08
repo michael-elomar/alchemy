@@ -48,12 +48,13 @@ _libc_lib_names := \
 	libresolv \
 	librt \
 	libthread_db \
-	libutil \
+	libutil
 
 # List of files to be put in /usr/lib or </usr/lib>
 _libc_usrlib_names := \
 	libstdc++ \
-	libgcc_s
+	libgcc_s \
+	libc
 
 # 'lib' directory
 _libc_lib_dir := $(_libc_sysroot)/lib
@@ -129,6 +130,11 @@ ifeq ("$(findstring libstdc++,$(_libc_usrlib_files) $(_libc_usrlib_arch_files))"
   _libc_support_dir := $(wildcard $(dir $(shell $(_libc_support_dir_cmd))))
   _libc_lib_files += $(wildcard $(_libc_support_dir)/libgcc_s*.so*)
   _libc_usrlib_files += $(wildcard $(_libc_support_dir)/libstdc++*.so*)
+endif
+
+# Musl libc is all in one.
+ifeq ("$(TARGET_LIBC)","musl")
+  LOCAL_CREATE_LINKS := $(TARGET_LOADER):/usr/lib/libc.so
 endif
 
 # Remove gdb python file

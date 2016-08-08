@@ -47,6 +47,8 @@ ifeq ("$(TARGET_OS)","linux")
     __need_sysroot := 1
   else ifeq ("$(TARGET_LIBC)","eglibc")
     __need_sysroot := 1
+  else ifeq ("$(TARGET_LIBC)","musl")
+    __need_sysroot := 1
   else
     __need_sysroot := 0
   endif
