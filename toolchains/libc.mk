@@ -53,8 +53,11 @@ _libc_lib_names := \
 # List of files to be put in /usr/lib or </usr/lib>
 _libc_usrlib_names := \
 	libstdc++ \
-	libgcc_s \
-	libc
+	libgcc_s
+
+ifeq ("$(TARGET_LIBC)","musl")
+  _libc_usrlib_names += libc
+endif
 
 # 'lib' directory
 _libc_lib_dir := $(_libc_sysroot)/lib
