@@ -133,7 +133,6 @@ endif
 ifeq ("$(TARGET_CPU)","armv7a")
   TARGET_GLOBAL_CFLAGS += -march=armv7-a -mfpu=vfpv3-d16
   TARGET_GLOBAL_LDFLAGS += -march=armv7-a -Wl,--fix-cortex-a8
-  TARGET_GLOBAL_LDFLAGS_SHARED += -march=armv7-a -Wl,--fix-cortex-a8
   TARGET_FLOAT_ABI ?= soft
 endif
 
@@ -141,7 +140,6 @@ endif
 ifeq ("$(TARGET_CPU)","armv7a-neon")
   TARGET_GLOBAL_CFLAGS += $(cflags_armv7a_neon)
   TARGET_GLOBAL_LDFLAGS += -march=armv7-a -Wl,--fix-cortex-a8
-  TARGET_GLOBAL_LDFLAGS_SHARED += -march=armv7-a -Wl,--fix-cortex-a8
   TARGET_CPU_ARMV7A_NEON := 1
   TARGET_CPU_HAS_NEON := 1
   TARGET_FLOAT_ABI ?= softfp

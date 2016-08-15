@@ -385,22 +385,18 @@ ifeq ("$(and $(call is-module-external,$(LOCAL_MODULE)),$(call strneq,$(LOCAL_MO
 ifeq ("$(USE_COVERAGE)","1")
   LOCAL_CFLAGS  += -fprofile-arcs -ftest-coverage -O0 -D__COVERAGE__
   LOCAL_LDFLAGS += -fprofile-arcs -ftest-coverage
-  LOCAL_LDFLAGS_SHARED += -fprofile-arcs -ftest-coverage
 endif
 ifeq ("$(USE_ADDRESS_SANITIZER)","1")
   LOCAL_CFLAGS += -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls -O1 -D__ADDRESSSANITIZER__
   LOCAL_LDFLAGS += -fsanitize=address
-  LOCAL_LDFLAGS_SHARED += -fsanitize=address
 endif
 ifeq ("$(USE_MEMORY_SANITIZER)","1")
   LOCAL_CFLAGS += -fsanitize=memory -fno-omit-frame-pointer -fno-optimize-sibling-calls -O1 -D__MEMORYSANITIZER__
   LOCAL_LDFLAGS += -fsanitize=memory
-  LOCAL_LDFLAGS_SHARED += -fsanitize=memory
 endif
 ifeq ("$(USE_THREAD_SANITIZER)","1")
   LOCAL_CFLAGS += -fsanitize=thread -O1 -D__THREADSANITIZER__
   LOCAL_LDFLAGS += -fsanitize=thread
-  LOCAL_LDFLAGS_SHARED += -fsanitize=memory
 endif
 endif
 

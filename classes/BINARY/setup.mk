@@ -289,7 +289,7 @@ define _internal-transform-o-to-shared-lib-darwin
 $(call print-banner2,"$(PRIVATE_MODE_MSG)SharedLib",$(PRIVATE_MODULE),$(call path-from-top,$2))
 $(call check-pwd-is-top-dir)
 $(Q) $(PRIVATE_CXX) \
-	$($1_GLOBAL_LDFLAGS_SHARED) \
+	$($1_GLOBAL_LDFLAGS) \
 	$($1_GLOBAL_LDFLAGS_$(PRIVATE_CC_FLAVOUR)) \
 	$(if $(call streq,$(USE_LINK_MAP_FILE),1), \
 		-Wl$(comma)-map$(comma)$(basename $(call path-from-top,$2)).map \
@@ -308,7 +308,7 @@ $(Q) $(PRIVATE_CXX) \
 	$(PRIVATE_ALL_SHARED_LIBRARIES) \
 	-o $(call path-from-top,$2) \
 	$(PRIVATE_LDLIBS) \
-	$($1_GLOBAL_LDLIBS_SHARED)
+	$($1_GLOBAL_LDLIBS)
 endef
 
 define _internal-transform-o-to-shared-lib
@@ -316,7 +316,7 @@ define _internal-transform-o-to-shared-lib
 $(call print-banner2,"$(PRIVATE_MODE_MSG)SharedLib",$(PRIVATE_MODULE),$(call path-from-top,$2))
 $(call check-pwd-is-top-dir)
 $(Q) $(PRIVATE_CXX) \
-	$($1_GLOBAL_LDFLAGS_SHARED) \
+	$($1_GLOBAL_LDFLAGS) \
 	$($1_GLOBAL_LDFLAGS_$(PRIVATE_CC_FLAVOUR)) \
 	$(if $(call streq,$(USE_LINK_MAP_FILE),1), \
 		-Wl$(comma)-Map$(comma)$(basename $(call path-from-top,$2)).map \
@@ -339,7 +339,7 @@ $(Q) $(PRIVATE_CXX) \
 	$(PRIVATE_ALL_SHARED_LIBRARIES) \
 	-o $(call path-from-top,$2) \
 	$(PRIVATE_LDLIBS) \
-	$($1_GLOBAL_LDLIBS_SHARED)
+	$($1_GLOBAL_LDLIBS)
 endef
 
 transform-o-to-shared-lib = $(if $(call streq,$($(PRIVATE_MODE)_OS),darwin), \

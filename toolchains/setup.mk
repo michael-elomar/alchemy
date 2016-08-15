@@ -32,8 +32,6 @@ TARGET_GLOBAL_CFLAGS_clang += --sysroot=$(__clang_toolchain_sysroot) \
 	-target $(TARGET_TOOLCHAIN_TRIPLET) -B $(__clang_toolchain_root)
 TARGET_GLOBAL_LDFLAGS_clang += --sysroot=$(__clang_toolchain_sysroot) \
 	-target $(TARGET_TOOLCHAIN_TRIPLET) -B $(__clang_toolchain_root)
-TARGET_GLOBAL_LDFLAGS_SHARED_clang += --sysroot=$(__clang_toolchain_sysroot) \
-	-target $(TARGET_TOOLCHAIN_TRIPLET) -B $(__clang_toolchain_root)
 endif
 endif
 
@@ -120,7 +118,6 @@ __extra-host-ldflags += $(strip \
 endif
 
 HOST_GLOBAL_LDFLAGS += $(__extra-host-ldflags)
-HOST_GLOBAL_LDFLAGS_SHARED += $(__extra-host-ldflags)
 
 ###############################################################################
 ## Update target include/lib directories.
@@ -164,7 +161,6 @@ __extra-target-ldflags += $(strip \
 endif
 
 TARGET_GLOBAL_LDFLAGS += $(__extra-target-ldflags)
-TARGET_GLOBAL_LDFLAGS_SHARED += $(__extra-target-ldflags)
 
 ###############################################################################
 ## ccache setup.

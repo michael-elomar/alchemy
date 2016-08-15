@@ -140,7 +140,7 @@ define _internal-qmake-gen-deps-darwin
 		echo "LIBS += $(PRIVATE_ALL_STATIC_LIBRARIES)"; \
 		echo "LIBS += $(PRIVATE_ALL_SHARED_LIBRARIES)"; \
 		echo "LIBS += $(PRIVATE_LDLIBS)"; \
-		echo "LIBS += $(TARGET_GLOBAL_LDLIBS_SHARED)"; \
+		echo "LIBS += $(TARGET_GLOBAL_LDLIBS)"; \
 		echo "CONFIG += $(APPLE_SDK)"; \
 		echo "macx:QMAKE_LFLAGS_SONAME = -Wl,-install_name,$(TARGET_OUT_STAGING)/$(TARGET_DEFAULT_LIB_DESTDIR)/"; \
 		echo "QMAKE_IOS_DEVICE_ARCHS = $(filter-out -arch,$(APPLE_ARCH))"; \
@@ -172,7 +172,7 @@ define _internal-qmake-gen-deps
 		echo "LIBS += $(PRIVATE_ALL_STATIC_LIBRARIES)"; \
 		echo "LIBS += $(PRIVATE_ALL_SHARED_LIBRARIES)"; \
 		echo "LIBS += $(PRIVATE_LDLIBS)"; \
-		echo "LIBS += $(TARGET_GLOBAL_LDLIBS_SHARED)"; \
+		echo "LIBS += $(TARGET_GLOBAL_LDLIBS)"; \
 		echo "ANDROID_EXTRA_LIBS = $(shell find $(TARGET_OUT_STAGING)/$(TARGET_DEFAULT_LIB_DESTDIR) -maxdepth 1 -name 'lib*.so' -type f)"; \
 	) >> $(PRIVATE_ALCHEMY_PRI_FILE).tmp
 	$(call update-file-if-needed,$(PRIVATE_ALCHEMY_PRI_FILE),$(PRIVATE_ALCHEMY_PRI_FILE).tmp)

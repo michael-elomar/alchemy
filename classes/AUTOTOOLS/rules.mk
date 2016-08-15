@@ -29,7 +29,6 @@ endif
 
 ifneq ("$(strip $(_external_add_LDFLAGS))","")
   LOCAL_AUTOTOOLS_CONFIGURE_ENV += LDFLAGS="$$LDFLAGS $(_external_add_LDFLAGS)"
-  LOCAL_AUTOTOOLS_CONFIGURE_ENV += DYN_LDFLAGS="$$DYN_LDFLAGS $(_external_add_LDFLAGS)"
 endif
 
 ifneq ("$(USE_AUTOTOOLS_CACHE)","0")
