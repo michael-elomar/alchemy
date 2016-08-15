@@ -147,6 +147,18 @@ remove-trailing-slash = $(strip $(patsubst %/,%,$1))
 # $1 : input string
 remove-slash = $(strip $(patsubst /%,%,$(patsubst %/,%,$1)))
 
+# Escape characters for xml (escape '&' first, so in the innermost call at the end)
+# $1 : string to escape
+# Note: do NOT split the line to avoid inserting spaces in the resulting string
+escape-xml = $(subst ",&quot;,$(subst ',&apos;,$(subst >,&gt;,$(subst <,&lt;,$(subst &,&amp;,$1)))))
+
+# Escape characters so it goes though the 'echo' correctly
+# $1 : string to escape
+# Note: do NOT split the line to avoid inserting spaces in the resulting string
+# Note: for some strange reasons, a '\' shall be written as '\\\\' to be correctly
+# interpreted. Mainly seen if a '\1' has to be written.
+escape-echo = $(subst ",\",$(subst $(dollar),\$(dollar),$(subst $(endl),\n,$(subst \,\\\\,$1))))
+
 ###############################################################################
 ## Call a function(macro) for each variable in a variable list.
 ## A variable list is a list of ';' separated <var>=<value> pairs.
@@ -1590,14 +1602,13 @@ link-hook = $(strip \
 ###############################################################################
 
 define add-depends-section
-$(eval __depsdata := $(empty))
-$(foreach __lib,$(PRIVATE_MODULE) $(__modules.$(PRIVATE_MODULE).depends.all), \
-	$(eval __depsdata += $(__lib):$(call module-get-revision,$(__lib))) \
-)
-$(eval __depsdata := $(subst $(space),\n,$(strip $(__depsdata))))
+$(eval __depsdata := $(strip \
+	$(foreach __lib,$(sort $(PRIVATE_MODULE) $(__modules.$(PRIVATE_MODULE).depends.all)), \
+		$(__lib):$(call module-get-revision,$(__lib)) \
+	)))
 @( \
 	__tmpfile=$$(mktemp tmp.XXXXXXXXXX); \
-	/bin/echo -e "$(__depsdata)" > $${__tmpfile}; \
+	echo -e "$(call escape-echo,$(subst $(space),$(endl),$(__depsdata)))" > $${__tmpfile}; \
 	$(PRIVATE_OBJCOPY) --add-section \
 		$(TARGET_DEPENDS_SECTION_NAME)=$${__tmpfile} $@; \
 	rm -f $${__tmpfile}; \
