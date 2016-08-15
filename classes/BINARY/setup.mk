@@ -182,6 +182,8 @@ transform-S-to-o = $(call _binary-cmd-s-to-o-internal,$(PRIVATE_MODE),$@,$<)
 ## Command to compile a cu file (cuda).
 ## Note: Only available for target
 ## NVCC dependencies generation have to be done in separate phase than compilation.
+## The sed command is to simulate the -MP option of gcc, it will create an empty
+## target for any dependencies.
 ###############################################################################
 
 # $1 : mode (HOST / TARGET)
@@ -191,28 +193,38 @@ define _binary-cmd-cu-to-o-internal
 @mkdir -p $(dir $2)
 $(call _binary-print-banner1,Cuda,$3)
 $(call check-pwd-is-top-dir)
-$(if $(TARGET_NVCC), \
+@if [ -z "$(TARGET_NVCC)" ]; then \
+	echo "TARGET_NVCC is not defined"; exit 1; \
+fi
+
 $(Q) $(TARGET_NVCC) \
 	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
 	$(call normalize-system-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(TARGET_GLOBAL_NVCFLAGS) \
 	$(PRIVATE_NVCFLAGS) \
 	-ccbin $(TARGET_CC) \
-	-M -MT $(call path-from-top,$2) \
-	-o $(call path-from-top,$(2:.o=.d)) \
-	$(call path-from-top,$3); \
-$(TARGET_NVCC) \
+	-o $(call path-from-top,$2) \
+	-c $(call path-from-top,$3)
+
+@$(TARGET_NVCC) \
 	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
 	$(call normalize-system-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(TARGET_GLOBAL_NVCFLAGS) \
 	$(PRIVATE_NVCFLAGS) \
 	-ccbin $(TARGET_CC) \
-	-o $(call path-from-top,$2) \
-	-c $(call path-from-top,$3) \
-, \
-@echo "TARGET_NVCC is not defined"; exit 1 \
-)
+	-M -MT $(call path-from-top,$2) \
+	-o $(call path-from-top,$(2:.o=.d.tmp)) \
+	$(call path-from-top,$3)
+@cp -af $(call path-from-top,$(2:.o=.d.tmp)) $(call path-from-top,$(2:.o=.d))
+@sed -e 's/^[^:]*: *//' \
+	-e 's/\\$$//' \
+	-e 's/^ *//' \
+	-e 's/$$/:/' \
+	< $(call path-from-top,$(2:.o=.d.tmp)) \
+	>> $(call path-from-top,$(2:.o=.d))
+@rm -f $(call path-from-top,$(2:.o=.d.tmp))
 $(call fix-deps-file,$(2:.o=.d))
+
 endef
 
 transform-cu-to-o = $(call _binary-cmd-cu-to-o-internal,$(PRIVATE_MODE),$@,$<)
