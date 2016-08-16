@@ -47,10 +47,11 @@ _libc_lib_names := \
 	libpthread \
 	libresolv \
 	librt \
+	libSegFault \
 	libthread_db \
 	libutil
 
-# List of files to be put in /usr/lib or </usr/lib>
+# List of files to be put in /usr/lib or /usr/lib/<arch>
 _libc_usrlib_names := \
 	libstdc++ \
 	libgcc_s
