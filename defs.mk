@@ -1151,7 +1151,7 @@ define generate-autoconf-file
 endef
 
 ###############################################################################
-## Search files matching an extension under LOCAL_PATH.
+## Search files matching an extension under LOCAL_PATH, recursively.
 ###############################################################################
 
 # $1 : directory relative to LOCAL_PATH to search
@@ -1159,7 +1159,7 @@ endef
 all-files-under = $(strip \
 	$(patsubst ./%,%, \
 		$(shell cd $(LOCAL_PATH); \
-			find $1  -type f -name "*$2" -and -not -name ".*") \
+			find $1 -type f -name "*$2" -and -not -name ".*") \
 	))
 
 # $1 : directory relative to LOCAL_PATH to search
@@ -1176,8 +1176,8 @@ all-cc-files-under = $(call all-files-under,$1,.cc)
 # $2 : extension to search (.c, .cpp ...)
 all-files-in = $(strip \
 	$(patsubst ./%,%, \
-	$(shell cd $(LOCAL_PATH); \
-		ls $1/*$2) \
+		$(shell cd $(LOCAL_PATH); \
+			find $1 -maxdepth 1 -type f -name "*$2" -and -not -name ".*") \
 	))
 
 # $1 : directory relative to LOCAL_PATH to search
