@@ -21,13 +21,15 @@ MAKEFINAL_ARGS :=
 
 # Stripping kernel modules requires --strip-debug option and its
 # specific strip program
-ifneq ("$(TARGET_STRIP)","")
 ifeq ("$(TARGET_NOSTRIP_FINAL)","0")
-  MAKEFINAL_ARGS += --strip="$(TARGET_STRIP)"
-  ifneq ("$(TARGET_LINUX_CROSS)","")
-    MAKEFINAL_ARGS += --strip-kernel="$(TARGET_LINUX_CROSS)strip --strip-debug"
+  ifneq ("$(TARGET_STRIP)","")
+    MAKEFINAL_ARGS += --strip="$(TARGET_STRIP)"
   endif
-endif
+  ifeq ("$(TARGET_OS)","linux")
+    ifneq ("$(TARGET_LINUX_CROSS)","")
+      MAKEFINAL_ARGS += --strip-kernel="$(TARGET_LINUX_CROSS)strip --strip-debug"
+    endif
+  endif
 endif
 
 ifneq ("$(TARGET_SKEL_DIRS)","")

@@ -216,8 +216,7 @@ _target_pkg_config_dirs := \
 	lib/$(TARGET_TOOLCHAIN_TRIPLET)/pkgconfig \
 	lib/pkgconfig \
 	$(TARGET_DEFAULT_LIB_DESTDIR)/$(TARGET_TOOLCHAIN_TRIPLET)/pkgconfig \
-	$(TARGET_DEFAULT_LIB_DESTDIR)/pkgconfig \
-	$(TARGET_DEFAULT_SHARE_DESTDIR)/pkgconfig
+	$(TARGET_DEFAULT_LIB_DESTDIR)/pkgconfig
 
 _target_pkg_config_path :=
 $(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
