@@ -134,7 +134,10 @@ define _internal-qmake-gen-deps-darwin
 		echo "INCLUDEPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
 		echo "DEPENDPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
 		echo "QMAKE_CFLAGS += $(TARGET_QMAKE_CFLAGS) $(PRIVATE_CFLAGS)"; \
-		echo "QMAKE_CXXFLAGS += $(filter-out -std=%,$(TARGET_QMAKE_CFLAGS)) $(TARGET_GLOBAL_CXXFLAGS) $(filter-out -std=%,$(PRIVATE_CFLAGS)) $(PRIVATE_CXXFLAGS)"; \
+		echo "QMAKE_CXXFLAGS += $(filter-out -std=%,$(TARGET_QMAKE_CFLAGS))"; \
+		echo "QMAKE_CXXFLAGS += $(TARGET_GLOBAL_CXXFLAGS)"; \
+		echo "QMAKE_CXXFLAGS += $(filter-out -std=%,$(PRIVATE_CFLAGS))"; \
+		echo "QMAKE_CXXFLAGS += $(PRIVATE_CXXFLAGS)"; \
 		echo "LIBS += $(subst $(APPLE_ARCH),,$(TARGET_QMAKE_LDFLAGS) $(PRIVATE_LDFLAGS))"; \
 		echo "LIBS += $(foreach __lib, $(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES), -force_load $(__lib))"; \
 		echo "LIBS += $(PRIVATE_ALL_STATIC_LIBRARIES)"; \
@@ -166,7 +169,10 @@ define _internal-qmake-gen-deps
 		echo "INCLUDEPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
 		echo "DEPENDPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
 		echo "QMAKE_CFLAGS += $(TARGET_QMAKE_CFLAGS) $(PRIVATE_CFLAGS)"; \
-		echo "QMAKE_CXXFLAGS += $(filter-out -std=%,$(TARGET_QMAKE_CFLAGS)) $(TARGET_GLOBAL_CXXFLAGS) $(filter-out -std=%,$(PRIVATE_CFLAGS)) $(PRIVATE_CXXFLAGS)"; \
+		echo "QMAKE_CXXFLAGS += $(filter-out -std=%,$(TARGET_QMAKE_CFLAGS))"; \
+		echo "QMAKE_CXXFLAGS += $(TARGET_GLOBAL_CXXFLAGS)"; \
+		echo "QMAKE_CXXFLAGS += $(filter-out -std=%,$(PRIVATE_CFLAGS))"; \
+		echo "QMAKE_CXXFLAGS += $(PRIVATE_CXXFLAGS)"; \
 		echo "LIBS += $(TARGET_QMAKE_LDFLAGS) $(PRIVATE_LDFLAGS)"; \
 		echo "LIBS += -Wl,--whole-archive $(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES) -Wl,--no-whole-archive"; \
 		echo "LIBS += $(PRIVATE_ALL_STATIC_LIBRARIES)"; \
