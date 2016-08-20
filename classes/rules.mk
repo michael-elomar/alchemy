@@ -406,8 +406,6 @@ endif
 ## Moreover CXXFLAGS does not inherit from CFLAGS so it must contains it.
 ###############################################################################
 
-# FIXME: handle HOST variants for TARGET_STATIC_LIB_SUFFIX/TARGET_SHARED_LIB_SUFFIX
-
 # Compilation flags
 _external_add_ASFLAGS := $(LOCAL_ASFLAGS)
 _external_add_CFLAGS := $(LOCAL_CFLAGS) $(call normalize-c-includes,$(LOCAL_C_INCLUDES))
@@ -423,10 +421,12 @@ _external_add_LDFLAGS :=
 ifneq ("$(strip $(all_whole_static_libs_filename))","")
 _external_add_LDFLAGS += -Wl,--whole-archive
 $(foreach __lib,$(all_whole_static_libs_filename), \
-	$(if $(filter lib%$(TARGET_STATIC_LIB_SUFFIX),$(notdir $(__lib))), \
-		$(eval _external_add_LDFLAGS := $(_external_add_LDFLAGS),-l$(patsubst lib%$(TARGET_STATIC_LIB_SUFFIX),%,$(notdir $(__lib)))) \
+	$(if $(filter lib%$($(_mode_prefix)_STATIC_LIB_SUFFIX),$(notdir $(__lib))), \
+		$(eval _external_add_LDFLAGS := \
+			$(_external_add_LDFLAGS),-l$(patsubst lib%$($(_mode_prefix)_STATIC_LIB_SUFFIX),%,$(notdir $(__lib)))) \
 		, \
-		$(eval _external_add_LDFLAGS := $(_external_add_LDFLAGS),-l:$(notdir $(__lib))) \
+		$(eval _external_add_LDFLAGS := \
+			$(_external_add_LDFLAGS),-l:$(notdir $(__lib))) \
 	) \
 )
 _external_add_LDFLAGS := $(_external_add_LDFLAGS),--no-whole-archive
@@ -437,10 +437,12 @@ endif
 # No comma separated list (like above or below !)
 ifneq ("$(strip $(all_static_libs_filename))","")
 $(foreach __lib,$(all_static_libs_filename), \
-	$(if $(filter lib%$(TARGET_STATIC_LIB_SUFFIX), $(notdir $(__lib))), \
-		$(eval _external_add_LDFLAGS := $(_external_add_LDFLAGS) -l$(patsubst lib%$(TARGET_STATIC_LIB_SUFFIX),%,$(notdir $(__lib)))) \
+	$(if $(filter lib%$($(_mode_prefix)_STATIC_LIB_SUFFIX), $(notdir $(__lib))), \
+		$(eval _external_add_LDFLAGS := \
+			$(_external_add_LDFLAGS) -l$(patsubst lib%$($(_mode_prefix)_STATIC_LIB_SUFFIX),%,$(notdir $(__lib)))) \
 		, \
-		$(eval _external_add_LDFLAGS := $(_external_add_LDFLAGS) -l:$(notdir $(__lib))) \
+		$(eval _external_add_LDFLAGS := \
+			$(_external_add_LDFLAGS) -l:$(notdir $(__lib))) \
 	) \
 )
 endif
@@ -452,10 +454,12 @@ endif
 ifneq ("$(strip $(all_shared_libs_filename))","")
 _external_add_LDFLAGS += -Wl
 $(foreach __lib,$(all_shared_libs_filename), \
-	$(if $(filter lib%$(TARGET_SHARED_LIB_SUFFIX), $(notdir $(__lib))), \
-		$(eval _external_add_LDFLAGS := $(_external_add_LDFLAGS),-l$(patsubst lib%$(TARGET_SHARED_LIB_SUFFIX),%,$(notdir $(__lib)))) \
+	$(if $(filter lib%$($(_mode_prefix)_SHARED_LIB_SUFFIX), $(notdir $(__lib))), \
+		$(eval _external_add_LDFLAGS := \
+			$(_external_add_LDFLAGS),-l$(patsubst lib%$($(_mode_prefix)_SHARED_LIB_SUFFIX),%,$(notdir $(__lib)))) \
 		, \
-		$(eval _external_add_LDFLAGS := $(_external_add_LDFLAGS),-l:$(notdir $(__lib))) \
+		$(eval _external_add_LDFLAGS := \
+			$(_external_add_LDFLAGS),-l:$(notdir $(__lib))) \
 	) \
 )
 endif
