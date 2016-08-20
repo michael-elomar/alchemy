@@ -26,7 +26,6 @@ _binary-global-objects-flags = \
 	CFLAGS \
 	CFLAGS_$(PRIVATE_CC_FLAVOUR) \
 	CFLAGS_$(PRIVATE_ARCH) \
-	CFLAGS_$(PRIVATE_ARCH)_$(PRIVATE_CC_FLAVOUR) \
 	CXXFLAGS \
 	CXXFLAGS_$(PRIVATE_CC_FLAVOUR) \
 	OBJCFLAGS \
@@ -76,7 +75,6 @@ $(Q) $(CCACHE) $(PRIVATE_CXX) \
 	$(filter-out -std=%,$($1_GLOBAL_CFLAGS_$(PRIVATE_CC_FLAVOUR))) \
 	$(WARNINGS_CXXFLAGS_$(PRIVATE_CC_FLAVOUR)) \
 	$(filter-out -std=%,$($1_GLOBAL_CFLAGS_$(PRIVATE_ARCH))) \
-	$(filter-out -std=%,$($1_GLOBAL_CFLAGS_$(PRIVATE_ARCH)_$(PRIVATE_CC_FLAVOUR))) \
 	$(PRIVATE_PCH_INCLUDE) \
 	$(filter-out -std=%,$(PRIVATE_CFLAGS)) $(PRIVATE_CXXFLAGS) \
 	-MD -MP -MF $(call path-from-top,$(2:.o=.d)) -MT $(call path-from-top,$2) \
@@ -107,7 +105,6 @@ $(Q) $(CCACHE) $(PRIVATE_CC) \
 	$($1_GLOBAL_CFLAGS_$(PRIVATE_CC_FLAVOUR)) \
 	$(WARNINGS_CFLAGS_$(PRIVATE_CC_FLAVOUR)) \
 	$($1_GLOBAL_CFLAGS_$(PRIVATE_ARCH)) \
-	$($1_GLOBAL_CFLAGS_$(PRIVATE_ARCH)_$(PRIVATE_CC_FLAVOUR)) \
 	$(PRIVATE_CFLAGS) \
 	-MD -MP -MF $(call path-from-top,$(2:.o=.d)) -MT $(call path-from-top,$2) \
 	-o $(call path-from-top,$2) \
@@ -135,7 +132,6 @@ $(Q) $(CCACHE) $(PRIVATE_CC) \
 	$($1_GLOBAL_CFLAGS_$(PRIVATE_CC_FLAVOUR)) \
 	$(WARNINGS_CFLAGS_$(PRIVATE_CC_FLAVOUR)) \
 	$($1_GLOBAL_CFLAGS_$(PRIVATE_ARCH)) \
-	$($1_GLOBAL_CFLAGS_$(PRIVATE_ARCH)_$(PRIVATE_CC_FLAVOUR)) \
 	$($1_GLOBAL_OBJCFLAGS) \
 	$(PRIVATE_CFLAGS) $(PRIVATE_OBJCFLAGS) \
 	-MD -MP -MF $(call path-from-top,$(2:.o=.d)) -MT $(call path-from-top,$2) \
@@ -166,7 +162,6 @@ $(Q) $(CCACHE) $(PRIVATE_CC) \
 	$($1_GLOBAL_CFLAGS_$(PRIVATE_CC_FLAVOUR)) \
 	$(WARNINGS_CFLAGS_$(PRIVATE_CC_FLAVOUR)) \
 	$($1_GLOBAL_CFLAGS_$(PRIVATE_ARCH)) \
-	$($1_GLOBAL_CFLAGS_$(PRIVATE_ARCH)_$(PRIVATE_CC_FLAVOUR)) \
 	$(PRIVATE_ASFLAGS) \
 	$(PRIVATE_CFLAGS) \
 	-MD -MP -MF $(call path-from-top,$(2:.o=.d)) -MT $(call path-from-top,$2) \
@@ -248,7 +243,6 @@ $(Q) $(CCACHE) $(PRIVATE_CXX) \
 	$($1_GLOBAL_CFLAGS_$(PRIVATE_CC_FLAVOUR)) \
 	$(WARNINGS_CXXFLAGS_$(PRIVATE_CC_FLAVOUR)) \
 	$($1_GLOBAL_CFLAGS_$(PRIVATE_ARCH)) \
-	$($1_GLOBAL_CFLAGS_$(PRIVATE_ARCH)_$(PRIVATE_CC_FLAVOUR)) \
 	$(PRIVATE_CFLAGS) $(PRIVATE_CXXFLAGS) \
 	-MD -MP -MF $(call path-from-top,$(2:.gch=.d)) -MT $(call path-from-top,$2) \
 	-o $(call path-from-top,$2) \

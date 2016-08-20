@@ -105,13 +105,9 @@ TARGET_GLOBAL_VALAFLAGS += \
 -include $(BUILD_SYSTEM)/toolchains/flags-$(TARGET_ARCH).mk
 -include $(BUILD_SYSTEM)/toolchains/$(TARGET_OS)/flags.mk
 
+# Just to avoid using undefined variable for arch other than arm
 HOST_GLOBAL_CFLAGS_$(HOST_ARCH) ?=
-HOST_GLOBAL_CFLAGS_$(HOST_ARCH)_gcc ?=
-HOST_GLOBAL_CFLAGS_$(HOST_ARCH)_clang ?=
-
 TARGET_GLOBAL_CFLAGS_$(TARGET_ARCH) ?=
-TARGET_GLOBAL_CFLAGS_$(TARGET_ARCH)_gcc ?=
-TARGET_GLOBAL_CFLAGS_$(TARGET_ARCH)_clang ?=
 
 TARGET_CPU_ARMV7A_NEON ?= 0
 TARGET_CPU_HAS_NEON ?= 0

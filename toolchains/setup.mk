@@ -54,7 +54,6 @@ ifeq ("$(TARGET_OS)","linux")
     __toolchain-sysroot-flags := $(TARGET_GLOBAL_CFLAGS) $(TARGET_GLOBAL_CFLAGS_gcc)
     ifeq ("$(TARGET_ARCH)","arm")
       __toolchain-sysroot-flags += $(TARGET_GLOBAL_CFLAGS_$(TARGET_DEFAULT_ARM_MODE))
-      __toolchain-sysroot-flags += $(TARGET_GLOBAL_CFLAGS_$(TARGET_DEFAULT_ARM_MODE)_gcc)
     endif
     TARGET_TOOLCHAIN_SYSROOT := $(shell $(TARGET_CROSS)gcc $(__toolchain-sysroot-flags) -print-sysroot)
     ifneq ("$(wildcard $(TARGET_TOOLCHAIN_SYSROOT))","")
