@@ -49,7 +49,9 @@ define _autotools-hook-pre-configure
 	$(if $(call strneq,$(PRIVATE_SRC_DIR),$(PRIVATE_PATH)), \
 		$(Q) find $(PRIVATE_SRC_DIR) -name Makefile.am -exec touch {} \;$(endl) \
 		$(Q) find $(PRIVATE_SRC_DIR) -name configure.ac -exec touch {} \;$(endl) \
+		$(Q) find $(PRIVATE_SRC_DIR) -name configure.in -exec touch {} \;$(endl) \
 		$(Q) find $(PRIVATE_SRC_DIR) -name aclocal.m4 -exec touch {} \;$(endl) \
+		$(Q) find $(PRIVATE_SRC_DIR) -name config.h.in -exec touch {} \;$(endl) \
 		$(Q) find $(PRIVATE_SRC_DIR) -name Makefile.in -exec touch {} \;$(endl) \
 		$(Q) find $(PRIVATE_SRC_DIR) -name configure -exec touch {} \;$(endl) \
 	)
