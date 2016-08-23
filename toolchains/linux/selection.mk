@@ -19,9 +19,9 @@ ifeq ("$(TARGET_OS_FLAVOUR)-$(TARGET_ARCH)","native-$(HOST_ARCH)")
 else ifeq ("$(subst -chroot,,$(TARGET_OS_FLAVOUR))","native")
   # Native with foreign architecture or native chroot
   ifeq ("$(TARGET_ARCH)","x64")
-    GNU_TARGET_NAME := x86_64-pc-linux-gnu
+    GNU_TARGET_NAME := x86_64-none-linux-gnu
   else ifeq ("$(TARGET_ARCH)","x86")
-    GNU_TARGET_NAME := i686-pc-linux-gnu
+    GNU_TARGET_NAME := i686-none-linux-gnu
   endif
 else
   # Not a native flavour
