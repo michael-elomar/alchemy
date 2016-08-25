@@ -81,8 +81,9 @@ ifeq ("$(TARGET_CC_PATH)","")
   $(error Unable to find compiler: $(TARGET_CC))
 endif
 
-# Determine compiler version
+# Determine compilers version
 TARGET_CC_VERSION := $(shell $(TARGET_CC) -dumpversion)
+HOST_CC_VERSION := $(shell $(HOST_CC) -dumpversion)
 
 # TODO: remove when not used anymore
 TARGET_COMPILER_PATH := $(shell PARAM="$(TARGET_CC)";echo $${PARAM%/bin*})
