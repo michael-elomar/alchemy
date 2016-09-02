@@ -202,7 +202,7 @@ def copySdk(ctx, srcDir, dstDir):
 #===============================================================================
 def copyHeaders(ctx, srcDir, dstDir):
     logging.debug("Copy headers: '%s' -> '%s'", srcDir, dstDir)
-    include = ["*.h", "*.hpp", "*.hh", "*.hxx", "*.doxygen", "*.inl"]
+    include = ["*.h", "*.hpp", "*.hh", "*.hxx", "*.doxygen", "*.inl", "*.ipp"]
     copyTree(ctx, srcDir, dstDir, includeExt=include)
 
 #===============================================================================
