@@ -61,34 +61,15 @@ else
     TARGET_CXX ?= clang++
   endif
   TARGET_AS ?= $(TARGET_CROSS)as
+  TARGET_AR ?= $(TARGET_CROSS)ar
   TARGET_LD ?= $(TARGET_CROSS)ld
+  TARGET_NM ?= $(TARGET_CROSS)nm
   TARGET_STRIP ?= $(TARGET_CROSS)strip
   TARGET_CPP ?= $(TARGET_CROSS)cpp
+  TARGET_RANLIB ?= $(TARGET_CROSS)ranlib
   TARGET_OBJCOPY ?= $(TARGET_CROSS)objcopy
   TARGET_OBJDUMP ?= $(TARGET_CROSS)objdump
   TARGET_FC ?= $(TARGET_CROSS)gfortran
-
-#
-# GCC 4.9 and above use a wrapper around ar/nm/ranlib
-#  to handle linker plugins
-#  ref: https://gcc.gnu.org/gcc-4.9/changes.html
-# TODO: do it also for HOST ?
-#
-  ifneq ("$(wildcard $(TARGET_CROSS)gcc-ar)","")
-    TARGET_AR ?= $(TARGET_CROSS)gcc-ar
-  else
-    TARGET_AR ?= $(TARGET_CROSS)ar
-  endif
-  ifneq ("$(wildcard $(TARGET_CROSS)gcc-nm)","")
-    TARGET_NM ?= $(TARGET_CROSS)gcc-nm
-  else
-    TARGET_NM ?= $(TARGET_CROSS)nm
-  endif
-  ifneq ("$(wildcard $(TARGET_CROSS)gcc-ranlib)","")
-    TARGET_RANLIB ?= $(TARGET_CROSS)gcc-ranlib
-  else
-    TARGET_RANLIB ?= $(TARGET_CROSS)ranlib
-  endif
 endif
 
 # Nvidia cuda compiler
