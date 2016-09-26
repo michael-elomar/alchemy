@@ -425,16 +425,15 @@ __modules-get-required-host-direct = $(strip $(sort \
 ## not actually in it).
 ## If no global configuration file present, always return true (unless if was
 ## forcibly disabled).
-## FIXME: do NOT require module to be registered (in some cases it can be called
-## before the module is registered)
+## If module is not registered (yet) still look at CONFIG_ALCHEMY_BUILD_ var.
 ###############################################################################
 is-module-in-build-config = $(strip \
+	$(eval __var := CONFIG_ALCHEMY_BUILD_$(call module-get-define,$1)) \
 	$(if $(call is-module-registered,$1), \
 		$(if $(call is-module-prebuilt,$1), \
 			$(true) \
 			, \
 			$(if $(call streq,$(GLOBAL_CONFIG_FILE_AVAILABLE),1), \
-				$(eval __var := CONFIG_ALCHEMY_BUILD_$(call module-get-define,$1)) \
 				$(if $(call is-var-defined,$(__var)), \
 					$(if $($(__var)),$(true),$(false)) \
 					, \
@@ -443,6 +442,12 @@ is-module-in-build-config = $(strip \
 				, \
 				$(call not,$(call is-var-defined,__modules.$(__mod).force-disabled)) \
 			) \
+		) \
+		, \
+		$(if $(call is-var-defined,$(__var)), \
+			$(if $($(__var)),$(true),$(false)) \
+			, \
+			$(false) \
 		) \
 	))
 
