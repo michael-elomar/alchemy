@@ -351,6 +351,16 @@ def processModule(ctx, module, headersOnly=False):
             ctx.atom.write(" \\\n\t%s" % lib)
         ctx.atom.write("\n")
 
+    # Custom variables
+    if "EXPORT_CUSTOM_VARIABLES" in module.fields:
+        modulePath = module.fields["PATH"]
+        custom = module.fields["EXPORT_CUSTOM_VARIABLES"]
+        # replace value of LOCAL_PATH by string "LOCAL_PATH"
+        custom = custom.replace(modulePath, "$(LOCAL_PATH)")
+        ctx.atom.write("LOCAL_EXPORT_CUSTOM_VARIABLES :=")
+        ctx.atom.write(" \\\n\t%s" % custom)
+        ctx.atom.write("\n")
+
     # Include directories
     if "EXPORT_C_INCLUDES" in module.fields:
         ctx.atom.write("LOCAL_EXPORT_C_INCLUDES :=")
