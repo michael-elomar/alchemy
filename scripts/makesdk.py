@@ -184,6 +184,7 @@ def copyStaging(ctx, srcDir, dstDir):
         "host",
         "android",
         "toolchain",
+        "opt",
     ]
     exclude = ["*.la"]
     for dirName in dirs_to_keep:
