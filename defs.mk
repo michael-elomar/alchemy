@@ -946,9 +946,15 @@ module-get-stamp-file = $(call module-get-build-dir,$1)/$1.$2.stamp
 # It handle host/target modules
 module-get-build-filename = $(strip \
 	$(if $(call is-module-host,$1), \
-		$(HOST_OUT_BUILD)/$(call module-normalize-host,$1)/$(__modules.$1.MODULE_FILENAME) \
+		$(if $(__modules.$1.SDK), \
+			$(HOST_OUT_BUILD)/$(call module-normalize-host,$1)/$(__modules.$1.MODULE).done, \
+			$(HOST_OUT_BUILD)/$(call module-normalize-host,$1)/$(__modules.$1.MODULE_FILENAME) \
+		) \
 		, \
-		$(TARGET_OUT_BUILD)/$1/$(__modules.$1.MODULE_FILENAME) \
+		$(if $(__modules.$1.SDK), \
+			$(TARGET_OUT_BUILD)/$1/$(__modules.$1.MODULE).done, \
+			$(TARGET_OUT_BUILD)/$1/$(__modules.$1.MODULE_FILENAME) \
+		) \
 	))
 
 # Get staging file name of a module.
