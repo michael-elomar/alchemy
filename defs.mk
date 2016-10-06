@@ -1006,50 +1006,96 @@ module-get-debug-flags = $(strip \
 
 ifneq ("$(USE_GIT_REV)","0")
 
-# Cache of already compute revisions
-__git-rev-cache := $(empty)
+# Cache of already computed revisions
+__git-rev-cache.sha1 := $(empty)
+__git-rev-cache.desc := $(empty)
+__git-rev-cache.url := $(empty)
 
-# Compute revision of a directory and update cache with the top level directory
-# ofthe gir repo containing the given directory.
-# Do not add in cache if top level has a .gitmodules
+# Compute the top level directory and sha1 of a directory
 # $1 : path inside of a git repo
-__git-rev-compute = \
+__git-rev-compute-top-level-sha1 = \
 	$(eval __data := $(shell cd $1 && git rev-parse --show-toplevel HEAD 2>/dev/null)) \
 	$(eval __top-level := $(word 1,$(__data))) \
-	$(eval __sha1 := $(word 2,$(__data))) \
-	$(eval __url := $(shell cd $1 && git ls-remote --get-url $$(git remote 2>/dev/null | head -n1) 2>/dev/null)) \
+	$(eval __sha1 := $(word 2,$(__data)))
+
+# Compute revision of a directory
+# Update cache with the top level directory (unless it has a .gitmodules)
+# $1 : path inside of a git repo
+__git-rev-compute-sha1 = \
+	$(__git-rev-compute-top-level-sha1) \
 	$(if $(__top-level), \
-		$(eval __desc := $(shell cd $(__top-level) && git describe --tags --always 2>/dev/null)) \
 		$(if $(wildcard $(__top-level)/.gitmodules),$(empty), \
-			$(eval __git-rev-cache.$(__top-level).sha1 := $(__sha1)) \
-			$(eval __git-rev-cache.$(__top-level).desc := $(__desc)) \
-			$(eval __git-rev-cache.$(__top-level).url := $(__url)) \
-			$(eval __git-rev-cache += $(__top-level)) \
+			$(eval __git-rev-cache.sha1.$(__top-level) := $(__sha1)) \
+			$(eval __git-rev-cache.sha1 += $(__top-level)) \
 		) \
 		, \
 		$(eval __sha1 := $(empty)) \
+	)
+
+# Similar to __git-rev-compute-sha1 but do also a 'git describe'
+# Update cache with the top level directory (unless it has a .gitmodules)
+# $1 : path inside of a git repo
+__git-rev-compute-desc = \
+	$(__git-rev-compute-top-level-sha1) \
+	$(if $(__top-level), \
+		$(eval __desc := $(shell cd $(__top-level) && git describe --tags --always 2>/dev/null)) \
+		$(if $(wildcard $(__top-level)/.gitmodules),$(empty), \
+			$(eval __git-rev-cache.desc.$(__top-level) := $(__desc)) \
+			$(eval __git-rev-cache.desc += $(__top-level)) \
+		) \
+		, \
 		$(eval __desc := $(empty)) \
+	)
+
+# Compute url of a directory
+# Update cache with the top level directory (unless it has a .gitmodules)
+# $1 : path inside of a git repo
+__git-rev-compute-url = \
+	$(__git-rev-compute-top-level-sha1) \
+	$(if $(__top-level), \
+		$(eval __url := $(shell cd $1 && git ls-remote --get-url $$(git remote 2>/dev/null | head -n1) 2>/dev/null)) \
+		$(if $(wildcard $(__top-level)/.gitmodules),$(empty), \
+			$(eval __git-rev-cache.url.$(__top-level) := $(__url)) \
+			$(eval __git-rev-cache.url += $(__top-level)) \
+		) \
+		, \
 		$(eval __url := $(empty)) \
 	)
 
-# Search in cache if directory has already on of its parent in the cache
-# If yes, retreive __sha1 and __desc.
-# If no, update the cache and retreive __sha1 and __desc.
+# Search in cache if directory has already one of its parent in the cache
+# If yes, retrieve information (sha1, desc, url).
+# If no, update the cache and retreive them
 # $1 : path inside a git repo
-__git-rev-get = \
+# $2 : info to retrieve (sha1, desc, url).
+__git-rev-compute = \
 	$(eval __found := $(false)) \
-	$(foreach __top-level,$(__git-rev-cache), \
+	$(foreach __top-level,$(__git-rev-cache.$2), \
 		$(if $(__found),$(empty), \
 			$(if $(or $(call streq,$(__top-level),$1), \
 					$(call not,$(patsubst $(__top-level)/%,,$1/))), \
-				$(eval __sha1 := $(__git-rev-cache.$(__top-level).sha1)) \
-				$(eval __desc := $(__git-rev-cache.$(__top-level).desc)) \
-				$(eval __url := $(__git-rev-cache.$(__top-level).url)) \
+				$(eval __$2 := $(__git-rev-cache.$2.$(__top-level))) \
 				$(eval __found := $(true)) \
 			) \
 		) \
 	) \
-	$(if $(__found),$(empty),$(call __git-rev-compute,$1))
+	$(if $(__found),$(empty),$(call __git-rev-compute-$2,$1))
+
+# Compute revision information about a single module
+# $1 : module name
+# $2 : info to retrieve (sha1, desc, url).
+# $3 : variable to update in module database (REVISION, REVISION_DESCRIBE, REVISION_URL)
+_module-rev-compute = \
+	$(if $(__modules.$1.$3),$(empty), \
+		$(eval __path := $(__modules.$1.PATH)) \
+		$(call __git-rev-compute,$(__path),$2) \
+		$(if $(__$2),$(empty),$(eval __$2 := unknown)) \
+		$(eval __modules.$1.$3 := $(__$2)) \
+	)
+
+# $1 : module name
+# $2 : info to retrieve (sha1, desc, url).
+# $3 : variable name in module database (REVISION, REVISION_DESCRIBE, REVISION_URL)
+_module-rev-get = $(strip $(call _module-rev-compute,$1,$2,$3)$(__modules.$1.$3))
 
 # Compute revision of all modules
 module-compute-revisions = \
@@ -1060,29 +1106,21 @@ module-compute-revisions = \
 # Compute revision of a single module
 # $1: module name
 module-compute-revision = \
-	$(if $(__modules.$1.REVISION),$(empty), \
-		$(eval __path := $(__modules.$1.PATH)) \
-		$(call __git-rev-get,$(__path)) \
-		$(if $(__sha1),$(empty),$(eval __sha1 := unknown)) \
-		$(if $(__desc),$(empty),$(eval __desc := unknown)) \
-		$(if $(__url),$(empty),$(eval __url := unknown)) \
-		$(eval __modules.$1.REVISION := $(__sha1)) \
-		$(eval __modules.$1.REVISION_DESCRIBE := $(__desc)) \
-		$(eval __modules.$1.REVISION_URL := $(__url)) \
-		$(if $(call strneq,$(V),0),$(info Revision of $1: $(__sha1) / $(__desc))) \
-	) \
+	$(call _module-rev-compute,$1,sha1,REVISION) \
+	$(call _module-rev-compute,$1,desc,REVISION_DESCRIBE) \
+	$(call _module-rev-compute,$1,url,REVISION_URL)
 
 # Get revision of one module
 # $1 : module name.
-module-get-revision = $(strip $(module-compute-revision)$(__modules.$1.REVISION))
+module-get-revision = $(call _module-rev-get,$1,sha1,REVISION)
 
 # Get revision (with git describe) of one module
 # $1 : module name.
-module-get-revision-describe = $(strip $(module-compute-revision)$(__modules.$1.REVISION_DESCRIBE))
+module-get-revision-describe = $(call _module-rev-get,$1,desc,REVISION_DESCRIBE)
 
 # Get revision url of one module
 # $1 : module name.
-module-get-revision-url = $(strip $(module-compute-revision)$(__modules.$1.REVISION_URL))
+module-get-revision-url = $(call _module-rev-get,$1,url,REVISION_URL)
 
 # Get last revision of one module. It is found in a generated file that may
 # not exist so the result can be empty.
