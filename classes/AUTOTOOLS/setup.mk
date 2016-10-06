@@ -45,6 +45,8 @@ _autotools_target_cache_file := $(TARGET_OUT_BUILD)/autotools.cache
 # autoreconf is not triggered
 # Only do it if the source dir is not LOCAL_PATH (so either extracted from
 # archive or copied in build directory)
+# No need to do that if a custom bootstrap is done
+# Not done if a custom bootstrap command is specified
 define _autotools-hook-pre-configure
 	$(if $(call strneq,$(PRIVATE_SRC_DIR),$(PRIVATE_PATH)), \
 		$(Q) find $(PRIVATE_SRC_DIR) -name Makefile.am -exec touch {} \;$(endl) \
