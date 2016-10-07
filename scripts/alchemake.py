@@ -210,9 +210,11 @@ def main():
 
     # Only redirect stderr (redirecting stdout causes issues if a child process
     # wants to use the terminal, like ncurses)
-    # Force locale to have english messages that we will try to detect
+    # Force error messages of sub processes to English, keeping encoding to UTF-8
+    # LANG=C.UTF8 does NOT work as expected (messages are still in original locale)
     env = os.environ
-    env['LANG'] = 'C.UTF-8'
+    env["LC_MESSAGES"] = "C"
+    env["LC_TIME"] = "C"
     cmdline = makeProg
     for arg in sys.argv[1:]:
         cmdline += " " + arg
