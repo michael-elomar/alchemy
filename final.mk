@@ -76,6 +76,11 @@ MAKEFINAL_ARGS += \
 MAKEFINAL_ARGS += \
 	--mode=$(TARGET_FINAL_MODE)
 
+# Construct contents of ld.so.preload
+_ld_so_preload_contents := $(strip $(foreach __mod,$(ALL_BUILD_MODULES), \
+	$(__modules.$(__mod).LDPRELOAD) \
+))
+
 ###############################################################################
 ## Internal generation of final tree.
 ##
@@ -112,6 +117,17 @@ ifeq ("$(is-full-system)","1")
 		) >> $(TARGET_OUT_FINAL)/$(TARGET_DEFAULT_ETC_DESTDIR)/ld.so.conf; \
 	fi
 	$(Q) $(LDCONFIG) -X -r $(TARGET_OUT_FINAL)
+ifneq ("$(_ld_so_preload_contents)","")
+	@( \
+		preload="$(TARGET_OUT_FINAL)/$(TARGET_DEFAULT_ETC_DESTDIR)/ld.so.preload"; \
+		touch $${preload}; \
+		for entry in $(_ld_so_preload_contents); do \
+			if ! grep -q "$${entry}" $${preload}; then \
+				echo "$${entry}" >> $${preload}; \
+			fi \
+		done \
+	)
+endif
 endif
 endif
 ifeq ("$(is-full-system)","1")

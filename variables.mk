@@ -252,6 +252,13 @@ vars-LOCAL += INSTALL_HEADERS
 # Linker script
 vars-LOCAL += LDSCRIPT
 
+# Linux specific
+# Name of .so to add in /etc/ld.so.preload
+# Multiple names can be put (separated by space or colon)
+# Can be file names or full path (on the target)
+# NOTE: It only makes sense for full system build
+vars-LOCAL += LDPRELOAD
+
 # Name of the doxyfile used for documentation generation
 # If none specified, LOCAL_PATH will be added to DOXYGEN_INPUT
 vars-LOCAL += DOXYFILE
