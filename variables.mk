@@ -297,6 +297,9 @@ vars-LOCAL += SDK
 vars-LOCAL += USE_CLANG
 vars-LOCAL += CLANG_PATH
 
+# To explicitly add dependencies (for example with cmake)
+vars-LOCAL += EXTRA_DEPENDENCIES
+
 ###############################################################################
 # Old variables still suported but no more in vars-LOCAL or macros-LOCAL
 ###############################################################################
