@@ -86,7 +86,7 @@ class Job:
         self.process = subprocess.Popen(cmdline,
                 stdin=stdin, stdout=stdout, stderr=stderr,
                 preexec_fn=self._preExec, shell=True, env=env,
-                universal_newlines=True)
+                universal_newlines=True, close_fds=False)
         # Get information (don't call os.getpgid() because of a race condition
         # with the child)
         self.pid = self.process.pid
