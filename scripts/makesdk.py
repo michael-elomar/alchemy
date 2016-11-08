@@ -499,20 +499,18 @@ def checkTargetVar(ctx, name):
 
 #===============================================================================
 #===============================================================================
-def writeTargetSetupVars(ctx, name):
-    val = ctx.moduledb.targetSetupVars.get(name, "")
-    if val:
-        # Replace directory path referencing previous sdk or staging directory
-        for dirPath in ctx.sdkDirs:
-            val = val.replace(dirPath, "$(LOCAL_PATH)")
-        val = val.replace(ctx.stagingDir, "$(LOCAL_PATH)")
-        ctx.setup.write("TARGET_%s :=" % name)
-        for field in val.split():
-            if field.startswith("-"):
-                ctx.setup.write(" \\\n\t%s" % field)
-            else:
-                ctx.setup.write(" %s" % field)
-        ctx.setup.write("\n\n")
+def writeTargetSetupVars(ctx, name, val):
+    # Replace directory path referencing previous sdk or staging directory
+    for dirPath in ctx.sdkDirs:
+        val = val.replace(dirPath, "$(LOCAL_PATH)")
+    val = val.replace(ctx.stagingDir, "$(LOCAL_PATH)")
+    ctx.setup.write("TARGET_%s :=" % name)
+    for field in val.split():
+        if field.startswith("-"):
+            ctx.setup.write(" \\\n\t%s" % field)
+        else:
+            ctx.setup.write(" %s" % field)
+    ctx.setup.write("\n\n")
 
 #===============================================================================
 # Main function.
@@ -559,7 +557,17 @@ def main():
 
     # Save initial TARGET_SETUP_XXX variables as TARGET_XXX
     for var in ctx.moduledb.targetSetupVars.keys():
-        writeTargetSetupVars(ctx, var)
+        val = ctx.moduledb.targetSetupVars.get(var, "")
+        if val:
+            writeTargetSetupVars(ctx, var, val)
+
+    # Add special linux variables
+    if "linux" in ctx.moduledb and ctx.moduledb["linux"].build:
+        val = ctx.moduledb.targetVars.get("LINUX_CROSS", "")
+        if val:
+            writeTargetSetupVars(ctx, "LINUX_CROSS", val)
+        ctx.setup.write("LINUX_DIR := $(LOCAL_PATH)/usr/src/linux-sdk\n\n")
+        ctx.setup.write("LINUX_BUILD_DIR := $(LOCAL_PATH)/usr/src/linux-sdk\n\n")
 
     # Process modules
     for module in ctx.moduledb:

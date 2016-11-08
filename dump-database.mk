@@ -91,7 +91,7 @@ __dump-database-xml = \
 	$(call __write-xml,<alchemy>) \
 	$(call __write-xml,<target>) \
 	$(call __dump-database-var-xml,ALCHEMY_WORKSPACE_DIR,$(ALCHEMY_WORKSPACE_DIR)) \
-	$(foreach __var,$(vars-TARGET), \
+	$(foreach __var,$(vars-TARGET) LINUX_CROSS, \
 		$(call __dump-database-var-xml,$(__var),$(strip $(TARGET_$(__var)))) \
 	) \
 	$(call __write-xml,</target>) \
