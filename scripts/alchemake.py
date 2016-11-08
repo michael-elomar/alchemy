@@ -189,7 +189,7 @@ def main():
     # If not on a terminal, do NOT use job control, simply execute make...
     if not os.isatty(0):
         logging.warning("Not using job control")
-        process = subprocess.Popen([makeProg] + sys.argv[1:], shell=False)
+        process = subprocess.Popen([makeProg] + sys.argv[1:], shell=False, close_fds=False)
         process.wait()
         sys.exit(process.returncode)
         return
