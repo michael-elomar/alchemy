@@ -463,10 +463,10 @@ def processModuleAndroid(ctx, module):
             libPath = libPath[:-3] + ".a"
             processModuleAndroidInternal(ctx, module, module.name + "-static", libPath, "STATIC")
     elif "EXPORT_LDLIBS" in module.fields:
-        # Only register single libs
+        # register all exported libs
         libNames = module.fields["EXPORT_LDLIBS"].split()
-        if len(libNames) == 1 and libNames[0].startswith("-l"):
-            libName = "lib" + libNames[0][2:]
+        for libName in ("lib" + libName[2:] for libName in libNames if libName.startswith("-l")):
+            moduleName = module.name + "-" + libName if len(libNames) > 1 else module.name
             libPathShared = None
             libPathStatic = None
             # Search shared/static lib path
@@ -479,14 +479,14 @@ def processModuleAndroid(ctx, module):
             # Register
             if libPathShared is not None and libPathStatic is not None:
                 # Both SHARED and STATIC
-                processModuleAndroidInternal(ctx, module, module.name, libPathShared, "SHARED")
-                processModuleAndroidInternal(ctx, module, module.name + "-static", libPathStatic, "STATIC")
+                processModuleAndroidInternal(ctx, module, moduleName, libPathShared, "SHARED")
+                processModuleAndroidInternal(ctx, module, moduleName + "-static", libPathStatic, "STATIC")
             elif libPathShared is not None:
                 # SHARED
-                processModuleAndroidInternal(ctx, module, module.name, libPathShared, "SHARED")
+                processModuleAndroidInternal(ctx, module, moduleName, libPathShared, "SHARED")
             elif libPathStatic is not None:
                 # STATIC
-                processModuleAndroidInternal(ctx, module, module.name, libPathStatic, "STATIC")
+                processModuleAndroidInternal(ctx, module, moduleName, libPathStatic, "STATIC")
 
 #===============================================================================
 #===============================================================================
