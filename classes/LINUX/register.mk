@@ -84,7 +84,7 @@ LOCAL_MODULE_FILENAME := $(LOCAL_MODULE).done
 
 LOCAL_MODULE_CLASS := LINUX
 
-LOCAL_LIBRARIES := libelf
+LOCAL_LIBRARIES := libelf libiberty
 
 # Register in the system
 $(module-add)
