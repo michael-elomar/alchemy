@@ -66,7 +66,8 @@ get-define = $(strip \
 	$(__gdtmp))
 
 # Remove quotes from string
-remove-quotes = $(strip $(subst ",,$1))
+#Start by removing '\"' if exist for not having a '\' in our string
+remove-quotes = $(strip $(subst ",,$(strip $(subst \",,$1))))
 
 # Check that the current directory is the top directory
 check-pwd-is-top-dir = \
