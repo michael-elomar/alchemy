@@ -81,6 +81,9 @@ class Project(object):
             self.includes.update(self.get_module_field(module, "EXPORT_C_INCLUDES").split())
         for dep in self.depends_all | self.depends_headers:
             self.includes.update(self.get_module_field(dep, "EXPORT_C_INCLUDES").split())
+            self.includes.update([x[2:]
+                    for x in self.get_module_field(dep, "EXPORT_CFLAGS").split()
+                    if x.startswith("-I")])
 
         # Compute list of autoconf files
         self.autoconf_h_files = set()
