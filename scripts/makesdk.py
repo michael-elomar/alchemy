@@ -344,6 +344,15 @@ def processModule(ctx, module, headersOnly=False):
                 # path, normally the file is already copied
                 relPath = os.path.relpath(lib, ctx.stagingDir)
                 newLibs.append("$(LOCAL_PATH)/" + relPath)
+            elif lib.startswith(modulePath) and lib.endswith(".a"):
+                # lib is defined by its full name (abs dir + lib name)
+                relPath = os.path.relpath(lib, modulePath)
+                if relPath != ".":
+                    dstPath = os.path.join("usr", "lib", module.name, relPath)
+                else:
+                    dstPath = os.path.join("usr", "lib", module.name)
+                ctx.addFile(lib, os.path.join(ctx.outDir, dstPath))
+                newLibs.append("$(LOCAL_PATH)/" + dstPath)
             else:
                 newLibs.append(lib)
         # Write libs in a readable way
