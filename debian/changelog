@@ -1,3 +1,29 @@
+parrot-tools-alchemy (1.3.1) unstable; urgency=low
+  * Add minimal support for Fortran compiler and libraries
+  * Set TARGET_DEFAULT_ARM_MODE to thumb on Cortex-M processors
+  * Use -MD instead of -MMD for dependencies generation.
+  * Add support for musl toolchains
+  * Do NOT put libc from usr/lib for eglibc.
+  * Remove GLOBAL_LDFLAGS_SHARED and GLOBAL_LDLIBS_SHARED
+  * Simplify GNU_TARGET_NAME selection
+  * Update usages of echo and escape function.
+  * Update nvcc cuda dependencies generation.
+  * Handle host variant for external extra flags.
+  * Update autootools pre configure hook.
+  * Better error handling when generating images
+  * Complete rewrite of eclipse/qtcreator project generation.
+  * Do not use colorized gcc output if HOST_CC does not support it
+  * Fix recompilation issues when using libs from SDk.
+  * Reduce number of git command executed.
+  * Remove some gcc specific flags for arm/thumb optimization flags
+  * Don't check if module is registered when checking if it's in build config
+  * Fix basename and dirname in native-wrapper.sh
+  * Allow alchemy to populate /etc/ld.so.preload file
+  * add genjsondb: generate compilation databases for tools based on libclang
+  * Fix build with latest version of Yocto SDK
+
+ -- Yves-Marie Morgan (Parrot) <yves-marie.morgan@parrot.com>  Wed, 21 Dec 2016 14:28:52 +0100
+
 parrot-tools-alchemy (1.3.0-2) unstable; urgency=low
 
  -- Yves-Marie Morgan (Parrot) <yves-marie.morgan@parrot.com>  Tue, 26 Jul 2016 11:37:14 +0200
