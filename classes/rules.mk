@@ -636,6 +636,12 @@ _delete-file = \
 
 _delete-files = $(foreach __f,$1,$(call _delete-file,$(__f)))
 
+# Update list of 'done' files with module file name
+# Using sort ensures there is no duplicates in the list
+ifeq ("$(patsubst %.done,1,$(LOCAL_MODULE_FILENAME))","1")
+  LOCAL_DONE_FILES := $(sort $(LOCAL_DONE_FILES) $(LOCAL_MODULE_FILENAME))
+endif
+
 # If not skipping checks of of module built externally, delete some files
 # TODO: delete custom targets ?
 ifeq ("$(skip_ext_checks)","0")
