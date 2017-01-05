@@ -168,13 +168,16 @@ $(call check-flags,LOCAL_EXPORT_CXXFLAGS,$(check-flags-debug),$(check-flags-debu
 
 # Forbid module to tweak architecture/cpu flags
 # They shall come from alchemy or product in TARGET_XXX variables
-check-flags-arch-cpu := -march=% -mcpu=% -mtune=% -mfloat-abi=%
+check-flags-arch-cpu := -march=% -mcpu=% -mtune=%
 check-flags-arch-cpu-message := please let alchemy or product determine arch/cpu flags
 
 # Unfortunately, there is one use case where a module overwrites the -mfpu=
 # due to a bug in 2012 toolchain
+# Also allow android armv7a to specify neon (can break at runtime if wrongly used)
 ifeq ("$(call str-starts-with,$(TARGET_CC_PATH),/opt/arm-2012.03)","")
-  check-flags-arch-cpu += -mfpu=%
+ifneq ("$(TARGET_OS)-$(TARGET_OS_FLAVOUR)-$(TARGET_CPU)","linux-android-armv7a")
+  check-flags-arch-cpu += -mfloat-abi=% -mfpu=%
+endif
 endif
 
 $(call check-flags,LOCAL_CFLAGS,$(check-flags-arch-cpu),$(check-flags-arch-cpu-message))
