@@ -463,7 +463,7 @@ def processModuleAndroid(ctx, module):
     elif moduleClass == "STATIC_LIBRARY":
         # STATIC
         libPath = module.fields["DESTDIR"] + "/" + module.fields["MODULE_FILENAME"]
-        processModuleAndroidInternal(ctx, module, module.name, libPath, "STATIC")
+        processModuleAndroidInternal(ctx, module, module.name + "-static", libPath, "STATIC")
     elif moduleClass == "LIBRARY":
         # Both SHARED and STATIC
         libPath = module.fields["DESTDIR"] + "/" + module.fields["MODULE_FILENAME"]
@@ -495,7 +495,7 @@ def processModuleAndroid(ctx, module):
                 processModuleAndroidInternal(ctx, module, moduleName, libPathShared, "SHARED")
             elif libPathStatic is not None:
                 # STATIC
-                processModuleAndroidInternal(ctx, module, moduleName, libPathStatic, "STATIC")
+                processModuleAndroidInternal(ctx, module, moduleName + "-static", libPathStatic, "STATIC")
 
 #===============================================================================
 #===============================================================================
