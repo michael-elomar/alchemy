@@ -241,7 +241,7 @@ def getExportedIncludes(ctx, module):
         if includeDir.startswith(modulePath):
             dstDir = None
             relPath = os.path.relpath(includeDir, modulePath)
-            entries = os.listdir(includeDir)
+            entries = [f for f in os.listdir(includeDir) if not f.startswith('.')]
             suffixesInc = ["include", "includes", "Include", "Includes"]
             suffixesSrc = ["src", "source", "sources", "Source", "Sources"]
 
