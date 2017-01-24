@@ -35,6 +35,7 @@ _libc_lib_names := \
 	libcrypt \
 	libdl \
 	libgcc_s \
+	libgomp \
 	libm \
 	libnsl \
 	libnss_compat \
