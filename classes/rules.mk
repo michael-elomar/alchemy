@@ -385,10 +385,6 @@ $(call add-debug-flags)
 
 # Code coverage & analysis flags (for internal modules only)
 ifeq ("$(and $(call is-module-external,$(LOCAL_MODULE)),$(call strneq,$(LOCAL_MODULE_CLASS),QMAKE))","")
-ifeq ("$(USE_COVERAGE)","1")
-  LOCAL_CFLAGS  += -fprofile-arcs -ftest-coverage -O0 -D__COVERAGE__
-  LOCAL_LDFLAGS += -fprofile-arcs -ftest-coverage
-endif
 ifeq ("$(USE_ADDRESS_SANITIZER)","1")
   LOCAL_CFLAGS += -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls -O1 -D__ADDRESSSANITIZER__
   LOCAL_LDFLAGS += -fsanitize=address
@@ -400,6 +396,14 @@ endif
 ifeq ("$(USE_THREAD_SANITIZER)","1")
   LOCAL_CFLAGS += -fsanitize=thread -O1 -D__THREADSANITIZER__
   LOCAL_LDFLAGS += -fsanitize=thread
+endif
+ifeq ("$(USE_UNDEFINED_SANITIZER)","1")
+  LOCAL_CFLAGS += -fsanitize=undefined -fno-omit-frame-pointer -fno-optimize-sibling-calls -O1 -D__UNDEFINEDSANITIZER__
+  LOCAL_LDFLAGS += -fsanitize=undefined
+endif
+ifeq ("$(USE_COVERAGE)","1")
+  LOCAL_CFLAGS  += -fprofile-arcs -ftest-coverage -O0 -D__COVERAGE__
+  LOCAL_LDFLAGS += -fprofile-arcs -ftest-coverage
 endif
 endif
 
