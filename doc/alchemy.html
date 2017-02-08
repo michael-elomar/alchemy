@@ -1563,6 +1563,12 @@ the error:</p>
     typedef struct _CustomTypedef CustomTypedef; /* custom typedef for consistency with other GObjects */
 </pre>
 
+<p>You can also ignore a warning for a whole file by using:</p>
+
+<pre>
+    codecheck_ignore_file[TYPE1(,TYPE2...)]
+</pre>
+
 <h2>Codecheck for C++ false positives or intentional deviations</h2>
 
 <p>You can ignore specific c++ codecheck warnings in a C++ source code file by inserting
