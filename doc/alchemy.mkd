@@ -901,6 +901,9 @@ If set to 1, all files under LOCAL_PATH will be copied to the build directory
 before the configure step. This allows modules to execute autoreconf out of the
 original source tree.
 
+`LOCAL_COPY_TO_BUILD_DIR_SKIP_FILES` can be used to list files that should not
+be copied (ath relative to `LOCAL_PATH`.
+
 #### `LOCAL_CODECHECK_xxx` `LOCAL_CODECHECK_xxx_ARGS`
 
 It is possible to customize the checker used to verify source code style.

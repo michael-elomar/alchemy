@@ -487,8 +487,9 @@ ifeq ("$(LOCAL_COPY_TO_BUILD_DIR)","1")
 # All files under LOCAL_PATH
 _module_copy_to_build_dir_src_files := $(shell find $(LOCAL_PATH) \
 	-name '.git' -prune -o \
-	-name '$(USER_MAKEFILE_NAME)' -prune \
-	-o -not -type d -print)
+	-name '$(USER_MAKEFILE_NAME)' -prune -o \
+	$(foreach __f,$(addprefix $(LOCAL_PATH)/,$(LOCAL_COPY_TO_BUILD_DIR_SKIP_FILES)),-path $(__f) -prune -o) \
+	-not -type d -print)
 
 # Where they wil be copied
 _module_copy_to_build_dir_dst_files := $(patsubst $(LOCAL_PATH)/%,$(_module_copy_to_build_dir_dst_dir)/%, \

@@ -146,6 +146,7 @@ vars-LOCAL += NO_COPY_TO_STAGING
 
 # Copy everything under LOCAL_PATH in build directory first.
 vars-LOCAL += COPY_TO_BUILD_DIR
+vars-LOCAL += COPY_TO_BUILD_DIR_SKIP_FILES
 
 # Files and directories to delete during a clean
 vars-LOCAL += CLEAN_FILES
