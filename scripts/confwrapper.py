@@ -284,6 +284,9 @@ def safeUnlink(path):
 def safeRename(old, new):
     if platform.system() == "Windows" and os.path.exists(new):
         safeUnlink(new)
+    dirPath = os.path.dirname(new)
+    if not os.path.exists(dirPath):
+        os.makedirs(dirPath)
     shutil.copy(old, new)
     safeUnlink(old)
 
