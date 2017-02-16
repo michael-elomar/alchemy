@@ -489,6 +489,11 @@ $(AUTOCONF_MERGE_FILE): $(__autoconf-list)
 ## Main rules.
 ###############################################################################
 
+# Poll variable contents after every helpers have been loaded
+.PHONY: var-%
+var-%:
+	@echo $* : $($*)
+
 .PHONY: all
 all: $(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST)
 	@echo "Done building all"

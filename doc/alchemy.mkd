@@ -1548,6 +1548,7 @@ compilation is in progress.
 You can specify some variables in the `make` command line to activate some extra
 features.
 
+* `var-<VAR>` : Prints the contents of the variable `<VAR>` interpreted by alchemy and exits.
 * `F=1` : Force re-checking external modules for modifications. By default they
   are not checked to speed-up thing. Note that if a module is explicitly given
   as a goal in `make` command, it will be re-checked.
