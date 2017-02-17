@@ -394,15 +394,15 @@ Mainly used by the android wrapper.
   disabled in some sdk use cases.
   </br>Default is `1`.
 * `USE_COVERAGE` : Enable options for coverage (and disable compiler optimisations).
-  </br>Default is `0`.
+  </br>Default is `0`. Can be set to a list of modules or 1 for all modules.
 * `USE_ADDRESS_SANITIZER` : Enable options for address sanitizer.
-  </br>Default is `0`.
+  </br>Default is `0`. Can be set to a list of modules or 1 for all modules.
 * `USE_MEMORY_SANITIZER` : Enable options for memory sanitizer.
-  </br>Default is `0`.
+  </br>Default is `0`. Set to 1 to enable.
 * `USE_THREAD_SANITIZER` : Enable options for thread sanitizer.
-  </br>Default is `0`.
+  </br>Default is `0`. Can be set to a list of modules or 1 for all modules.
 * `USE_UNDEFINED_SANITIZER` : Enable options for undefined sanitizer.
-  </br>Default is `0`.
+  </br>Default is `0`. Can be set to a list of modules or 1 for all modules.
 * `USE_AUTO_LIB_PREFIX` : Automatically add 'lib' prefix when building an library
   whose name is not specified. This is needed for dynamic libraries on some platforms.
   </br>Default is `0`.

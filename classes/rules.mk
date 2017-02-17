@@ -385,7 +385,7 @@ $(call add-debug-flags)
 
 # Code coverage & analysis flags (for internal modules only)
 ifeq ("$(and $(call is-module-external,$(LOCAL_MODULE)),$(call strneq,$(LOCAL_MODULE_CLASS),QMAKE))","")
-ifeq ("$(USE_ADDRESS_SANITIZER)","1")
+ifneq ($(filter $(LOCAL_MODULE) 1,$(USE_ADDRESS_SANITIZER)),)
   LOCAL_CFLAGS += -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls -O1 -D__ADDRESSSANITIZER__
   LOCAL_LDFLAGS += -fsanitize=address
 endif
@@ -393,15 +393,15 @@ ifeq ("$(USE_MEMORY_SANITIZER)","1")
   LOCAL_CFLAGS += -fsanitize=memory -fno-omit-frame-pointer -fno-optimize-sibling-calls -O1 -D__MEMORYSANITIZER__
   LOCAL_LDFLAGS += -fsanitize=memory
 endif
-ifeq ("$(USE_THREAD_SANITIZER)","1")
+ifneq ($(filter $(LOCAL_MODULE) 1,$(USE_THREAD_SANITIZER)),)
   LOCAL_CFLAGS += -fsanitize=thread -O1 -D__THREADSANITIZER__
   LOCAL_LDFLAGS += -fsanitize=thread
 endif
-ifeq ("$(USE_UNDEFINED_SANITIZER)","1")
+ifneq ($(filter $(LOCAL_MODULE) 1,$(USE_UNDEFINED_SANITIZER)),)
   LOCAL_CFLAGS += -fsanitize=undefined -fno-omit-frame-pointer -fno-optimize-sibling-calls -O1 -D__UNDEFINEDSANITIZER__
   LOCAL_LDFLAGS += -fsanitize=undefined
 endif
-ifeq ("$(USE_COVERAGE)","1")
+ifneq ($(filter $(LOCAL_MODULE) 1,$(USE_COVERAGE)),)
   LOCAL_CFLAGS  += -fprofile-arcs -ftest-coverage -O0 -D__COVERAGE__
   LOCAL_LDFLAGS += -fprofile-arcs -ftest-coverage
 endif
