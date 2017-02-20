@@ -31,6 +31,7 @@ _libc_arch_subdir := $(TARGET_TOOLCHAIN_TRIPLET)
 # List of files to be put in /lib or /lib/<arch>
 _libc_lib_names := \
 	ld \
+	libasan \
 	libc \
 	libcrypt \
 	libdl \
