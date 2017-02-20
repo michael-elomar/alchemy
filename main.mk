@@ -409,7 +409,7 @@ $(info Generating rules...)
 # If a module is specified in goals, only include this one and its dependencies.
 # If 'all' or 'check' is also given do not do the filter
 # For meta packages, also get config dependencies (for build/clean shortcuts)
-ifeq ("$(call is-targets-in-make-goals,all check all-clean all-dirclean)","")
+ifeq ("$(call is-targets-in-make-goals,all check all-clean all-dirclean all-doc all-codecheck)","")
 $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST), \
 	$(if $(call is-module-in-make-goals,$(__mod)), \
 		$(eval __modlist += $(__mod)) \
