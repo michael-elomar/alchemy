@@ -102,6 +102,7 @@ endif
 
 ifeq ("$(TARGET_CPU)","a9s")
   TARGET_GLOBAL_CFLAGS += $(cflags_armv7a_neon)
+  TARGET_GLOBAL_CFLAGS += -mtune=cortex-a9 -mcpu=cortex-a9
   TARGET_GLOBAL_LDFLAGS += -Wl,--fix-cortex-a8
   TARGET_CPU_ARMV7A_NEON := 1
   TARGET_CPU_HAS_NEON := 1
