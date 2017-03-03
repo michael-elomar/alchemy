@@ -102,6 +102,11 @@ LOCAL_EXPORT_LDLIBS := -llapack
 $(call local-register-prebuilt-overridable)
 
 include $(CLEAR_VARS)
+LOCAL_MODULE := libav
+LOCAL_EXPORT_LDLIBS := -lavformat -lavcodec -lavutil
+$(call local-register-prebuilt-overridable)
+
+include $(CLEAR_VARS)
 LOCAL_MODULE := glm
 $(call local-register-prebuilt-overridable)
 
