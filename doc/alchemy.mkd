@@ -262,7 +262,7 @@ Mainly used by the android wrapper.
   </br>Default is `rcs`, so you should never have to define it.
 * `TARGET_GLOBAL_LDFLAGS` : Flags to pass to the linker.
 * `TARGET_GLOBAL_LDLIBS` : Additional libraries to use when linking.
-* `TARGET_GLOBAL_PCH_FLAGS` : Flags to pass when precompiling headers.
+* `TARGET_GLOBAL_PCHFLAGS` : Flags to pass when precompiling headers.
 * `TARGET_GLOBAL_OBJCFLAGS` : Flags to pass to the Objective-C compiler.
 
 ### Specific flags for arm targets.
@@ -277,6 +277,9 @@ Mainly used by the android wrapper.
   (`arm` or `thumb`). Default is `thumb`, however modules can override this in
   their `LOCAL_ARM_MODE`. It is only possible to override `thumb` mode in `arm`
   mode, not the other way.
+* `TARGET_DEFAULT_ARM_MODE_EXTERNAL` : similar to `TARGET_DEFAULT_ARM_MODE` but
+  for external modules (autotools, cmake...). Default is `arm` for compatibility
+  with previous behaviour.
 
 ### Other variables
 
@@ -1364,7 +1367,7 @@ customized before invoking `alchemy`. For the meaning, see the corresponding
 * `HOST_GLOBAL_ARFLAGS` : `rcs`
 * `HOST_GLOBAL_LDFLAGS` : empty
 * `HOST_GLOBAL_LDLIBS` : empty
-* `HOST_GLOBAL_PCH_FLAGS` : empty
+* `HOST_GLOBAL_PCHFLAGS` : `-x c++-header`
 * `HOST_CC` : `gcc`
 * `HOST_CXX` : `g++`
 * `HOST_AS` : `as`

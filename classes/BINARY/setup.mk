@@ -19,42 +19,61 @@ _binary-print-banner1 = \
 # List of compilation flags that will be stored in a file used as dependency
 # Whenever on of those flags changed, it will retrigger compilations
 # Shall be = and not := because reference to some variables needs to be done during expansion
-
-_binary-global-objects-flags = \
-	C_INCLUDES \
-	ASFLAGS \
-	CFLAGS \
-	CFLAGS_$(PRIVATE_CC_FLAVOUR) \
-	CFLAGS_$(PRIVATE_ARCH) \
-	CXXFLAGS \
-	CXXFLAGS_$(PRIVATE_CC_FLAVOUR) \
-	OBJCFLAGS \
-	VALAFLAGS
-
-_binary-warnings-objects-flags = \
-	CFLAGS \
-	CFLAGS_$(PRIVATE_CC_FLAVOUR) \
-	CXXFLAGS \
-	CXXFLAGS_$(PRIVATE_CC_FLAVOUR)
-
-_binary-private-objects-flags = \
-	C_INCLUDES \
-	ASFLAGS \
-	CFLAGS \
-	CXXFLAGS \
-	OBJCFLAGS \
-	VALAFLAGS
+# TODO: add nvcc flags
+_binary-objects-flags = \
+	$(PRIVATE_MODE)_GLOBAL_C_INCLUDES \
+	$(PRIVATE_MODE)_GLOBAL_ASFLAGS \
+	$(PRIVATE_MODE)_GLOBAL_OBJCFLAGS \
+	$(PRIVATE_MODE)_GLOBAL_VALAFLAGS \
+	$(PRIVATE_MODE)_GLOBAL_PCHFLAGS \
+	$(PRIVATE_MODE)_GLOBAL_LDLIBS \
+	PRIVATE_GLOBAL_CFLAGS \
+	PRIVATE_GLOBAL_CXXFLAGS \
+	PRIVATE_GLOBAL_LDFLAGS \
+	PRIVATE_C_INCLUDES \
+	PRIVATE_ASFLAGS \
+	PRIVATE_CFLAGS \
+	PRIVATE_CXXFLAGS \
+	PRIVATE_OBJCFLAGS \
+	PRIVATE_VALAFLAGS \
+	PRIVATE_PCH_INCLUDE \
+	PRIVATE_LDFLAGS \
+	PRIVATE_LDLIBS \
+	PRIVATE_WARNINGS_CFLAGS \
+	PRIVATE_WARNINGS_CXXFLAGS
 
 _binary-get-objects-flags = \
-	$(foreach __v,$(_binary-global-objects-flags), \
-		GLOBAL_$(__v) := $($(PRIVATE_MODE)_GLOBAL_$(__v))$(endl) \
+	$(foreach __v,$(_binary-objects-flags), \
+		$(__v) := $(strip $($(__v)))$(endl) \
 	) \
-	$(foreach __v,$(_binary-warnings-objects-flags), \
-		WARNINGS_$(__v) := $(WARNINGS_$(__v))$(endl) \
-	) \
-	$(foreach __v,$(_binary-private-objects-flags), \
-		PRIVATE_$(__v) := $(PRIVATE_$(__v))$(endl) \
-	)
+
+###############################################################################
+## Commands to generate a precompiled file.
+###############################################################################
+
+# $1 : mode (HOST / TARGET)
+# $2 : destination
+# $3 : source
+define _internal-transform-h-to-gch
+@mkdir -p $(dir $2)
+$(call _binary-print-banner1,Precompile,$3)
+$(call check-pwd-is-top-dir)
+$(Q) $(CCACHE) $(PRIVATE_CXX) \
+	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
+	$(call normalize-system-c-includes-rel,$($1_GLOBAL_C_INCLUDES)) \
+	$(filter-out -std=%,$(PRIVATE_GLOBAL_CFLAGS)) \
+	$(PRIVATE_GLOBAL_CXXFLAGS) \
+	$(PRIVATE_WARNINGS_CXXFLAGS) \
+	$(filter-out -std=%,$(PRIVATE_CFLAGS)) \
+	$(PRIVATE_CXXFLAGS) \
+	$($1_GLOBAL_PCHFLAGS) \
+	-MD -MP -MF $(call path-from-top,$(2:.gch=.d)) -MT $(call path-from-top,$2) \
+	-o $(call path-from-top,$2) \
+	$(call path-from-top,$3)
+$(call fix-deps-file,$(2:.gch=.d))
+endef
+
+transform-h-to-gch = $(call _internal-transform-h-to-gch,$(PRIVATE_MODE),$@,$<)
 
 ###############################################################################
 ## Command to compile a C++ file.
@@ -70,13 +89,12 @@ $(call check-pwd-is-top-dir)
 $(Q) $(CCACHE) $(PRIVATE_CXX) \
 	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
 	$(call normalize-system-c-includes-rel,$($1_GLOBAL_C_INCLUDES)) \
-	$(filter-out -std=%,$($1_GLOBAL_CFLAGS)) $($1_GLOBAL_CXXFLAGS) $(WARNINGS_CXXFLAGS) \
-	$($1_GLOBAL_CXXFLAGS_$(PRIVATE_CC_FLAVOUR)) \
-	$(filter-out -std=%,$($1_GLOBAL_CFLAGS_$(PRIVATE_CC_FLAVOUR))) \
-	$(WARNINGS_CXXFLAGS_$(PRIVATE_CC_FLAVOUR)) \
-	$(filter-out -std=%,$($1_GLOBAL_CFLAGS_$(PRIVATE_ARCH))) \
+	$(filter-out -std=%,$(PRIVATE_GLOBAL_CFLAGS)) \
+	$(PRIVATE_GLOBAL_CXXFLAGS) \
+	$(PRIVATE_WARNINGS_CXXFLAGS) \
+	$(filter-out -std=%,$(PRIVATE_CFLAGS)) \
+	$(PRIVATE_CXXFLAGS) \
 	$(PRIVATE_PCH_INCLUDE) \
-	$(filter-out -std=%,$(PRIVATE_CFLAGS)) $(PRIVATE_CXXFLAGS) \
 	-MD -MP -MF $(call path-from-top,$(2:.o=.d)) -MT $(call path-from-top,$2) \
 	-o $(call path-from-top,$2) \
 	-c $(call path-from-top,$3)
@@ -101,10 +119,8 @@ $(call check-pwd-is-top-dir)
 $(Q) $(CCACHE) $(PRIVATE_CC) \
 	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
 	$(call normalize-system-c-includes-rel,$($1_GLOBAL_C_INCLUDES)) \
-	$($1_GLOBAL_CFLAGS) $(WARNINGS_CFLAGS) \
-	$($1_GLOBAL_CFLAGS_$(PRIVATE_CC_FLAVOUR)) \
-	$(WARNINGS_CFLAGS_$(PRIVATE_CC_FLAVOUR)) \
-	$($1_GLOBAL_CFLAGS_$(PRIVATE_ARCH)) \
+	$(PRIVATE_GLOBAL_CFLAGS) \
+	$(PRIVATE_WARNINGS_CFLAGS) \
 	$(PRIVATE_CFLAGS) \
 	-MD -MP -MF $(call path-from-top,$(2:.o=.d)) -MT $(call path-from-top,$2) \
 	-o $(call path-from-top,$2) \
@@ -128,12 +144,11 @@ $(call check-pwd-is-top-dir)
 $(Q) $(CCACHE) $(PRIVATE_CC) \
 	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
 	$(call normalize-system-c-includes-rel,$($1_GLOBAL_C_INCLUDES)) \
-	$($1_GLOBAL_CFLAGS) $(WARNINGS_CFLAGS) \
-	$($1_GLOBAL_CFLAGS_$(PRIVATE_CC_FLAVOUR)) \
-	$(WARNINGS_CFLAGS_$(PRIVATE_CC_FLAVOUR)) \
-	$($1_GLOBAL_CFLAGS_$(PRIVATE_ARCH)) \
+	$(filter-out -std=%,$(PRIVATE_GLOBAL_CFLAGS)) \
 	$($1_GLOBAL_OBJCFLAGS) \
-	$(PRIVATE_CFLAGS) $(PRIVATE_OBJCFLAGS) \
+	$(PRIVATE_WARNINGS_CFLAGS) \
+	$(filter-out -std=%,$(PRIVATE_CFLAGS)) \
+	$(PRIVATE_OBJCFLAGS) \
 	-MD -MP -MF $(call path-from-top,$(2:.o=.d)) -MT $(call path-from-top,$2) \
 	-o $(call path-from-top,$2) \
 	-c $(call path-from-top,$3)
@@ -158,12 +173,10 @@ $(Q) $(CCACHE) $(PRIVATE_CC) \
 	$(call normalize-system-c-includes-rel,$($1_GLOBAL_C_INCLUDES)) \
 	$($1_GLOBAL_ASFLAGS) \
 	-D __ASSEMBLY__ \
-	$($1_GLOBAL_CFLAGS) $(WARNINGS_CFLAGS) \
-	$($1_GLOBAL_CFLAGS_$(PRIVATE_CC_FLAVOUR)) \
-	$(WARNINGS_CFLAGS_$(PRIVATE_CC_FLAVOUR)) \
-	$($1_GLOBAL_CFLAGS_$(PRIVATE_ARCH)) \
+	$(filter-out -std=%,$(PRIVATE_GLOBAL_CFLAGS)) \
+	$(PRIVATE_WARNINGS_CFLAGS) \
 	$(PRIVATE_ASFLAGS) \
-	$(PRIVATE_CFLAGS) \
+	$(filter-out -std=%,$(PRIVATE_CFLAGS)) \
 	-MD -MP -MF $(call path-from-top,$(2:.o=.d)) -MT $(call path-from-top,$2) \
 	-o $(call path-from-top,$2) \
 	-c $(call path-from-top,$3)
@@ -197,7 +210,7 @@ $(Q) $(TARGET_NVCC) \
 	$(call normalize-system-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(TARGET_GLOBAL_NVCFLAGS) \
 	$(PRIVATE_NVCFLAGS) \
-	-ccbin $(TARGET_CC) \
+	-ccbin $(PRIVATE_NVCC_CC) \
 	-o $(call path-from-top,$2) \
 	-c $(call path-from-top,$3)
 
@@ -206,7 +219,7 @@ $(Q) $(TARGET_NVCC) \
 	$(call normalize-system-c-includes-rel,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(TARGET_GLOBAL_NVCFLAGS) \
 	$(PRIVATE_NVCFLAGS) \
-	-ccbin $(TARGET_CC) \
+	-ccbin $(PRIVATE_NVCC_CC) \
 	-M -MT $(call path-from-top,$2) \
 	-o $(call path-from-top,$(2:.o=.d.tmp)) \
 	$(call path-from-top,$3)
@@ -223,34 +236,6 @@ $(call fix-deps-file,$(2:.o=.d))
 endef
 
 transform-cu-to-o = $(call _binary-cmd-cu-to-o-internal,$(PRIVATE_MODE),$@,$<)
-
-###############################################################################
-## Commands to generate a precompiled file.
-###############################################################################
-
-# $1 : mode (HOST / TARGET)
-# $2 : destination
-# $3 : source
-define _internal-transform-h-to-gch
-@mkdir -p $(dir $2)
-$(call _binary-print-banner1,Precompile,$3)
-$(call check-pwd-is-top-dir)
-$(Q) $(CCACHE) $(PRIVATE_CXX) \
-	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
-	$(call normalize-system-c-includes-rel,$($1_GLOBAL_C_INCLUDES)) \
-	$($1_GLOBAL_CFLAGS) $($1_GLOBAL_CXXFLAGS) $(WARNINGS_CXXFLAGS) \
-	$($1_GLOBAL_CXXFLAGS_$(PRIVATE_CC_FLAVOUR)) \
-	$($1_GLOBAL_CFLAGS_$(PRIVATE_CC_FLAVOUR)) \
-	$(WARNINGS_CXXFLAGS_$(PRIVATE_CC_FLAVOUR)) \
-	$($1_GLOBAL_CFLAGS_$(PRIVATE_ARCH)) \
-	$(PRIVATE_CFLAGS) $(PRIVATE_CXXFLAGS) \
-	-MD -MP -MF $(call path-from-top,$(2:.gch=.d)) -MT $(call path-from-top,$2) \
-	-o $(call path-from-top,$2) \
-	$($1_GLOBAL_PCH_FLAGS) $(call path-from-top,$3)
-$(call fix-deps-file,$(2:.gch=.d))
-endef
-
-transform-h-to-gch = $(call _internal-transform-h-to-gch,$(PRIVATE_MODE),$@,$<)
 
 ###############################################################################
 ## Commands to compile vala files.
@@ -281,7 +266,11 @@ define _internal-transform-o-to-static-lib
 $(call print-banner2,"$(PRIVATE_MODE_MSG)StaticLib",$(PRIVATE_MODULE),$(call path-from-top,$2))
 $(call check-pwd-is-top-dir)
 @rm -f $2
-$(Q) $(PRIVATE_AR) $($1_GLOBAL_ARFLAGS) $(PRIVATE_ARFLAGS) $2 $(PRIVATE_ALL_OBJECTS)
+$(Q) $(PRIVATE_AR) \
+	$($1_GLOBAL_ARFLAGS) \
+	$(PRIVATE_ARFLAGS) \
+	$(call path-from-top,$2) \
+	$(PRIVATE_ALL_OBJECTS)
 endef
 
 transform-o-to-static-lib = $(call _internal-transform-o-to-static-lib,$(PRIVATE_MODE),$@)
@@ -295,8 +284,7 @@ define _internal-transform-o-to-shared-lib-darwin
 $(call print-banner2,"$(PRIVATE_MODE_MSG)SharedLib",$(PRIVATE_MODULE),$(call path-from-top,$2))
 $(call check-pwd-is-top-dir)
 $(Q) $(PRIVATE_CXX) \
-	$($1_GLOBAL_LDFLAGS) \
-	$($1_GLOBAL_LDFLAGS_$(PRIVATE_CC_FLAVOUR)) \
+	$(PRIVATE_GLOBAL_LDFLAGS) \
 	$(if $(call streq,$(USE_LINK_MAP_FILE),1), \
 		-Wl$(comma)-map$(comma)$(basename $(call path-from-top,$2)).map \
 	) \
@@ -322,8 +310,7 @@ define _internal-transform-o-to-shared-lib
 $(call print-banner2,"$(PRIVATE_MODE_MSG)SharedLib",$(PRIVATE_MODULE),$(call path-from-top,$2))
 $(call check-pwd-is-top-dir)
 $(Q) $(PRIVATE_CXX) \
-	$($1_GLOBAL_LDFLAGS) \
-	$($1_GLOBAL_LDFLAGS_$(PRIVATE_CC_FLAVOUR)) \
+	$(PRIVATE_GLOBAL_LDFLAGS) \
 	$(if $(call streq,$(USE_LINK_MAP_FILE),1), \
 		-Wl$(comma)-Map$(comma)$(basename $(call path-from-top,$2)).map \
 	) \
@@ -366,8 +353,7 @@ define _internal-transform-o-to-executable-darwin
 $(call print-banner2,"$(PRIVATE_MODE_MSG)Executable",$(PRIVATE_MODULE),$(call path-from-top,$2))
 $(call check-pwd-is-top-dir)
 $(Q) $(PRIVATE_CXX) \
-	$($1_GLOBAL_LDFLAGS) \
-	$($1_GLOBAL_LDFLAGS_$(PRIVATE_CC_FLAVOUR)) \
+	$(PRIVATE_GLOBAL_LDFLAGS) \
 	$(if $(call streq,$(USE_LINK_MAP_FILE),1), \
 		-Wl$(comma)-map$(comma)$(basename $(call path-from-top,$2)).map \
 	) \
@@ -391,8 +377,7 @@ define _internal-transform-o-to-executable
 $(call print-banner2,"$(PRIVATE_MODE_MSG)Executable",$(PRIVATE_MODULE),$(call path-from-top,$2))
 $(call check-pwd-is-top-dir)
 $(Q) $(PRIVATE_CXX) \
-	$($1_GLOBAL_LDFLAGS) \
-	$($1_GLOBAL_LDFLAGS_$(PRIVATE_CC_FLAVOUR)) \
+	$(PRIVATE_GLOBAL_LDFLAGS) \
 	$(if $(call streq,$(USE_LINK_MAP_FILE),1), \
 		-Wl$(comma)-Map$(comma)$(basename $(call path-from-top,$2)).map \
 	) \

@@ -51,6 +51,24 @@ _module_all_stamp_files := \
 	$(_module_installed_stamp_file) \
 	$(_module_done_stamp_file)
 
+# Module Architecture
+ifneq ("$(LOCAL_HOST_MODULE)","")
+  _module_arch := $(HOST_ARCH)
+else ifeq ("$(TARGET_ARCH)","arm")
+  # Can be arm or thumb
+  LOCAL_ARM_MODE := $(strip $(LOCAL_ARM_MODE))
+  ifeq ("$(LOCAL_ARM_MODE)","")
+    ifneq ("$(call is-module-external,$(LOCAL_MODULE))","")
+      LOCAL_ARM_MODE := $(TARGET_DEFAULT_ARM_MODE_EXTERNAL)
+    else
+      LOCAL_ARM_MODE := $(TARGET_DEFAULT_ARM_MODE)
+    endif
+  endif
+  _module_arch := $(LOCAL_ARM_MODE)
+else
+  _module_arch := $(TARGET_ARCH)
+endif
+
 _module_cc_flavour := $($(_mode_prefix)_CC_FLAVOUR)
 _module_cc         := $($(_mode_prefix)_CC)
 _module_cxx        := $($(_mode_prefix)_CXX)
@@ -63,6 +81,20 @@ _module_cpp        := $($(_mode_prefix)_CPP)
 _module_ranlib     := $($(_mode_prefix)_RANLIB)
 _module_objcopy    := $($(_mode_prefix)_OBJCOPY)
 _module_objdump    := $($(_mode_prefix)_OBJDUMP)
+
+# Override some values if clang should be used locally
+ifeq ("$(LOCAL_USE_CLANG)","1")
+  ifneq ("$(_module_cc_flavour)","clang")
+    $(_module_cc_flavour) := clang
+    ifneq ("$(LOCAL_CLANG_PATH)","")
+      _module_cc := $(LOCAL_CLANG_PATH)/clang
+      _module_cxx := $(LOCAL_CLANG_PATH)/clang++
+    else
+      _module_cc := clang
+      _module_cxx := clang++
+    endif
+  endif
+endif
 
 # Full path to build/staging module
 LOCAL_BUILD_MODULE := $(call module-get-build-filename,$(LOCAL_MODULE))
@@ -125,12 +157,6 @@ ifeq ("$(_mode_host)","")
 ifeq ("$(TARGET_ARCH)","arm")
 
 # Make sure LOCAL_ARM_MODE is valid
-# If not set, use default mode
-LOCAL_ARM_MODE := $(strip $(LOCAL_ARM_MODE))
-ifeq ("$(LOCAL_ARM_MODE)","")
-  LOCAL_ARM_MODE := $(TARGET_DEFAULT_ARM_MODE)
-endif
-
 ifneq ("$(LOCAL_ARM_MODE)","arm")
 ifneq ("$(LOCAL_ARM_MODE)","thumb")
   $(error $(LOCAL_PATH): LOCAL_ARM_MODE is not valid : $(LOCAL_ARM_MODE))
@@ -408,18 +434,36 @@ endif
 endif
 
 ###############################################################################
+## Prepend global flags depending on compiler arch
+###############################################################################
+
+LOCAL_CFLAGS := \
+	$($(_mode_prefix)_GLOBAL_CFLAGS_$(_module_arch)) \
+	$(LOCAL_CFLAGS)
+
+LOCAL_LDFLAGS := \
+	$($(_mode_prefix)_GLOBAL_LDFLAGS_$(_module_arch)) \
+	$(LOCAL_LDFLAGS)
+
+###############################################################################
 ## Determine flags that external modules will need to add manually.
 ## External modules (AUTOTOOLS, CMAKE) only have ASFLAGS CFLAGS CXXFLAGS and LDFLAGS.
 ## Moreover CXXFLAGS does not inherit from CFLAGS so it must contains it.
 ###############################################################################
 
-# Compilation flags
-_external_add_ASFLAGS := $(LOCAL_ASFLAGS)
-_external_add_CFLAGS := $(LOCAL_CFLAGS) $(call normalize-c-includes,$(LOCAL_C_INCLUDES))
-_external_add_CXXFLAGS := $(_external_add_CFLAGS) $(LOCAL_CXXFLAGS)
+_external_add_ASFLAGS := \
+	$(LOCAL_ASFLAGS)
 
-# Linker flags
-_external_add_LDFLAGS :=
+_external_add_CFLAGS := \
+	$(call normalize-c-includes,$(LOCAL_C_INCLUDES)) \
+	$(LOCAL_CFLAGS)
+
+_external_add_CXXFLAGS := \
+	$(filter-out -std=%,$(_external_add_CFLAGS)) \
+	$(LOCAL_CXXFLAGS)
+
+_external_add_LDFLAGS := \
+	$(LOCAL_LDFLAGS)
 
 # Whole static libraries
 # As one unique -Wl option otherwise libtool makes a terrible mess with it
@@ -652,6 +696,7 @@ endif
 
 # If not skipping checks of of module built externally, delete some files
 # TODO: delete custom targets ?
+# TODO: handle absolute file for LOCAL_DONE_FILES
 ifeq ("$(skip_ext_checks)","0")
   $(call _delete-files,$(addprefix $(_module_build_dir)/,$(LOCAL_DONE_FILES)))
   ifneq ("$(call is-module-external,$(LOCAL_MODULE))","")
@@ -703,6 +748,7 @@ include $(BUILD_SYSTEM)/classes/extra-rules.mk
 ## Rule-specific variable definitions.
 ###############################################################################
 
+$(LOCAL_TARGETS): PRIVATE_ARCH := $(_module_arch)
 $(LOCAL_TARGETS): PRIVATE_CC_FLAVOUR := $(_module_cc_flavour)
 $(LOCAL_TARGETS): PRIVATE_CC := $(_module_cc)
 $(LOCAL_TARGETS): PRIVATE_CXX := $(_module_cxx)

@@ -305,7 +305,7 @@ file compiled. The -I prefix will be appended so do not put it.</li>
 </br>Default is <code>rcs</code>, so you should never have to define it.</li>
 <li><code>TARGET_GLOBAL_LDFLAGS</code> : Flags to pass to the linker.</li>
 <li><code>TARGET_GLOBAL_LDLIBS</code> : Additional libraries to use when linking.</li>
-<li><code>TARGET_GLOBAL_PCH_FLAGS</code> : Flags to pass when precompiling headers.</li>
+<li><code>TARGET_GLOBAL_PCHFLAGS</code> : Flags to pass when precompiling headers.</li>
 <li><code>TARGET_GLOBAL_OBJCFLAGS</code> : Flags to pass to the Objective-C compiler.</li>
 </ul>
 
@@ -323,6 +323,9 @@ compile in <code>thumb</code> mode. Normally managed internally but can be overr
 (<code>arm</code> or <code>thumb</code>). Default is <code>thumb</code>, however modules can override this in
 their <code>LOCAL_ARM_MODE</code>. It is only possible to override <code>thumb</code> mode in <code>arm</code>
 mode, not the other way.</li>
+<li><code>TARGET_DEFAULT_ARM_MODE_EXTERNAL</code> : similar to <code>TARGET_DEFAULT_ARM_MODE</code> but
+for external modules (autotools, cmake...). Default is <code>arm</code> for compatibility
+with previous behaviour.</li>
 </ul>
 
 <h3>Other variables</h3>
@@ -1471,7 +1474,7 @@ customized before invoking <code>alchemy</code>. For the meaning, see the corres
 <li><code>HOST_GLOBAL_ARFLAGS</code> : <code>rcs</code></li>
 <li><code>HOST_GLOBAL_LDFLAGS</code> : empty</li>
 <li><code>HOST_GLOBAL_LDLIBS</code> : empty</li>
-<li><code>HOST_GLOBAL_PCH_FLAGS</code> : empty</li>
+<li><code>HOST_GLOBAL_PCHFLAGS</code> : <code>-x c++-header</code></li>
 <li><code>HOST_CC</code> : <code>gcc</code></li>
 <li><code>HOST_CXX</code> : <code>g++</code></li>
 <li><code>HOST_AS</code> : <code>as</code></li>

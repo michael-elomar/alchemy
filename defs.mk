@@ -1646,7 +1646,7 @@ link-hook = $(strip \
 			)\
 		) \
 		$(shell $(BUILD_SYSTEM)/pbuild-hook/pbuild-link-hook.sh \
-			"$(PRIVATE_NM)" "$(PRIVATE_CC) $(TARGET_GLOBAL_CFLAGS)" \
+			"$(PRIVATE_NM)" "$(PRIVATE_CC) $(PRIVATE_GLOBAL_CFLAGS) $(PRIVATE_CFLAGS)" \
 			$1 $2 "$(__depsdata)" $3 \
 		) \
 	))

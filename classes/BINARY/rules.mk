@@ -221,14 +221,24 @@ endif
 ###############################################################################
 ###############################################################################
 
-# Arch to display
-ifneq ("$(LOCAL_HOST_MODULE)","")
-  arch := $(HOST_ARCH)
-else ifeq ("$(TARGET_ARCH)","arm")
-  arch := $(LOCAL_ARM_MODE)
+# If local flavour is different than default one, remove default and add specific
+ifeq ("$(_module_cc_flavour)","$($(_mode_prefix)_CC_FLAVOUR)")
+  _binary_GLOBAL_CFLAGS := $($(_mode_prefix)_GLOBAL_CFLAGS)
+  _binary_GLOBAL_CXXFLAGS := $($(_mode_prefix)_GLOBAL_CXXFLAGS)
+  _binary_GLOBAL_LDFLAGS := $($(_mode_prefix)_GLOBAL_LDFLAGS)
 else
-  arch := $(TARGET_ARCH)
+$(foreach __f,CFLAGS CXXFLAGS LDFLAGS, \
+	$(eval _binary_GLOBAL_$(__f) := \
+		$(filter-out $($(_mode_prefix)_GLOBAL_$(__f)_$($(_mode_prefix)_CC_FLAVOUR)), \
+			$($(_mode_prefix)_GLOBAL_$(__f)) \
+		) \
+		$($(_mode_prefix)_GLOBAL_$(__f)_$(_module_cc_flavour)) \
+	) \
+)
 endif
+
+###############################################################################
+###############################################################################
 
 # Make sure all prerequisites files are generated first
 # But do NOT force recompilation (order only)
@@ -248,10 +258,13 @@ $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(all_objects)
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(all_objects:%.o=%.d)
 $(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(vala_c_sources)
 
+$(LOCAL_TARGETS): PRIVATE_GLOBAL_CFLAGS := $(_binary_GLOBAL_CFLAGS)
+$(LOCAL_TARGETS): PRIVATE_GLOBAL_CXXFLAGS := $(_binary_GLOBAL_CXXFLAGS)
+$(LOCAL_TARGETS): PRIVATE_GLOBAL_LDFLAGS := $(_binary_GLOBAL_LDFLAGS)
 $(LOCAL_TARGETS): PRIVATE_OBJ_DIR := $(obj_dir)
+$(LOCAL_TARGETS): PRIVATE_C_INCLUDES := $(LOCAL_C_INCLUDES)
 $(LOCAL_TARGETS): PRIVATE_ASFLAGS := $(LOCAL_ASFLAGS)
 $(LOCAL_TARGETS): PRIVATE_CFLAGS := $(LOCAL_CFLAGS)
-$(LOCAL_TARGETS): PRIVATE_C_INCLUDES := $(LOCAL_C_INCLUDES)
 $(LOCAL_TARGETS): PRIVATE_CXXFLAGS := $(LOCAL_CXXFLAGS)
 $(LOCAL_TARGETS): PRIVATE_OBJCFLAGS := $(LOCAL_OBJCFLAGS)
 $(LOCAL_TARGETS): PRIVATE_VALAFLAGS := $(LOCAL_VALAFLAGS)
@@ -262,12 +275,13 @@ $(LOCAL_TARGETS): PRIVATE_ARFLAGS := $(LOCAL_ARFLAGS)
 $(LOCAL_TARGETS): PRIVATE_LDFLAGS := $(LOCAL_LDFLAGS)
 $(LOCAL_TARGETS): PRIVATE_LDLIBS := $(LOCAL_LDLIBS)
 $(LOCAL_TARGETS): PRIVATE_MODE_MSG := $(if $(_mode_host),Host )
-$(LOCAL_TARGETS): PRIVATE_ARCH := $(arch)
 $(LOCAL_TARGETS): PRIVATE_PBUILD_HOOK := $(LOCAL_PBUILD_HOOK)
 $(LOCAL_TARGETS): PRIVATE_ALL_SHARED_LIBRARIES := $(all_shared_libs_filename)
 $(LOCAL_TARGETS): PRIVATE_ALL_STATIC_LIBRARIES := $(all_static_libs_filename)
 $(LOCAL_TARGETS): PRIVATE_ALL_WHOLE_STATIC_LIBRARIES := $(all_whole_static_libs_filename)
 $(LOCAL_TARGETS): PRIVATE_ALL_OBJECTS := $(all_objects)
+$(LOCAL_TARGETS): PRIVATE_WARNINGS_CFLAGS := $(WARNINGS_CFLAGS) $(WARNINGS_CFLAGS_$(_module_cc_flavour))
+$(LOCAL_TARGETS): PRIVATE_WARNINGS_CXXFLAGS := $(WARNINGS_CXXFLAGS) $(WARNINGS_CXXFLAGS_$(_module_cc_flavour))
 
 ifneq ("$(LOCAL_PRECOMPILED_FILE)","")
 $(LOCAL_TARGETS): PRIVATE_PCH_INCLUDE := -include $(LOCAL_PRECOMPILED_FILE)
@@ -291,13 +305,17 @@ endif
 ifeq ("$(LOCAL_HOST_MODULE)","")
 __nvcflags-all := \
 	$(TARGET_GLOBAL_CFLAGS) \
-	$(TARGET_GLOBAL_CFLAGS_$(TARGET_CC_FLAVOUR)) \
-	$(TARGET_GLOBAL_CFLAGS_$(TARGET_ARCH)) \
 	$(LOCAL_CFLAGS) \
 	$(TARGET_GLOBAL_CXXFLAGS) \
-	$(TARGET_GLOBAL_CXXFLAGS_$(TARGET_CC_FLAVOUR)) \
-	$(TARGET_GLOBAL_CXXFLAGS) \
 	$(LOCAL_CXXFLAGS)
+
+# Always use gcc for cuda compilation, so remove clang specific flag if needed
+ifeq ("$(_module_cc_flavour)","clang")
+__nvcflags-all := $(filter-out $(TARGET_GLOBAL_CFLAGS)_clang,$(__nvcflags-all))
+$(LOCAL_TARGETS): PRIVATE_NVCC_CC := $(TARGET_CROSS)gcc
+else
+$(LOCAL_TARGETS): PRIVATE_NVCC_CC := $(TARGET_CC)
+endif
 
 # collect -std* and --std* and keep only the latest like GCC
 # local flags can override global ones
