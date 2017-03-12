@@ -46,7 +46,9 @@ endef
 ## Variables used for cmake.
 ###############################################################################
 
-CMAKE := $(shell which cmake 2>/dev/null)
+ifndef CMAKE
+  CMAKE := $(shell which cmake 2>/dev/null)
+endif
 
 ifeq ("$(TARGET_OS)","linux")
   TARGET_CMAKE_SYSTEM_NAME := Linux
