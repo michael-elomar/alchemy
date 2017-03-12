@@ -332,6 +332,9 @@ $(Q) $(PRIVATE_CXX) \
 	-Wl,--no-undefined \
 	-Wl,--gc-sections \
 	-Wl,--as-needed \
+	$(if $(call streq,$($(PRIVATE_MODE)_OS),windows), \
+		-Wl$(comma)--out-implib$(comma)$(call path-from-top,$2).a \
+	) \
 	$(PRIVATE_LDFLAGS) \
 	$(PRIVATE_ALL_OBJECTS) \
 	$(call link-hook,$(PRIVATE_MODULE),$2, \
