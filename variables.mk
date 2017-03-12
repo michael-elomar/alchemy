@@ -463,6 +463,7 @@ vars-TARGET += AUTOTOOLS_CONFIGURE_PREFIX
 vars-TARGET += AUTOTOOLS_CONFIGURE_SYSCONFDIR
 vars-TARGET += AUTOTOOLS_INSTALL_DESTDIR
 vars-TARGET += PKG_CONFIG_ENV
+vars-TARGET += PKG_CONFIG_PATH
 
 # This variable can be modified by some makefiles (os that needs to install
 # headers prior to start anything)

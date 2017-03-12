@@ -222,10 +222,12 @@ _target_pkg_config_dirs := \
 	$(TARGET_DEFAULT_LIB_DESTDIR)/$(TARGET_TOOLCHAIN_TRIPLET)/pkgconfig \
 	$(TARGET_DEFAULT_LIB_DESTDIR)/pkgconfig
 
-_target_pkg_config_path :=
+ifndef TARGET_PKG_CONFIG_PATH
+  TARGET_PKG_CONFIG_PATH :=
+endif
 $(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
 	$(foreach __dir2,$(_target_pkg_config_dirs), \
-		$(eval _target_pkg_config_path := $(_target_pkg_config_path):$(__dir)/$(__dir2)) \
+		$(eval TARGET_PKG_CONFIG_PATH := $(TARGET_PKG_CONFIG_PATH):$(__dir)/$(__dir2)) \
 	) \
 )
 
@@ -233,7 +235,7 @@ $(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
 # Only use packages found in TARGET_OUT_STAGING by setting PKG_CONFIG_LIBDIR empty
 TARGET_PKG_CONFIG_ENV := \
 	PKG_CONFIG="$(PKGCONFIG_BIN)" \
-	PKG_CONFIG_PATH="$(_target_pkg_config_path)"
+	PKG_CONFIG_PATH="$(TARGET_PKG_CONFIG_PATH)"
 ifeq ("$(TARGET_OS_FLAVOUR)","native")
   TARGET_PKG_CONFIG_ENV += PKG_CONFIG_SYSROOT_DIR=""
 else

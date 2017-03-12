@@ -115,9 +115,11 @@ else
   TARGET_CMAKE_SEARCH_OPTION += ONLY
 endif
 
-_cmake_target_root_path :=
+ifndef TARGET_CMAKE_ROOT_PATH
+  TARGET_CMAKE_ROOT_PATH :=
+endif
 $(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
-	$(eval _cmake_target_root_path := $(_cmake_target_root_path) \"$(__dir)\") \
+	$(eval TARGET_CMAKE_ROOT_PATH := $(TARGET_CMAKE_ROOT_PATH) \"$(__dir)\") \
 )
 
 define _cmake-target-gen-toolchain-file
@@ -148,7 +150,7 @@ define _cmake-target-gen-toolchain-file
 		\"$(TARGET_CMAKE_MODULE_LINKER_FLAGS) \$${ALCHEMY_EXTRA_MODULE_LINKER_FLAGS}\" \
 		CACHE STRING \"MODULE_LINKER_FLAGS\")"; \
 	echo "set(CMAKE_INSTALL_SO_NO_EXE 0)"; \
-	echo "set(CMAKE_FIND_ROOT_PATH $(_cmake_target_root_path))"; \
+	echo "set(CMAKE_FIND_ROOT_PATH $(TARGET_CMAKE_ROOT_PATH))"; \
 	echo "set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)"; \
 	echo "set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY $(TARGET_CMAKE_SEARCH_OPTION))"; \
 	echo "set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE $(TARGET_CMAKE_SEARCH_OPTION))"; \
