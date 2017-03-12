@@ -1162,14 +1162,22 @@ endif
 ###############################################################################
 ## Register a prebuilt module using pkg-config
 ## $1 : name of the alchemy module
-## $2 : name of the pkg-config module (can specify several separaed by space)
+## $2 : name of the pkg-config module (can specify several separated by space)
+## $3 : optional path for PKG_CONFIG_PATH search
 ###############################################################################
+
 register-prebuilt-pkg-config-module = \
-	$(if $(call streq,$(shell pkg-config --exists $2; echo $$?),0), \
+	$(call register-prebuilt-pkg-config-module-internal,$1,$2,pkg-config)
+
+register-prebuilt-pkg-config-module-with-path = \
+	$(call register-prebuilt-pkg-config-module-internal,$1,$2,PKG_CONFIG_PATH=$3 pkg-config)
+
+register-prebuilt-pkg-config-module-internal = \
+	$(if $(call streq,$(shell $3 --exists $2; echo $$?),0), \
 		$(eval include $(CLEAR_VARS)) \
 		$(eval LOCAL_MODULE := $1) \
-		$(eval LOCAL_EXPORT_CFLAGS := $(shell pkg-config --cflags $2)) \
-		$(eval LOCAL_EXPORT_LDLIBS := $(shell pkg-config --libs $2)) \
+		$(eval LOCAL_EXPORT_CFLAGS := $(shell $3 --cflags $2)) \
+		$(eval LOCAL_EXPORT_LDLIBS := $(shell $3 --libs $2)) \
 		$(call local-register-prebuilt-overridable) \
 	)
 
