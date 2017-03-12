@@ -1257,6 +1257,9 @@ system.
 * `LOCAL_QMAKE_PRO_FILE` : The name of the `.pro` file to be used. If not
   specified, the name is assumed to be `$(LOCAL_MODULE).pro`. The path is
   relative to `LOCAL_PATH`
+* `LOCAL_QMAKE_CONFIGURE_ARGS` : Additional arguments to give to qmake.
+* `LOCAL_QMAKE_MAKE_BUILD_ARGS` : Additional arguments to give to make build.
+* `LOCAL_QMAKE_MAKE_INSTALL_ARGS` : Additional arguments to give to make install.
 
 ### Python extension modules
 

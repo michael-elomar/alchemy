@@ -201,6 +201,9 @@ vars-LOCAL += CMAKE_MAKE_INSTALL_ARGS
 
 # QMake customization
 vars-LOCAL += QMAKE_PRO_FILE
+vars-LOCAL += QMAKE_CONFIGURE_ARGS
+vars-LOCAL += QMAKE_MAKE_BUILD_ARGS
+vars-LOCAL += QMAKE_MAKE_INSTALL_ARGS
 
 # Python extension customization
 vars-LOCAL += PYTHONEXT_SETUP_PY_ENV
