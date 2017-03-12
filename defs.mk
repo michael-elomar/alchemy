@@ -1708,16 +1708,19 @@ endef
 ## changed.
 ## $1 : file to create.
 ## $2 : other file with new contents.
+## $3 : optional message when file is really updated (or created)
 ###############################################################################
-define update-file-if-needed
+define update-file-if-needed-msg
 @( \
 	mkdir -p $(dir $1); \
-	if [ ! -f $1 ]; then mv $2 $1; \
-	elif ! cmp -s $2 $1 &>/dev/null; then mv $2 $1; \
+	if [ ! -f $1 ]; then $(if $3,echo $3;) mv $2 $1; \
+	elif ! cmp -s $2 $1 &>/dev/null; then $(if $3,echo $3;) mv $2 $1; \
 	else rm -f $2; \
 	fi; \
 )
 endef
+
+update-file-if-needed = $(call update-file-if-needed-msg,$1,$2,$(empty))
 
 ###############################################################################
 ## Commands for copying files.
