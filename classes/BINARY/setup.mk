@@ -256,6 +256,25 @@ endef
 transform-vala-to-c = $(call _internal-transform-vala-to-c,$(PRIVATE_MODE))
 
 ###############################################################################
+## Commands for running windres.
+###############################################################################
+
+define _internal-transform-rc-to-o
+@mkdir -p $(dir $2)
+$(call print-banner1,"$(PRIVATE_MODE_MSG)Rc",$(PRIVATE_MODULE),$(call path-from-top,$3))
+$(call check-pwd-is-top-dir)
+$(Q) $(PRIVATE_WINDRES) \
+	$(filter -D%,$(PRIVATE_GLOBAL_CFLAGS)) \
+	$(filter -D%,$(PRIVATE_GLOBAL_CXXFLAGS)) \
+	$(filter -D%,$(PRIVATE_CFLAGS)) \
+	$(filter -D%,$(PRIVATE_CXXFLAGS)) \
+	-o $(call path-from-top,$2) \
+	$(call path-from-top,$3)
+endef
+
+transform-rc-to-o = $(call _internal-transform-rc-to-o,$(PRIVATE_MODE),$@,$<)
+
+###############################################################################
 ## Commands for running ar.
 ###############################################################################
 

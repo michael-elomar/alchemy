@@ -56,6 +56,20 @@ $(foreach __e,$(_binary_extensions), \
 	$(eval all_objects += $($(__e)_objects) $(gen_$(__e)_objects)) \
 )
 
+ifeq ("$($(_mode_prefix)_OS)","windows")
+  rc_sources := $(filter %.rc,$(LOCAL_SRC_FILES))
+  rc_objects := $(addprefix $(obj_dir)/,$(rc_sources:.rc=.rc.o))
+  gen_rc_sources := $(filter %.rc,$(LOCAL_GENERATED_SRC_FILES))
+  gen_rc_objects := $(addprefix $(obj_dir)/,$(gen_rc_sources:.rc=.rc.o))
+  all_gen_sources += $(gen_rc_sources)
+  all_objects += $(rc_objects) $(gen_rc_objects)
+else
+ rc_sources :=
+ rc_objects :=
+ gen_rc_sources :=
+ gen_rc_objects :=
+endif
+
 vala_sources := $(filter %.vala,$(LOCAL_SRC_FILES))
 vala_c_sources := $(addprefix $(obj_dir)/,$(vala_sources:.vala=.c))
 vala_objects := $(addprefix $(obj_dir)/,$(vala_sources:.vala=.c.o))
@@ -116,6 +130,11 @@ $(foreach __e,$(_binary_extensions), \
 	$(eval $(call _binary-rules-transform-to-o,$(__e))) \
 	$(eval $(call _binary-rules-transform-gen-to-o,$(__e))) \
 )
+
+ifeq ("$($(_mode_prefix)_OS)","windows")
+  $(eval $(call _binary-rules-transform-to-o,rc))
+  $(eval $(call _binary-rules-transform-gen-to-o,rc))
+endif
 
 ###############################################################################
 # File with compilation flags

@@ -19,6 +19,7 @@ ifneq ("$(USE_CLANG)","1")
   HOST_RANLIB ?= ranlib
   HOST_OBJCOPY ?= objcopy
   HOST_OBJDUMP ?= objdump
+  HOST_WINDRES ?= windres
 else
   HOST_CC ?= clang
   HOST_CXX ?= clang++
@@ -32,6 +33,7 @@ else
   HOST_RANLIB ?= llvm-ranlib
   HOST_OBJCOPY ?= objcopy
   HOST_OBJDUMP ?= llvm-objdump
+  HOST_WINDRES ?= windres
 endif
 
 # Select correct toolchain
@@ -52,6 +54,7 @@ ifeq ("$(TARGET_OS)-$(TARGET_OS_FLAVOUR)","$(HOST_OS)-native")
   TARGET_RANLIB ?= $(HOST_RANLIB)
   TARGET_OBJCOPY ?= $(HOST_OBJCOPY)
   TARGET_OBJDUMP ?= $(HOST_OBJDUMP)
+  TARGET_WINDRES ?= $(HOST_WINDRES)
 else
   ifneq ("$(USE_CLANG)","1")
     TARGET_CC ?= $(TARGET_CROSS)gcc
@@ -70,6 +73,7 @@ else
   TARGET_RANLIB ?= $(TARGET_CROSS)ranlib
   TARGET_OBJCOPY ?= $(TARGET_CROSS)objcopy
   TARGET_OBJDUMP ?= $(TARGET_CROSS)objdump
+  TARGET_WINDRES ?= $(TARGET_CROSS)windres
 endif
 
 # Nvidia cuda compiler
