@@ -161,7 +161,8 @@ def executeCmd(cmd):
 def isExec(filePath):
     try:
         with open(filePath, "rb") as fd:
-            if fd.read(4) == b"\x7fELF":
+            hdr = fd.read(4)
+            if hdr == b"\x7fELF" or hdr[:2] == b"MZ":
                 return True
     except IOError as ex:
         logging.error("Failed to open file: %s ([err=%d] %s)",
