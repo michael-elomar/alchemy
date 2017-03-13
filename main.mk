@@ -492,7 +492,7 @@ $(AUTOCONF_MERGE_FILE): $(__autoconf-list)
 # Poll variable contents after every helpers have been loaded
 .PHONY: var-%
 var-%:
-	@echo $* : $($*)
+	@echo $*=$($*)
 
 .PHONY: all
 all: $(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST)
