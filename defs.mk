@@ -1701,12 +1701,13 @@ endef
 ## Fix a .d file with compilation dependencies.
 ## It will ensure that full paths are specified.
 ## $1 : file to fix.
+## It handles both unix path and windows path.
 ###############################################################################
 define fix-deps-file
 @( \
 	[ ! -f $1 ] || (sed -i.bak \
-		-e 's| \([^/\\: ]\)| $(TOP_DIR)/\1|g' \
-		-e 's|^\([^/\\: ]\)|$(TOP_DIR)/\1|g' \
+		-e 's| \([^/: ][^:][^: ]*\)| $(TOP_DIR)/\1|g' \
+		-e 's|^\([^/: ][^:][^: ]*\)|$(TOP_DIR)/\1|g' \
 		$1 && rm -f $1.bak) \
 )
 endef
