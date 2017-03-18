@@ -75,9 +75,9 @@ check-pwd-is-top-dir = \
 		$(error Not at the top directory))
 
 # Determine if a path is absolute.
-# It simply checks if the path starts with a '/'
 # $1 : path to check.
-is-path-absolute = $(strip $(call not,$(patsubst /%,,$1)))
+# It simply checks if the path starts with a '/' or contains ':/' (for windows)
+is-path-absolute = $(if $(patsubst /%,,$1),$(if $(findstring $(colon)/,$1),$(true),$(false)),$(true))
 
 # Determine if a path is a directory. This check does not look in the
 # filesystem, it just checks if the path ends with a '/'.
