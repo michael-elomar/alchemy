@@ -163,6 +163,6 @@ $(TARGET_CMAKE_TOOLCHAIN_FILE): .FORCE
 
 .PHONY: _cmake-target-toolchain-file-clean
 _cmake-target-cmake-toolchain-file-clean:
-	$(Q) rm -f $(CMAKE_TOOLCHAIN_FILE)
+	$(Q) rm -f $(TARGET_CMAKE_TOOLCHAIN_FILE)
 
 clobber: _cmake-target-toolchain-file-clean
