@@ -69,11 +69,6 @@ get-define = $(strip \
 #Start by removing '\"' if exist for not having a '\' in our string
 remove-quotes = $(strip $(subst ",,$(strip $(subst \",,$1))))
 
-# Check that the current directory is the top directory
-check-pwd-is-top-dir = \
-	$(if $(patsubst $(TOP_DIR)%,%,$(realpath $(shell pwd))), \
-		$(error Not at the top directory))
-
 # Determine if a path is absolute.
 # $1 : path to check.
 # It simply checks if the path starts with a '/' or contains ':/' (for windows)

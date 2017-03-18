@@ -57,7 +57,6 @@ _binary-get-objects-flags = \
 define _internal-transform-h-to-gch
 @mkdir -p $(dir $2)
 $(call _binary-print-banner1,Precompile,$3)
-$(call check-pwd-is-top-dir)
 $(Q) $(CCACHE) $(PRIVATE_CXX) \
 	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
 	$(call normalize-system-c-includes-rel,$($1_GLOBAL_C_INCLUDES)) \
@@ -85,7 +84,6 @@ transform-h-to-gch = $(call _internal-transform-h-to-gch,$(PRIVATE_MODE),$@,$<)
 define _binary-cmd-cpp-to-o-internal
 @mkdir -p $(dir $2)
 $(call _binary-print-banner1,C++,$3)
-$(call check-pwd-is-top-dir)
 $(Q) $(CCACHE) $(PRIVATE_CXX) \
 	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
 	$(call normalize-system-c-includes-rel,$($1_GLOBAL_C_INCLUDES)) \
@@ -115,7 +113,6 @@ transform-cc-to-o = $(call _binary-cmd-cpp-to-o-internal,$(PRIVATE_MODE),$@,$<)
 define _binary-cmd-c-to-o-internal
 @mkdir -p $(dir $2)
 $(call _binary-print-banner1,C,$3)
-$(call check-pwd-is-top-dir)
 $(Q) $(CCACHE) $(PRIVATE_CC) \
 	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
 	$(call normalize-system-c-includes-rel,$($1_GLOBAL_C_INCLUDES)) \
@@ -140,7 +137,6 @@ transform-c-to-o = $(call _binary-cmd-c-to-o-internal,$(PRIVATE_MODE),$@,$<)
 define _binary-cmd-m-to-o-internal
 @mkdir -p $(dir $2)
 $(call _binary-print-banner1,ObjC,$3)
-$(call check-pwd-is-top-dir)
 $(Q) $(CCACHE) $(PRIVATE_CC) \
 	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
 	$(call normalize-system-c-includes-rel,$($1_GLOBAL_C_INCLUDES)) \
@@ -167,7 +163,6 @@ transform-m-to-o = $(call _binary-cmd-m-to-o-internal,$(PRIVATE_MODE),$@,$<)
 define _binary-cmd-s-to-o-internal
 @mkdir -p $(dir $2)
 $(call _binary-print-banner1,Asm,$3)
-$(call check-pwd-is-top-dir)
 $(Q) $(CCACHE) $(PRIVATE_CC) \
 	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
 	$(call normalize-system-c-includes-rel,$($1_GLOBAL_C_INCLUDES)) \
@@ -200,7 +195,6 @@ transform-S-to-o = $(call _binary-cmd-s-to-o-internal,$(PRIVATE_MODE),$@,$<)
 define _binary-cmd-cu-to-o-internal
 @mkdir -p $(dir $2)
 $(call _binary-print-banner1,Cuda,$3)
-$(call check-pwd-is-top-dir)
 @if [ -z "$(TARGET_NVCC)" ]; then \
 	echo "TARGET_NVCC is not defined"; exit 1; \
 fi
@@ -243,7 +237,6 @@ transform-cu-to-o = $(call _binary-cmd-cu-to-o-internal,$(PRIVATE_MODE),$@,$<)
 
 define _internal-transform-vala-to-c
 $(call print-banner1,"$(PRIVATE_MODE_MSG)Valac",$(PRIVATE_MODULE),$(call path-from-top,$(PRIVATE_VALA_SOURCES)))
-$(call check-pwd-is-top-dir)
 $(Q) $(HOST_OUT_STAGING)/$(HOST_DEFAULT_BIN_DESTDIR)/valac \
 	$($1_GLOBAL_VALAFLAGS) \
 	$(PRIVATE_VALAFLAGS) \
@@ -262,7 +255,6 @@ transform-vala-to-c = $(call _internal-transform-vala-to-c,$(PRIVATE_MODE))
 define _internal-transform-rc-to-o
 @mkdir -p $(dir $2)
 $(call print-banner1,"$(PRIVATE_MODE_MSG)Rc",$(PRIVATE_MODULE),$(call path-from-top,$3))
-$(call check-pwd-is-top-dir)
 $(Q) $(PRIVATE_WINDRES) \
 	$(filter -D%,$(PRIVATE_GLOBAL_CFLAGS)) \
 	$(filter -D%,$(PRIVATE_GLOBAL_CXXFLAGS)) \
@@ -283,7 +275,6 @@ transform-rc-to-o = $(call _internal-transform-rc-to-o,$(PRIVATE_MODE),$@,$<)
 define _internal-transform-o-to-static-lib
 @mkdir -p $(dir $2)
 $(call print-banner2,"$(PRIVATE_MODE_MSG)StaticLib",$(PRIVATE_MODULE),$(call path-from-top,$2))
-$(call check-pwd-is-top-dir)
 @rm -f $2
 $(Q) $(PRIVATE_AR) \
 	$($1_GLOBAL_ARFLAGS) \
@@ -301,7 +292,6 @@ transform-o-to-static-lib = $(call _internal-transform-o-to-static-lib,$(PRIVATE
 define _internal-transform-o-to-shared-lib-darwin
 @mkdir -p $(dir $2)
 $(call print-banner2,"$(PRIVATE_MODE_MSG)SharedLib",$(PRIVATE_MODULE),$(call path-from-top,$2))
-$(call check-pwd-is-top-dir)
 $(Q) $(PRIVATE_CXX) \
 	$(PRIVATE_GLOBAL_LDFLAGS) \
 	$(if $(call streq,$(USE_LINK_MAP_FILE),1), \
@@ -327,7 +317,6 @@ endef
 define _internal-transform-o-to-shared-lib
 @mkdir -p $(dir $2)
 $(call print-banner2,"$(PRIVATE_MODE_MSG)SharedLib",$(PRIVATE_MODULE),$(call path-from-top,$2))
-$(call check-pwd-is-top-dir)
 $(Q) $(PRIVATE_CXX) \
 	$(PRIVATE_GLOBAL_LDFLAGS) \
 	$(if $(call streq,$(USE_LINK_MAP_FILE),1), \
@@ -370,7 +359,6 @@ transform-o-to-shared-lib = $(if $(call streq,$($(PRIVATE_MODE)_OS),darwin), \
 define _internal-transform-o-to-executable-darwin
 @mkdir -p $(dir $2)
 $(call print-banner2,"$(PRIVATE_MODE_MSG)Executable",$(PRIVATE_MODULE),$(call path-from-top,$2))
-$(call check-pwd-is-top-dir)
 $(Q) $(PRIVATE_CXX) \
 	$(PRIVATE_GLOBAL_LDFLAGS) \
 	$(if $(call streq,$(USE_LINK_MAP_FILE),1), \
@@ -394,7 +382,6 @@ endef
 define _internal-transform-o-to-executable
 @mkdir -p $(dir $2)
 $(call print-banner2,"$(PRIVATE_MODE_MSG)Executable",$(PRIVATE_MODULE),$(call path-from-top,$2))
-$(call check-pwd-is-top-dir)
 $(Q) $(PRIVATE_CXX) \
 	$(PRIVATE_GLOBAL_LDFLAGS) \
 	$(if $(call streq,$(USE_LINK_MAP_FILE),1), \
