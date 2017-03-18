@@ -941,7 +941,7 @@ def main():
 
     # Create 'config.in' file
     (configInFd, configInPath) = tempfile.mkstemp(suffix=TEMP_SUFFIX)
-    configInFile = os.fdopen(configInFd, "w")
+    configInFile = os.fdopen(configInFd, "w", newline="\n")
     logging.info("Generating full 'config.in' file as %s", configInPath)
     writeTargetVarConfigIn(configInFile)
     writeFullConfigIn(configInFile, menuRoot)
@@ -950,7 +950,7 @@ def main():
 
     # Create full '.config' file
     (fullConfigFd, fullConfigPath) = tempfile.mkstemp(suffix=TEMP_SUFFIX)
-    fullConfigFile = os.fdopen(fullConfigFd, "w")
+    fullConfigFile = os.fdopen(fullConfigFd, "w", newline="\n")
     logging.info("Generating full '.config' file as %s", fullConfigPath)
     prepareFullConfig(fullConfigFile, menuRoot, options.main, modules)
     fullConfigFile.close()
