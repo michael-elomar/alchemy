@@ -100,6 +100,11 @@ else
   TARGET_CMAKE_MAKE_ARGS += VERBOSE=1
 endif
 
+# On windows host, force generation of Unix makefiles instead of Visual Studio projects
+ifeq ("$(HOST_OS)","windows")
+  TARGET_CMAKE_CONFIGURE_ARGS += -G "Unix Makefiles"
+endif
+
 ###############################################################################
 ## Generation of toolchain file.
 ###############################################################################
