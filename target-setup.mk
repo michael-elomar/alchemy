@@ -298,7 +298,7 @@ TARGET_FINAL_MODE ?= firmware
 # List of directories to add in ldconfig cache
 TARGET_LDCONFIG_DIRS ?=
 
-# Comptaiblity when TARGET_ROOT_DESTDIR is not 'usr'
+# Compatiblity when TARGET_ROOT_DESTDIR is not 'usr'
 # Create a simlink from usr to the actual TARGET_ROOT_DESTDIR
 # Note: this does NOT work if TARGET_ROOT_DESTDIR is a subdir of 'usr' (for
 # example 'usr/local')
