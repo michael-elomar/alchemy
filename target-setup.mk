@@ -286,6 +286,7 @@ TARGET_LINUX_DEVICE_TREE_NAMES ?=
 
 # TODO: remove compatibility with old name in future version
 ifdef TARGET_LINUX_DEVICE_TREE
+  $(warning TARGET_LINUX_DEVICE_TREE is deprecated, please use TARGET_LINUX_DEVICE_TREE_NAMES)
   TARGET_LINUX_DEVICE_TREE_NAMES += $(TARGET_LINUX_DEVICE_TREE)
 endif
 
