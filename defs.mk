@@ -693,8 +693,11 @@ modules-compute-depends = \
 		$(eval __dummy := $(call __module-compute-depends-all,$(__mod))) \
 		$(if $(call streq,$(__modules.$(__mod).MODULE_CLASS),EXECUTABLE), \
 			$(if $(findstring -static,$(__modules.$(__mod).LDFLAGS)), \
-				$(call __module-update-static-executable,$(__mod)) \
+				$(call __module-force-static,$(__mod)) \
 			) \
+		) \
+		$(if $(call streq,$(__modules.$(__mod).FORCE_STATIC),1), \
+			$(call __module-force-static,$(__mod)) \
 		) \
 		$(call __module-compute-depends-link,$(__mod)) \
 	)
@@ -836,11 +839,11 @@ __module-compute-depends-all-internal = \
 		) \
 	)
 
-# Update dependencies for static executables.
+# Force to use static libraries when possible.
 # $1 : module name.
 # Note : for each generic library in depends.all, it will transform shared
 # version to static version.
-__module-update-static-executable = \
+__module-force-static = \
 	$(foreach __lib,$(__modules.$1.depends.all), \
 		$(if $(call is-module-registered,$(__lib)), \
 			$(if $(call streq,$(__modules.$(__lib).MODULE_CLASS),LIBRARY), \

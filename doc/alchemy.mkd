@@ -711,6 +711,12 @@ build order.
 Once migrated to `LOCAL_REQUIRED_MODULES`, `LOCAL_DEPENDS_MODULES` might be used
 for another purpose (like really have a build dependency).
 
+#### `LOCAL_FORCE_STATIC`
+
+If set to `1`, forces to use static libraries instead of shared libraries for
+all dependencies. It only forces internal modules, not external ones and only
+if a static version of the dependncy is available (module is `STATIC` or `LIBRARY`).
+
 #### `LOCAL_BUILD_PROPERTIES`
 
 List of properties to put in file build.prop loaded by boxinit at startup.

@@ -71,9 +71,12 @@ vars-LOCAL += EXTERNAL_LIBRARIES
 # General libraries to add in dependency based on their actual class (STATIC/SHARED/EXTERNAL).
 vars-LOCAL += LIBRARIES
 
+# Force using static libraries as dependencies instead of shared libraries
+vars-LOCAL += FORCE_STATIC
+
 # Libraries whose dependency is conditional
 # Format : list of pair <var>:<lib>
-# <var> : variable to test
+# <var> : variable to test (can be special value OPTIONAL to check if in build config)
 # <lib> : library to add in LOCAL_LIBRARIES if <var> is defined
 vars-LOCAL += CONDITIONAL_LIBRARIES
 
