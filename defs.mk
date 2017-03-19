@@ -679,19 +679,16 @@ modules-compute-depends = \
 		$(call conditional-libraries-setup,$(__mod)) \
 		$(foreach __field,$(modules-fields-depends), \
 			$(eval __modules.$(__mod).$(__field) := $(empty)) \
+			$(eval __modules.$(__mod).$(__field).done := $(false)) \
 		) \
 		$(call __module-update-depends-direct,$(__mod)) \
 		$(call __module-compute-depends-direct,$(__mod)) \
 	) \
 	$(foreach __mod,$(__modules), \
-		$(eval __depends-loop := $(empty)) \
-		$(eval __dummy := $(call __module-compute-depends-static,$(__mod),EXTERNAL_LIBRARIES)) \
-		$(eval __depends-loop := $(empty)) \
-		$(eval __dummy := $(call __module-compute-depends-static,$(__mod),STATIC_LIBRARIES)) \
-		$(eval __depends-loop := $(empty)) \
-		$(eval __dummy := $(call __module-compute-depends-static,$(__mod),WHOLE_STATIC_LIBRARIES)) \
-		$(eval __depends-loop := $(empty)) \
-		$(eval __dummy := $(call __module-compute-depends-static,$(__mod),SHARED_LIBRARIES)) \
+		$(foreach __field,EXTERNAL_LIBRARIES STATIC_LIBRARIES WHOLE_STATIC_LIBRARIES SHARED_LIBRARIES, \
+			$(eval __depends-loop := $(empty)) \
+			$(eval __dummy := $(call __module-compute-depends-static,$(__mod),$(__field))) \
+		) \
 		$(eval __depends-loop := $(empty)) \
 		$(eval __dummy := $(call __module-compute-depends-all,$(__mod))) \
 		$(if $(call streq,$(__modules.$(__mod).MODULE_CLASS),EXECUTABLE), \
@@ -764,10 +761,9 @@ __module-compute-depends-static = \
 	) \
 	$(eval __depends-loop += $1) \
 	$(eval $1.__var := __modules.$1.depends.$2) \
-	$(if $($($1.__var)),$($($1.__var)), \
-		$(eval $($1.__var) := $(strip \
-			$(call uniq2,$(call __module-compute-depends-static-internal,$1,$2))) \
-		) \
+	$(if $($($1.__var).done),$($($1.__var)), \
+		$(eval $($1.__var) := $(call uniq2,$(call __module-compute-depends-static-internal,$1,$2))) \
+		$(eval $($1.__var).done := $(true)) \
 		$($($1.__var)) \
 	) \
 	$(eval __depends-loop := $(filter-out $1,$(__depends-loop)))
