@@ -47,6 +47,29 @@ _binary-get-objects-flags = \
 		$(__v) := $(strip $($(__v)))$(endl) \
 	) \
 
+# Under windows, use response file for linking to avoid reaching command line limit
+# Note: it requires make >= 4.0 and the 'file' function
+ifeq ("$(HOST_OS)","windows")
+  ifeq ("$(MAKE_HAS_FILE_FUNC)","1")
+    _binary_use_rsp_file := 1
+  else
+    _binary_use_rsp_file := 0
+  endif
+else
+  _binary_use_rsp_file := 0
+endif
+
+# Generate or get response file
+# $1: name of file (will be in 'PRIVATE_BUILD_DIR' with '.rsp' extension)
+# $2: contents to put in file
+ifneq ("$(_binary_use_rsp_file)","0")
+_binary-gen-rsp-file = $(file > $(PRIVATE_BUILD_DIR)/$(PRIVATE_MODULE).$1.rsp,$2)
+_binary-get-rsp-file = @$(PRIVATE_BUILD_DIR)/$(PRIVATE_MODULE).$1.rsp
+else
+_binary-gen-rsp-file =
+_binary-get-rsp-file = $2
+endif
+
 ###############################################################################
 ## Commands to generate a precompiled file.
 ###############################################################################
@@ -275,12 +298,13 @@ transform-rc-to-o = $(call _internal-transform-rc-to-o,$(PRIVATE_MODE),$@,$<)
 define _internal-transform-o-to-static-lib
 @mkdir -p $(dir $2)
 $(call print-banner2,"$(PRIVATE_MODE_MSG)StaticLib",$(PRIVATE_MODULE),$(call path-from-top,$2))
+$(call _binary-gen-rsp-file,objects-static,$(PRIVATE_ALL_OBJECTS))
 @rm -f $2
 $(Q) $(PRIVATE_AR) \
 	$($1_GLOBAL_ARFLAGS) \
 	$(PRIVATE_ARFLAGS) \
 	$(call path-from-top,$2) \
-	$(PRIVATE_ALL_OBJECTS)
+	$(call _binary-get-rsp-file,objects-static,$(PRIVATE_ALL_OBJECTS))
 endef
 
 transform-o-to-static-lib = $(call _internal-transform-o-to-static-lib,$(PRIVATE_MODE),$@)
@@ -292,6 +316,7 @@ transform-o-to-static-lib = $(call _internal-transform-o-to-static-lib,$(PRIVATE
 define _internal-transform-o-to-shared-lib-darwin
 @mkdir -p $(dir $2)
 $(call print-banner2,"$(PRIVATE_MODE_MSG)SharedLib",$(PRIVATE_MODULE),$(call path-from-top,$2))
+$(call _binary-gen-rsp-file,objects-shared,$(PRIVATE_ALL_OBJECTS))
 $(Q) $(PRIVATE_CXX) \
 	$(PRIVATE_GLOBAL_LDFLAGS) \
 	$(if $(call streq,$(USE_LINK_MAP_FILE),1), \
@@ -301,7 +326,7 @@ $(Q) $(PRIVATE_CXX) \
 	-Wl,-dead_strip \
 	-Wl,-install_name,$($1_OUT_STAGING)/$($1_DEFAULT_LIB_DESTDIR)/$(notdir $2) \
 	$(PRIVATE_LDFLAGS) \
-	$(PRIVATE_ALL_OBJECTS) \
+	$(call _binary-get-rsp-file,objects-shared,$(PRIVATE_ALL_OBJECTS)) \
 	$(call link-hook,$(PRIVATE_MODULE),$2, \
 		$(PRIVATE_ALL_OBJECTS) \
 		$(PRIVATE_ALL_STATIC_LIBRARIES) \
@@ -317,6 +342,7 @@ endef
 define _internal-transform-o-to-shared-lib
 @mkdir -p $(dir $2)
 $(call print-banner2,"$(PRIVATE_MODE_MSG)SharedLib",$(PRIVATE_MODULE),$(call path-from-top,$2))
+$(call _binary-gen-rsp-file,objects-shared,$(PRIVATE_ALL_OBJECTS))
 $(Q) $(PRIVATE_CXX) \
 	$(PRIVATE_GLOBAL_LDFLAGS) \
 	$(if $(call streq,$(USE_LINK_MAP_FILE),1), \
@@ -331,7 +357,7 @@ $(Q) $(PRIVATE_CXX) \
 		-Wl$(comma)--out-implib$(comma)$(call path-from-top,$2).a \
 	) \
 	$(PRIVATE_LDFLAGS) \
-	$(PRIVATE_ALL_OBJECTS) \
+	$(call _binary-get-rsp-file,objects-shared,$(PRIVATE_ALL_OBJECTS)) \
 	$(call link-hook,$(PRIVATE_MODULE),$2, \
 		$(PRIVATE_ALL_OBJECTS) \
 		$(PRIVATE_ALL_STATIC_LIBRARIES) \
@@ -359,6 +385,7 @@ transform-o-to-shared-lib = $(if $(call streq,$($(PRIVATE_MODE)_OS),darwin), \
 define _internal-transform-o-to-executable-darwin
 @mkdir -p $(dir $2)
 $(call print-banner2,"$(PRIVATE_MODE_MSG)Executable",$(PRIVATE_MODULE),$(call path-from-top,$2))
+$(call _binary-gen-rsp-file,objects-executable,$(PRIVATE_ALL_OBJECTS))
 $(Q) $(PRIVATE_CXX) \
 	$(PRIVATE_GLOBAL_LDFLAGS) \
 	$(if $(call streq,$(USE_LINK_MAP_FILE),1), \
@@ -366,7 +393,7 @@ $(Q) $(PRIVATE_CXX) \
 	) \
 	-Wl,-dead_strip \
 	$(PRIVATE_LDFLAGS) \
-	$(PRIVATE_ALL_OBJECTS) \
+	$(call _binary-get-rsp-file,objects-executable,$(PRIVATE_ALL_OBJECTS)) \
 	$(call link-hook,$(PRIVATE_MODULE),$2, \
 		$(PRIVATE_ALL_OBJECTS) \
 		$(PRIVATE_ALL_STATIC_LIBRARIES) \
@@ -382,6 +409,7 @@ endef
 define _internal-transform-o-to-executable
 @mkdir -p $(dir $2)
 $(call print-banner2,"$(PRIVATE_MODE_MSG)Executable",$(PRIVATE_MODULE),$(call path-from-top,$2))
+$(call _binary-gen-rsp-file,objects-executable,$(PRIVATE_ALL_OBJECTS))
 $(Q) $(PRIVATE_CXX) \
 	$(PRIVATE_GLOBAL_LDFLAGS) \
 	$(if $(call streq,$(USE_LINK_MAP_FILE),1), \
@@ -390,7 +418,7 @@ $(Q) $(PRIVATE_CXX) \
 	-Wl,--gc-sections \
 	-Wl,--as-needed \
 	$(PRIVATE_LDFLAGS) \
-	$(PRIVATE_ALL_OBJECTS) \
+	$(call _binary-get-rsp-file,objects-executable,$(PRIVATE_ALL_OBJECTS)) \
 	$(call link-hook,$(PRIVATE_MODULE),$2, \
 		$(PRIVATE_ALL_OBJECTS) \
 		$(PRIVATE_ALL_STATIC_LIBRARIES) \
