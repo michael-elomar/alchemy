@@ -7,7 +7,6 @@
 ###############################################################################
 
 # Use thumb mode by default
-# TODO: is it necessary/usefull/wise ?
 TARGET_DEFAULT_ARM_MODE ?= thumb
 
 # Allow mix thumb/arm mode
