@@ -80,11 +80,6 @@ endif
 HOST_GLOBAL_CFLAGS += -DALCHEMY_BUILD
 TARGET_GLOBAL_CFLAGS += -DALCHEMY_BUILD
 
-# TODO : is it really the place and where to do it ?
-ifeq ("$(findstring -D__STDC_LIMIT_MACROS,$(TARGET_GLOBAL_CXXFLAGS))","")
-  TARGET_GLOBAL_CXXFLAGS += -D__STDC_LIMIT_MACROS
-endif
-
 # Don't emit warning for unused driver arguments
 HOST_GLOBAL_CFLAGS_clang += -Qunused-arguments
 TARGET_GLOBAL_CFLAGS_clang += -Qunused-arguments
