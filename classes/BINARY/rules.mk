@@ -139,6 +139,8 @@ endif
 $(_binary_objects_flags)-dir:
 	@mkdir -p $(dir $@)
 
+$(LOCAL_TARGETS): PRIVATE_CLEAN_FILES += $(_binary_objects_flags)
+
 ###############################################################################
 ## vala rules (.vala files are in LOCAL_PATH, generated .c and .o are in build dir)
 ###############################################################################
