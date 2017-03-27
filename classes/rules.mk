@@ -312,10 +312,10 @@ LOCAL_TARGETS += \
 	$(_module_autoconf_file) \
 	$(_module_revision_h_file)
 
-# Host modules required
+# Modules required (both host and target)
 all_prerequisites += \
-	$(foreach __mod,$(LOCAL_DEPENDS_HOST_MODULES), \
-		$(call module-get-stamp-file,$(__mod),installed))
+	$(foreach __mod,$(LOCAL_DEPENDS_HOST_MODULES) $(LOCAL_DEPENDS_MODULES), \
+		$(call module-get-stamp-file,$(__mod),done))
 
 ###############################################################################
 ## Import of dependencies.

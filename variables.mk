@@ -84,10 +84,10 @@ vars-LOCAL += CONDITIONAL_LIBRARIES
 vars-LOCAL += DEPENDS_HEADERS
 
 # Other modules required (at runtime for example). But not required for build
-# TODO: change the meaning of DEPENDS_MODULES to introduce build order
-# keeping REQUIRED_MODULES with no build order
-vars-LOCAL += DEPENDS_MODULES
 vars-LOCAL += REQUIRED_MODULES
+
+# Other modules required to build
+vars-LOCAL += DEPENDS_MODULES
 
 # Host modules required to build
 vars-LOCAL += DEPENDS_HOST_MODULES
