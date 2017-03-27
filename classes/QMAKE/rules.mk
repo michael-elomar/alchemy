@@ -30,7 +30,7 @@ _module_def_cmd_build := _qmake-def-cmd-build
 _module_def_cmd_install := _qmake-def-cmd-install
 _module_def_cmd_clean := _qmake-def-cmd-clean
 
-include $(BUILD_SYSTEM)/classes/BINARY/rules.mk
+include $(BUILD_SYSTEM)/classes/GENERIC/rules.mk
 
 $(LOCAL_TARGETS): PRIVATE_HAS_QT_SYSROOT := $(_qmake_has_qt_sysroot)
 $(LOCAL_TARGETS): PRIVATE_QMAKE := $(QMAKE)
