@@ -41,12 +41,14 @@ _autotools_configure_args := \
 # Cache file for target
 _autotools_target_cache_file := $(TARGET_OUT_BUILD)/autotools.cache
 
-# Force timestamp ordering of some generated files to make sure an automatic
-# autoreconf is not triggered
-# Only do it if the source dir is not LOCAL_PATH (so either extracted from
-# archive or copied in build directory)
-# No need to do that if a custom bootstrap is done
-# Not done if a custom bootstrap command is specified
+# - Force timestamp ordering of some generated files to make sure an automatic
+#   autoreconf is not triggered
+#   Only do it if the source dir is not LOCAL_PATH (so either extracted from
+#   archive or copied in build directory)
+#   No need to do that if a custom bootstrap is done
+# - Use our own copy of config.sub to make sure we have an up to date version
+#   for old packages that lack support for some platforms (aarch64, android...)
+#   TODO: do the copy only if our script is newer (compare timestamp with -t)
 define _autotools-hook-pre-configure
 	$(if $(call strneq,$(PRIVATE_SRC_DIR),$(PRIVATE_PATH)), \
 		$(Q) find $(PRIVATE_SRC_DIR) -name Makefile.am -exec touch {} \;$(endl) \
@@ -56,6 +58,7 @@ define _autotools-hook-pre-configure
 		$(Q) find $(PRIVATE_SRC_DIR) -name config.h.in -exec touch {} \;$(endl) \
 		$(Q) find $(PRIVATE_SRC_DIR) -name Makefile.in -exec touch {} \;$(endl) \
 		$(Q) find $(PRIVATE_SRC_DIR) -name configure -exec touch {} \;$(endl) \
+		$(Q) find $(PRIVATE_SRC_DIR) -name config.sub -exec cp -af $(BUILD_SYSTEM)/scripts/config.sub {} \;$(endl) \
 	)
 endef
 
