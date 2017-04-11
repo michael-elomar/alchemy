@@ -27,6 +27,14 @@ ifndef TARGET_TOOLCHAIN_TRIPLET
     # compiler does not support '-print-multiarch' option
     TARGET_TOOLCHAIN_TRIPLET := $(shell $(__toolchain_triplet_cmd) -dumpmachine)
   endif
+  # Catch error in compiler invocation
+  ifneq ("$(findstring error,$(TARGET_TOOLCHAIN_TRIPLET))","")
+    $(error Unable to determine TARGET_TOOLCHAIN_TRIPLET: $(TARGET_TOOLCHAIN_TRIPLET)))
+  endif
+endif
+
+ifeq ("$(TARGET_TOOLCHAIN_TRIPLET)","")
+  $(error Unable to determine TARGET_TOOLCHAIN_TRIPLET))
 endif
 
 # Clang uses gcc toochain(libc&binutils) to cross-compile
