@@ -175,6 +175,8 @@ TARGET_GLOBAL_LDFLAGS += $(cpu_flags)
 
 # Set float abi
 ifdef TARGET_FLOAT_ABI
-  TARGET_GLOBAL_CFLAGS += -mfloat-abi=$(TARGET_FLOAT_ABI)
-  TARGET_GLOBAL_LDFLAGS += -mfloat-abi=$(TARGET_FLOAT_ABI)
+  ifneq ("$(TARGET_ARCH)","aarch64")
+    TARGET_GLOBAL_CFLAGS += -mfloat-abi=$(TARGET_FLOAT_ABI)
+    TARGET_GLOBAL_LDFLAGS += -mfloat-abi=$(TARGET_FLOAT_ABI)
+  endif
 endif
