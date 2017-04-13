@@ -161,7 +161,7 @@ ifeq ("$(TARGET_CPU)", "stm32f3")
   TARGET_FLOAT_ABI ?= hard
 endif
 
-ifeq ("$(TARGET_CPU)", "m0")
+ifeq ("$(TARGET_CPU)", "cortex-m0")
   cpu_flags += -mcpu=cortex-m0
   TARGET_DEFAULT_ARM_MODE ?= thumb
   TARGET_FLOAT_ABI ?= soft
