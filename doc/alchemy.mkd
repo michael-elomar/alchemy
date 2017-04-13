@@ -228,6 +228,8 @@ it when targetting Android.
 * Otherwise, alchemy will try to use an Android NDK. This mode supports a few options:
   * `TARGET_ANDROID_APILEVEL` : Android API level to target.
   </br>Default is `17`
+  * `TARGET_ANDROID_MINAPILEVEL` : Minimum Android API Level required for the application to run.
+  </br>Default is `TARGET_ANDROID_APILEVEL`
   * `TARGET_ANDROID_NDK` : Path of the Android NDK to use.
   </br>Default tries to auto-detect the NDK from a few somewhat standard location (`/opt/android-ndk-*`, `~/android-ndk-*`, ...)
   * `TARGET_ANDROID_SDK` : Path of the Android SDK to use.
