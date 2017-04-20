@@ -63,7 +63,7 @@ HOST_GLOBAL_LDFLAGS += -O2
 HOST_GLOBAL_ARFLAGS += rcs
 
 # Add some target generic flags
-TARGET_GLOBAL_CFLAGS += -pipe -O2 -g -fno-short-enums
+TARGET_GLOBAL_CFLAGS += -pipe -O2 -g
 TARGET_GLOBAL_LDFLAGS += -O2
 TARGET_GLOBAL_ARFLAGS += rcs
 
