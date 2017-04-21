@@ -91,6 +91,8 @@ TARGET_CMAKE_MAKE_ARGS := \
 # Force static compilation if required
 ifeq ("$(TARGET_FORCE_STATIC)","1")
   TARGET_CMAKE_CONFIGURE_ARGS += -DBUILD_SHARED_LIBS=OFF
+else
+  TARGET_CMAKE_CONFIGURE_ARGS += -DBUILD_SHARED_LIBS=ON
 endif
 
 # Quiet/Verbose flags
