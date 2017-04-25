@@ -1,3 +1,41 @@
+parrot-tools-alchemy (1.3.2) unstable; urgency=low
+  * Add module filename in LOCAL_DONE_FILES if it ends with .done
+  * Allow android amv7a to override mfpu to neon.
+  * Android.mk: add -static suffix to static lib
+  * Add variable to explicitly add dependencies
+  * sdk: ignore hidden file when checking multiple exported includes
+  * Copy toolchain libgomp if available to /lib
+  * Support undefined sanitizer & fix using coverage w/ sanitizers
+  * Allow to ignore codecheck warning for a whole file.
+  * Add LOCAL_COPY_TO_BUILD_DIR_SKIP_FILES
+  * Copy libasan from toolchain to final when using address sanitizer
+  * fix module disabling when no config file avilable
+  * Generate .dll.a import library file under windows.
+  * Allow override of cmake binary (CMAKE variable)
+  * Handle windows binaries in makefinal.py
+  * Handle mingw for windows host os.
+  * Remove support for installed kconfig in confwrapper.py
+  * On windows host, force generation of Unix makefiles for cmake.
+  * Allow cmake modules to use ccache.
+  * Allow customization of pkg-config and cmake search paths.
+  * Update is-path-absolute to support windows paths.
+  * Update fix-deps-file to support windows paths.
+  * Add binutils'ld link optimization
+  * Add LOCAL_FORCE_STATIC variable.
+  * Allow customization of qmake configure/build steps.
+  * Update global flags handling.
+  * Add support for windows rc file compilation using windres.
+  * Add support for response file to avoid too long command line
+  * Change the meaning of LOCAL_DEPENDS_MODULES
+  * Add CONFIG+=debug to qmake if O0 if found in CFLAGS.
+  * Allow USE_CLANG on Android to select newer NDK 'clang+unified headers'
+  * Catch error in compiler invocation when determining triplet
+  * Force using a recent version of config.sub
+  * Remove -fno-short-enums from TARGET_GLOBAL_CFLAGS
+  * Enable shared libraries for cmake
+
+ -- Yves-Marie Morgan (Parrot) <yves-marie.morgan@parrot.com>  Tue, 25 Apr 2017 10:35:39 +0200
+
 parrot-tools-alchemy (1.3.1) unstable; urgency=low
   * Add minimal support for Fortran compiler and libraries
   * Set TARGET_DEFAULT_ARM_MODE to thumb on Cortex-M processors
