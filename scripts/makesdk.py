@@ -571,8 +571,8 @@ def main():
     # in the correct environment
     target_elements = [
         "OS", "OS_FLAVOUR",
-        "ARCH", "CPU", "CROSS",
-        "LIBC", "DEFAULT_ARM_MODE"
+        "ARCH", "CPU", "CC_VERSION", "CC_FLAVOUR", "TOOLCHAIN_TRIPLET",
+        "LIBC", "DEFAULT_ARM_MODE", "FLOAT_ABI"
     ]
     for element_to_check in target_elements:
         checkTargetVar(ctx, element_to_check)
