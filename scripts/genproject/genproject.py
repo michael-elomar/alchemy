@@ -250,13 +250,14 @@ class Project(object):
 #===============================================================================
 #===============================================================================
 def main():
+    setup_log()
+
     # Load project specific packages
     for kind in _PROJECT_KINDS:
         _PROJECT_KINDS[kind] = importlib.import_module(kind)
 
     # Parse arguments
     options = parse_args()
-    setup_log()
 
     # Load module db from xml
     try:
