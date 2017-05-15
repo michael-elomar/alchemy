@@ -436,7 +436,10 @@ endif
 
 ###############################################################################
 ## Prepend global flags depending on compiler arch
+## Not done for linux module because global flags are for userspace components only.
 ###############################################################################
+
+ifneq ("$(LOCAL_MODULE_CLASS)","LINUX_MODULE")
 
 LOCAL_CFLAGS := \
 	$($(_mode_prefix)_GLOBAL_CFLAGS_$(_module_arch)) \
@@ -445,6 +448,8 @@ LOCAL_CFLAGS := \
 LOCAL_LDFLAGS := \
 	$($(_mode_prefix)_GLOBAL_LDFLAGS_$(_module_arch)) \
 	$(LOCAL_LDFLAGS)
+
+endif
 
 ###############################################################################
 ## Determine flags that external modules will need to add manually.
