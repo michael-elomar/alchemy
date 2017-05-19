@@ -62,13 +62,19 @@ image-extract-args = \
 ###############################################################################
 PLFTOOL ?= plftool
 MK_KERNEL_PLF ?= mk_kernel_plf
+
+ifndef gen-kernel-plf
+gen-kernel-plf = \
+	$(MK_KERNEL_PLF) \
+		"ignore-boot.cfg" \
+		$(TARGET_OUT_FINAL)/boot/zImage \
+		$(TARGET_OUT_BUILD)/linux/.config \
+		$1;
+endif
+
 define gen-image-plf
 	$(Q) if [ -f "$(TARGET_OUT_FINAL)/boot/zImage" ]; then \
-		$(MK_KERNEL_PLF) \
-			"ignore-boot.cfg" \
-			$(TARGET_OUT_FINAL)/boot/zImage \
-			$(TARGET_OUT_BUILD)/linux/.config \
-			$(TARGET_OUT)/kernel.plf; \
+		$(call gen-kernel-plf,$(TARGET_OUT)/kernel.plf) \
 		$(PLFTOOL) -a u_data=$(TARGET_OUT)/kernel.plf $1; \
 	elif [ "$(TARGET_CHROOT)" = "0" ]; then \
 		echo "Image plf: no kernel image found"; \
