@@ -1472,6 +1472,8 @@ You can also ignore a warning for a whole file by using:
 	codecheck_ignore_file[TYPE1(,TYPE2...)]
 </pre>
 
+If `TYPE` is `ALL`, *all* codecheck warnings will be disabled for the file
+
 ## Codecheck for C++ false positives or intentional deviations
 
 You can ignore specific c++ codecheck warnings in a C++ source code file by inserting
