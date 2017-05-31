@@ -118,6 +118,8 @@ TARGET_QMAKE_LDFLAGS := $(shell echo $(TARGET_QMAKE_LDFLAGS) | sed 's/-isysroot 
 
 ###############################################################################
 ## Generate a .pri file to be included by the .pro file with dependencies found by alchemy
+## Remove optimization flags, let qmake put them based on debug/release config
+## By default release is choosen unless -O0 is found in CFLAGS (via Alchemy-debug-setup.mk)
 ###############################################################################
 
 define _internal-qmake-gen-deps-darwin
@@ -133,12 +135,12 @@ define _internal-qmake-gen-deps-darwin
 		echo "INSTALLS += target"; \
 		echo "INCLUDEPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
 		echo "DEPENDPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
-		echo "QMAKE_CFLAGS += $(TARGET_QMAKE_CFLAGS) $(PRIVATE_CFLAGS)"; \
-		echo "QMAKE_CXXFLAGS += $(filter-out -std=%,$(TARGET_QMAKE_CFLAGS))"; \
-		echo "QMAKE_CXXFLAGS += $(TARGET_GLOBAL_CXXFLAGS)"; \
-		echo "QMAKE_CXXFLAGS += $(filter-out -std=%,$(PRIVATE_CFLAGS))"; \
-		echo "QMAKE_CXXFLAGS += $(PRIVATE_CXXFLAGS)"; \
-		echo "LIBS += $(subst $(APPLE_ARCH),,$(TARGET_QMAKE_LDFLAGS) $(PRIVATE_LDFLAGS))"; \
+		echo "QMAKE_CFLAGS += $(filter-out -O0 -O1 -O2 -O3,$(TARGET_QMAKE_CFLAGS) $(PRIVATE_CFLAGS))"; \
+		echo "QMAKE_CXXFLAGS += $(filter-out -O0 -O1 -O2 -O3,$(filter-out -std=%,$(TARGET_QMAKE_CFLAGS)))"; \
+		echo "QMAKE_CXXFLAGS += $(filter-out -O0 -O1 -O2 -O3,$(TARGET_GLOBAL_CXXFLAGS))"; \
+		echo "QMAKE_CXXFLAGS += $(filter-out -O0 -O1 -O2 -O3,$(filter-out -std=%,$(PRIVATE_CFLAGS)))"; \
+		echo "QMAKE_CXXFLAGS += $(filter-out -O0 -O1 -O2 -O3,$(PRIVATE_CXXFLAGS))"; \
+		echo "LIBS += $(filter-out -O0 -O1 -O2 -O3,$(subst $(APPLE_ARCH),,$(TARGET_QMAKE_LDFLAGS) $(PRIVATE_LDFLAGS)))"; \
 		echo "LIBS += $(foreach __lib, $(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES), -force_load $(__lib))"; \
 		echo "LIBS += $(PRIVATE_ALL_STATIC_LIBRARIES)"; \
 		echo "LIBS += $(PRIVATE_ALL_SHARED_LIBRARIES)"; \
@@ -168,12 +170,12 @@ define _internal-qmake-gen-deps
 		echo "INSTALLS += target"; \
 		echo "INCLUDEPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
 		echo "DEPENDPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
-		echo "QMAKE_CFLAGS += $(TARGET_QMAKE_CFLAGS) $(PRIVATE_CFLAGS)"; \
-		echo "QMAKE_CXXFLAGS += $(filter-out -std=%,$(TARGET_QMAKE_CFLAGS))"; \
-		echo "QMAKE_CXXFLAGS += $(TARGET_GLOBAL_CXXFLAGS)"; \
-		echo "QMAKE_CXXFLAGS += $(filter-out -std=%,$(PRIVATE_CFLAGS))"; \
-		echo "QMAKE_CXXFLAGS += $(PRIVATE_CXXFLAGS)"; \
-		echo "LIBS += $(TARGET_QMAKE_LDFLAGS) $(PRIVATE_LDFLAGS)"; \
+		echo "QMAKE_CFLAGS += $(filter-out -O0 -O1 -O2 -O3,$(TARGET_QMAKE_CFLAGS) $(PRIVATE_CFLAGS))"; \
+		echo "QMAKE_CXXFLAGS += $(filter-out -O0 -O1 -O2 -O3,$(filter-out -std=%,$(TARGET_QMAKE_CFLAGS)))"; \
+		echo "QMAKE_CXXFLAGS += $(filter-out -O0 -O1 -O2 -O3,$(TARGET_GLOBAL_CXXFLAGS))"; \
+		echo "QMAKE_CXXFLAGS += $(filter-out -O0 -O1 -O2 -O3,$(filter-out -std=%,$(PRIVATE_CFLAGS)))"; \
+		echo "QMAKE_CXXFLAGS += $(filter-out -O0 -O1 -O2 -O3,$(PRIVATE_CXXFLAGS))"; \
+		echo "LIBS += $(filter-out -O0 -O1 -O2 -O3,$(TARGET_QMAKE_LDFLAGS) $(PRIVATE_LDFLAGS))"; \
 		echo "LIBS += -Wl,--whole-archive $(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES) -Wl,--no-whole-archive"; \
 		echo "LIBS += $(PRIVATE_ALL_STATIC_LIBRARIES)"; \
 		echo "LIBS += $(PRIVATE_ALL_SHARED_LIBRARIES)"; \

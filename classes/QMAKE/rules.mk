@@ -32,6 +32,8 @@ _module_def_cmd_clean := _qmake-def-cmd-clean
 
 ifneq ("$(findstring -O0,$(LOCAL_CFLAGS))","")
   LOCAL_QMAKE_CONFIGURE_ARGS += CONFIG+=debug
+else
+  LOCAL_QMAKE_CONFIGURE_ARGS += CONFIG+=release
 endif
 
 include $(BUILD_SYSTEM)/classes/GENERIC/rules.mk
