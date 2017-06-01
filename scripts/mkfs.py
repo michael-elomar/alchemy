@@ -78,13 +78,17 @@ def addFsEntry(root, entry):
 
 #===============================================================================
 #===============================================================================
-def addFsEntries(root):
+def addFsEntries(root, filters):
     # Read file names on stdin
     reLine = re.compile("([^;]*)(;mode=([0-7]*);uid=([0-9]*);gid=([0-9]*))?")
     for line in sys.stdin:
         buf = line.rstrip("\n")
         match = reLine.match(buf)
         filePath = match.group(1)
+
+        if filePath in filters:
+            logging.info("Skipping entry: %s", filePath)
+            continue
 
         # Get file info
         st = MyStat(os.lstat(filePath))
@@ -165,7 +169,7 @@ def main():
 
     # Construct image from root
     root = FsEntry(None, 0, None)
-    addFsEntries(root)
+    addFsEntries(root, options.filters)
     addDevNodes(root, options.devNodes)
 
     # Generate the ouput file
@@ -214,6 +218,13 @@ def parseArgs():
         default=[],
         metavar="NODE",
         help="add a device node (format is name:mode:uid:gid:c|b:maj:min)")
+
+    parser.add_argument("--filter",
+        dest="filters",
+        action="append",
+        default=[],
+        metavar="FILTER",
+        help="filter out some files from generated image")
 
     parser.add_argument("-q",
         dest="quiet",

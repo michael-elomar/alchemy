@@ -423,7 +423,8 @@ forms <code>tar.gz</code>, <code>cpio.gz</code>, <code>ext2.gz</code>, <code>ext
 </br>Default is <code>tar.gz</code>.</li>
 <li><code>TARGET_IMAGE_OPTIONS</code> : additional options to give during image generation:
 <ul>
-<li><code>--size &lt;val&gt; [&lt;unit&gt;]</code> : size of image (for <code>ext</code> format), unit is <code>K</code>, <code>M</code>, <code>G</code>
+<li><code>--size &lt;val&gt; [&lt;unit&gt;]</code> : size of image (for <code>ext</code> format), unit is <code>K</code>, <code>M</code>, <code>G</code></li>
+<li><code>--filter &lt;path&gt;</code> : path (relative to root fs) to skip during image generation
 </br>Default is empty.</li>
 </ul></li>
 <li><code>TARGET_FINAL_MODE</code>: how to create the final directory. Supported value:

@@ -373,6 +373,7 @@ Mainly used by the android wrapper.
   </br>Default is `tar.gz`.
 * `TARGET_IMAGE_OPTIONS` : additional options to give during image generation:
   * `--size <val> [<unit>]` : size of image (for `ext` format), unit is `K`, `M`, `G`
+  * `--filter <path>` : path (relative to root fs) to skip during image generation
   </br>Default is empty.
 * `TARGET_FINAL_MODE`: how to create the final directory. Supported value:
   * `full`: nothing is filtered.
