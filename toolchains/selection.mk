@@ -6,7 +6,10 @@
 ## Setup toolchain variables.
 ###############################################################################
 
-ifneq ("$(USE_CLANG)","1")
+HOST_USE_CLANG ?= $(USE_CLANG)
+TARGET_USE_CLANG ?= $(USE_CLANG)
+
+ifneq ("$(HOST_USE_CLANG)","1")
   HOST_CC ?= cc
   HOST_CXX ?= c++
   HOST_AS ?= as
@@ -56,7 +59,7 @@ ifeq ("$(TARGET_OS)-$(TARGET_OS_FLAVOUR)","$(HOST_OS)-native")
   TARGET_OBJDUMP ?= $(HOST_OBJDUMP)
   TARGET_WINDRES ?= $(HOST_WINDRES)
 else
-  ifneq ("$(USE_CLANG)","1")
+  ifneq ("$(TARGET_USE_CLANG)","1")
     TARGET_CC ?= $(TARGET_CROSS)gcc
     TARGET_CXX ?= $(TARGET_CROSS)g++
   else

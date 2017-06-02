@@ -19,7 +19,7 @@ endif
 
 ANDROID_TOOLCHAIN_PATH := $(TARGET_OUT)/toolchain
 
-ifeq ("$(USE_CLANG)","1")
+ifeq ("$(TARGET_USE_CLANG)","1")
   # Requires NDK r14b or newer, use new scripts, new args, and new toolchain
 
   # TARGET_ANDROID_TOOLCHAIN_VERSION & TARGET_ANDROID_TOOLCHAIN are ignored as
@@ -77,7 +77,7 @@ ifeq ("$(ANDROID_TOOLCHAIN_PREFIX)", "")
   $(error Failed to detect android toolchain prefix)
 endif
 
-ifeq ("$(USE_CLANG)", "1")
+ifeq ("$(TARGET_USE_CLANG)", "1")
   # Clang mode, do not define TARGET_CROSS but define our own TARGET_tools
   ANDROID_CROSS := $(ANDROID_TOOLCHAIN_PATH)/bin/$(ANDROID_TOOLCHAIN_PREFIX)-
   TARGET_CC ?= $(ANDROID_CROSS)clang
