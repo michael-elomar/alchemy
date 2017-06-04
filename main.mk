@@ -238,11 +238,12 @@ create-user-makefiles-cache = \
 	( \
 		echo "\$$(info Found `echo $$files | wc -w` makefiles)"; \
 		for f in $$files; do \
-			echo "USER_MAKEFILES += $$f"; \
-			echo "\$$(call user-makefile-before-include,$$f)"; \
-			$(if $(call strneq,$(V),0),echo "\$$(info $$f)";) \
-			echo "include $$f"; \
-			echo "\$$(call user-makefile-after-include,$$f)"; \
+			echo "USER_MAKEFILE := $$f"; \
+			echo "USER_MAKEFILES += \$$(USER_MAKEFILE)"; \
+			echo "\$$(call user-makefile-before-include,\$$(USER_MAKEFILE))"; \
+			$(if $(call strneq,$(V),0),echo "\$$(info \$$(USER_MAKEFILE))";) \
+			echo "include \$$(USER_MAKEFILE)"; \
+			echo "\$$(call user-makefile-after-include,\$$(USER_MAKEFILE))"; \
 		done \
 	) >> $(USER_MAKEFILES_CACHE);
 
