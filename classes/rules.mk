@@ -358,14 +358,19 @@ endif
 # Add includes of modules listed in LOCAL_DEPENDS_HEADERS
 imported_C_INCLUDES += $(call module-get-listed-export,$(LOCAL_DEPENDS_HEADERS),C_INCLUDES)
 
+# Move include flags from CFLAGS/CXXFLAGS to C_INCLUDES
+imported_C_INCLUDES += $(patsubst -I%,%,$(filter -I%,$(imported_CFLAGS) $(imported_CXXFLAGS)))
+imported_CFLAGS := $(filter-out -I%,$(imported_CFLAGS))
+imported_CXXFLAGS := $(filter-out -I%,$(imported_CXXFLAGS))
+
 # Import prerequisites (the one for this module are already in all_prerequisites)
 imported_PREREQUISITES := $(call module-get-listed-export,$(all_depends),PREREQUISITES)
 all_prerequisites += $(imported_PREREQUISITES)
 
 # The imported/exported compiler flags are prepended to their LOCAL_XXXX value
 # (this allows the module to override them).
-LOCAL_CFLAGS     := $(strip $(imported_CFLAGS) $(LOCAL_CFLAGS))
-LOCAL_CXXFLAGS   := $(strip $(imported_CXXFLAGS) $(LOCAL_CXXFLAGS))
+LOCAL_CFLAGS := $(strip $(imported_CFLAGS) $(LOCAL_CFLAGS))
+LOCAL_CXXFLAGS := $(strip $(imported_CXXFLAGS) $(LOCAL_CXXFLAGS))
 
 # The imported/exported include directories are appended to their LOCAL_XXX value
 # (this allows the module to override them)
@@ -374,7 +379,11 @@ LOCAL_C_INCLUDES := $(strip $(LOCAL_C_INCLUDES) $(imported_C_INCLUDES))
 # Similarly, you want the imported/exported flags to appear _after_ the LOCAL_LDLIBS
 # due to the way Unix linkers work (depending libraries must appear before
 # dependees on final link command).
-LOCAL_LDLIBS     := $(strip $(LOCAL_LDLIBS) $(imported_LDLIBS))
+LOCAL_LDLIBS := $(strip $(LOCAL_LDLIBS) $(imported_LDLIBS))
+
+# Simplify variable by keeping only first occurence of each item
+LOCAL_C_INCLUDES := $(strip $(call uniq,$(LOCAL_C_INCLUDES)))
+LOCAL_LDLIBS := $(strip $(call uniq,$(LOCAL_LDLIBS)))
 
 # Get all autoconf files that we depend on, don't forget to add ourself
 # External modules only get internal ones. Mainly because we don't want to break

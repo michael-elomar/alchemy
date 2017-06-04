@@ -94,6 +94,15 @@ strneq = $(call not,$(call streq,$1,$2))
 # $2 : minimum version.
 check-version = $(call strneq,0,$(shell expr $1 \>= $2))
 
+# Make sure an item appears only once in a list, keeping only the first reference.
+# $1 : input list.
+uniq = \
+	$(eval __r := $(empty)) \
+	$(foreach __f,$1, \
+		$(if $(filter $(__f),$(__r)),,$(eval __r += $(__f))) \
+	) \
+	$(__r)
+
 # Make sure an item appears only once in a list, keeping only the last reference.
 # $1 : input list.
 uniq2 = \
