@@ -38,6 +38,14 @@ endif
 
 include $(BUILD_SYSTEM)/classes/GENERIC/rules.mk
 
+# Restart configure if debug/release mode is changed
+_qmake_configure_flags := $(_module_build_dir)/$(LOCAL_MODULE).configure.flags
+$(_module_configured_stamp_file): $(_qmake_configure_flags)
+$(_qmake_configure_flags): .FORCE
+	@mkdir -p $(dir $@)
+	@echo "$(PRIVATE_QMAKE_CONFIGURE_ARGS)" > $@.tmp
+	$(call update-file-if-needed,$@,$@.tmp)
+
 # Determine debug libraries of qmake dependencies
 # Get the first ford of LOCAL_EXPORT_LDLIBS and append '_debug'
 _qmake_ldlibs_debug := $(LOCAL_LDLIBS)
