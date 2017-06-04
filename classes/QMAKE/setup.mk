@@ -181,7 +181,9 @@ define _internal-qmake-gen-deps
 		echo "LIBS += $(PRIVATE_ALL_SHARED_LIBRARIES)"; \
 		echo "LIBS += $(PRIVATE_LDLIBS)"; \
 		echo "LIBS += $(TARGET_GLOBAL_LDLIBS)"; \
-		echo "ANDROID_EXTRA_LIBS = $(shell find $(TARGET_OUT_STAGING)/$(TARGET_DEFAULT_LIB_DESTDIR) -maxdepth 1 -name 'lib*.so' -type f)"; \
+		$(if $(call streq,$(TARGET_OS_FLAVOUR),android), \
+			echo "ANDROID_EXTRA_LIBS = $(shell find $(TARGET_OUT_STAGING)/$(TARGET_DEFAULT_LIB_DESTDIR) -maxdepth 1 -name 'lib*.so' -type f)"; \
+		) \
 	) >> $(PRIVATE_ALCHEMY_PRI_FILE).tmp
 	$(call update-file-if-needed,$(PRIVATE_ALCHEMY_PRI_FILE),$(PRIVATE_ALCHEMY_PRI_FILE).tmp)
 endef
