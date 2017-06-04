@@ -1340,9 +1340,8 @@ copy-get-dst-path-host = $(strip \
 ###############################################################################
 install-headers-setup = \
 	$(foreach __pair,$(__modules.$1.INSTALL_HEADERS), \
-		$(eval __pair2 := $(subst :,$(space),$(__pair))) \
-		$(eval __w1 := $(word 1,$(__pair2))) \
-		$(eval __w2 := $(word 2,$(__pair2))) \
+		$(eval __w1 := $(firstword $(subst :,$(space),$(__pair)))) \
+		$(eval __w2 := $(patsubst $(__w1):%,%,$(__pair))) \
 		$(if $(__w2),$(empty), \
 			$(if $(call is-module-host,$1), \
 				$(eval __w2 := $(HOST_ROOT_DESTDIR)/include/) \

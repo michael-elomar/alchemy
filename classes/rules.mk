@@ -588,9 +588,8 @@ ifneq ("$(LOCAL_COPY_FILES)","")
 # Handle relative/absolute paths
 # Handle directory only for destination
 $(foreach __pair,$(LOCAL_COPY_FILES), \
-	$(eval __pair2 := $(subst :,$(space),$(__pair))) \
-	$(eval __w1 := $(word 1,$(__pair2))) \
-	$(eval __w2 := $(word 2,$(__pair2))) \
+	$(eval __w1 := $(firstword $(subst :,$(space),$(__pair)))) \
+	$(eval __w2 := $(patsubst $(__w1):%,%,$(__pair))) \
 	$(eval __src := $(call copy-get-src-path,$(__w1))) \
 	$(eval __dst := $(call copy-get-dst-path$(_mode_suffix),$(__w2))) \
 	$(if $(call is-path-dir,$(__dst)), \
@@ -630,9 +629,8 @@ ifneq ("$(LOCAL_CREATE_LINKS)","")
 
 # Generate a rule to create links
 $(foreach __pair,$(LOCAL_CREATE_LINKS), \
-	$(eval __pair2 := $(subst :,$(space),$(__pair))) \
-	$(eval __w1 := $(word 1,$(__pair2))) \
-	$(eval __w2 := $(word 2,$(__pair2))) \
+	$(eval __w1 := $(firstword $(subst :,$(space),$(__pair)))) \
+	$(eval __w2 := $(patsubst $(__w1):%,%,$(__pair))) \
 	$(eval __name := $($(_mode_prefix)_OUT_STAGING)/$(__w1)) \
 	$(eval __target := $(__w2)) \
 	$(eval _module_all_create_links += $(__name)) \
