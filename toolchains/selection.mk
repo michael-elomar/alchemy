@@ -88,10 +88,6 @@ ifeq ("$(TARGET_CC_PATH)","")
   $(error Unable to find compiler: $(TARGET_CC))
 endif
 
-# Determine compilers version
-TARGET_CC_VERSION := $(shell $(TARGET_CC) -dumpversion)
-HOST_CC_VERSION := $(shell $(HOST_CC) -dumpversion)
-
 # TODO: remove when not used anymore
 TARGET_COMPILER_PATH := $(shell PARAM="$(TARGET_CC)";echo $${PARAM%/bin*})
 
@@ -107,4 +103,19 @@ ifeq ("$(shell $(TARGET_CC) --version | grep -q clang; echo $$?)","0")
   TARGET_CC_FLAVOUR := clang
 else
   TARGET_CC_FLAVOUR := gcc
+endif
+
+# Determine compilers version
+ifeq ("$(HOST_CC_FLAVOUR)","clang")
+  TARGET_CC_VERSION := $(shell $(HOST_CC) --version | head -1 | \
+		sed -e 's/clang version \([0-9]\+\.[0-9]\+\.[0-9]\+\).*/\1/')
+else
+  HOST_CC_VERSION := $(shell $(HOST_CC) -dumpversion)
+endif
+
+ifeq ("$(TARGET_CC_FLAVOUR)","clang")
+  TARGET_CC_VERSION := $(shell $(TARGET_CC) --version | head -1 | \
+		sed -e 's/clang version \([0-9]\+\.[0-9]\+\.[0-9]\+\).*/\1/')
+else
+  TARGET_CC_VERSION := $(shell $(TARGET_CC) -dumpversion)
 endif
