@@ -397,7 +397,7 @@ $(foreach __mod,$(ALL_MODULES), \
 			$(if $(call is-not-item-in-list,$(__mod),$(ALL_BUILD_MODULES)), \
 				$(info $(__mod) is not enabled in the config) \
 				$(eval ALL_BUILD_MODULES += $(__mod) \
-					$(call module-get-all-depends,$(__mod)) \
+					$(call module-get-build-depends,$(__mod)) \
 				) \
 			) \
 		) \
