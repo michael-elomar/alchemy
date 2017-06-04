@@ -10,12 +10,16 @@ MKFS_SCRIPT := $(BUILD_SYSTEM)/scripts/mkfs.py
 SPARSE_SCRIPT := $(BUILD_SYSTEM)/scripts/sparse.py
 
 # Script that will modify mode/uid/gid of files while generating the image
-FIXSTAT := $(BUILD_SYSTEM)/scripts/fixstat.py \
+FIXSTAT := $(BUILD_SYSTEM)/scripts/fixstat.py
+
+ifeq ("$(TARGET_OS)","linux")
+ifeq ("$(is-full-system)","1")
+FIXSTAT += \
 	--user-file=$(TARGET_OUT_FINAL)/$(TARGET_DEFAULT_ETC_DESTDIR)/passwd \
 	--group-file=$(TARGET_OUT_FINAL)/$(TARGET_DEFAULT_ETC_DESTDIR)/group \
-	$(foreach __f,$(TARGET_PERMISSIONS_FILES), \
-		--permissions-file=$(__f) \
-	)
+	$(foreach __f,$(TARGET_PERMISSIONS_FILES), --permissions-file=$(__f))
+endif
+endif
 
 # Apply default permissions (quite restrictives) only if other rules are present
 ifneq ("$(TARGET_PERMISSIONS_FILES)","")
