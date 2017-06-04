@@ -164,6 +164,14 @@ define _internal-qmake-gen-deps
 		echo "equals(TEMPLATE, lib) {"; \
 		echo "    target.path = $(if $(PRIVATE_HAS_QT_SYSROOT),$(TARGET_OUT_STAGING))/$(TARGET_DEFAULT_LIB_DESTDIR)"; \
 		$(if $(call streq,$(TARGET_FORCE_STATIC),1),echo "    CONFIG += staticlib";) \
+		$(if $(call streq,$(TARGET_OS),windows), \
+			echo "    CONFIG(debug, debug|release): TARGET = \$$\$${TARGET}_debug"; \
+			echo "    !CONFIG(staticlib) {"; \
+			echo "        target.CONFIG = no_dll"; \
+			echo "        dlltarget.path = $(if $(PRIVATE_HAS_QT_SYSROOT),$(TARGET_OUT_STAGING))/$(TARGET_DEFAULT_BIN_DESTDIR)"; \
+			echo "        INSTALLS += dlltarget"; \
+			echo "    }"; \
+		) \
 		echo "} else {"; \
 		echo "    target.path = $(if $(PRIVATE_HAS_QT_SYSROOT),$(TARGET_OUT_STAGING))/$(TARGET_DEFAULT_BIN_DESTDIR)"; \
 		echo "}"; \
