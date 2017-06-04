@@ -38,6 +38,20 @@ endif
 
 include $(BUILD_SYSTEM)/classes/GENERIC/rules.mk
 
+# Determine debug libraries of qmake dependencies
+# Get the first ford of LOCAL_EXPORT_LDLIBS and append '_debug'
+_qmake_ldlibs_debug := $(LOCAL_LDLIBS)
+ifeq ("$(TARGET_OS)","windows")
+$(foreach __mod,$(all_external_libs), \
+	$(if $(call streq,$(__modules.$(__mod).MODULE_CLASS),QMAKE), \
+		$(eval __lib := $(firstword $(call module-get-export,$(__mod),LDLIBS))) \
+		$(if $(__lib), \
+			$(eval _qmake_ldlibs_debug := $(patsubst $(__lib),$(__lib)_debug,$(_qmake_ldlibs_debug))) \
+		) \
+	) \
+)
+endif
+
 $(LOCAL_TARGETS): PRIVATE_HAS_QT_SYSROOT := $(_qmake_has_qt_sysroot)
 $(LOCAL_TARGETS): PRIVATE_QMAKE := $(QMAKE)
 $(LOCAL_TARGETS): PRIVATE_QMAKE_PRO_FILE := $(LOCAL_QMAKE_PRO_FILE)
@@ -49,6 +63,7 @@ $(LOCAL_TARGETS): PRIVATE_CFLAGS := $(LOCAL_CFLAGS)
 $(LOCAL_TARGETS): PRIVATE_CXXFLAGS := $(LOCAL_CXXFLAGS)
 $(LOCAL_TARGETS): PRIVATE_LDFLAGS := $(LOCAL_LDFLAGS)
 $(LOCAL_TARGETS): PRIVATE_LDLIBS := $(LOCAL_LDLIBS)
+$(LOCAL_TARGETS): PRIVATE_LDLIBS_DEBUG := $(_qmake_ldlibs_debug)
 $(LOCAL_TARGETS): PRIVATE_ALL_SHARED_LIBRARIES := $(all_shared_libs_filename)
 $(LOCAL_TARGETS): PRIVATE_ALL_STATIC_LIBRARIES := $(all_static_libs_filename)
 $(LOCAL_TARGETS): PRIVATE_ALL_WHOLE_STATIC_LIBRARIES := $(all_whole_static_libs_filename)

@@ -187,7 +187,15 @@ define _internal-qmake-gen-deps
 		echo "LIBS += -Wl,--whole-archive $(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES) -Wl,--no-whole-archive"; \
 		echo "LIBS += $(PRIVATE_ALL_STATIC_LIBRARIES)"; \
 		echo "LIBS += $(PRIVATE_ALL_SHARED_LIBRARIES)"; \
-		echo "LIBS += $(PRIVATE_LDLIBS)"; \
+		$(if $(call streq,$(TARGET_OS),windows), \
+			echo "CONFIG(debug, debug|release) {"; \
+			echo "    LIBS += $(PRIVATE_LDLIBS_DEBUG)"; \
+			echo "} else {"; \
+			echo "    LIBS += $(PRIVATE_LDLIBS)"; \
+			echo "}"; \
+			, \
+			echo "LIBS += $(PRIVATE_LDLIBS)"; \
+		) \
 		echo "LIBS += $(TARGET_GLOBAL_LDLIBS)"; \
 		$(if $(call streq,$(TARGET_OS_FLAVOUR),android), \
 			echo "ANDROID_EXTRA_LIBS = $(shell find $(TARGET_OUT_STAGING)/$(TARGET_DEFAULT_LIB_DESTDIR) -maxdepth 1 -name 'lib*.so' -type f)"; \
