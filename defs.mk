@@ -224,6 +224,8 @@ clear-vars = $(foreach __varname,$1,$(eval $(__varname) := $(empty)))
 ###############################################################################
 modules-fields-depends := \
 	depends \
+	depends.META_PACKAGES \
+	depends.PREBUILT_LIBRARIES \
 	depends.EXTERNAL_LIBRARIES \
 	depends.STATIC_LIBRARIES \
 	depends.WHOLE_STATIC_LIBRARIES \
@@ -681,7 +683,7 @@ modules-compute-depends = \
 		$(call __module-compute-depends-direct,$(__mod)) \
 	) \
 	$(foreach __mod,$(__modules), \
-		$(foreach __field,EXTERNAL_LIBRARIES STATIC_LIBRARIES WHOLE_STATIC_LIBRARIES SHARED_LIBRARIES, \
+		$(foreach __field,META_PACKAGES PREBUILT_LIBRARIES EXTERNAL_LIBRARIES STATIC_LIBRARIES WHOLE_STATIC_LIBRARIES SHARED_LIBRARIES, \
 			$(eval __depends-loop := $(empty)) \
 			$(eval __dummy := $(call __module-compute-depends-static,$(__mod),$(__field))) \
 		) \
@@ -713,14 +715,22 @@ __module-update-depends-direct = \
 				$(eval __modules.$1.WHOLE_STATIC_LIBRARIES += $(__lib)), \
 				$(eval __modules.$1.STATIC_LIBRARIES += $(__lib)) \
 			) \
-		, \
+			, \
 			$(if $(call streq,$(__class),SHARED_LIBRARY), \
 				$(eval __modules.$1.SHARED_LIBRARIES += $(__lib)) \
-			, \
+				, \
 				$(if $(call streq,$(__class),LIBRARY), \
 					$(eval __modules.$1.SHARED_LIBRARIES += $(__lib)) \
 					, \
-					$(eval __modules.$1.EXTERNAL_LIBRARIES += $(__lib)) \
+					$(if $(call streq,$(__class),META_PACKAGE), \
+						$(eval __modules.$1.META_PACKAGES += $(__lib)) \
+						, \
+						$(if $(call streq,$(__class),PREBUILT), \
+							$(eval __modules.$1.PREBUILT_LIBRARIES += $(__lib)) \
+							, \
+							$(eval __modules.$1.EXTERNAL_LIBRARIES += $(__lib)) \
+						) \
+					) \
 				) \
 			) \
 		) \
@@ -732,6 +742,8 @@ __module-compute-depends-direct = \
 	$(call __module-add-depends-direct,$1,$(__modules.$1.STATIC_LIBRARIES)) \
 	$(call __module-add-depends-direct,$1,$(__modules.$1.WHOLE_STATIC_LIBRARIES)) \
 	$(call __module-add-depends-direct,$1,$(__modules.$1.SHARED_LIBRARIES)) \
+	$(call __module-add-depends-direct,$1,$(__modules.$1.META_PACKAGES)) \
+	$(call __module-add-depends-direct,$1,$(__modules.$1.PREBUILT_LIBRARIES)) \
 	$(call __module-add-depends-direct,$1,$(__modules.$1.EXTERNAL_LIBRARIES)) \
 	$(eval __modules.$1.depends.headers := $(__modules.$1.DEPENDS_HEADERS)) \
 	$(eval __modules.$1.depends.build += $(__modules.$1.DEPENDS_MODULES)) \
@@ -784,6 +796,14 @@ __module-compute-depends-static-internal = \
 		) \
 	)
 
+# Recurse prebuilt and meta packages as well
+__module-compute-depends-static-internal += \
+	$(foreach __mod,$(__modules.$1.META_PACKAGES) $(__modules.$1.PREBUILT_LIBRARIES), \
+		$(if $(call is-module-registered,$(__mod)), \
+			$(call __module-compute-depends-static,$(__mod),$2) \
+		) \
+	)
+
 # When forcing static libraries, take into account external libraries as well
 # Otherwise assume they are mostly shared libraries
 __module-compute-depends-static-internal += \
@@ -799,6 +819,8 @@ __module-compute-depends-static-internal += \
 # $1 : module name.
 __module-compute-depends-link = \
 	$(eval __modules.$1.depends.link := $(strip $(sort \
+		$(__modules.$1.depends.META_PACKAGES) \
+		$(__modules.$1.depends.PREBUILT_LIBRARIES) \
 		$(__modules.$1.depends.EXTERNAL_LIBRARIES) \
 		$(__modules.$1.depends.STATIC_LIBRARIES) \
 		$(__modules.$1.depends.WHOLE_STATIC_LIBRARIES) \

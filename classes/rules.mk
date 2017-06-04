@@ -217,6 +217,8 @@ $(call check-flags,LOCAL_EXPORT_CXXFLAGS,$(check-flags-arch-cpu),$(check-flags-a
 ###############################################################################
 
 # Get libraries used by us and static libraries
+all_prebuilt_libs := \
+	$(call module-get-static-depends,$(LOCAL_MODULE),PREBUILT_LIBRARIES)
 all_external_libs := \
 	$(call module-get-static-depends,$(LOCAL_MODULE),EXTERNAL_LIBRARIES)
 all_static_libs := \
@@ -228,6 +230,7 @@ all_shared_libs := \
 
 # List of our dependencies and from static (recursive on static libs)
 all_libs := \
+	$(all_prebuilt_libs) \
 	$(all_external_libs) \
 	$(all_static_libs) \
 	$(all_whole_static_libs) \
