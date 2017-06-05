@@ -36,6 +36,18 @@ else
   LOCAL_QMAKE_CONFIGURE_ARGS += CONFIG+=release
 endif
 
+_qmake_spec :=
+ifeq ("$(TARGET_OS)-$(TARGET_OS_FLAVOUR)","linux-native")
+  ifeq ("$(_module_cc_flavour)","gcc")
+    _qmake_spec := linux-g++
+  else ifeq ("$(_module_cc_flavour)","clang")
+    _qmake_spec := linux-clang
+  endif
+endif
+ifneq ("$(_qmake_spec)","")
+  LOCAL_QMAKE_CONFIGURE_ARGS += -spec $(_qmake_spec)
+endif
+
 include $(BUILD_SYSTEM)/classes/GENERIC/rules.mk
 
 # Restart configure if debug/release mode is changed
