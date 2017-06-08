@@ -334,7 +334,7 @@ ALL_BUILD_MODULES := $(strip \
 # If no config file available, remove modules with unknown dependencies
 ifeq ("$(GLOBAL_CONFIG_FILE_AVAILABLE)","0")
 $(foreach __mod,$(ALL_BUILD_MODULES), \
-	$(foreach __lib,$(call module-get-all-depends,$(__mod)) $(call module-get-headers-depends,$(__mod)), \
+	$(foreach __lib,$(call module-get-build-depends,$(__mod)), \
 		$(if $(call is-module-registered,$(__lib)),$(empty), \
 			$(info Disabling $(__mod): has unknown dependency $(__lib)) \
 			$(eval ALL_BUILD_MODULES := $(filter-out $(__mod),$(ALL_BUILD_MODULES))) \
@@ -414,13 +414,11 @@ ifeq ("$(call is-targets-in-make-goals,all check all-clean all-dirclean all-doc 
 $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST), \
 	$(if $(call is-module-in-make-goals,$(__mod)), \
 		$(eval __modlist += $(__mod)) \
-		$(eval __modlist += $(call module-get-all-depends,$(__mod))) \
-		$(eval __modlist += $(call module-get-headers-depends,$(__mod))) \
+		$(eval __modlist += $(call module-get-build-depends,$(__mod))) \
 		$(if $(call is-module-meta-package,$(__mod)), \
 			$(foreach __mod2,$(call module-get-config-depends,$(__mod)), \
 				$(eval __modlist += $(__mod2)) \
-				$(eval __modlist += $(call module-get-all-depends,$(__mod2))) \
-				$(eval __modlist += $(call module-get-headers-depends,$(__mod2))) \
+				$(eval __modlist += $(call module-get-build-depends,$(__mod2))) \
 			) \
 			$(foreach __mod2,$(sort $(__modlist)), \
 				$(if $(call is-module-registered,$(__mod2)),$(empty), \

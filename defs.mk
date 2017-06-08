@@ -909,6 +909,7 @@ module-get-all-depends = \
 # Get all build dependencies (including the ones required only for build order)
 module-get-build-depends = \
 	$(__modules.$1.depends.all) \
+	$(__modules.$1.depends.headers) \
 	$(__modules.$1.depends.build)
 
 # Get headers dependencies
