@@ -107,15 +107,15 @@ endif
 
 # Determine compilers version
 ifeq ("$(HOST_CC_FLAVOUR)","clang")
-  TARGET_CC_VERSION := $(shell $(HOST_CC) --version | head -1 | \
-		sed -e 's/clang version \([0-9]\+\.[0-9]\+\.[0-9]\+\).*/\1/')
+  HOST_CC_VERSION := $(shell $(HOST_CC) --version | head -1 | \
+		grep -o -E '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
 else
   HOST_CC_VERSION := $(shell $(HOST_CC) -dumpversion)
 endif
 
 ifeq ("$(TARGET_CC_FLAVOUR)","clang")
   TARGET_CC_VERSION := $(shell $(TARGET_CC) --version | head -1 | \
-		sed -e 's/clang version \([0-9]\+\.[0-9]\+\.[0-9]\+\).*/\1/')
+		grep -o -E '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
 else
   TARGET_CC_VERSION := $(shell $(TARGET_CC) -dumpversion)
 endif
