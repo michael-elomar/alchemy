@@ -23,7 +23,10 @@ ANDROID_TOOLCHAIN_PATH := $(TARGET_OUT)/toolchain
 # MAJOR is the ndk number
 # MINOR is the ndk letter (0 = no letter, 1 = b, ...)
 # Ex: r14b is 14.1, r11c is 11.2, r15 is 15.0
-ANDROID_NDK_VERSION := $(shell grep -o -E '[0-9]+\.[0-9+]' $(TARGET_ANDROID_NDK)/source.properties)
+ANDROID_NDK_SOURCE_PROP := $(TARGET_ANDROID_NDK)/source.properties
+ANDROID_NDK_VERSION := $(shell test -f $(ANDROID_NDK_SOURCE_PROP) \
+			&& grep -o -E '[0-9]+\.[0-9+]' $(ANDROID_NDK_SOURCE_PROP) \
+			|| echo '0.0')
 ANDROID_NDK_MAJOR_VERSION := $(firstword $(subst ., ,$(ANDROID_NDK_VERSION)))
 ANDROID_NDK_MINOR_VERSION := $(word 2,$(subst ., ,$(ANDROID_NDK_VERSION)))
 
