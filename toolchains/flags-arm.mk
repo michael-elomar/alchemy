@@ -34,7 +34,6 @@ endif
 TARGET_GLOBAL_CFLAGS_arm ?= \
 	-marm \
 	-O2 \
-	-fomit-frame-pointer \
 	-fstrict-aliasing
 
 TARGET_GLOBAL_LDFLAGS_arm ?= \
@@ -47,7 +46,6 @@ ifneq ("$(TARGET_DEFAULT_ARM_MODE)","arm")
 TARGET_GLOBAL_CFLAGS_thumb ?= \
 	-mthumb \
 	-Os \
-	-fomit-frame-pointer \
 	-fno-strict-aliasing
 
 TARGET_GLOBAL_LDFLAGS_thumb ?= \
