@@ -1,3 +1,22 @@
+parrot-tools-alchemy (1.3.3) unstable; urgency=low
+  * Do not add GLOBAL flags to LOCAL one for linux modules
+  * Allow to ignore all codecheck for a complete file
+  * Declare a fake linux module in native mode if we have kernel headers
+  * Allow to filter some file during image generation
+  * Integrate ubi image generation in mkfs scripts
+  * Better handling of windows path for destination of copy
+  * Add TARGET_USE_CLANG
+  * Fix detection of clang compiler version
+  * Only handle permission file and user/group for full linux system
+  * Add kconfig binaries for windows host.
+  * Only set major/minor for device in tar creation
+  * Correctly handle DEPENDS_MODULES and REQUIRED_MODULES
+  * Fix Android toolchain selection for NDK r15
+  * Force ARC for all ObjC builds (host or target)
+  * Remove -fomit-frame-pointer from the arm flags
+  * Do not set -Wno-psabi for clang
+ -- Yves-Marie Morgan (Parrot) <yves-marie.morgan@parrot.com>  Fri, 30 Jun 2017 14:19:59 +0200
+
 parrot-tools-alchemy (1.3.2) unstable; urgency=low
   * Add module filename in LOCAL_DONE_FILES if it ends with .done
   * Allow android amv7a to override mfpu to neon.
