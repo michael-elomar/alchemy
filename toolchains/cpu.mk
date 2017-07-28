@@ -121,6 +121,19 @@ ifeq ("$(TARGET_CPU)","h22")
 endif
 
 ###############################################################################
+# Renesas cpus
+###############################################################################
+
+ifeq ("$(TARGET_CPU)","rcarh3")
+  cpu_flags += -march=armv8-a+crc+simd+crypto -mtune=cortex-a57.cortex-a53
+  TARGET_CPU_HAS_NEON := 1
+  ifneq ("$(TARGET_ARCH)","aarch64")
+    cpu_flags += -mfpu=crypto-neon-fp-armv8
+    TARGET_FLOAT_ABI ?= hard
+  endif
+endif
+
+###############################################################################
 # Qualcomm cpus.
 ###############################################################################
 
