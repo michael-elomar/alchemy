@@ -20,10 +20,14 @@ $(call register-prebuilt-pkg-config-module,glib-2.0,glib-2.0)
 $(call register-prebuilt-pkg-config-module,gobject-2.0,gobject-2.0)
 $(call register-prebuilt-pkg-config-module,gio-2.0,gio-2.0)
 
+_glib_deps := glib-2.0 gobject-2.0 gio-2.0
+_glib_deps_available := $(call is-module-list-registered,$(_glib_deps))
+ifneq ("$(_glib_deps_available)","")
 include $(CLEAR_VARS)
 LOCAL_MODULE := glib
-LOCAL_LIBRARIES := glib-2.0 gobject-2.0 gio-2.0
+LOCAL_LIBRARIES := $(_glib_deps)
 $(call local-register-prebuilt-overridable)
+endif
 
 $(call register-prebuilt-pkg-config-module,gstreamer-1.0,gstreamer-1.0)
 $(call register-prebuilt-pkg-config-module,gstreamer-app-1.0,gstreamer-app-1.0)
@@ -31,15 +35,23 @@ $(call register-prebuilt-pkg-config-module,gstreamer-audio-1.0,gstreamer-audio-1
 $(call register-prebuilt-pkg-config-module,gstreamer-base-1.0,gstreamer-base-1.0)
 $(call register-prebuilt-pkg-config-module,gstreamer-video-1.0,gstreamer-video-1.0)
 
+_gstreamer_deps := gstreamer-1.0 gstreamer-base-1.0
+_gstreamer_deps_available := $(call is-module-list-registered,$(_gstreamer_deps))
+ifneq ("$(_gstreamer_deps_available)","")
 include $(CLEAR_VARS)
 LOCAL_MODULE := gstreamer
-LOCAL_LIBRARIES := gstreamer-1.0 gstreamer-base-1.0
+LOCAL_LIBRARIES := $(_gstreamer_deps)
 $(call local-register-prebuilt-overridable)
+endif
 
+_gst-plugins-base_deps := gstreamer-app-1.0 gstreamer-audio-1.0 gstreamer-video-1.0
+_gst-plugins-base_deps_available := $(call is-module-list-registered,$(_gst-plugins-base_deps))
+ifneq ("$(_gst-plugins-base_deps_available)","")
 include $(CLEAR_VARS)
 LOCAL_MODULE := gst-plugins-base
-LOCAL_LIBRARIES := gstreamer-app-1.0 gstreamer-audio-1.0 gstreamer-video-1.0
+LOCAL_LIBRARIES := $(_gst-plugins-base_deps)
 $(call local-register-prebuilt-overridable)
+endif
 
 endif
 

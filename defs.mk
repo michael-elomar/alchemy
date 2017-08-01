@@ -360,6 +360,14 @@ is-module-in-make-goals = $(strip \
 is-module-registered = $(call is-var-defined,__modules.$1.PATH)
 
 ###############################################################################
+## Check if a list of modules are registered. It simply verifies that none of
+## the variable __modules.$1.PATH have not been.
+## $1 : module list to check.
+###############################################################################
+is-module-list-registered = $(call not,$(strip $(foreach __lib,$1, \
+	$(call is-var-undefined,__modules.$(__lib).PATH))))
+
+###############################################################################
 ## Check if a module is built externally (by autotools or custom rules).
 ## $1 : module to check.
 ## AUTOTOOLS/CMAKE/QMAKE/PYTHON_EXTENSION/GENERIC/CUSTOM/META_PACKAGE class or empty
