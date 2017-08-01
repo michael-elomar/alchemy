@@ -383,7 +383,6 @@ LOCAL_LDLIBS := $(strip $(LOCAL_LDLIBS) $(imported_LDLIBS))
 
 # Simplify variable by keeping only first occurence of each item
 LOCAL_C_INCLUDES := $(strip $(call uniq,$(LOCAL_C_INCLUDES)))
-LOCAL_LDLIBS := $(strip $(call uniq,$(LOCAL_LDLIBS)))
 
 # Get all autoconf files that we depend on, don't forget to add ourself
 # External modules only get internal ones. Mainly because we don't want to break
