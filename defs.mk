@@ -962,11 +962,10 @@ module-get-build-dir = $(strip \
 module-get-build-dir-host = $(strip $(HOST_OUT_BUILD)/$1)
 
 
-# Get stamp file of a module
+# Get build directory of a module
+# It handle host/target modules
 # $2: name to retreive (built, installed...)
-# Note: nothing is returned for prebuilt modules
-module-get-stamp-file = $(strip $(if $(call is-module-prebuilt,$1), \
-	$(empty),$(call module-get-build-dir,$1)/$1.$2.stamp))
+module-get-stamp-file = $(call module-get-build-dir,$1)/$1.$2.stamp
 
 # Get build file name of a module
 # It handle host/target modules
