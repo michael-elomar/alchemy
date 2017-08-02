@@ -68,6 +68,12 @@ vars-LOCAL += SHARED_LIBRARIES
 # Used as dependencies to trigger indirect build.
 vars-LOCAL += EXTERNAL_LIBRARIES
 
+# Prebuilt libraries
+vars-LOCAL += PREBUILT_LIBRARIES
+
+# Meta packages
+vars-LOCAL += META_PACKAGES
+
 # General libraries to add in dependency based on their actual class (STATIC/SHARED/EXTERNAL).
 vars-LOCAL += LIBRARIES
 
