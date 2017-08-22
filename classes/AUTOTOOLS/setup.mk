@@ -58,6 +58,7 @@ define _autotools-hook-pre-configure
 		$(Q) find $(PRIVATE_SRC_DIR) -name config.h.in -exec touch {} \;$(endl) \
 		$(Q) find $(PRIVATE_SRC_DIR) -name Makefile.in -exec touch {} \;$(endl) \
 		$(Q) find $(PRIVATE_SRC_DIR) -name configure -exec touch {} \;$(endl) \
+		$(Q) find $(PRIVATE_SRC_DIR) -name configure.sh -exec touch {} \;$(endl) \
 		$(Q) find $(PRIVATE_SRC_DIR) -name config.sub -exec cp -af $(BUILD_SYSTEM)/scripts/config.sub {} \;$(endl) \
 	)
 endef
