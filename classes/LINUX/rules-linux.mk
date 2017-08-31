@@ -197,7 +197,7 @@ $(if $(call streq,$(LINUX_ARCH),arm), \
 		find arch/$(LINUX_SRCARCH)/*/include -type f \
 		>> $(LINUX_BUILD_DIR)/sdksrcfiles) \
 )
-$(if $(call streq,$(LINUX_ARCH),aarch64), \
+$(if $(call streq,$(LINUX_ARCH),arm64), \
 	$(Q) (cd $(PRIVATE_PATH); \
 		find arch/arm/include -type f \
 		>> $(LINUX_BUILD_DIR)/sdksrcfiles) \
