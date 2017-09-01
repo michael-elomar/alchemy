@@ -60,5 +60,5 @@ sdk-clean:
 sdk: post-build
 sdk-tar: post-build
 sdk-tar-gz: post-build
-sdk-tar-be2: post-build
+sdk-tar-bz2: post-build
 clobber: sdk-clean
