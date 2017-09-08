@@ -89,7 +89,8 @@ LINUX_EXPORTED_HEADERS_OVER := \
 	include/linux/iio/types.h \
 	include/linux/cn_proc.h \
 	include/linux/prctl.h \
-	include/linux/input-event-codes.h
+	include/linux/input-event-codes.h \
+	include/linux/mii.h
 
 ###############################################################################
 ###############################################################################
