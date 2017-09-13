@@ -367,8 +367,10 @@ linux-reset-config:
 ###############################################################################
 
 # Default rule to invoke kernel specific targets (like cscope, tags, help ...)
+ifneq ("$(filter linux-%,$(MAKECMDGOALS))","")
 .PHONY: linux-%
 linux-%: $(LINUX_BUILD_DIR)/.config
 	@echo "Building linux kernel $* target with $(LINUX_CONFIG_FILE)"
 	$(Q) $(MAKE) $(LINUX_MAKE_ARGS) $*
 	$(Q) $(linux-save-config)
+endif
