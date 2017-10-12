@@ -362,7 +362,8 @@ even if they are already built. See chapter relating to recompilation checks
 for more information.
 </br>Default is <code>0</code>.</li>
 <li><code>TARGET_NOSTRIP_FINAL</code> : Can be set at <code>1</code> to prevent stripping binaries when
-generating final directory.
+generating final directory. Setting to <code>2</code> does a partial stripping: debug info is removed,
+but symbol table is kept. This is useful for tools like perf.
 </br>Default is <code>0</code>.</li>
 <li><code>TARGET_STRIP_FILTER</code> : List of filenames to filter during strip. Mainly used
 when valgrind or other tracing tool is used and requires debugging symbols

@@ -314,7 +314,8 @@ Mainly used by the android wrapper.
   for more information.
   </br>Default is `0`.
 * `TARGET_NOSTRIP_FINAL` : Can be set at `1` to prevent stripping binaries when
-  generating final directory.
+  generating final directory. Setting to `2` does a partial stripping: debug info
+  is removed, but symbol table is kept. This is useful for tools like perf.
   </br>Default is `0`.
 * `TARGET_STRIP_FILTER` : List of filenames to filter during strip. Mainly used
   when valgrind or other tracing tool is used and requires debugging symbols
