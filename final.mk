@@ -23,13 +23,7 @@ MAKEFINAL_ARGS :=
 # specific strip program
 ifneq ("$(TARGET_NOSTRIP_FINAL)","1")
   ifneq ("$(TARGET_STRIP)","")
-    #strip only debug info but keep symbol table for symbol resolving on target
-    #this usefull for tools like perf
-    ifeq ("$(TARGET_NOSTRIP_FINAL)","2")
-      MAKEFINAL_ARGS += --strip="$(TARGET_STRIP) --strip-debug"
-    else
       MAKEFINAL_ARGS += --strip="$(TARGET_STRIP)"
-    endif
   endif
   ifeq ("$(TARGET_OS)","linux")
     ifneq ("$(TARGET_LINUX_CROSS)","")
