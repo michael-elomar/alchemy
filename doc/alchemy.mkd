@@ -370,7 +370,8 @@ Mainly used by the android wrapper.
 * `TARGET_IMAGE_FORMAT` : format of the image file to generate wilth `image` command.
   Supported value: `tar`, `cpio`, `ext2`, `ext3`, `ext4`, `plf` and the compressed
   forms `tar.gz`, `cpio.gz`, `ext2.gz`, `ext3.gz`, `ext4.gz`,
-  `tar.bz2`, `cpio.bz2`, `ext2.bz2`, `ext3.bz2`, `ext4.bz2`
+  `tar.bz2`, `cpio.bz2`, `ext2.bz2`, `ext3.bz2`, `ext4.bz2`,
+  `tar.zip`, `cpio.zip`, `ext2.zip`, `ext3.zip`, `ext4.zip`
   </br>Default is `tar.gz`.
 * `TARGET_IMAGE_OPTIONS` : additional options to give during image generation:
   * `--size <val> [<unit>]` : size of image (for `ext` format), unit is `K`, `M`, `G`
@@ -1293,7 +1294,7 @@ dependency variables.
 ### GObject introspection type library modules
 
 This class of modules is for the compilation of gobject-introspection `.typelib`
-type libraries used by languages bindings to automatically use a library 
+type libraries used by languages bindings to automatically use a library
 without explicit wrappers. Only GObject introspection of libraries is currently
 supported.
 

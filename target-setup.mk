@@ -303,7 +303,7 @@ ifeq ("$(TARGET_OS_FLAVOUR:-chroot=)","native")
 endif
 
 # Target image format (tar, cpio, ext2, ext3, ext4, plf)
-# It can optionaly be suffixed with .gz or .bz2 to compress the image
+# It can optionaly be suffixed with .gz, .bz2 or zip to compress the image
 TARGET_IMAGE_FORMAT ?= tar.gz
 
 # Target image generation options (not used for plf images)

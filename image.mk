@@ -100,8 +100,8 @@ gen-image-ubi = $(call gen-image,ubi,$1, \
 ###############################################################################
 define image-rules
 $(eval __image-$1-file := $(TARGET_OUT)/$(TARGET_PRODUCT_FULL_NAME).$1)
-.PHONY: image-$1 image-$1-gz image-$1-bz2
-.PHONY: image-$1-clean image-$1-gz-clean image-$1-bz2-clean
+.PHONY: image-$1 image-$1-gz image-$1-bz2 image-$1-zip
+.PHONY: image-$1-clean image-$1-gz-clean image-$1-bz2-clean image-$1-zip-clean
 __image-$1-internal: image-$1-clean
 	@echo "Image $1: start"
 	$(Q) if [ ! -d $(TARGET_OUT_FINAL) ]; then \
@@ -118,10 +118,17 @@ image-$1-bz2: __image-$1-internal
 	@echo "Image $1: compressing"
 	$(Q) bzip2 $(__image-$1-file)
 	@echo "Image $1: done -> $(__image-$1-file).bz2"
+image-$1-zip: __image-$1-internal
+	@echo "Image $1: compressing"
+	$(Q) blkid -c /dev/null -o value -s UUID $(__image-$1-file) | \
+		zip --archive-comment --junk-paths $(__image-$1-file).zip \
+			$(__image-$1-file)
+	@echo "Image $1: done -> $(__image-$1-file).zip"
 image-$1-clean:
 	$(Q) rm -f $(__image-$1-file)
 	$(Q) rm -f $(__image-$1-file).gz
 	$(Q) rm -f $(__image-$1-file).bz2
+	$(Q) rm -f $(__image-$1-file).zip
 image-all-clean: image-$1-clean
 __image-$1-internal: post-final
 endef
