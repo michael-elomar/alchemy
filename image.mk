@@ -120,7 +120,7 @@ image-$1-bz2: __image-$1-internal
 	@echo "Image $1: done -> $(__image-$1-file).bz2"
 image-$1-zip: __image-$1-internal
 	@echo "Image $1: compressing"
-	$(Q) blkid -c /dev/null -o value -s UUID $(__image-$1-file) | \
+	$(Q) /sbin/blkid -c /dev/null -o value -s UUID $(__image-$1-file) | \
 		zip --archive-comment --junk-paths $(__image-$1-file).zip \
 			$(__image-$1-file)
 	@echo "Image $1: done -> $(__image-$1-file).zip"
