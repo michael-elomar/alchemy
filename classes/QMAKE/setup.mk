@@ -6,6 +6,12 @@
 ## Setup QMAKE modules.
 ###############################################################################
 
+# Update host compilation path
+_qmake_host_path := $(HOST_OUT_STAGING)/bin:$(HOST_OUT_STAGING)/$(HOST_DEFAULT_BIN_DESTDIR):$(PATH)
+
+# Update target compilation path (use host binaries)
+_qmake_target_path := $(_qmake_host_path)
+
 ###############################################################################
 ## Variables used for qmake.
 ###############################################################################
@@ -92,7 +98,7 @@ ifndef TARGET_QMAKE
   endif
 endif
 
-TARGET_QMAKE_ENV :=
+TARGET_QMAKE_ENV := PATH="$(_qmake_target_path)"
 TARGET_QMAKE_ARG :=
 TARGET_QMAKE_MAKE_ARG :=
 
@@ -233,7 +239,7 @@ endef
 
 define _qmake-def-cmd-build
 	$(Q) cd $(PRIVATE_BUILD_DIR) \
-		&& $(MAKE) $(TARGET_QMAKE_MAKE_ARG) \
+		&& $(TARGET_QMAKE_ENV) $(MAKE) $(TARGET_QMAKE_MAKE_ARG) \
 			$(PRIVATE_QMAKE_MAKE_BUILD_ARGS)
 endef
 

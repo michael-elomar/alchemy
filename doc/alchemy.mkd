@@ -1357,8 +1357,8 @@ Host tools are installed in the directory `HOST_OUT_STAGING` and usually in the
 `usr/bin` sub-directory.
 
 Note that `$(HOST_OUT_STAGING)/bin` and `$(HOST_OUT_STAGING)/usr/bin` are
-automatically added to the `PATH` environment variable for `AUTOTOOLS` and
-`CMAKE` builds.
+automatically added to the `PATH` environment variable for `AUTOTOOLS`,
+`CMAKE` and `QMAKE` builds.
 
 There is some `HOST_xxx` variables that are defined internally and that can be
 customized before invoking `alchemy`. For the meaning, see the corresponding
