@@ -350,7 +350,9 @@ $(Q) $(PRIVATE_CXX) \
 	) \
 	-shared \
 	-Wl,-soname -Wl,$(notdir $2) \
-	-Wl,--no-undefined \
+	$(if $(call strneq,$(USE_ADDRESS_SANITIZER),1), \
+		-Wl$(comma)--no-undefined \
+	) \
 	-Wl,--gc-sections \
 	-Wl,--as-needed \
 	$(if $(call streq,$($(PRIVATE_MODE)_OS),windows), \
