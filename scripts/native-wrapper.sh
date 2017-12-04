@@ -27,10 +27,10 @@ fi
 SYSROOT=${SCRIPT_PATH}
 
 # Restore previous variables
-if [ "${OLD_PATH}" != "" ]; then
+if [ "${OLD_PATH-}" != "" ]; then
 	export PATH=${OLD_PATH}
 fi
-if [ "${OLD_LD_LIBRARY_PATH}" != "" ]; then
+if [ "${OLD_LD_LIBRARY_PATH-}" != "" ]; then
 	export LD_LIBRARY_PATH=${OLD_LD_LIBRARY_PATH}
 fi
 
