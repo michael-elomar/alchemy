@@ -132,6 +132,9 @@ ifeq ("$(TARGET_USE_CLANG)", "1")
 else
   # Legacy mode, use TARGET_CROSS
   TARGET_CROSS := $(ANDROID_TOOLCHAIN_PATH)/bin/$(ANDROID_TOOLCHAIN_PREFIX)-
+
+  # For unified headers & gcc, we must add the __ANDROID_API__ define manually
+  TARGET_GLOBAL_CFLAGS += -D__ANDROID_API__=$(TARGET_ANDROID_MINAPILEVEL)
 endif
 
 endif
