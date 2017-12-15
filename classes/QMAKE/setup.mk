@@ -141,7 +141,7 @@ define _internal-qmake-gen-deps-darwin
 		echo "QMAKE_CXXFLAGS += $(filter-out -O0 -O1 -O2 -O3,$(filter-out -std=%,$(PRIVATE_CFLAGS)))"; \
 		echo "QMAKE_CXXFLAGS += $(filter-out -O0 -O1 -O2 -O3,$(PRIVATE_CXXFLAGS))"; \
 		echo "LIBS += $(filter-out -O0 -O1 -O2 -O3,$(subst $(APPLE_ARCH),,$(TARGET_QMAKE_LDFLAGS) $(PRIVATE_LDFLAGS)))"; \
-		echo "LIBS += $(foreach __lib, $(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES), -force_load $(__lib))"; \
+		echo "LIBS += $(foreach __lib, $(PRIVATE_ALL_WHOLE_STATIC_LIBRARIES), -Wl,-force_load,$(__lib))"; \
 		echo "LIBS += $(PRIVATE_ALL_STATIC_LIBRARIES)"; \
 		echo "LIBS += $(PRIVATE_ALL_SHARED_LIBRARIES)"; \
 		echo "LIBS += $(PRIVATE_LDLIBS)"; \
