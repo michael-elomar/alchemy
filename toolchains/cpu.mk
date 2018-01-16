@@ -6,6 +6,11 @@
 ## Setup toolchain variables.
 ###############################################################################
 
+# Note for aarch64:
+#   https://gcc.gnu.org/onlinedocs/gcc/AArch64-Options.html
+#   Feature crypto implies aes, sha2, and simd, which implies fp
+
+
 # arm v5te flags (to be used in cpu flags below)
 # ecos already set them
 ifneq ("$(TARGET_OS)","ecos")
@@ -112,9 +117,11 @@ ifeq ("$(TARGET_CPU)","a9s")
 endif
 
 ifeq ("$(TARGET_CPU)","h22")
-  cpu_flags += -march=armv8-a+crc -mtune=cortex-a53 -mcpu=cortex-a53
   TARGET_CPU_HAS_NEON := 1
-  ifneq ("$(TARGET_ARCH)","aarch64")
+  ifeq ("$(TARGET_ARCH)","aarch64")
+    cpu_flags += -march=armv8-a+crc+crypto -mtune=cortex-a53
+  else
+    cpu_flags += -march=armv8-a+crc -mtune=cortex-a53
     cpu_flags += -mfpu=crypto-neon-fp-armv8
     TARGET_FLOAT_ABI ?= hard
   endif
