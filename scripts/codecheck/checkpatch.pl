@@ -3085,7 +3085,7 @@ sub process {
 				  "space required before the open brace '{'\n" . $herecurr) &&
 			    $fix) {
 				$fixed[$linenr - 1] =~
-				    s/^(\+.*(?:do|\))){/$1 {/;
+				    s/^(\+.*(?:do|\)))\{/$1 \{/;
 			}
 		}
 
