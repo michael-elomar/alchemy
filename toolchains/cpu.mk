@@ -152,6 +152,15 @@ ifeq ("$(TARGET_CPU)","apq8009")
   TARGET_FLOAT_ABI ?= hard
 endif
 
+ifeq ("$(TARGET_CPU)","apq8053")
+  cpu_flags += -march=armv8-a+crc -mtune=cortex-a53
+  TARGET_CPU_HAS_NEON := 1
+  ifneq ("$(TARGET_ARCH)","aarch64")
+    cpu_flags += -mfpu=crypto-neon-fp-armv8
+    TARGET_FLOAT_ABI ?= hard
+  endif
+endif
+
 ###############################################################################
 # Generic cpus.
 ###############################################################################
