@@ -17,6 +17,7 @@ $(call register-prebuilt-pkg-config-module,liblz4,liblz4)
 $(call register-prebuilt-pkg-config-module,libusb,libusb)
 $(call register-prebuilt-pkg-config-module,libusb_1_0,libusb-1.0)
 $(call register-prebuilt-pkg-config-module,ncurses,ncurses)
+$(call register-prebuilt-pkg-config-module,sdl2,sdl2)
 $(call register-prebuilt-pkg-config-module,zlib,zlib)
 
 $(call register-prebuilt-pkg-config-module,glib-2.0,glib-2.0)
