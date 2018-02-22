@@ -58,15 +58,16 @@ class Context(object):
 
         if "OS_FLAVOUR" in self.moduledb.targetVars and \
                 self.moduledb.targetVars["OS_FLAVOUR"] == "android":
+            abi = os.path.basename(os.path.dirname(self.buildDir))
             self.android = StringIO()
             self.android.write("# GENERATED FILE, DO NOT EDIT\n\n")
-            self.android.write("ifndef ALCHEMY_SDK_ANDROID_INCLUDED\n")
-            self.android.write("ALCHEMY_SDK_ANDROID_INCLUDED = 1\n\n")
+            self.android.write("ifndef ALCHEMY_SDK_ANDROID_{}_INCLUDED\n".format(abi))
+            self.android.write("ALCHEMY_SDK_ANDROID_{}_INCLUDED = 1\n\n".format(abi))
             self.android.write("LOCAL_PATH := $(call my-dir)\n\n")
             self.android_static = StringIO()
             self.android_static.write("# GENERATED FILE, DO NOT EDIT\n\n")
-            self.android_static.write("ifndef ALCHEMY_SDK_ANDROID_STATIC_INCLUDED\n")
-            self.android_static.write("ALCHEMY_SDK_ANDROID_STATIC_INCLUDED = 1\n\n")
+            self.android_static.write("ifndef ALCHEMY_SDK_ANDROID_STATIC_{}_INCLUDED\n".format(abi))
+            self.android_static.write("ALCHEMY_SDK_ANDROID_STATIC_{}_INCLUDED = 1\n\n".format(abi))
             self.android_static.write("LOCAL_PATH := $(call my-dir)\n\n")
         else:
             self.android = None
@@ -89,8 +90,8 @@ class Context(object):
         self.finishFile(self.atom, "atom.mk")
         self.finishFile(self.setup, "setup.mk")
         if self.android is not None:
-            self.android.write("endif\n\n")
-            self.android.write("include $(LOCAL_PATH)/Android-static.mk\n")
+            self.android.write("include $(LOCAL_PATH)/Android-static.mk\n\n")
+            self.android.write("endif\n")
             self.finishFile(self.android, "Android.mk")
         if self.android_static is not None:
             self.android_static.write("endif\n")
