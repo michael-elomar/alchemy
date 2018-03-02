@@ -59,7 +59,7 @@ $(_qmake_configure_flags): .FORCE
 	$(call update-file-if-needed,$@,$@.tmp)
 
 # Determine debug libraries of qmake dependencies
-# Get the first ford of LOCAL_EXPORT_LDLIBS and append '_debug'
+# Get the first word of LOCAL_EXPORT_LDLIBS and append '_debug'
 _qmake_ldlibs_debug := $(LOCAL_LDLIBS)
 ifeq ("$(TARGET_OS)","windows")
 $(foreach __mod,$(all_external_libs), \
