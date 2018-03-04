@@ -28,7 +28,7 @@ endef
 sdk: dump-xml
 	@echo "Sdk: start"
 	$(call sdk-gen,$(SDK_DIR))
-	$(Q) tar -C $(dir $(SDK_DIR)) -czf $(SDK_TGZ) $(notdir $(SDK_DIR))
+	$(Q) $(TAR) -C $(dir $(SDK_DIR)) -czf $(SDK_TGZ) $(notdir $(SDK_DIR))
 	@echo "Sdk: done -> $(SDK_DIR) ($(SDK_TGZ))"
 
 .PHONY: sdk-tar

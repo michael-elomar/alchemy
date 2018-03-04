@@ -208,10 +208,10 @@ $(if $(call streq,$(LINUX_ARCH),arm64), \
 		find arch/$(LINUX_SRCARCH)/include include scripts .config Module.symvers -type f \
 		>> $(LINUX_BUILD_DIR)/sdkobjfiles)
 	$(Q) mkdir -p $(LINUX_SDK_DIR)
-	$(Q) tar -C $(PRIVATE_PATH) -cf - -T $(LINUX_BUILD_DIR)/sdksrcfiles | \
-		tar -C $(LINUX_SDK_DIR) -xf -
-	$(Q) tar -C $(LINUX_BUILD_DIR) -cf - -T $(LINUX_BUILD_DIR)/sdkobjfiles | \
-		tar -C $(LINUX_SDK_DIR) -xf -
+	$(Q) $(TAR) -C $(PRIVATE_PATH) -cf - -T $(LINUX_BUILD_DIR)/sdksrcfiles | \
+		$(TAR) -C $(LINUX_SDK_DIR) -xf -
+	$(Q) $(TAR) -C $(LINUX_BUILD_DIR) -cf - -T $(LINUX_BUILD_DIR)/sdkobjfiles | \
+		$(TAR) -C $(LINUX_SDK_DIR) -xf -
 	$(Q) rm -f $(LINUX_BUILD_DIR)/sdksrcfiles
 	$(Q) rm -f $(LINUX_BUILD_DIR)/sdkobjfiles
 	$(Q) echo "$(LINUX_ARCH)" > $(LINUX_SDK_DIR)/linuxarch

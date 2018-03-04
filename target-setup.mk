@@ -93,6 +93,13 @@ HOST_DEFAULT_BIN_DESTDIR := usr/bin
 HOST_DEFAULT_LIB_DESTDIR := usr/lib
 HOST_DEFAULT_ETC_DESTDIR := etc
 
+# Add --force-local to tar command on windows to avoid interpretation of ':'
+# as network resource
+TAR := tar
+ifeq ("$(HOST_OS)","windows")
+  TAR += --force-local
+endif
+
 ###############################################################################
 ###############################################################################
 
