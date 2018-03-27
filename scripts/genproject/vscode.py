@@ -93,15 +93,15 @@ def _package_tasks(name, build_args):
     ]
 
 def _gen_tasks(project, build_args, modules):
-    _, product, _ = build_args.split(' ')
+    args = ' '.join(build_args.split(' ')[:-1]) # remove trailing -A
     tasks_path = os.path.join(project.workspace_dir, '.vscode', 'tasks.json')
     with open(tasks_path, 'w') as f:
         data = {}
         data['version'] = '2.0.0'
         tasks = list()
         data['tasks'] = tasks
-        tasks.append(_single_task('full_build', '${{workspaceFolder}}/build.sh -p {} -t build -j/1'.format(product), default=True))
-        tasks.append(_single_task('clean', '${{workspaceFolder}}/build.sh -p {} -t clean'.format(product)))
+        tasks.append(_single_task('full_build', '${{workspaceFolder}}/build.sh {} -t build -j/1'.format(args), default=True))
+        tasks.append(_single_task('clean', '${{workspaceFolder}}/build.sh {} -t clean'.format(args)))
         for name in modules:
             tasks.extend(_package_tasks(name, build_args))
         json.dump(data, f, indent='\t')
