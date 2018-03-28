@@ -600,22 +600,18 @@ ifneq ("$(LOCAL_COPY_FILES)","")
 
 # Generate a rule to copy all files
 # Handle relative/absolute paths
-# Handle wildcard for source
 # Handle directory only for destination
 $(foreach __pair,$(LOCAL_COPY_FILES), \
 	$(eval __w1 := $(firstword $(subst :,$(space),$(__pair)))) \
 	$(eval __w2 := $(patsubst $(__w1):%,%,$(__pair))) \
 	$(eval __src := $(call copy-get-src-path,$(__w1))) \
 	$(eval __dst := $(call copy-get-dst-path$(_mode_suffix),$(__w2))) \
-	$(foreach __exs, $(wildcard $(__src)), \
-		$(if $(call is-path-dir,$(__dst)), \
-			$(eval __exd := $(__dst)$(notdir $(__exs))), \
-			$(eval __exd := $(__dst)) \
-		) \
-		$(eval _module_all_copy_files_src += $(__exs)) \
-		$(eval _module_all_copy_files_dst += $(__exd)) \
-		$(eval $(call copy-one-file,$(__exs),$(__exd))) \
+	$(if $(call is-path-dir,$(__dst)), \
+		$(eval __dst := $(__dst)$(notdir $(__src))) \
 	) \
+	$(eval _module_all_copy_files_src += $(__src)) \
+	$(eval _module_all_copy_files_dst += $(__dst)) \
+	$(eval $(call copy-one-file,$(__src),$(__dst))) \
 )
 
 # Add an order-only dependency between sources and prerequisites
