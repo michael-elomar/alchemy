@@ -161,6 +161,15 @@ ifeq ("$(TARGET_CPU)","apq8053")
   endif
 endif
 
+ifeq ("$(TARGET_CPU)","apq8096")
+  cpu_flags += -march=armv8-a+crc
+  TARGET_CPU_HAS_NEON := 1
+  ifneq ("$(TARGET_ARCH)","aarch64")
+    cpu_flags += -mfpu=crypto-neon-fp-armv8
+    TARGET_FLOAT_ABI ?= hard
+  endif
+endif
+
 ###############################################################################
 # Generic cpus.
 ###############################################################################
