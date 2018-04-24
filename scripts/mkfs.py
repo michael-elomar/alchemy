@@ -12,6 +12,7 @@ FS_LIST = [
 ]
 
 _DEFAULT_IMAGE_SIZE = "256M"
+_DEFAULT_BLOCK_SIZE = "1024"
 
 #===============================================================================
 #===============================================================================
@@ -185,9 +186,9 @@ def main():
         elif options.fstype == "ext2":
             mkextfs.genImage(image, root, 2)
         elif options.fstype == "ext3":
-            mkextfs.genImage(image, root, 3)
+            mkextfs.genImage(image, root, 3, int(options.blockSize))
         elif options.fstype == "ext4":
-            mkextfs.genImage(image, root, 4)
+            mkextfs.genImage(image, root, 4, int(options.blockSize))
         elif options.fstype == "ubi":
             mkubi.genImage(image, root, options)
     except Exception as ex:
@@ -214,6 +215,12 @@ def parseArgs():
         default=_DEFAULT_IMAGE_SIZE,
         metavar="SIZE",
         help="file system image size (in bytes, suffixes K,M,G allowed)")
+
+    parser.add_argument("--blocksize",
+        dest="blockSize",
+        default=_DEFAULT_BLOCK_SIZE,
+        metavar="BLOCKSIZE",
+        help="file system block size (in bytes)")
 
     parser.add_argument("--devnode",
         dest="devNodes",
