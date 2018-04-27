@@ -202,12 +202,6 @@ ifeq ("$(TARGET_CPU)","arm7tdmi")
   cpu_flags += -mcpu=arm7tdmi
 endif
 
-ifeq ("$(TARGET_CPU)", "stm32f3")
-  cpu_flags += -mcpu=cortex-m4 -mfpu=fpv4-sp-d16
-  TARGET_DEFAULT_ARM_MODE ?= thumb
-  TARGET_FLOAT_ABI ?= hard
-endif
-
 ifeq ("$(TARGET_CPU)", "cortex-m0")
   cpu_flags += -mcpu=cortex-m0
   TARGET_DEFAULT_ARM_MODE ?= thumb
@@ -218,6 +212,12 @@ ifeq ("$(TARGET_CPU)", "cortex-m3")
   cpu_flags += -mcpu=cortex-m3
   TARGET_DEFAULT_ARM_MODE ?= thumb
   TARGET_FLOAT_ABI ?= soft
+endif
+
+ifeq ("$(TARGET_CPU)", "cortex-m4-fpu")
+  cpu_flags += -mcpu=cortex-m4 -mfpu=fpv4-sp-d16
+  TARGET_DEFAULT_ARM_MODE ?= thumb
+  TARGET_FLOAT_ABI ?= hard
 endif
 
 ###############################################################################
