@@ -40,7 +40,8 @@ UBINIZE ?= $(wildcard /usr/sbin/ubinize)
 define gen-image
 	$(Q) cd $(TARGET_OUT_FINAL); \
 		find . $(if $(call streq,$1,cpio),-name 'boot' -prune -o) \
-			! -name '.' -printf '%P\n' | $(FIXSTAT) | \
+			-name '.DS_Store' -prune -o \
+			! -name '.' -print | $(FIXSTAT) | \
 			$4 $(MKFS_SCRIPT) --fstype $1 $3 $2
 endef
 
@@ -74,7 +75,9 @@ define gen-image-plf
 		echo "Image plf: no kernel image found"; \
 	fi
 	$(Q) cd $(TARGET_OUT_FINAL); \
-		find . -path './boot/*' -a ! -name '*.dtb' -prune -o ! -name '.' -printf '%P\n' \
+		find . -path './boot/*' -a ! -name '*.dtb' -prune -o \
+			-name '.DS_Store' -prune -o \
+			! -name '.' -print \
 			| $(FIXSTAT) | plfbatch '-a u_unixfile="&"' $1
 endef
 
