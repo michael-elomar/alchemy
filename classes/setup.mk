@@ -36,6 +36,7 @@ _classes := \
 include $(BUILD_SYSTEM)/classes/GENERIC/setup.mk
 include $(BUILD_SYSTEM)/classes/BINARY/setup.mk
 include $(BUILD_SYSTEM)/classes/codecheck-setup.mk
+include $(BUILD_SYSTEM)/classes/genproject-setup.mk
 
 # Setup the BUILD_XXX variable with the name of the makefile for registration
 # Also include the makefile for class specific setup (optional)

@@ -112,7 +112,8 @@ LOCAL_TARGETS := \
 	$(LOCAL_MODULE)-path \
 	$(LOCAL_MODULE)-doc \
 	$(LOCAL_MODULE)-cloc \
-	$(call codecheck-get-targets,$(LOCAL_MODULE))
+	$(call codecheck-get-targets,$(LOCAL_MODULE)) \
+	$(call genproject-get-targets,$(LOCAL_MODULE))
 
 # Configuration file.
 _module_orig_config_file := $(call __get-orig-module-config,$(LOCAL_MODULE))
@@ -760,6 +761,7 @@ $(LOCAL_MODULE)-path:
 	@echo "$(PRIVATE_MODULE): $(PRIVATE_PATH)"
 
 include $(BUILD_SYSTEM)/classes/codecheck-rules.mk
+include $(BUILD_SYSTEM)/classes/genproject-rules.mk
 include $(BUILD_SYSTEM)/classes/extra-rules.mk
 
 ###############################################################################
