@@ -254,10 +254,18 @@ def main():
 
     # Load project specific packages
     for kind in _PROJECT_KINDS:
-        _PROJECT_KINDS[kind] = importlib.import_module(kind)
+        try:
+            _PROJECT_KINDS[kind] = importlib.import_module(kind)
+        except ImportError as ex:
+            logging.warning("Error while loading module '%s', generator disabled: %s", kind, str(ex))
 
     # Parse arguments
     options = parse_args()
+
+    # Test if generator is available
+    if _PROJECT_KINDS[options.kind] is None:
+        logging.error("Generator for '%s' not available.", options.kind)
+        sys.exit(1)
 
     # Load module db from xml
     try:
@@ -391,9 +399,10 @@ def parse_args():
 
     # Project generator specific options
     for kind in sorted(_PROJECT_KINDS.keys()):
-        title = "%s specific optional arguments" % kind
-        group = parser.add_argument_group(title=title)
-        _PROJECT_KINDS[kind].setup_argparse(group)
+        if _PROJECT_KINDS[kind] is not None:
+            title = "%s specific optional arguments" % kind
+            group = parser.add_argument_group(title=title)
+            _PROJECT_KINDS[kind].setup_argparse(group)
 
     # Parse arguments and check validity
     return parser.parse_args()
