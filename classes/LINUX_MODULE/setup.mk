@@ -6,6 +6,9 @@
 ## Setup LINUX_MODULE modules.
 ###############################################################################
 
+export LINUX_DEPMOD_LOCKFILE := $(TARGET_OUT_BUILD)/depmod.lock
+LINUX_DEPMOD := $(BUILD_SYSTEM)/scripts/depmod.sh
+
 # Create Kbuild file
 define _linux-module-gen-kbuild
 	@mkdir -p $(dir $(PRIVATE_KBUILD))
@@ -33,6 +36,7 @@ define _linux-module-def-cmd-install
 		$(if $(wildcard $(PRIVATE_LINUX_BUILD_DIR)/linuxarch),ARCH=$$(cat $(PRIVATE_LINUX_BUILD_DIR)/linuxarch)) \
 		$(PRIVATE_KBUILD_FLAGS) \
 		CROSS_COMPILE=$(if $(TARGET_LINUX_CROSS),$(TARGET_LINUX_CROSS),$(TARGET_CROSS)) \
+		DEPMOD="$(LINUX_DEPMOD)" \
 		modules_install
 	$(Q) cp -af $(PRIVATE_OBJ_DIR)/$(PRIVATE_MODULE_FILENAME) $(PRIVATE_BUILD_DIR)/$(PRIVATE_MODULE_FILENAME)
 endef
