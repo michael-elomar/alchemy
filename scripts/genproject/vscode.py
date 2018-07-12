@@ -4,8 +4,10 @@ import os
 import subprocess
 import sys
 
+
 def setup_argparse(parser):
     pass
+
 
 def _dump_defines(binary):
     ret = subprocess.run([binary, '-dM', '-E', '-'],
@@ -21,6 +23,7 @@ def _dump_defines(binary):
         else:
             defs.add(name)
     return defs
+
 
 def _dump_search_paths(binary):
     ret = subprocess.run([binary, '-E', '-xc++', '-', '-v'],
@@ -45,9 +48,11 @@ def _dump_search_paths(binary):
 
 
 def _update_props(project, includes, defines):
-    props = os.path.join(project.workspace_dir, '.vscode', 'c_cpp_properties.json')
+    props = os.path.join(project.workspace_dir, '.vscode',
+                         'c_cpp_properties.json')
     if not os.path.exists(props):
-        logging.error('file {} must exist. Launch vscode once and launch "C/Cpp: Edit Configurations..." task'.format(props))
+        logging.error(
+            'file {} must exist. Launch vscode once and launch "C/Cpp: Edit Configurations..." task'.format(props))
         sys.exit(1)
 
     compiler = project.get_target_var('CC')
@@ -64,8 +69,11 @@ def _update_props(project, includes, defines):
         for c in configs:
             c['includePath'] = sorted(incs)
             c['defines'] = sorted(defs)
-            #c['browse']['path'] = sorted(['{}/*'.format(x) for x in incs])
-            c['browse']['path'] = ['${workspaceRoot}'] + sorted(['{}/*'.format(x) for x in compiler_incs])
+            # c['browse']['path'] = sorted(['{}/*'.format(x) for x in incs])
+            if 'browse' not in c:
+                c['browse'] = {}
+            c['browse']['path'] = ['${workspaceRoot}'] + \
+                sorted(['{}/*'.format(x) for x in compiler_incs])
     with open(props, 'w') as f:
         json.dump(data, f, indent='\t')
 
@@ -78,38 +86,47 @@ def _single_task(label, command, *, default=False):
         'problemMatcher': ['$gcc'],
     }
     if default:
-        task['group'] = { 'kind': 'build', 'isDefault': True }
+        task['group'] = {'kind': 'build', 'isDefault': True}
     else:
         task['group'] = 'build'
     return task
+
 
 def _package_tasks(name, build_args):
     bsh_fmt = '${{workspaceFolder}}/build.sh {} {}{}'
     return [
         _single_task(name, bsh_fmt.format(build_args, name, '')),
-        _single_task('{}-clean'.format(name), bsh_fmt.format(build_args, name, '-clean')),
-        _single_task('{}-dirclean'.format(name), bsh_fmt.format(build_args, name, '-dirclean')),
-        _single_task('{}-codecheck'.format(name), bsh_fmt.format(build_args, name, '-codecheck'))
+        _single_task('{}-clean'.format(name),
+                     bsh_fmt.format(build_args, name, '-clean')),
+        _single_task('{}-dirclean'.format(name),
+                     bsh_fmt.format(build_args, name, '-dirclean')),
+        _single_task('{}-codecheck'.format(name),
+                     bsh_fmt.format(build_args, name, '-codecheck'))
     ]
 
+
 def _gen_tasks(project, build_args, modules):
-    args = ' '.join(build_args.split(' ')[:-1]) # remove trailing -A
+    args = ' '.join(build_args.split(' ')[:-1])  # remove trailing -A
     tasks_path = os.path.join(project.workspace_dir, '.vscode', 'tasks.json')
     with open(tasks_path, 'w') as f:
         data = {}
         data['version'] = '2.0.0'
         tasks = list()
         data['tasks'] = tasks
-        tasks.append(_single_task('full_build', '${{workspaceFolder}}/build.sh {} -t build -j/1'.format(args), default=True))
-        tasks.append(_single_task('clean', '${{workspaceFolder}}/build.sh {} -t clean'.format(args)))
+        tasks.append(_single_task(
+            'full_build', '${{workspaceFolder}}/build.sh {} -t build -j/1'.format(args), default=True))
+        tasks.append(_single_task(
+            'clean', '${{workspaceFolder}}/build.sh {} -t clean'.format(args)))
         for name in modules:
             tasks.extend(_package_tasks(name, build_args))
         json.dump(data, f, indent='\t')
 
+
 def generate(project):
 
     if len(project.modules) > 1 and not project.options.merge:
-        logging.error('Multiple modules selected. Please use "-merge" option !')
+        logging.error(
+            'Multiple modules selected. Please use "-merge" option !')
         sys.exit(1)
 
     defines = set()
