@@ -590,6 +590,9 @@ include $(BUILD_SYSTEM)/oss-packages.mk
 # Code coverage helpers
 include $(BUILD_SYSTEM)/coverage.mk
 
+# Genproject helpers
+include $(BUILD_SYSTEM)/genproject.mk
+
 # Help
 include $(BUILD_SYSTEM)/help.mk
 
