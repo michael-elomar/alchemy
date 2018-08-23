@@ -171,6 +171,33 @@ ifeq ("$(TARGET_CPU)","apq8096")
 endif
 
 ###############################################################################
+# Hisilicon cpus.
+###############################################################################
+
+ifeq ("$(TARGET_CPU)","hi3559")
+#  cpu_flags += -mcpu=cortex-a73.cortex-a53
+  TARGET_CPU_HAS_NEON := 1
+  ifneq ("$(TARGET_ARCH)","aarch64")
+    TARGET_FLOAT_ABI ?= hard
+  endif
+endif
+
+ifeq ("$(TARGET_CPU)","hi3559-a53")
+  cpu_flags += -mcpu=cortex-a53
+  TARGET_CPU_HAS_NEON := 1
+  ifneq ("$(TARGET_ARCH)","aarch64")
+    TARGET_FLOAT_ABI ?= hard
+  endif
+endif
+
+ifeq ("$(TARGET_CPU)","hi3559-m7")
+  cpu_flags += -march=armv7e-m -mtune=cortex-m7
+  cpu_flags += -mfpu=fpv4-sp-d16
+  TARGET_DEFAULT_ARM_MODE ?= thumb
+  TARGET_FLOAT_ABI ?= hard
+endif
+
+###############################################################################
 # Generic cpus.
 ###############################################################################
 
