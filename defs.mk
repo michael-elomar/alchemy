@@ -950,7 +950,8 @@ module-get-all-depends = \
 module-get-build-depends = \
 	$(__modules.$1.depends.all) \
 	$(__modules.$1.depends.headers) \
-	$(__modules.$1.depends.build)
+	$(__modules.$1.depends.build) \
+	$(filter $(TARGET_GLOBAL_PREREQUISITES),$(__modules))
 
 # Get headers dependencies
 module-get-headers-depends = \

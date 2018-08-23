@@ -299,12 +299,15 @@ all_prerequisites += \
 		) \
 	)
 
-# Remove our build module from the list of global deps to avoid circular chain
-# FIXME: do NOT add TARGET_GLOBAL_PREREQUISITES for host modules
 all_prerequisites += \
-	$(filter-out $(LOCAL_MODULE) $(LOCAL_BUILD_MODULE),$(TARGET_GLOBAL_PREREQUISITES)) \
 	$(LOCAL_PREREQUISITES) \
 	$(LOCAL_EXPORT_PREREQUISITES)
+
+# Do not add global prerequisites if our module is one of them.
+# FIXME: do NOT add TARGET_GLOBAL_PREREQUISITES for host modules
+ifeq ("$(filter $(LOCAL_MODULE),$(TARGET_GLOBAL_PREREQUISITES))","")
+  all_prerequisites += $(filter-out $(LOCAL_MODULE) $(LOCAL_BUILD_MODULE),$(TARGET_GLOBAL_PREREQUISITES))
+endif
 
 # Make sure autoconf.h file is generated
 all_prerequisites += $(_module_autoconf_file)
