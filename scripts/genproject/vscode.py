@@ -74,6 +74,7 @@ def _update_props(project, includes, defines):
                 c['browse'] = {}
             c['browse']['path'] = ['${workspaceRoot}'] + \
                 sorted(['{}/*'.format(x) for x in compiler_incs])
+            c['compilerPath'] = compiler
     with open(props, 'w') as f:
         json.dump(data, f, indent='\t')
 
