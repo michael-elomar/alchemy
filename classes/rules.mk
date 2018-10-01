@@ -428,7 +428,8 @@ endif
 # Add debug flags at the end
 $(call add-debug-flags)
 
-# Code coverage & analysis flags (for internal modules only)
+# Code coverage & analysis flags (for internal, non host modules only)
+ifeq ("$(_mode_host)","")
 ifeq ("$(and $(call is-module-external,$(LOCAL_MODULE)),$(call strneq,$(LOCAL_MODULE_CLASS),QMAKE))","")
 ifneq ($(filter $(LOCAL_MODULE) 1,$(USE_ADDRESS_SANITIZER)),)
   LOCAL_CFLAGS += -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls -O1 -D__ADDRESSSANITIZER__
@@ -449,6 +450,7 @@ endif
 ifneq ($(filter $(LOCAL_MODULE) 1,$(USE_COVERAGE)),)
   LOCAL_CFLAGS  += -fprofile-arcs -ftest-coverage -O0 -D__COVERAGE__
   LOCAL_LDFLAGS += -fprofile-arcs -ftest-coverage
+endif
 endif
 endif
 
