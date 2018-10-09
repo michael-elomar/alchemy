@@ -3,14 +3,18 @@ import logging
 import os
 import subprocess
 import sys
+import argparse
 
 
 def setup_argparse(parser):
     pass
 
 
-def _dump_defines(binary):
-    ret = subprocess.run([binary, '-dM', '-E', '-'],
+def _dump_defines(binary, flags=[]):
+    cmd = [binary]
+    cmd.extend(flags)
+    cmd.extend(['-dM', '-E', '-'])
+    ret = subprocess.run(cmd,
                          stdin=subprocess.DEVNULL,
                          stdout=subprocess.PIPE,
                          check=True)
@@ -25,8 +29,11 @@ def _dump_defines(binary):
     return defs
 
 
-def _dump_search_paths(binary):
-    ret = subprocess.run([binary, '-E', '-xc++', '-', '-v'],
+def _dump_search_paths(binary, flags=[]):
+    cmd = [binary]
+    cmd.extend(flags)
+    cmd.extend(['-E', '-xc++', '-', '-v'])
+    ret = subprocess.run(cmd,
                          stdin=subprocess.DEVNULL,
                          stdout=subprocess.DEVNULL,
                          stderr=subprocess.PIPE,
@@ -47,6 +54,38 @@ def _dump_search_paths(binary):
     return paths
 
 
+class _cflag:
+    def __init__(self, name, has_arg=False, multiple_args=False):
+        self.name = name
+        self.has_arg = has_arg
+        self.multiple_args = multiple_args
+
+
+def _parse_flags(cflags, flags_list):
+    cfp = argparse.ArgumentParser()
+    for f in flags_list:
+        action = 'append' if f.has_arg and f.multiple_args else \
+                 'store' if f.has_arg else \
+                 'store_true'
+        cfp.add_argument('-{}'.format(f.name), action=action)
+    x, _ = cfp.parse_known_args(cflags)
+
+    flags = []
+    for f in flags_list:
+        v = x.__dict__[f.name]
+        if v is None:
+            continue
+        if f.has_arg:
+            if f.multiple_args:
+                for z in v:
+                    flags.extend(['-{}'.format(f.name), z])
+            else:
+                flags.extend(['-{}'.format(f.name), v])
+        else:
+            flags.append('-{}'.format(f.name))
+    return flags
+
+
 def _update_props(project, includes, defines):
     props = os.path.join(project.workspace_dir, '.vscode',
                          'c_cpp_properties.json')
@@ -56,10 +95,16 @@ def _update_props(project, includes, defines):
         sys.exit(1)
 
     compiler = project.get_target_var('CC')
+    cflags = project.get_target_var('GLOBAL_CFLAGS').split()
+    known_flags = [
+        _cflag('arch', has_arg=True),
+        _cflag('isysroot', has_arg=True),
+    ]
+    flags = _parse_flags(cflags, known_flags)
 
-    defs = _dump_defines(compiler)
+    defs = _dump_defines(compiler, flags)
     defs.update(defines)
-    incs = _dump_search_paths(compiler)
+    incs = _dump_search_paths(compiler, flags)
     compiler_incs = set(incs)
     incs.update(includes)
 
@@ -74,7 +119,7 @@ def _update_props(project, includes, defines):
                 c['browse'] = {}
             c['browse']['path'] = ['${workspaceRoot}'] + \
                 sorted(['{}/*'.format(x) for x in compiler_incs])
-            c['compilerPath'] = compiler
+            c['compilerPath'] = '{} {}'.format(compiler, ' '.join(flags))
     with open(props, 'w') as f:
         json.dump(data, f, indent='\t')
 
