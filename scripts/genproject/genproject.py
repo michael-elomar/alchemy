@@ -120,6 +120,23 @@ class Project(object):
             name = "BUILD_" + dep.replace("-", "_").replace(".", "_").upper()
             self.defines_c[name] = ""
             self.defines_cxx[name] = ""
+        for module in self.modules:
+            config = os.path.join(self.get_target_var("OUT_BUILD"),
+                                  module,
+                                  module + ".config")
+            try:
+                with open(config, "r") as c:
+                    for l in c:
+                        if not l.startswith("CONFIG_"):
+                            continue
+                        name, _, value = l.strip().partition("=")
+                        name = name[7:]  # remove "CONFIG_" prefix
+                        if value == "y":
+                            value = ""
+                        self.defines_c[name] = value
+                        self.defines_cxx[name] = value
+            except FileNotFoundError:
+                pass
 
         # Compute list of source files and headers
         self.sources = set()
