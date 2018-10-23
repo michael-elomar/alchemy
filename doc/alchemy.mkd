@@ -935,9 +935,9 @@ If `none` is given, the specified language check will be disabled.
 
 Available languages:
 * `AS`: default checker is `none`.
-* `C`: default checker is `linux`.
-* `CXX`: default checker is `cpplint`.
-* `OBJC`: default checker is `linux`.
+* `C`: default checkers are `linux` and `clang-format`.
+* `CXX`: default checker is `clang-format`.
+* `OBJC`: default checker is `none`.
 * `VALA`: default checker is `valastyle`.
 
 ### Internal modules
