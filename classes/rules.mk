@@ -340,8 +340,8 @@ all_prerequisites += \
 ###############################################################################
 
 # Get list of exported stuff by our dependencies
-ifeq ("$(and $(call is-module-external,$(LOCAL_MODULE)),$(call strneq,$(LOCAL_MODULE_CLASS),QMAKE))","")
-  # Internal module or QMAKE module
+ifeq ("$(and $(call is-module-external,$(LOCAL_MODULE)),$(call strneq,$(LOCAL_MODULE_CLASS),QMAKE),$(call strneq,$(LOCAL_MODULE_CLASS),LINUX_MODULE))","")
+  # Internal module or QMAKE module or LINUX_MODULE
   imported_CFLAGS        := $(call module-get-listed-export,$(all_depends),CFLAGS)
   imported_CXXFLAGS      := $(call module-get-listed-export,$(all_depends),CXXFLAGS)
   imported_C_INCLUDES    := $(call module-get-listed-export,$(all_depends),C_INCLUDES)

@@ -47,6 +47,7 @@ $(LOCAL_TARGETS): PRIVATE_C_INCLUDES := $(addprefix -I$(LOCAL_PATH)/, $(call uni
 $(LOCAL_TARGETS): PRIVATE_C_INCLUDES += $(addprefix -I, $(LOCAL_C_INCLUDES))
 $(LOCAL_TARGETS): PRIVATE_CFLAGS := $(LOCAL_CFLAGS)
 $(LOCAL_TARGETS): PRIVATE_KBUILD := $(LINUX_MODULE_KBUILD)
+$(LOCAL_TARGETS): PRIVATE_ALL_LIBS := $(all_libs)
 
 # LINUX_XXX variables can NOT be used here, they may not be defined yet
 # So the ARCH argument is given later when invoking make
