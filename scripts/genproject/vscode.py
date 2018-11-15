@@ -10,50 +10,6 @@ def setup_argparse(parser):
     pass
 
 
-def _dump_defines(binary, flags=[]):
-    cmd = [binary]
-    cmd.extend(flags)
-    cmd.extend(['-dM', '-E', '-'])
-    ret = subprocess.run(cmd,
-                         stdin=subprocess.DEVNULL,
-                         stdout=subprocess.PIPE,
-                         check=True)
-    defs = set()
-    for line in ret.stdout.decode('utf-8').splitlines():
-        _, _, line = line.partition(' ')
-        name, _, value = line.partition(' ')
-        if value:
-            defs.add('{}={}'.format(name, value))
-        else:
-            defs.add(name)
-    return defs
-
-
-def _dump_search_paths(binary, flags=[]):
-    cmd = [binary]
-    cmd.extend(flags)
-    cmd.extend(['-E', '-xc++', '-', '-v'])
-    ret = subprocess.run(cmd,
-                         stdin=subprocess.DEVNULL,
-                         stdout=subprocess.DEVNULL,
-                         stderr=subprocess.PIPE,
-                         check=True)
-    paths = set()
-    inside = False
-    for line in ret.stderr.decode('utf-8').splitlines():
-        if line.startswith('#include <...> search starts here:'):
-            inside = True
-            continue
-        if not inside or line.endswith('(framework directory)'):
-            continue
-        if line.startswith('End of search list.'):
-            inside = False
-            continue
-
-        paths.add(line.strip())
-    return paths
-
-
 class _cflag:
     def __init__(self, name, has_arg=False, multiple_args=False):
         self.name = name
@@ -102,11 +58,11 @@ def _update_props(project, includes, defines):
     ]
     flags = _parse_flags(cflags, known_flags)
 
-    defs = _dump_defines(compiler, flags)
-    defs.update(defines)
-    incs = _dump_search_paths(compiler, flags)
-    compiler_incs = set(incs)
-    incs.update(includes)
+    defs = set(defines)
+    incs = set(includes)
+
+    # Filter any "bad" defines (empty or stating with a number)
+    defs = [d for d in defs if len(d) > 0 and not d[0].isdigit()]
 
     with open(props, 'r') as f:
         data = json.load(f)
@@ -114,11 +70,6 @@ def _update_props(project, includes, defines):
         for c in configs:
             c['includePath'] = sorted(incs)
             c['defines'] = sorted(defs)
-            # c['browse']['path'] = sorted(['{}/*'.format(x) for x in incs])
-            if 'browse' not in c:
-                c['browse'] = {}
-            c['browse']['path'] = ['${workspaceRoot}'] + \
-                sorted(['{}/*'.format(x) for x in compiler_incs])
             c['compilerPath'] = '{} {}'.format(compiler, ' '.join(flags))
     with open(props, 'w') as f:
         json.dump(data, f, indent='\t')
