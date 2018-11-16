@@ -410,7 +410,7 @@ $(info Generating rules...)
 # If a module is specified in goals, only include this one and its dependencies.
 # If 'all' or 'check' is also given do not do the filter
 # For meta packages, also get config dependencies (for build/clean shortcuts)
-ifeq ("$(call is-targets-in-make-goals,all check all-clean all-dirclean all-doc all-codecheck all-genproject)","")
+ifeq ("$(call is-targets-in-make-goals,all check all-clean all-dirclean all-doc all-codecheck all-codeformat all-genproject)","")
 $(foreach __mod,$(ALL_BUILD_MODULES) $(ALL_BUILD_MODULES_HOST), \
 	$(if $(call is-module-in-make-goals,$(__mod)), \
 		$(eval __modlist += $(__mod)) \
@@ -504,6 +504,10 @@ all-doc: $(foreach __mod,$(ALL_BUILD_MODULES),$(if $(call is-module-prebuilt,$(_
 .PHONY: all-codecheck
 all-codecheck: $(foreach __mod,$(ALL_BUILD_MODULES),$(if $(call is-module-prebuilt,$(__mod)),$(empty),$(__mod)-codecheck))
 	@echo "Done all-codecheck"
+
+.PHONY: all-codeformat
+all-codeformat: $(foreach __mod,$(ALL_BUILD_MODULES),$(if $(call is-module-prebuilt,$(__mod)),$(empty),$(__mod)-codeformat))
+	@echo "Done all-codeformat"
 
 .PHONY: all-genproject
 all-genproject: $(foreach __mod,$(ALL_BUILD_MODULES),$(if $(call is-module-prebuilt,$(__mod)),$(empty),$(__mod)-genproject))

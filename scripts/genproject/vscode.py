@@ -98,7 +98,9 @@ def _package_tasks(name, build_args):
         _single_task('{}-dirclean'.format(name),
                      bsh_fmt.format(build_args, name, '-dirclean')),
         _single_task('{}-codecheck'.format(name),
-                     bsh_fmt.format(build_args, name, '-codecheck'))
+                     bsh_fmt.format(build_args, name, '-codecheck')),
+        _single_task('{}-codeformat'.format(name),
+                     bsh_fmt.format(build_args, name, '-codeformat'))
     ]
 
 

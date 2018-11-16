@@ -636,6 +636,7 @@ unpacked sources and applied patches will be kept in the build directory.</li>
 <li><code>make &lt;module&gt;-dirclean</code> : will remove the build directory of the module.</li>
 <li><code>make &lt;module&gt;-doc</code> : will generate the documentation for the module.</li>
 <li><code>make &lt;module&gt;-path</code> : will display the path of the module.</li>
+<li><code>make &lt;module&gt;-codeformat</code> : will format source files.</li>
 <li><code>make &lt;module&gt;-codecheck</code> : will check coding style of source files.</li>
 <li><code>make &lt;module&gt;-cloc</code> : will count the number of lines of code.</li>
 </ul>
@@ -993,6 +994,25 @@ original source tree.</p>
 
 <p><code>LOCAL_COPY_TO_BUILD_DIR_SKIP_FILES</code> can be used to list files that should not
 be copied (ath relative to <code>LOCAL_PATH</code>.</p>
+
+<h4><code>LOCAL_CODEFORMAT_xxx</code> <code>LOCAL_CODEFORMAT_xxx_ARGS</code></h4>
+
+<p>It is possible to customize the formatter used to format source code.</p>
+
+<p><code>LOCAL_CODEFORMAT_xxx</code> can be used to specify either an internal formatter name or
+a custom script to use.</p>
+
+<p>If an external script is used, it will be given extra argument as its first
+argument and the list of files to format as its second argument.</p>
+
+<p>If <code>none</code> is given, the specified language format will be disabled.</p>
+
+<p><code>LOCAL_CODEFORMAT_xxx_ARGS</code> can be used to pass extra argument to the formatter script.</p>
+
+<p>Available languages:
+* <code>C</code>: default formatter is <code>clang-format</code>.
+* <code>CXX</code>: default formatter is <code>clang-format</code>.
+* <code>OBJC</code>: default formatter is <code>clang-format</code>.</p>
 
 <h4><code>LOCAL_CODECHECK_xxx</code> <code>LOCAL_CODECHECK_xxx_ARGS</code></h4>
 

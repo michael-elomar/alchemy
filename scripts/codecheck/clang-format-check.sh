@@ -5,30 +5,9 @@ SCRIPT_PATH=$(cd $(dirname $0) && pwd -P)
 FILES=$1
 MODULE_DIR=$2
 
-# Exec everything from MODULE_DIR
-cd ${MODULE_DIR}
-
-# Search .clang-format file in MODULE_DIR or its parents, up to the
-# git repository root
-GITROOT=$(git rev-parse --show-toplevel)
-if [ "${GITROOT}" ]; then
-	TESTDIR=${MODULE_DIR}
-	while true; do
-		CLANG_FORMAT_CFG=${TESTDIR}/.clang-format
-		if [ -f "${CLANG_FORMAT_CFG}" ]; then
-			break
-		fi
-		if [ "${TESTDIR}" = "${GITROOT}" ]; then
-			break
-		fi
-		TESTDIR=$(dirname ${TESTDIR})
-	done
-else
-	CLANG_FORMAT_CFG=${MODULE_DIR}/.clang-format
-fi
-
 # If no .clang-format file, skip the tests
-if [ ! -f "${CLANG_FORMAT_CFG}" ]; then
+CLANG_FORMAT_CFG=$(${SCRIPT_PATH}/../codeformat/find_clang_format.sh ${MODULE_DIR})
+if [ -z "${CLANG_FORMAT_CFG}" ]; then
 	exit 0
 fi
 
@@ -36,13 +15,8 @@ fi
 echo "found .clang-format file: ${CLANG_FORMAT_CFG}"
 cd $(dirname ${CLANG_FORMAT_CFG})
 
-# Find newest clang-format available
-OLD_IFS=$IFS
-IFS=":"
-CLANG_FORMAT=$(ls ${PATH} 2>/dev/null | grep -E '^clang-format(-[0-9]\.[0-9])?$' | sort -r | head -n1)
-IFS=$OLD_IFS
-
-# If not clang-format, skip the tests, but print a message
+# If no clang-format binary found, skip the tests, but print a message
+CLANG_FORMAT=$(${SCRIPT_PATH}/../codeformat/select_clang_format.sh)
 if [ -z "${CLANG_FORMAT}" ]; then
 	echo "clang-format not available, skipping clang-format checks"
 	exit 0

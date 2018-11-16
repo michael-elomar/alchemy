@@ -576,6 +576,7 @@ For each registered modules, following `make` targets will be available :
 * `make <module>-dirclean` : will remove the build directory of the module.
 * `make <module>-doc` : will generate the documentation for the module.
 * `make <module>-path` : will display the path of the module.
+* `make <module>-codeformat` : will format source files.
 * `make <module>-codecheck` : will check coding style of source files.
 * `make <module>-cloc` : will count the number of lines of code.
 
@@ -918,6 +919,25 @@ original source tree.
 
 `LOCAL_COPY_TO_BUILD_DIR_SKIP_FILES` can be used to list files that should not
 be copied (ath relative to `LOCAL_PATH`.
+
+#### `LOCAL_CODEFORMAT_xxx` `LOCAL_CODEFORMAT_xxx_ARGS`
+
+It is possible to customize the formatter used to format source code.
+
+`LOCAL_CODEFORMAT_xxx` can be used to specify either an internal formatter name or
+a custom script to use.
+
+If an external script is used, it will be given extra argument as its first
+argument and the list of files to format as its second argument.
+
+If `none` is given, the specified language format will be disabled.
+
+`LOCAL_CODEFORMAT_xxx_ARGS` can be used to pass extra argument to the formatter script.
+
+Available languages:
+* `C`: default formatter is `clang-format`.
+* `CXX`: default formatter is `clang-format`.
+* `OBJC`: default formatter is `clang-format`.
 
 #### `LOCAL_CODECHECK_xxx` `LOCAL_CODECHECK_xxx_ARGS`
 

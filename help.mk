@@ -26,6 +26,7 @@ help:
 	@echo "  <module>-doc             : generate a documentation for the specified module."
 	@echo "  <module>-dirclean        : clean specified module and delete its build directory."
 	@echo "  <module>-path            : print location of module."
+	@echo "  <module>-codeformat      : format code for the specified module."
 	@echo "  <module>-codecheck       : check coding rules for the specified module."
 	@echo "  <module>-genproject-<ide>: generate ide config for <ide>. <ide> could be : \"$(genproject-get-ides)\"."
 	@echo ""

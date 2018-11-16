@@ -280,6 +280,18 @@ vars-LOCAL += DOXYFILE
 # is given, LOCAL_PATH will be added automatically
 vars-LOCAL += DOXYGEN_INPUT
 
+# Code format to use (depending on source code kind)
+# If empty or 'default' an internal default with be used
+# If 'none', it will disable code format
+vars-LOCAL += CODEFORMAT_C
+vars-LOCAL += CODEFORMAT_CXX
+vars-LOCAL += CODEFORMAT_OBJC
+
+# Arguments to give to code formatter
+vars-LOCAL += CODEFORMAT_C_ARGS
+vars-LOCAL += CODEFORMAT_CXX_ARGS
+vars-LOCAL += CODEFORMAT_OBJC_ARGS
+
 # Code check to use (depending on source code kind)
 # If empty or 'default' an internal default with be used
 # If 'none', it will disable code check
