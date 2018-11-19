@@ -273,7 +273,9 @@ $(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
 )
 
 # Setup pkg-config
-# Only use packages found in TARGET_OUT_STAGING by setting PKG_CONFIG_LIBDIR empty
+# Prevent use of packages from the host by setting PKG_CONFIG_LIBDIR to the
+# staging dir, assuming no .pc file is present there. Using an empty string
+# does not work with pkgconf.
 TARGET_PKG_CONFIG_ENV := \
 	PKG_CONFIG="$(PKGCONFIG_BIN)" \
 	PKG_CONFIG_PATH="$(TARGET_PKG_CONFIG_PATH)"
@@ -281,7 +283,7 @@ ifeq ("$(TARGET_OS_FLAVOUR)","native")
   TARGET_PKG_CONFIG_ENV += PKG_CONFIG_SYSROOT_DIR=""
 else
   TARGET_PKG_CONFIG_ENV += PKG_CONFIG_SYSROOT_DIR="$(TARGET_OUT_STAGING)"
-  TARGET_PKG_CONFIG_ENV += PKG_CONFIG_LIBDIR=""
+  TARGET_PKG_CONFIG_ENV += PKG_CONFIG_LIBDIR="$(TARGET_OUT_STAGING)"
 endif
 
 # Environment to use when executing configure script
