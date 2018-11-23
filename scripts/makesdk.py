@@ -541,17 +541,42 @@ def processModuleAndroid(ctx, module):
     elif "EXPORT_LDLIBS" in module.fields:
         # register all exported libs
         libNames = module.fields["EXPORT_LDLIBS"].split()
-        for libName in ("lib" + libName[2:] for libName in libNames if libName.startswith("-l")):
-            moduleName = module.name + "-" + libName if len(libNames) > 1 else module.name
+
+        for libName in libNames:
             libPathShared = None
             libPathStatic = None
-            # Search shared/static lib path
-            for libDir in "lib", "usr/lib":
-                libPath = os.path.join(libDir, libName)
-                if os.path.exists(os.path.join(ctx.stagingDir, libPath) + ".so"):
-                    libPathShared = libPath + ".so"
-                if os.path.exists(os.path.join(ctx.stagingDir, libPath) + ".a"):
-                    libPathStatic = libPath + ".a"
+            libPath = None
+            modulePath = module.fields["PATH"]
+
+            if libName.startswith("-l"):
+                libName = "lib" + libName[2:]
+                # Search shared/static lib path
+                for libDir in "lib", "usr/lib":
+                    lPath = os.path.join(libDir, libName)
+                    if os.path.exists(os.path.join(ctx.stagingDir, lPath) + ".so"):
+                        libPathShared = lPath + ".so"
+                    if os.path.exists(os.path.join(ctx.stagingDir, lPath) + ".a"):
+                        libPathStatic = lPath + ".a"
+            elif libName.startswith(modulePath):
+                # lib is defined by its full name (abs dir + lib name)
+                if os.path.exists(modulePath):
+                    relPath = os.path.relpath(libName, modulePath)
+                    if relPath != ".":
+                        libPath = os.path.join("usr", "lib", module.name, relPath)
+                    else:
+                        libPath = os.path.join("usr", "lib", module.name)
+            elif libName.startswith(ctx.stagingDir):
+                libPath = os.path.relpath(libName, ctx.stagingDir)
+            else:
+                 libPath = libName
+
+            if libPath is not None and libPath.endswith(".so"):
+                libPathShared = libPath
+            elif libPath is not None and libPath.endswith(".a"):
+                libPathStatic = libPath
+
+            moduleName = module.name + "-" + libName if len(libNames) > 1 else module.name
+
             # Register
             if libPathShared is not None:
                 # SHARED
