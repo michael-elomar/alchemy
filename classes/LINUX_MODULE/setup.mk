@@ -45,7 +45,11 @@ define _linux-module-def-cmd-install
 		DEPMOD="$(LINUX_DEPMOD)" \
 		KBUILD_EXTRA_SYMBOLS="$(call module-get-linux-extra-symbols,$(PRIVATE_ALL_LIBS))" \
 		modules_install
-	$(Q) cp -af $(PRIVATE_OBJ_DIR)/$(PRIVATE_MODULE_FILENAME) $(PRIVATE_BUILD_DIR)/$(PRIVATE_MODULE_FILENAME)
+	$(Q) if [ -n $(PRIVATE_DESTDIR) ]; then \
+		mkdir -p $(TARGET_OUT_STAGING)/$(PRIVATE_DESTDIR); \
+		cp -af $(PRIVATE_OBJ_DIR)/$(PRIVATE_MODULE_FILENAME) \
+			$(TARGET_OUT_STAGING)/$(PRIVATE_DESTDIR); \
+	fi
 endef
 
 define _linux-module-def-cmd-clean
@@ -57,5 +61,8 @@ define _linux-module-def-cmd-clean
 			clean || echo "Ignoring clean errors"; \
 	fi
 	$(Q) rm -f $(PRIVATE_BUILD_DIR)/$(PRIVATE_MODULE_FILENAME)
+	$(Q) if [ -n $(PRIVATE_DESTDIR) ]; then \
+		rm -f $(TARGET_OUT_STAGING)/$(PRIVATE_DESTDIR)/$(PRIVATE_MODULE_FILENAME); \
+	fi
 	$(Q) rm -f $(TARGET_OUT_STAGING)/lib/modules/*/extra/$(PRIVATE_MODULE_FILENAME)
 endef
