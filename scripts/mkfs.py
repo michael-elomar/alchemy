@@ -2,6 +2,7 @@
 
 import sys, os, logging
 import argparse
+import fnmatch
 import re
 import stat
 import mktar, mkextfs, mkcpio, mkubi
@@ -88,7 +89,7 @@ def addFsEntries(root, filters):
         match = reLine.match(buf)
         filePath = match.group(1)
 
-        if filePath in filters:
+        if any(map(lambda f: fnmatch.fnmatch(filePath, f), filters)):
             logging.info("Skipping entry: %s", filePath)
             continue
 
