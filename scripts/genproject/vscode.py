@@ -75,7 +75,7 @@ def _update_props(project, includes, defines):
         json.dump(data, f, indent='\t')
 
 
-def _single_task(label, command, *, default=False):
+def _single_task(label, command, *, default=False, reevaluate=True):
     task = {
         'label': label,
         'type': 'shell',
@@ -86,6 +86,8 @@ def _single_task(label, command, *, default=False):
         task['group'] = {'kind': 'build', 'isDefault': True}
     else:
         task['group'] = 'build'
+    if not reevaluate:
+        task['runOptions'] = {'reevaluateOnRerun': False}
     return task
 
 
@@ -102,9 +104,11 @@ def _gen_tasks(project, build_args, modules):
         tasks.append(_single_task(
             'clean', '${{workspaceFolder}}/build.sh {} -t clean -j/1'.format(args)))
         tasks.append(_single_task(
-            'alchemy', '${{workspaceFolder}}/build.sh {} -A ${{input:module}}${{input:mode}}'.format(args)))
+            'alchemy', '${{workspaceFolder}}/build.sh {} -A ${{input:module}}${{input:mode}}'.format(args),
+            reevaluate=False))
         tasks.append(_single_task(
-            'custom', '${{workspaceFolder}}/build.sh {} ${{input:any}}'.format(args)))
+            'custom', '${{workspaceFolder}}/build.sh {} ${{input:any}}'.format(args),
+            reevaluate=False))
         inputs = list()
         data['inputs'] = inputs
         inputs.append({'id': 'module',
@@ -114,9 +118,9 @@ def _gen_tasks(project, build_args, modules):
                        'options': modules})
         inputs.append({'id': 'mode',
                        'description': 'What to do on module (empty = build)',
-                       'default': '',
+                       'default': ' ',
                        'type': 'pickString',
-                       'options': ['', '-clean', '-dirclean', '-codecheck', '-codeformat']})
+                       'options': [' ', '-clean', '-dirclean', '-codecheck', '-codeformat']})
         inputs.append({'id': 'any',
                        'description': 'Will be passed to build.sh as options',
                        'default': '',
