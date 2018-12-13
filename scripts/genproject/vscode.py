@@ -89,21 +89,6 @@ def _single_task(label, command, *, default=False):
     return task
 
 
-def _package_tasks(name, build_args):
-    bsh_fmt = '${{workspaceFolder}}/build.sh {} {}{}'
-    return [
-        _single_task(name, bsh_fmt.format(build_args, name, '')),
-        _single_task('{}-clean'.format(name),
-                     bsh_fmt.format(build_args, name, '-clean')),
-        _single_task('{}-dirclean'.format(name),
-                     bsh_fmt.format(build_args, name, '-dirclean')),
-        _single_task('{}-codecheck'.format(name),
-                     bsh_fmt.format(build_args, name, '-codecheck')),
-        _single_task('{}-codeformat'.format(name),
-                     bsh_fmt.format(build_args, name, '-codeformat'))
-    ]
-
-
 def _gen_tasks(project, build_args, modules):
     args = ' '.join(build_args.split(' ')[:-1])  # remove trailing -A
     tasks_path = os.path.join(project.workspace_dir, '.vscode', 'tasks.json')
@@ -115,9 +100,27 @@ def _gen_tasks(project, build_args, modules):
         tasks.append(_single_task(
             'full_build', '${{workspaceFolder}}/build.sh {} -t build -j/1'.format(args), default=True))
         tasks.append(_single_task(
-            'clean', '${{workspaceFolder}}/build.sh {} -t clean'.format(args)))
-        for name in modules:
-            tasks.extend(_package_tasks(name, build_args))
+            'clean', '${{workspaceFolder}}/build.sh {} -t clean -j/1'.format(args)))
+        tasks.append(_single_task(
+            'alchemy', '${{workspaceFolder}}/build.sh {} -A ${{input:module}}${{input:mode}}'.format(args)))
+        tasks.append(_single_task(
+            'custom', '${{workspaceFolder}}/build.sh {} ${{input:any}}'.format(args)))
+        inputs = list()
+        data['inputs'] = inputs
+        inputs.append({'id': 'module',
+                       'description': 'What module must we operate on',
+                       'default': '',
+                       'type': 'pickString',
+                       'options': modules})
+        inputs.append({'id': 'mode',
+                       'description': 'What to do on module (empty = build)',
+                       'default': '',
+                       'type': 'pickString',
+                       'options': ['', '-clean', '-dirclean', '-codecheck', '-codeformat']})
+        inputs.append({'id': 'any',
+                       'description': 'Will be passed to build.sh as options',
+                       'default': '',
+                       'type': 'promptString'})
         json.dump(data, f, indent='\t')
 
 
