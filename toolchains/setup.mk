@@ -88,6 +88,8 @@ ifeq ("$(TARGET_OS)","linux")
         TOOLCHAIN_GDBSERVER := $(TARGET_TOOLCHAIN_SYSROOT)/../../bin/gdbserver
       else ifneq ("$(wildcard $(TARGET_TOOLCHAIN_SYSROOT)/../debug-root/usr/bin/gdbserver)","")
         TOOLCHAIN_GDBSERVER := $(TARGET_TOOLCHAIN_SYSROOT)/../debug-root/usr/bin/gdbserver
+      else ifneq ("$(wildcard $(TARGET_TOOLCHAIN_SYSROOT)/../host_bin/gdbserver)","")
+        TOOLCHAIN_GDBSERVER := $(TARGET_TOOLCHAIN_SYSROOT)/../host_bin/gdbserver
       endif
     endif
   endif
