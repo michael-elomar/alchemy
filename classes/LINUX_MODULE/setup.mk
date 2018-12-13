@@ -9,7 +9,8 @@
 export LINUX_DEPMOD_LOCKFILE := $(TARGET_OUT_BUILD)/depmod.lock
 LINUX_DEPMOD := $(BUILD_SYSTEM)/scripts/depmod.sh
 
-_linux-module-get-extra-symbols = $(foreach __mod,$1, \
+# Public macro, can be used by atom.mk
+module-get-linux-extra-symbols = $(foreach __mod,$1, \
 	$(wildcard $(call module-get-build-dir,$(__mod))/obj/Module.symvers) \
 )
 
@@ -31,7 +32,7 @@ define _linux-module-def-cmd-build
 		$(if $(wildcard $(PRIVATE_LINUX_BUILD_DIR)/linuxarch),ARCH=$$(cat $(PRIVATE_LINUX_BUILD_DIR)/linuxarch)) \
 		$(PRIVATE_KBUILD_FLAGS) \
 		CROSS_COMPILE=$(if $(TARGET_LINUX_CROSS),$(TARGET_LINUX_CROSS),$(TARGET_CROSS)) \
-		KBUILD_EXTRA_SYMBOLS="$(call _linux-module-get-extra-symbols,$(PRIVATE_ALL_LIBS))" \
+		KBUILD_EXTRA_SYMBOLS="$(call module-get-linux-extra-symbols,$(PRIVATE_ALL_LIBS))" \
 		modules
 endef
 
@@ -42,7 +43,7 @@ define _linux-module-def-cmd-install
 		$(PRIVATE_KBUILD_FLAGS) \
 		CROSS_COMPILE=$(if $(TARGET_LINUX_CROSS),$(TARGET_LINUX_CROSS),$(TARGET_CROSS)) \
 		DEPMOD="$(LINUX_DEPMOD)" \
-		KBUILD_EXTRA_SYMBOLS="$(call _linux-module-get-extra-symbols,$(PRIVATE_ALL_LIBS))" \
+		KBUILD_EXTRA_SYMBOLS="$(call module-get-linux-extra-symbols,$(PRIVATE_ALL_LIBS))" \
 		modules_install
 	$(Q) cp -af $(PRIVATE_OBJ_DIR)/$(PRIVATE_MODULE_FILENAME) $(PRIVATE_BUILD_DIR)/$(PRIVATE_MODULE_FILENAME)
 endef
