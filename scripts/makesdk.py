@@ -472,6 +472,45 @@ def processModuleAndroidInternal(ctx, writer, module, name, libPath, kind):
                 writer.write(" \\\n\t$(LOCAL_PATH)/%s" % exportedInclude[1])
     writer.write("\n")
 
+    # Deps (only for static libraries)
+    if kind == "STATIC" and "depends" in module.fields:
+        raw_deps_list = module.fields["depends"].split()
+        static_libs_deps = []
+        shared_libs_deps = []
+        for name in raw_deps_list:
+            try:
+                mod = ctx.moduledb[name]
+            except KeyError:
+                continue
+            moduleClass = mod.fields["MODULE_CLASS"]
+            if moduleClass == "SHARED_LIBRARY":
+                shared_libs_deps.append(name)
+            elif moduleClass == "STATIC_LIBRARY" or moduleClass == "LIBRARY":
+                static_libs_deps.append("%s-static" % name)
+            elif "EXPORT_LDLIBS" in mod.fields:
+                libNames = mod.fields["EXPORT_LDLIBS"].split()
+                for libName in ("lib" + libName[2:] for libName in libNames if libName.startswith("-l")):
+                    name = mod.name + "-" + libName if len(libNames) > 1 else mod.name
+                    libPathShared = None
+                    libPathStatic = None
+                    # Search shared/static lib path
+                    for libDir in "lib", "usr/lib":
+                        libPath = os.path.join(libDir, libName)
+                        if os.path.exists(os.path.join(ctx.stagingDir, libPath) + ".so"):
+                            libPathShared = libPath + ".so"
+                        if os.path.exists(os.path.join(ctx.stagingDir, libPath) + ".a"):
+                            libPathStatic = libPath + ".a"
+                    if libPathStatic is not None:
+                        static_libs_deps.append("%s-static" % name)
+                    elif libPathShared is not None:
+                        shared_libs_deps.append(name)
+
+        if static_libs_deps:
+            writer.write("LOCAL_STATIC_LIBRARIES := %s\n" % " \\\n\t".join(static_libs_deps))
+        if shared_libs_deps:
+            writer.write("LOCAL_SHARED_LIBRARIES := %s\n" % " \\\n\t".join(shared_libs_deps))
+
+
     # End of module
     writer.write("include $(PREBUILT_%s_LIBRARY)\n" % kind)
     writer.write("\n")
