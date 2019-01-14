@@ -113,9 +113,9 @@ $(Q) $(CCACHE) $(PRIVATE_CXX) \
 	$(filter-out -std=%,$(PRIVATE_GLOBAL_CFLAGS)) \
 	$(PRIVATE_GLOBAL_CXXFLAGS) \
 	$(PRIVATE_WARNINGS_CXXFLAGS) \
+	$(PRIVATE_PCH_INCLUDE) \
 	$(filter-out -std=%,$(PRIVATE_CFLAGS)) \
 	$(PRIVATE_CXXFLAGS) \
-	$(PRIVATE_PCH_INCLUDE) \
 	-MD -MP -MF $(call path-from-top,$(2:.o=.d)) -MT $(call path-from-top,$2) \
 	-o $(call path-from-top,$2) \
 	-c $(call path-from-top,$3)
