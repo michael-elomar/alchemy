@@ -67,6 +67,7 @@ endif
 # Headers to be copied in $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)
 LINUX_EXPORTED_HEADERS_OVER := \
 	include/linux/media.h \
+	include/linux/media-bus-format.h \
 	include/linux/videodev2.h \
 	include/linux/v4l2-common.h \
 	include/linux/v4l2-mediabus.h \
