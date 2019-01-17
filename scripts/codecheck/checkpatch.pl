@@ -1974,11 +1974,12 @@ sub process {
 # check we are in a valid source file if not then ignore this hunk
 		next if ($realfile !~ /\.(h|c|s|S|pl|sh)$/);
 
-#line length limit
-		if ($line =~ /^\+/ && $prevrawline !~ /\/\*\*/ &&
-		    $rawline !~ /^.\s*\*\s*\@$Ident\s/ &&
-		    !($line =~ /^\+\s*$logFunctions\s*\(\s*(?:(KERN_\S+\s*|[^"]*))?"[X\t]*"\s*(?:|,|\)\s*;)\s*$/ ||
-		    $line =~ /^\+\s*"[^"]*"\s*(?:\s*|,|\)\s*;)\s*$/) &&
+# line length limit
+# Allow lines with a URL to be longer than the limit
+# Allow lines with only a string (and an optional ',', ')' or ';') to be longer
+		if ($line =~ /^\+/ &&
+		    $rawline !~ /^\+.*\b[a-z][\w\.\+\-]*:\/\/\S+/i &&
+		    $line !~ /^\+\s*"[^"]*"\s*(?:\s*|,|\)\s*;)\s*$/ &&
 		    $length > $max_line_length)
 		{
 			WARN("LONG_LINE",
