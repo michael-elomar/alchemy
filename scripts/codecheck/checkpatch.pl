@@ -1389,7 +1389,11 @@ sub possible {
 my $prefix = '';
 
 sub show_type {
-       return !defined $ignore_type{$_[0]} && !defined $ignore_type_line{$_[0]} && !defined $ignore_type_file{$_[0]} && !defined $ignore_type_file{"ALL"}
+	my $res = !defined $ignore_type{$_[0]} && !defined $ignore_type_line{$_[0]} && !defined $ignore_type_file{$_[0]} && !defined $ignore_type_file{"ALL"};
+	if (defined $ignore_type_line{$_[0]} && $ignore_type_line{$_[0]} > 0) {
+		$ignore_type_line{$_[0]}--;
+	}
+	return $res;
 }
 
 sub report {
@@ -4104,6 +4108,13 @@ sub process {
 		    $line =~ /DEVICE_ATTR.*S_IWUGO/ ) {
 			WARN("EXPORTED_WORLD_WRITABLE",
 			     "Exporting world writable files is usually an error. Consider more restrictive permissions.\n" . $herecurr);
+		}
+
+		while(my($k, $v) = each %ignore_type_line) {
+			if ($v > 0) {
+				ERROR("UNUSED_IGNORE:" . $k,
+				      "Setting a codecheck_ignore for a line which does not have the ignored issue is an error.\n" . $herecurr);
+			}
 		}
 	}
 
