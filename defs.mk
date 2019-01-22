@@ -266,9 +266,11 @@ module-add = \
 				$(call streq,$(LOCAL_MODULE_CLASS),CUSTOM), \
 				$(call streq,$(LOCAL_MODULE_CLASS),EXECUTABLE), \
 				$(call streq,$(LOCAL_MODULE_CLASS),STATIC_LIBRARY), \
-				$(call streq,$(LOCAL_MODULE_CLASS),PREBUILT)), \
+				$(call streq,$(LOCAL_MODULE_CLASS),PREBUILT), \
+				$(call streq,$(LOCAL_MODULE_CLASS),META_PACKAGE), \
+				$(call streq,$(LOCAL_MODULE_CLASS),PYTHON_PACKAGE)), \
 			$(eval LOCAL_MODULE := host.$(LOCAL_MODULE)), \
-			$(error $(LOCAL_PATH): Only AUTOTOOLS/CUSTOM/EXECUTABLE/STATIC_LIBRARY/PREBUILT supported for host modules) \
+			$(error $(LOCAL_PATH): Only AUTOTOOLS/CUSTOM/EXECUTABLE/STATIC_LIBRARY/PREBUILT/META_PACKAGE/PYTHON_PACKAGE supported for host modules) \
 		) \
 	) \
 	$(eval __mod := $(LOCAL_MODULE)) \
@@ -376,6 +378,7 @@ is-module-list-registered = $(call not,$(strip $(foreach __lib,$1, \
 ## $1 : module to check.
 ## AUTOTOOLS/CMAKE/QMAKE/PYTHON_EXTENSION/GENERIC/CUSTOM/META_PACKAGE class or empty
 ## class means external.
+## TODO: Use _classes_external list instead
 ###############################################################################
 is-module-external = $(strip \
 	$(eval __class := $(__modules.$1.MODULE_CLASS)) \
@@ -383,6 +386,7 @@ is-module-external = $(strip \
 		$(call streq,$(__class),CMAKE), \
 		$(call streq,$(__class),QMAKE), \
 		$(call streq,$(__class),PYTHON_EXTENSION), \
+		$(call streq,$(__class),PYTHON_PACKAGE), \
 		$(call streq,$(__class),GENERIC), \
 		$(call streq,$(__class),CUSTOM) \
 		$(call streq,$(__class),META_PACKAGE) \

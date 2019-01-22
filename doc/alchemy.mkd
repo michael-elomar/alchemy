@@ -591,7 +591,7 @@ Several classes of modules are managed by `alchemy` :
 * `AUTOTOOLS`
 * `CMAKE`
 * `QMAKE`
-* `PYTHON_EXTENSION`
+* `PYTHON_PACKAGE`
 * `CUSTOM`
 * `META_PACKAGE`
 * `LINUX_MODULE`
@@ -600,7 +600,7 @@ Module will be referred as either `internal` or `external` :
 
 * Internal modules are `STATIC_LIBRARY`, `SHARED_LIBRARY`, `LIBRARY` and
   `EXECUTABLE` modules because they are completely managed by the build system.
-* External modules are `AUTOTOOLS`, `CMAKE`, `QMAKE`, `PYTHON_EXTENSION`,
+* External modules are `AUTOTOOLS`, `CMAKE`, `QMAKE`, `PYTHON_PACKAGE`,
   `CUSTOM`, `META_PACKAGE` and `LINUX_MODULE` modules because the build system has little
   control on the way those modules are built.
 
@@ -1292,16 +1292,32 @@ system.
 
 ### Python extension modules
 
-This class of modules is for the compilation of python extensions using a
-`setup.py` file and `distutils`. `Alchemy` provides internally everything
-needed to correctly build them and install them. The module still need to add
-a dependency to `python` or `python3`.
+This class of modules is obsolete, please migrate to python package class.
+
+### Python packages modules
+
+This class of modules is used to build and install python packages based on
+`distutils` or `setuptools`. It requires the availability of 2 alchemy modules:
+* 'host.python': a module that installs a suitable python version in host staging directory.
+* 'python': a module that installs a suitable python version in staging directory.
+
+Those two modules should be the same python version, that's why for cross-compilation
+it is required to build python for the host as well (it is not possible to use the
+one from the `native` host)
+
+For `native` build it is possible to simplify things and skip the compilation of python.
+You can simply create symlinks in staging directory to the python executable to use.
+Or you can use virtual env to install a dedicated python environment in the staging directory.
+An example of such `atom.k` is available here [python-native-atom.mk](python-native-atom.mk).
 
 #### Customization variables
 
-* `LOCAL_PYTHONEXT_SETUP_PY_ENV` : Additional environment variables to pass to
-  `setup.py`.
-* `LOCAL_PYTHONEXT_SETUP_PY_ARGS` : Additional arguments to pass to `setup.py`.
+* `LOCAL_PYTHONPKG_TYPE` : Type of the package (`distutils` or `setuptools`), mandatory.
+* `LOCAL_PYTHONPKG_SETUP_PY` : Name of the `setup.py` script to execute (relative to `LOCAL_PATH').
+  Default is `setup.py`.
+* `LOCAL_PYTHONPKG_ENV` : Optional extra environment for build/install.
+* `LOCAL_PYTHONPKG_BUILD_ARGS` : Optional extra build arguments.
+* `LOCAL_PYTHONPKG_INSTALL_ARGS` : Optional extra install arguments.
 
 ### Linux kernel modules
 

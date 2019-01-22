@@ -22,6 +22,7 @@ _classes_external := \
 	CMAKE \
 	QMAKE \
 	PYTHON_EXTENSION \
+	PYTHON_PACKAGE \
 	CUSTOM \
 	META_PACKAGE \
 	GI_TYPELIB \

@@ -653,7 +653,7 @@ unpacked sources and applied patches will be kept in the build directory.</li>
 <li><code>AUTOTOOLS</code></li>
 <li><code>CMAKE</code></li>
 <li><code>QMAKE</code></li>
-<li><code>PYTHON_EXTENSION</code></li>
+<li><code>PYTHON_PACKAGE</code></li>
 <li><code>CUSTOM</code></li>
 <li><code>META_PACKAGE</code></li>
 <li><code>LINUX_MODULE</code></li>
@@ -664,7 +664,7 @@ unpacked sources and applied patches will be kept in the build directory.</li>
 <ul>
 <li>Internal modules are <code>STATIC_LIBRARY</code>, <code>SHARED_LIBRARY</code>, <code>LIBRARY</code> and
 <code>EXECUTABLE</code> modules because they are completely managed by the build system.</li>
-<li>External modules are <code>AUTOTOOLS</code>, <code>CMAKE</code>, <code>QMAKE</code>, <code>PYTHON_EXTENSION</code>,
+<li>External modules are <code>AUTOTOOLS</code>, <code>CMAKE</code>, <code>QMAKE</code>, <code>PYTHON_PACKAGE</code>,
 <code>CUSTOM</code>, <code>META_PACKAGE</code> and <code>LINUX_MODULE</code> modules because the build system has little
 control on the way those modules are built.</li>
 </ul>
@@ -1393,17 +1393,33 @@ relative to <code>LOCAL_PATH</code></li>
 
 <h3>Python extension modules</h3>
 
-<p>This class of modules is for the compilation of python extensions using a
-<code>setup.py</code> file and <code>distutils</code>. <code>Alchemy</code> provides internally everything
-needed to correctly build them and install them. The module still need to add
-a dependency to <code>python</code> or <code>python3</code>.</p>
+<p>This class of modules is obsolete, please migrate to python package class.</p>
+
+<h3>Python packages modules</h3>
+
+<p>This class of modules is used to build and install python packages based on
+<code>distutils</code> or <code>setuptools</code>. It requires the availability of 2 alchemy modules:
+* 'host.python': a module that installs a suitable python version in host staging directory.
+* 'python': a module that installs a suitable python version in staging directory.</p>
+
+<p>Those two modules should be the same python version, that's why for cross-compilation
+it is required to build python for the host as well (it is not possible to use the
+one from the <code>native</code> host)</p>
+
+<p>For <code>native</code> build it is possible to simplify things and skip the compilation of python.
+You can simply create symlinks in staging directory to the python executable to use.
+Or you can use virtual env to install a dedicated python environment in the staging directory.
+An example of such <code>atom.k</code> is available here <a href="python-native-atom.mk">python-native-atom.mk</a>.</p>
 
 <h4>Customization variables</h4>
 
 <ul>
-<li><code>LOCAL_PYTHONEXT_SETUP_PY_ENV</code> : Additional environment variables to pass to
-<code>setup.py</code>.</li>
-<li><code>LOCAL_PYTHONEXT_SETUP_PY_ARGS</code> : Additional arguments to pass to <code>setup.py</code>.</li>
+<li><code>LOCAL_PYTHONPKG_TYPE</code> : Type of the package (<code>distutils</code> or <code>setuptools</code>), mandatory.</li>
+<li><code>LOCAL_PYTHONPKG_SETUP_PY</code> : Name of the <code>setup.py</code> script to execute (relative to <code>LOCAL_PATH').
+Default is</code>setup.py`.</li>
+<li><code>LOCAL_PYTHONPKG_ENV</code> : Optional extra environment for build/install.</li>
+<li><code>LOCAL_PYTHONPKG_BUILD_ARGS</code> : Optional extra build arguments.</li>
+<li><code>LOCAL_PYTHONPKG_INSTALL_ARGS</code> : Optional extra install arguments.</li>
 </ul>
 
 <h3>Linux kernel modules</h3>
