@@ -21,7 +21,7 @@ $(call register-prebuilt-pkg-config-module,libudev,libudev)
 
 ifeq ("$(TARGET_ARCH)","$(HOST_ARCH)")
 
-$(call register-prebuilt-pkg-config-module,avahi,avahi-client)
+$(call register-prebuilt-pkg-config-module,avahi-client,avahi-client)
 $(call register-prebuilt-pkg-config-module,opengles,glesv2)
 $(call register-prebuilt-pkg-config-module,opengl,gl)
 $(call register-prebuilt-pkg-config-module,libpng,libpng)
