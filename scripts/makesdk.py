@@ -408,7 +408,7 @@ def processModule(ctx, module, headersOnly=False):
                 copyHeaders(ctx, exportedInclude[0], os.path.join(ctx.outDir, exportedInclude[1]))
             if os.path.isabs(exportedInclude[1]):
                 ctx.atom.write(" \\\n\t%s" % exportedInclude[1])
-            elif exportedInclude[1] != "usr/include":
+            elif exportedInclude[1] != "usr/include" or moduleClass == "LINUX_MODULE":
                 ctx.atom.write(" \\\n\t$(LOCAL_PATH)/%s" % exportedInclude[1])
         ctx.atom.write("\n")
 
