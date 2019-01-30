@@ -36,13 +36,13 @@ fi
 
 # Save previous variables
 OLD_PATH=${PATH}
-OLD_LD_LIBRARY_PATH=${LD_LIBRARY_PATH}
+OLD_LD_LIBRARY_PATH=${LD_LIBRARY_PATH-}
 
 # Update path
 export PATH=${SYSROOT}/bin:${SYSROOT}/usr/bin:${PATH}
 
 # Update library path
-export LD_LIBRARY_PATH=${SYSROOT}/lib:${SYSROOT}/usr/lib:${LD_LIBRARY_PATH}
+export LD_LIBRARY_PATH=${SYSROOT}/lib:${SYSROOT}/usr/lib:${LD_LIBRARY_PATH-}
 
 # Execute given command line (only if not sourced)
 if [ "${executed}" = "1" ]; then
