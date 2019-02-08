@@ -42,7 +42,9 @@ endif
 ###############################################################################
 
 # Linux configuration file or target
-LINUX_CONFIG_FILE := $(call module-get-config,$(LOCAL_MODULE))
+ifndef LINUX_CONFIG_FILE
+  LINUX_CONFIG_FILE := $(call module-get-config,$(LOCAL_MODULE))
+endif
 LINUX_CONFIG_FILE_IS_TARGET := $(false)
 ifeq ("$(wildcard $(LINUX_CONFIG_FILE))","")
   ifdef LINUX_CONFIG_TARGET
