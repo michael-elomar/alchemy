@@ -132,9 +132,12 @@ endif
 ###############################################################################
 
 ifeq ("$(TARGET_CPU)","rcarh3")
-  cpu_flags += -march=armv8-a+crc+simd+crypto -mtune=cortex-a57.cortex-a53
   TARGET_CPU_HAS_NEON := 1
-  ifneq ("$(TARGET_ARCH)","aarch64")
+  ifeq ("$(TARGET_ARCH)","aarch64")
+    cpu_flags += -march=armv8-a+crc+simd+crypto -mtune=cortex-a57.cortex-a53
+  else ifeq ("$(TARGET_ARCH)","arm")
+    cpu_flags += -march=armv8-a+crc -mtune=cortex-a57.cortex-a53
+  else
     cpu_flags += -mfpu=crypto-neon-fp-armv8
     TARGET_FLOAT_ABI ?= hard
   endif
