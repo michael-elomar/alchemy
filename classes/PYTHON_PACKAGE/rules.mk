@@ -9,7 +9,7 @@
 # Python executable to use
 ifeq ("$(TARGET_OS)-$(TARGET_OS_FLAVOUR)","$(HOST_OS)-native")
   # For native build, assume that a package has installed some links
-  _python-pkg-python-bin = $(TARGET_OUT_STAGING)/$(TARGET_DEFAULT_BIN_DESTDIR)/python
+  _python-pkg-python-bin = $(HOST_OUT_STAGING)/$(HOST_DEFAULT_BIN_DESTDIR)/python
   _python-pkg-use-native-python := $(true)
 else ifneq ("$(call is-module-in-build-config,python3)","")
   _python-pkg-python-bin := $(HOST_OUT_STAGING)/$(HOST_DEFAULT_BIN_DESTDIR)/python3
