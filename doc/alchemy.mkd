@@ -199,6 +199,12 @@ conflict with other build systems (android for example).
   inside. Also, required options are internally set in linux config. Although
   only the copy in build directory is modified, the original one is not touched.
   </br>Default is `0`
+* `TARGET_LINUX_INSTALL_DEVICE_TREE` : enable linux kernel devicetree install target
+  rule: `dtbs_install`. The install directory shall be defined in `TARGET_LINUX_MAKE_BUILD_ARGS`
+  via linux kernel `INSTALL_DTBS_PATH` environment variable added to it.
+  This override `TARGET_LINUX_DEVICE_TREE_NAMES`
+  </br>(i.e `TARGET_LINUX_MAKE_BUILD_ARGS := INSTALL_DTBS_PATH="$(TARGET_OUT_STAGING)/boot"`)
+  </br>Default is `0`
 * `TARGET_LINUX_DEVICE_TREE_NAMES` : list of device tree name to copy in boot
   directory. It shall be in `$(LINUX_BUILD_DIR)/arch/$(TARGET_ARCH)/boot/dts`.
   The names shall be the ones with the `.dtb` extension. Default is empty.

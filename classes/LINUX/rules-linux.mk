@@ -251,7 +251,9 @@ ifeq ("$(TARGET_LINUX_IMAGE)","uImage")
 endif
 	@mkdir -p $(TARGET_OUT_STAGING)/boot
 	$(call linux-copy-images)
-ifneq ("$(TARGET_LINUX_DEVICE_TREE_NAMES)","")
+ifneq ("$(TARGET_LINUX_INSTALL_DEVICE_TREE)","0")
+	$(Q) $(MAKE) $(LINUX_MAKE_ARGS) dtbs_install
+else ifneq ("$(TARGET_LINUX_DEVICE_TREE_NAMES)","")
 	$(foreach __f,$(TARGET_LINUX_DEVICE_TREE_NAMES), \
 		$(Q) cp -af $(LINUX_BUILD_DIR)/arch/$(LINUX_SRCARCH)/boot/dts/$(__f) \
 			$(TARGET_OUT_STAGING)/boot/$(endl) \

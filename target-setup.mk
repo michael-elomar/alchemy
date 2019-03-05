@@ -288,6 +288,9 @@ TARGET_LINUX_LINK_CPIO_IMAGE ?= 0
 # Generate a Uboot image of linux
 TARGET_LINUX_GENERATE_UIMAGE ?= 0
 
+# Proceed install device-tree blobs via kernel target build ('no' by default)
+TARGET_LINUX_INSTALL_DEVICE_TREE ?= 0
+
 # Copy device tree files to the boot directory
 TARGET_LINUX_DEVICE_TREE_NAMES ?=
 
