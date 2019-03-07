@@ -38,7 +38,7 @@ _python-pkg-get-extra-env = \
 # Build and install in the same command because the build directory can only be
 # specified for the build command...
 define _python-pkg-def-cmd-build
-	if [ ! -e "$(PRIVATE_PYTHON)" ]; then \
+	@if [ ! -e "$(PRIVATE_PYTHON)" ]; then \
 		echo "Missing python binary: '$(PRIVATE_PYTHON)'"; \
 		exit 1; \
 	fi
