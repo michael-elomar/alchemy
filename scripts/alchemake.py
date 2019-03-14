@@ -229,7 +229,10 @@ def main():
     while True:
         try:
             # Empty line means EOF detected, so exit loop
-            line = jobCtrl.job.process.stderr.readline()
+            try:
+                line = jobCtrl.job.process.stderr.readline()
+            except UnicodeDecodeError as err:
+                line = err.object.decode('utf-8', 'ignore')
             if len(line) == 0:
                 logging.debug("EOF detected")
                 break
