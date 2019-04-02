@@ -51,6 +51,8 @@ def _update_props(project, includes, defines):
         sys.exit(1)
 
     compiler = project.get_target_var('CC')
+    if not os.path.isabs(compiler):
+        compiler = subprocess.check_output(['which', compiler]).decode('utf-8').strip()
     cflags = project.get_target_var('GLOBAL_CFLAGS').split()
     known_flags = [
         _cflag('arch', has_arg=True),
@@ -70,7 +72,10 @@ def _update_props(project, includes, defines):
         for c in configs:
             c['includePath'] = sorted(incs)
             c['defines'] = sorted(defs)
-            c['compilerPath'] = '{} {}'.format(compiler, ' '.join(flags))
+            if flags:
+                c['compilerPath'] = '{} {}'.format(compiler, ' '.join(flags))
+            else:
+                c['compilerPath'] = compiler
     with open(props, 'w') as f:
         json.dump(data, f, indent='\t')
 
