@@ -779,7 +779,9 @@ system will use it.</p>
 
 <p>This is a list of modules whose headers are required to compile but not for
 link. This does <strong>NOT</strong> introduce a build order, just an automatic import of
-exported headers.</p>
+exported headers. This instruction does <strong>NOT</strong> handle dependencies well, it
+only allows one level dependency. If more than one level of dependency is
+needed, use a <code>CUSTOM</code> class module which exports headers.</p>
 
 <h4><code>LOCAL_DEPENDS_MODULES</code></h4>
 

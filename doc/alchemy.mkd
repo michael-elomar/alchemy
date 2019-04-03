@@ -714,7 +714,9 @@ system will use it.
 
 This is a list of modules whose headers are required to compile but not for
 link. This does **NOT** introduce a build order, just an automatic import of
-exported headers.
+exported headers. This instruction does **NOT** handle dependencies well, it
+only allows one level dependency. If more than one level of dependency is
+needed, use a `CUSTOM` class module which exports headers.
 
 #### `LOCAL_DEPENDS_MODULES`
 
