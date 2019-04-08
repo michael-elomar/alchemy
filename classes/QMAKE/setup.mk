@@ -158,9 +158,9 @@ define _internal-qmake-gen-deps-darwin
 		echo "QMAKE_IOS_SIMULATOR_ARCHS = $(filter-out -arch,$(APPLE_ARCH))"; \
 		echo "QMAKE_IOS_DEPLOYMENT_TARGET = $(TARGET_IPHONE_VERSION)"; \
 		echo "QMAKE_MACOSX_DEPLOYMENT_TARGET = $(TARGET_MACOS_VERSION)"; \
-		echo "deployement.files = $(shell find $(TARGET_OUT_STAGING)/$(TARGET_DEFAULT_LIB_DESTDIR) -maxdepth 1 -name '*.dylib' -type f)"; \
-		echo "deployement.path = Contents/Frameworks/"; \
-		echo "QMAKE_BUNDLE_DATA += deployement"; \
+		echo "deployment.files = $(shell find $(TARGET_OUT_STAGING)/$(TARGET_DEFAULT_LIB_DESTDIR) -maxdepth 1 -name '*.dylib' -type f)"; \
+		echo "deployment.path = Contents/Frameworks/"; \
+		echo "QMAKE_BUNDLE_DATA += deployment"; \
 	) >> $(PRIVATE_ALCHEMY_PRI_FILE)
 endef
 
