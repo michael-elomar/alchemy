@@ -63,6 +63,7 @@ endif
 ###############################################################################
 # Texas Instrument cpus.
 ###############################################################################
+
 ifeq ("$(TARGET_CPU)","omap3")
   cpu_flags += $(cpu_flags_armv7a_neon)
   TARGET_GLOBAL_LDFLAGS += -Wl,--fix-cortex-a8
