@@ -103,6 +103,12 @@ endif
 ###############################################################################
 ###############################################################################
 
+# Global prerequisites (shall be used only by os makefile or product specific config)
+# Make sure it is a simply expanded variable
+ifndef TARGET_GLOBAL_PREREQUISITES
+  TARGET_GLOBAL_PREREQUISITES :=
+endif
+
 # Include product env file
 ifdef TARGET_CONFIG_DIR
   -include $(TARGET_CONFIG_DIR)/target-setup.mk
@@ -225,11 +231,6 @@ TARGET_SDK_DIRS ?=
 TARGET_FORCE_EXTERNAL_CHECKS ?= 0
 ifneq ("$(F)","0")
   TARGET_FORCE_EXTERNAL_CHECKS := 1
-endif
-
-# Global prerequisites (shall be used only by os makefile)
-ifndef TARGET_GLOBAL_PREREQUISITES
-  TARGET_GLOBAL_PREREQUISITES :=
 endif
 
 # Add a section in executable/shared library with dependencies used
