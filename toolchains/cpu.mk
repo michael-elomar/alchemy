@@ -187,7 +187,7 @@ endif
 ###############################################################################
 
 ifeq ("$(TARGET_CPU)","hi3559")
-#  cpu_flags += -mcpu=cortex-a73.cortex-a53
+  cpu_flags += -mcpu=cortex-a73.cortex-a53
   TARGET_CPU_HAS_NEON := 1
   ifneq ("$(TARGET_ARCH)","aarch64")
     TARGET_FLOAT_ABI ?= hard
