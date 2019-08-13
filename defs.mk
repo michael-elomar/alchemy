@@ -239,7 +239,6 @@ modules-fields-depends := \
 	depends.STATIC_LIBRARIES \
 	depends.WHOLE_STATIC_LIBRARIES \
 	depends.SHARED_LIBRARIES \
-	depends.link \
 	depends.build \
 	depends.runtime \
 	depends.headers \
@@ -720,7 +719,6 @@ modules-compute-depends = \
 		$(if $(call streq,$(__modules.$(__mod).FORCE_STATIC),1), \
 			$(call __module-force-static,$(__mod)) \
 		) \
-		$(call __module-compute-depends-link,$(__mod)) \
 	)
 
 # Update direct dependencies of a single module.
@@ -838,18 +836,6 @@ __module-compute-depends-static-internal += \
 		) \
 	)
 
-# Compute dependencies for link. It simply aggregate (and sort) dependencies
-# $1 : module name.
-__module-compute-depends-link = \
-	$(eval __modules.$1.depends.link := $(strip $(sort \
-		$(__modules.$1.depends.META_PACKAGES) \
-		$(__modules.$1.depends.PREBUILT_LIBRARIES) \
-		$(__modules.$1.depends.EXTERNAL_LIBRARIES) \
-		$(__modules.$1.depends.STATIC_LIBRARIES) \
-		$(__modules.$1.depends.WHOLE_STATIC_LIBRARIES) \
-		$(__modules.$1.depends.SHARED_LIBRARIES) \
-	)))
-
 # Compute all dependencies of a module.
 # $1 : module name.
 # Note : it recursively descends into modules to get their dependencies.
@@ -941,11 +927,6 @@ module-get-listed-autoconf = $(strip \
 # Get dependencies due to static libraries
 module-get-static-depends = \
 	$(__modules.$1.depends.$2)
-
-# Get link dependencies for the build (aggregation of all static depends)
-# list is sorted and is mainly used for generation of elf section with dependencies.
-module-get-link-depends = \
-	$(__modules.$1.depends.link)
 
 # Get all dependencies (except the ones required only for build order)
 module-get-all-depends = \
