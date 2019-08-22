@@ -192,6 +192,7 @@ def copyStaging(ctx, srcDir, dstDir):
         os.path.join("usr", "lib"),
         os.path.join("usr", "include"),
         os.path.join("usr", "share", "vala"),
+        os.path.join("usr", "share", "protobuf"),
         os.path.join("usr", "src", "linux-sdk"),
         os.path.join("usr", "local", "cuda-6.5"),
         os.path.join("usr", "local", "cuda-7.0"),
