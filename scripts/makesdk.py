@@ -203,6 +203,12 @@ def copyStaging(ctx, srcDir, dstDir):
         "opt",
     ]
     exclude = ["*.la"]
+
+    if ctx.moduledb.targetVars.get("OS", "windows"):
+        dirs_to_keep.append("bin")
+        dirs_to_keep.append(os.path.join("usr", "bin"),)
+        exclude.append("*.exe")
+
     for dirName in dirs_to_keep:
         srcDirPath = os.path.normpath(os.path.join(srcDir, dirName))
         if os.path.exists(srcDirPath):
