@@ -65,6 +65,16 @@ ifdef ALCHEMY_TARGET_SDK_DIRS
   TARGET_SDK_DIRS := $(ALCHEMY_TARGET_SDK_DIRS)
 endif
 
+# Import host build dir from env
+ifdef ALCHEMY_HOST_OUT_BUILD
+  HOST_OUT_BUILD := $(ALCHEMY_HOST_OUT_BUILD)
+endif
+
+# Import host staging dir from env
+ifdef ALCHEMY_HOST_OUT_STAGING
+  HOST_OUT_STAGING := $(ALCHEMY_HOST_OUT_STAGING)
+endif
+
 ###############################################################################
 ## Make sure TOP_DIR is ALCHEMY_WORKSPACE_DIR
 ###############################################################################
