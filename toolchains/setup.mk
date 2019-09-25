@@ -83,19 +83,22 @@ ifeq ("$(TARGET_OS)","linux")
       __toolchain-sysroot-flags += $(TARGET_GLOBAL_CFLAGS_$(TARGET_DEFAULT_ARM_MODE))
     endif
     TARGET_TOOLCHAIN_SYSROOT := $(shell $(TARGET_CROSS)gcc $(__toolchain-sysroot-flags) -print-sysroot)
-    ifneq ("$(wildcard $(TARGET_TOOLCHAIN_SYSROOT))","")
+    ifeq ("$(wildcard $(TARGET_TOOLCHAIN_SYSROOT))","")
+        TOOLCHAIN_LIBC := /
+    else
       TOOLCHAIN_LIBC := $(TARGET_TOOLCHAIN_SYSROOT)
-      ifneq ("$(wildcard $(TARGET_TOOLCHAIN_SYSROOT)/usr/bin/gdbserver)","")
-        TOOLCHAIN_GDBSERVER := $(TARGET_TOOLCHAIN_SYSROOT)/usr/bin/gdbserver
-      else ifneq ("$(wildcard $(TARGET_TOOLCHAIN_SYSROOT)/../bin/gdbserver)","")
-        TOOLCHAIN_GDBSERVER := $(TARGET_TOOLCHAIN_SYSROOT)/../bin/gdbserver
-      else ifneq ("$(wildcard $(TARGET_TOOLCHAIN_SYSROOT)/../../bin/gdbserver)","")
-        TOOLCHAIN_GDBSERVER := $(TARGET_TOOLCHAIN_SYSROOT)/../../bin/gdbserver
-      else ifneq ("$(wildcard $(TARGET_TOOLCHAIN_SYSROOT)/../debug-root/usr/bin/gdbserver)","")
-        TOOLCHAIN_GDBSERVER := $(TARGET_TOOLCHAIN_SYSROOT)/../debug-root/usr/bin/gdbserver
-      else ifneq ("$(wildcard $(TARGET_TOOLCHAIN_SYSROOT)/../host_bin/gdbserver)","")
-        TOOLCHAIN_GDBSERVER := $(TARGET_TOOLCHAIN_SYSROOT)/../host_bin/gdbserver
-      endif
+    endif
+
+    ifneq ("$(wildcard $(TARGET_TOOLCHAIN_SYSROOT)/usr/bin/gdbserver)","")
+      TOOLCHAIN_GDBSERVER := $(TARGET_TOOLCHAIN_SYSROOT)/usr/bin/gdbserver
+    else ifneq ("$(wildcard $(TARGET_TOOLCHAIN_SYSROOT)/../bin/gdbserver)","")
+      TOOLCHAIN_GDBSERVER := $(TARGET_TOOLCHAIN_SYSROOT)/../bin/gdbserver
+    else ifneq ("$(wildcard $(TARGET_TOOLCHAIN_SYSROOT)/../../bin/gdbserver)","")
+      TOOLCHAIN_GDBSERVER := $(TARGET_TOOLCHAIN_SYSROOT)/../../bin/gdbserver
+    else ifneq ("$(wildcard $(TARGET_TOOLCHAIN_SYSROOT)/../debug-root/usr/bin/gdbserver)","")
+      TOOLCHAIN_GDBSERVER := $(TARGET_TOOLCHAIN_SYSROOT)/../debug-root/usr/bin/gdbserver
+    else ifneq ("$(wildcard $(TARGET_TOOLCHAIN_SYSROOT)/../host_bin/gdbserver)","")
+      TOOLCHAIN_GDBSERVER := $(TARGET_TOOLCHAIN_SYSROOT)/../host_bin/gdbserver
     endif
   endif
 endif
