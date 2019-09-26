@@ -88,18 +88,16 @@ ifeq ("$(TARGET_OS)","linux")
     else
       TOOLCHAIN_LIBC := $(TARGET_TOOLCHAIN_SYSROOT)
     endif
-
-    ifneq ("$(wildcard $(TARGET_TOOLCHAIN_SYSROOT)/usr/bin/gdbserver)","")
-      TOOLCHAIN_GDBSERVER := $(TARGET_TOOLCHAIN_SYSROOT)/usr/bin/gdbserver
-    else ifneq ("$(wildcard $(TARGET_TOOLCHAIN_SYSROOT)/../bin/gdbserver)","")
-      TOOLCHAIN_GDBSERVER := $(TARGET_TOOLCHAIN_SYSROOT)/../bin/gdbserver
-    else ifneq ("$(wildcard $(TARGET_TOOLCHAIN_SYSROOT)/../../bin/gdbserver)","")
-      TOOLCHAIN_GDBSERVER := $(TARGET_TOOLCHAIN_SYSROOT)/../../bin/gdbserver
-    else ifneq ("$(wildcard $(TARGET_TOOLCHAIN_SYSROOT)/../debug-root/usr/bin/gdbserver)","")
-      TOOLCHAIN_GDBSERVER := $(TARGET_TOOLCHAIN_SYSROOT)/../debug-root/usr/bin/gdbserver
-    else ifneq ("$(wildcard $(TARGET_TOOLCHAIN_SYSROOT)/../host_bin/gdbserver)","")
-      TOOLCHAIN_GDBSERVER := $(TARGET_TOOLCHAIN_SYSROOT)/../host_bin/gdbserver
-    endif
+    TOOLCHAIN_GDBSERVER := $(firstword                                  \
+                             $(wildcard                                 \
+                               $(addprefix $(TARGET_TOOLCHAIN_SYSROOT), \
+                                 $(addsuffix /gdbserver,                \
+                                   /usr/bin                             \
+                                   /../bin                              \
+                                   /../../bin                           \
+                                   /../debug-root/usr/bin               \
+                                   /../host_bin                         \
+                                  ))))
   endif
 endif
 
