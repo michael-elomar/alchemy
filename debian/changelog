@@ -1,4 +1,4 @@
-parrot-tools-alchemy (1.3.4) unstable; urgency=low
+parrot-tools-alchemy (1.3.5) unstable; urgency=low
   * Initialize TARGET_GLOBAL_PREREQUISITES before including config mk
   * add cpu flags to target hi3559
   * Allow use of android without SDK (only NDK is mandatory)
@@ -9,6 +9,8 @@ parrot-tools-alchemy (1.3.4) unstable; urgency=low
   * Copy usr/share/protbuf directory in sdk
   * Add additional path in makesdk for windows
   * Allow overriding HOST_OUT_BUILD/HOST_OUT_STAGING from the environment
+
+ -- Yves-Marie Morgan (Parrot) <yves-marie.morgan@parrot.com>  Fri, 27 Sep 2019 13:58:39 +0200
 
 parrot-tools-alchemy (1.3.4) unstable; urgency=low
   * Better windows support
