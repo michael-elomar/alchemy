@@ -168,12 +168,18 @@ AUTOCONF_MERGE_FILE := $(TARGET_OUT_BUILD)/autoconf-merge.h
 
 # Define some target class
 __clobber-targets := clobber clean dirclean final-clean
-__query-targets := scan help help-modules dump dump-depends dump-xml build-graph
+__query-targets := scan help help-modules dump dump-depends dump-xml build-graph var-%
 __config-targets := config config-check config-update xconfig menuconfig nconfig
 
 # Do not check config if we are cloberring or doing some query or configuration
-__skip-config-check-targets := $(__clobber-targets) $(__query-targets) $(__config-targets)
+__skip-config-check-targets := $(__clobber-targets) $(__config-targets)
 ifneq ("$(call is-targets-in-make-goals,$(__skip-config-check-targets))","")
+  SKIP_CONFIG_CHECK := 1
+endif
+
+# Do not check dependencies and config if there are only queries
+ifeq ("$(filter-out $(__query-targets),$(MAKECMDGOALS))","")
+  SKIP_DEPS_AND_CHECKS := 1
   SKIP_CONFIG_CHECK := 1
 endif
 
@@ -384,7 +390,7 @@ include $(BUILD_SYSTEM)/config-rules.mk
 __modlist := $(empty)
 
 # Completely skip this for simple queries or clobber.
-ifeq ("$(call is-targets-in-make-goals,$(__query-targets) $(__clobber-targets))","")
+ifeq ("$(filter $(__query-targets) $(__clobber-targets),$(MAKECMDGOALS))","")
 
 # Check that, if a registered module is specified in goals,
 # it is in the build config
