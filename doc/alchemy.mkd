@@ -1337,11 +1337,6 @@ and should be a `.ko` filename), `LOCAL_SRC_FILES`, `LOCAL_C_INCLUDES` and
 `LOCAL_CFLAGS` are supported in addition to generic module description and
 dependency variables.
 
-#### Customization variables
-
-* `LOCAL_LINUX_MAKE_BUILD_ARGS` : Additional variables to be given as parameters
-to the kernel build commands (using make).
-
 ### GObject introspection type library modules
 
 This class of modules is for the compilation of gobject-introspection `.typelib`
