@@ -139,10 +139,10 @@ endif
 ###############################################################################
 ###############################################################################
 
+$(LOCAL_TARGETS) $(LINUX_BUILD_DIR)/.config $(LINUX_BUILD_DIR)/$(LOCAL_MODULE_FILENAME) linux-%: PRIVATE_LINUX_MAKE_ARGS := $(LINUX_MAKE_ARGS) $(LOCAL_LINUX_MAKE_BUILD_ARGS)
+
 # Setup config in build dir
 ifneq ("$(LINUX_CONFIG_FILE_IS_TARGET)","")
-
-$(LOCAL_TARGETS): PRIVATE_LINUX_MAKE_ARGS := $(LINUX_MAKE_ARGS) $(LOCAL_LINUX_MAKE_BUILD_ARGS)
 
 # Use linux target
 define linux-setup-config
@@ -254,7 +254,7 @@ endif
 	@mkdir -p $(TARGET_OUT_STAGING)/boot
 	$(call linux-copy-images)
 ifneq ("$(TARGET_LINUX_INSTALL_DEVICE_TREE)","0")
-	$(Q) $(MAKE) $(LINUX_MAKE_ARGS) dtbs_install
+	$(Q) $(MAKE) $(PRIVATE_LINUX_MAKE_ARGS) dtbs_install
 else ifneq ("$(TARGET_LINUX_DEVICE_TREE_NAMES)","")
 	$(foreach __f,$(TARGET_LINUX_DEVICE_TREE_NAMES), \
 		$(Q) cp -af $(LINUX_BUILD_DIR)/arch/$(LINUX_SRCARCH)/boot/dts/$(__f) \
