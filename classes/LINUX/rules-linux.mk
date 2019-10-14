@@ -147,7 +147,7 @@ ifneq ("$(LINUX_CONFIG_FILE_IS_TARGET)","")
 # Use linux target
 define linux-setup-config
 	@mkdir -p $(LINUX_BUILD_DIR)
-	$(Q) $(MAKE) $(PRIVATE_LINUX_MAKE_ARGS) $(LINUX_CONFIG_TARGET)
+	$(Q) $(MAKE) $(LINUX_MAKE_ARGS) $(LINUX_CONFIG_TARGET)
 endef
 
 # Copy it somewhere so after a dirclean it is not completely lost...
@@ -229,16 +229,16 @@ endef
 $(LINUX_BUILD_DIR)/$(LOCAL_MODULE_FILENAME): $(LINUX_BUILD_DIR)/.config $(LINUX_HEADERS_DONE_FILE)
 	@mkdir -p $(LINUX_BUILD_DIR)/drivers/parrot/nand
 	@echo "Checking linux kernel config: $(LINUX_CONFIG_FILE)"
-	$(Q) yes "" 2>/dev/null | $(MAKE) $(PRIVATE_LINUX_MAKE_ARGS) oldconfig
+	$(Q) yes "" 2>/dev/null | $(MAKE) $(LINUX_MAKE_ARGS) oldconfig
 	@echo "Building linux kernel"
 ifneq ("$(TARGET_LINUX_LINK_CPIO_IMAGE)","0")
 	@ : > $(LINUX_BUILD_DIR)/rootfs.cpio.gz
 endif
-	$(Q) $(MAKE) $(PRIVATE_LINUX_MAKE_ARGS)
+	$(Q) $(MAKE) $(LINUX_MAKE_ARGS)
 	@echo "Installing linux kernel modules"
 	$(Q) rm -rf $(TARGET_OUT_STAGING)/lib/modules
 	$(Q) if grep -q "CONFIG_MODULES=y" $(LINUX_BUILD_DIR)/.config; then \
-		$(MAKE) $(PRIVATE_LINUX_MAKE_ARGS) modules_install ; \
+		$(MAKE) $(LINUX_MAKE_ARGS) modules_install ; \
 	else \
 		echo "CONFIG_MODULES not set in kernel config, ignoring"; \
 	fi
@@ -246,10 +246,10 @@ endif
 	$(Q) rm -f  $(TARGET_OUT_STAGING)/lib/modules/*/source
 	@echo "Installing linux kernel images"
 ifneq ("$(TARGET_LINUX_GENERATE_UIMAGE)","0")
-	$(Q) $(MAKE) $(PRIVATE_LINUX_MAKE_ARGS) uImage
+	$(Q) $(MAKE) $(LINUX_MAKE_ARGS) uImage
 endif
 ifeq ("$(TARGET_LINUX_IMAGE)","uImage")
-	$(Q) $(MAKE) $(PRIVATE_LINUX_MAKE_ARGS) uImage
+	$(Q) $(MAKE) $(LINUX_MAKE_ARGS) uImage
 endif
 	@mkdir -p $(TARGET_OUT_STAGING)/boot
 	$(call linux-copy-images)
@@ -280,7 +280,7 @@ ifneq ("$(LINUX_ARCH)","um")
 	@mkdir -p $(LINUX_BUILD_DIR)
 	@mkdir -p $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/src/linux-headers
 	@echo "Installing linux kernel headers"
-	$(Q) $(MAKE) $(PRIVATE_LINUX_MAKE_ARGS) headers_install
+	$(Q) $(MAKE) $(LINUX_MAKE_ARGS) headers_install
 	@mkdir -p $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/include/linux
 	@mkdir -p $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/include/linux/spi
 	$(foreach header,$(LINUX_EXPORTED_HEADERS), \
@@ -305,7 +305,7 @@ endif
 .PHONY: linux-clean
 linux-clean:
 	$(Q) if [ -d $(LINUX_BUILD_DIR) ]; then \
-		$(MAKE) $(PRIVATE_LINUX_MAKE_ARGS) --ignore-errors \
+		$(MAKE) $(LINUX_MAKE_ARGS) --ignore-errors \
 			clean || echo "Ignoring clean errors"; \
 	fi
 	$(Q) rm -rf $(TARGET_OUT_STAGING)/lib/modules
@@ -335,7 +335,7 @@ linux-menuconfig: $(LINUX_BUILD_DIR)/.config
 	@echo "Configuring linux kernel: $(LINUX_CONFIG_FILE)"
 	$(if $(call is-var-defined,custom.linux.config.sedfiles), \
 		$(error Sed files found. We cannot save in this case))
-	$(Q) $(MAKE) $(PRIVATE_LINUX_MAKE_ARGS) menuconfig
+	$(Q) $(MAKE) $(LINUX_MAKE_ARGS) menuconfig
 	$(Q) $(linux-save-config)
 
 .PHONY: linux-xconfig
@@ -343,7 +343,7 @@ linux-xconfig: $(LINUX_BUILD_DIR)/.config
 	@echo "Configuring linux kernel: $(LINUX_CONFIG_FILE)"
 	$(if $(call is-var-defined,custom.linux.config.sedfiles), \
 		$(error Sed files found. We cannot save in this case))
-	$(Q) $(MAKE) $(PRIVATE_LINUX_MAKE_ARGS) xconfig
+	$(Q) $(MAKE) $(LINUX_MAKE_ARGS) xconfig
 	$(Q) $(linux-save-config)
 
 .PHONY: linux-config
@@ -361,7 +361,7 @@ endif
 .PHONY: linux-check-config
 linux-check-config: $(LINUX_BUILD_DIR)/.config
 	@echo "Checking linux config: $(LINUX_CONFIG_FILE)"
-	$(Q) yes "" 2>/dev/null | $(MAKE) $(PRIVATE_LINUX_MAKE_ARGS) oldconfig
+	$(Q) yes "" 2>/dev/null | $(MAKE) $(LINUX_MAKE_ARGS) oldconfig
 	$(Q) diff -u $(LINUX_CONFIG_FILE) $(LINUX_BUILD_DIR)/.config || true
 
 .PHONY: linux-reset-config
@@ -378,6 +378,6 @@ ifneq ("$(filter linux-%,$(MAKECMDGOALS))","")
 .PHONY: linux-%
 linux-%: $(LINUX_BUILD_DIR)/.config
 	@echo "Building linux kernel $* target with $(LINUX_CONFIG_FILE)"
-	$(Q) $(MAKE) $(PRIVATE_LINUX_MAKE_ARGS) $*
+	$(Q) $(MAKE) $(LINUX_MAKE_ARGS) $*
 	$(Q) $(linux-save-config)
 endif
