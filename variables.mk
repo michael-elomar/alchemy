@@ -206,7 +206,7 @@ vars-LOCAL += CMAKE_MAKE_BUILD_ARGS
 vars-LOCAL += CMAKE_MAKE_INSTALL_ARGS
 
 # Linux customization
-var-LOCAL += LINUX_MAKE_BUILD_ARGS
+vars-LOCAL += LINUX_MAKE_BUILD_ARGS
 
 # QMake customization
 vars-LOCAL += QMAKE_PRO_FILE
