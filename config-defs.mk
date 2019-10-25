@@ -104,13 +104,13 @@ __generate-config-module-args = $(strip \
 	$(eval __sdk := $(__modules.$(__mod).SDK)) \
 	$(eval __configInFiles := $(call __get-module-config-in-files,$(__mod))) \
 	$(if $(__configInFiles), \
-		$(eval __configPath := $(call __get-orig-module-config,$(__mod))), \
+		$(eval __configPath := $(call path-from-top,$(call __get-orig-module-config,$(__mod)))), \
 		$(eval __configPath := $(empty)) \
 	) \
 	$(eval __arg := $(__mod)|$(__desc)$(space)|$(__depends)|$(__dependsCond)|$(__modPath)) \
 	$(eval __arg := $(__arg)|$(__categoryPath)|$(__sdk)|$(__configPath)) \
 	$(foreach __f,$(__configInFiles), \
-		$(eval __arg := $(__arg)|$(abspath $(__f))) \
+		$(eval __arg := $(__arg)|$(call path-from-top,$(__f))) \
 	) \
 	"$(__arg)")
 
