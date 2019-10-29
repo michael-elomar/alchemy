@@ -274,7 +274,7 @@ def safeRename(old, new):
     if platform.system() == "Windows" and os.path.exists(new):
         safeUnlink(new)
     dirPath = os.path.dirname(new)
-    if not os.path.exists(dirPath):
+    if dirPath and not os.path.exists(dirPath):
         os.makedirs(dirPath)
     shutil.copy(old, new)
     safeUnlink(old)
@@ -284,7 +284,7 @@ def safeRename(old, new):
 #===============================================================================
 def safeCreateFile(path):
     dirPath = os.path.dirname(path)
-    if not os.path.isdir(dirPath):
+    if dirPath and not os.path.isdir(dirPath):
         os.makedirs(dirPath)
     return open(path, "w")
 
