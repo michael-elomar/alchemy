@@ -152,6 +152,35 @@ __generate-config-args = $(strip \
 	))
 
 ###############################################################################
+# Call confwrapper either by generating a single command line or by putting extra
+# arguments in a file to bypass size limits
+# $1: options to give to confwrapper
+###############################################################################
+
+# Normal command line
+__call-confwrapper-args = \
+	@$(CONFWRAPPER) --main=$(TARGET_GLOBAL_CONFIG_FILE) $1 $(call __generate-config-args)
+
+# With a temp file holding the (potentially) long arguments
+__call-confwrapper-file = \
+	$(eval __tmpfile := $(shell mktemp alchemy.tmp.XXXXXXXXXX)) \
+	$(file >$(__tmpfile),$(call __generate-config-args)) \
+	@( \
+		function cleanup { rm -f $(__tmpfile); }; \
+		trap cleanup SIGINT SIGTERM; \
+		$(CONFWRAPPER) --main=$(TARGET_GLOBAL_CONFIG_FILE) $1 @$(__tmpfile); \
+		retcode=$$?; \
+		cleanup; \
+		exit $${retcode}; \
+	)
+
+ifeq ("$(MAKE_HAS_FILE_FUNC)","1")
+  __call-confwrapper = $(call __call-confwrapper-file,$1)
+else
+  __call-confwrapper = $(call __call-confwrapper-args,$1)
+endif
+
+###############################################################################
 ## Load configuration of a module.
 ## A copy is made in the build directory (with optional sed files applied).
 ## $1: module name.

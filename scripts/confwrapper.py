@@ -1001,8 +1001,17 @@ def main():
 # Setup option parser and parse command line.
 #===============================================================================
 def parseArgs():
-    # Setup parser
-    parser = argparse.ArgumentParser()
+    # By default, ArgumentParser assumes an argument begining with '@' contains
+    # actual arguments, one per line. Override default behavior to handle single
+    # line with shell escaped argument list
+    class MyArgumentParser(argparse.ArgumentParser):
+        def convert_arg_line_to_args(self, arg_line):
+            import shlex
+            return shlex.split(arg_line)
+
+    # Setup parser, handle arguments begining with '@' as a file containing
+    # actual argument (to bypass command line size limits)
+    parser = MyArgumentParser(fromfile_prefix_chars="@")
 
     # Positional arguments
     parser.add_argument("action",
