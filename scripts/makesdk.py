@@ -281,6 +281,9 @@ def getExportedIncludes(ctx, module):
                     if shortName not in entry and not isStandard:
                         simplify = False
 
+    if module.name.endswith("legacy"):
+        simplify = False
+
     for includeDir in includeDirs:
         if includeDir.startswith(modulePath):
             dstDir = None
