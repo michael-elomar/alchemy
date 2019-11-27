@@ -42,6 +42,7 @@ $(LOCAL_MODULE)-doc:
 		cat $(PRIVATE_DOXYFILE); \
 		echo "PROJECT_NAME=$(PRIVATE_MODULE)"; \
 		echo "PROJECT_BRIEF=\"$(PRIVATE_DESCRIPTION)\""; \
+		echo "GENERATE_XML=YES"; \
 		echo "INPUT=$(PRIVATE_INPUT)"; \
 		echo "EXCLUDE_PATTERNS+=.git out sdk"; \
 		echo "OUTPUT_DIRECTORY=$(PRIVATE_DOC_DIR)"; \
@@ -72,6 +73,7 @@ $(LOCAL_MODULE)-doc:
 		echo "PROJECT_BRIEF=\"$(PRIVATE_DESCRIPTION)\""; \
 		echo "EXTRACT_ALL=YES"; \
 		echo "GENERATE_LATEX=NO"; \
+		echo "GENERATE_XML=YES"; \
 		echo "WARNINGS=NO"; \
 		echo "WARN_IF_DOC_ERROR=NO"; \
 		echo "RECURSIVE=YES"; \
