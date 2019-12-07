@@ -54,23 +54,40 @@ fi
 
 SYSROOT=${SCRIPT_PATH}
 
+# Determine if we are under Darwin (to use DYLD_LIBRARY_PATH instead of LD_LIBRARY_PATH
+is_darwin=0
+if [ "$(uname -s)" = "Darwin" ]; then
+	is_darwin=1
+fi
+
 # Restore previous variables
 if [ "${OLD_PATH-}" != "" ]; then
-	export PATH=${OLD_PATH}
+	PATH=${OLD_PATH}
 fi
-if [ "${OLD_LD_LIBRARY_PATH-}" != "" ]; then
-	export LD_LIBRARY_PATH=${OLD_LD_LIBRARY_PATH}
+if [ "${OLD_LIBRARY_PATH-}" != "" ]; then
+	LIBRARY_PATH=${OLD_LIBRARY_PATH}
 fi
 
 # Save previous variables
 OLD_PATH=${PATH}
-OLD_LD_LIBRARY_PATH=${LD_LIBRARY_PATH-}
+if [ "${is_darwin}" = "0" ]; then
+	OLD_LIBRARY_PATH=${LD_LIBRARY_PATH-}
+else
+	OLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH-}
+fi
 
 # Update path
-export PATH=${SYSROOT}/bin:${SYSROOT}/usr/bin:${PATH}
+PATH=${SYSROOT}/bin:${SYSROOT}/usr/bin:${OLD_PATH}
 
 # Update library path
-export LD_LIBRARY_PATH=${SYSROOT}/lib:${SYSROOT}/usr/lib:${LD_LIBRARY_PATH-}
+LIBRARY_PATH=${SYSROOT}/lib:${SYSROOT}/usr/lib:${OLD_LIBRARY_PATH}
+
+export PATH=${PATH}
+if [ "${is_darwin}" = "0" ]; then
+	export LD_LIBRARY_PATH=${LIBRARY_PATH}
+else
+	export DYLD_LIBRARY_PATH=${LIBRARY_PATH}
+fi
 
 # Execute given command line (only if not sourced)
 if [ "${sourced}" = "0" ]; then

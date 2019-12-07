@@ -649,7 +649,7 @@ endif
 else ifeq ("$(TARGET_OS)","darwin")
 
 ifeq ("$(TARGET_OS_FLAVOUR)","native")
-  NATIVE_WRAPPER_SCRIPT := native-darwin-wrapper.sh
+  NATIVE_WRAPPER_SCRIPT := native-wrapper.sh
 endif
 
 endif
