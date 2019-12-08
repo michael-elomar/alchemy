@@ -94,6 +94,7 @@ _cloc_files += $(_codecheck_c_files)
 _cloc_files += $(_codecheck_cxx_files)
 _cloc_files += $(_codecheck_objc_files)
 _cloc_files += $(_codecheck_vala_files)
+_cloc_files += $(_codecheck_python_files)
 
 # Sort to have unique names
 _cloc_files := $(sort $(_cloc_files))
