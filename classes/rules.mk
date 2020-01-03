@@ -8,8 +8,8 @@
 
 # Make sure module is registered otherwise restoring variables will fail
 ifeq ("$(call is-module-registered,$(LOCAL_MODULE))","")
-$(error Unknown module $(LOCAL_MODULE))
-endif
+$(warning Unknown module $(LOCAL_MODULE))
+else
 
 # Bring back all LOCAL_XXX variables defined by LOCAL_MODULE
 $(call module-restore-locals,$(LOCAL_MODULE))
@@ -858,3 +858,5 @@ ifeq ("$(LOCAL_MODULE_CLASS)","")
 $(error $(LOCAL_MODULE): LOCAL_MODULE_CLASS is empty)
 endif
 include $(BUILD_SYSTEM)/classes/$(LOCAL_MODULE_CLASS)/rules.mk
+
+endif
