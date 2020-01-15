@@ -34,6 +34,8 @@ $(call register-prebuilt-pkg-config-module,freetype,freetype2)
 $(call register-prebuilt-pkg-config-module,libcrypto,libcrypto libssl)
 $(call register-prebuilt-pkg-config-module,egl,egl)
 $(call register-prebuilt-pkg-config-module,opencv,opencv)
+$(call register-prebuilt-pkg-config-module,libav-ffmpeg,libavcodec \
+	libavresample libavutil libavformat)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := libjpeg-turbo
