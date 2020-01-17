@@ -101,6 +101,9 @@ transform-h-to-gch = $(call _internal-transform-h-to-gch,$(PRIVATE_MODE),$@,$<)
 ## Command to compile a C++ file.
 ###############################################################################
 
+# Command line options to filter out for C++
+_c++_filter_out_options = -std=% -Wno-missing-prototypes -Wno-jump-misses-init
+
 # $1 : mode (HOST / TARGET)
 # $2 : destination
 # $3 : source
@@ -110,11 +113,11 @@ $(call _binary-print-banner1,C++,$3)
 $(Q) $(CCACHE) $(PRIVATE_CXX) \
 	$(call normalize-c-includes-rel,$(PRIVATE_C_INCLUDES)) \
 	$(call normalize-system-c-includes-rel,$($1_GLOBAL_C_INCLUDES)) \
-	$(filter-out -std=%,$(PRIVATE_GLOBAL_CFLAGS)) \
+	$(filter-out $(_c++_filter_out_options),$(PRIVATE_GLOBAL_CFLAGS)) \
 	$(PRIVATE_GLOBAL_CXXFLAGS) \
 	$(PRIVATE_WARNINGS_CXXFLAGS) \
 	$(PRIVATE_PCH_INCLUDE) \
-	$(filter-out -std=%,$(PRIVATE_CFLAGS)) \
+	$(filter-out $(_c++_filter_out_options),$(PRIVATE_CFLAGS)) \
 	$(PRIVATE_CXXFLAGS) \
 	-MD -MP -MF $(call path-from-top,$(2:.o=.d)) -MT $(call path-from-top,$2) \
 	-o $(call path-from-top,$2) \
