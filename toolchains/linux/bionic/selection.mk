@@ -34,7 +34,7 @@ ANDROID_NDK_MINOR_VERSION := $(word 2,$(subst ., ,$(ANDROID_NDK_VERSION)))
 ifneq ("$(firstword $(sort $(ANDROID_NDK_MAJOR_VERSION) 17))", "17")
   $(error NDK $(ANDROID_NDK_VERSION) is too old for this version of Alchemy)
 endif
-ifeq ("$(firstword $(sort $(ANDROID_NDK_MAJOR_VERSION) 21))", "21")
+ifeq ("$(firstword $(sort $(ANDROID_NDK_MAJOR_VERSION) 22))", "22")
   $(error NDK $(ANDROID_NDK_VERSION) is too recent for this version of Alchemy)
 endif
 
