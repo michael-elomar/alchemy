@@ -1,3 +1,37 @@
+parrot-tools-alchemy (1.3.6) unstable; urgency=low
+  * Set HOST_xx on macOS to xcrun provided values
+  * gcc 8.3 print-sysroot returns "" instead of "/"
+  * export TARGET_TOOLCHAIN_SYSROOT for darwin toolchains
+  * Reduce amount of repeated code to locate gdbserver
+  * Allow customizing linux make build args from linux module
+  * Add expat & libffi modules
+  * Do not perform deps & config check for var-* targets
+  * Reduce command line limits
+  * Do not simplify path for legacy modules
+  * Fix export of variables by modules
+  * Save some QT target setup settings to put them in sdk
+  * Add additional search path for qt
+  * Copy usr/share in sdk
+  * fix executed detection in zsh
+  * Add Image.gz Linux kernel image type
+  * codeformat: inherit as much as possible of the original file
+  * Better native wrapper compatibility
+  * Remove darwin-ar script
+  * Add ndk r19 & r20 support
+  * Add Doxygen tag to generate XML output for later use by Sphinx/Breathe
+  * Get rid of darwin specific native wrapper, use a comon one
+  * Add python code check/format
+  * Alchemy task should not fail when only generating doc for module
+  * Whitelist Android NDK r21
+  * Filter out command some command line options for C++
+  * Add libssl to libcrypto module to reflect the embedded behaviour
+  * Search libasan in <sysroot>/usr/lib too
+  * (genvscode) Limit the number of parallel tasks to "NCPU-2"
+  * (genvscode) Propagate "TARGET_TEST=1" to generated tasks
+  * Add support of Fortran
+
+ -- Yves-Marie Morgan (Parrot) <yves-marie.morgan@parrot.com>  Wed, 18 Mar 2020 21:12:18 +0100
+
 parrot-tools-alchemy (1.3.5) unstable; urgency=low
   * Initialize TARGET_GLOBAL_PREREQUISITES before including config mk
   * add cpu flags to target hi3559
