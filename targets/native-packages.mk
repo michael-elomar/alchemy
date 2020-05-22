@@ -26,6 +26,10 @@ $(call register-prebuilt-pkg-config-module,glib-2.0,glib-2.0)
 $(call register-prebuilt-pkg-config-module,gobject-2.0,gobject-2.0)
 $(call register-prebuilt-pkg-config-module,gio-2.0,gio-2.0)
 
+include $(CLEAR_VARS)
+LOCAL_MODULE := qt5-base
+$(call local-register-prebuilt-overridable)
+
 _glib_deps := glib-2.0 gobject-2.0 gio-2.0
 _glib_deps_available := $(call is-module-list-registered,$(_glib_deps))
 ifneq ("$(_glib_deps_available)","")
