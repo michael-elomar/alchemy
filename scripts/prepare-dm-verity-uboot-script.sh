@@ -29,6 +29,14 @@ while read line; do
 	esac
 done
 
+if [ -z "${UUID}" ] || [ -z "${DATA_BLOCKS}" ] || [ -z "${DATA_BLOCK_SIZE}" ] \
+	|| [ -z "${HASH_BLOCK_SIZE}" ] || [ -z "${HASH_ALG}" ] \
+	|| [ -z "${SALT}" ] || [ -z "${ROOT_HASH}" ]
+then
+	echo "Missing parameters"
+	exit 22
+fi
+
 echo setenv verity_sectors $((${DATA_BLOCKS} * ${DATA_BLOCK_SIZE} / 512))
 echo setenv verity_data_blocks ${DATA_BLOCKS}
 echo setenv verity_hash_start $((${DATA_BLOCKS} * ${DATA_BLOCK_SIZE} / ${HASH_BLOCK_SIZE} + 1))
