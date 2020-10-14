@@ -13,6 +13,19 @@ class Ubi(object):
 
 #===============================================================================
 #===============================================================================
+def processRoot(ubi):
+        # Update mode/owner, requires to be run under fakeroot to work properly
+        try:
+            st = stat.S_IRWXU | \
+                 stat.S_IRGRP | stat.S_IXGRP | \
+                 stat.S_IROTH | stat.S_IXOTH
+            os.chmod(ubi.tmpRoot.name, st)
+        except OSError:
+            logging.error("Script must be run under fakeroot to work properly")
+            raise
+
+#===============================================================================
+#===============================================================================
 def processTree(ubi, tree):
     for child in tree.children.values():
         fullPath = os.path.join(ubi.tmpRoot.name, child.filePath)
@@ -60,6 +73,7 @@ def genImage(image, root, options):
 
     # Re-create a root fs with contents and mode/owner set (requires fakeroot)
     ubi = Ubi()
+    processRoot(ubi)
     processTree(ubi, root)
 
     # Create file system image with mkfs.ubifs
