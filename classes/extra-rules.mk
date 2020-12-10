@@ -93,6 +93,7 @@ _cloc_files := $(_codecheck_as_files)
 _cloc_files += $(_codecheck_c_files)
 _cloc_files += $(_codecheck_cxx_files)
 _cloc_files += $(_codecheck_objc_files)
+_cloc_files += $(_codecheck_objcpp_files)
 _cloc_files += $(_codecheck_vala_files)
 _cloc_files += $(_codecheck_python_files)
 
