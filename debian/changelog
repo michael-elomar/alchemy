@@ -1,3 +1,28 @@
+parrot-tools-alchemy (1.3.7) unstable; urgency=low
+  * Add libav-ffmpeg as prebuilt module for linux native
+  * Disable runtime deps when doing config-force-all
+  * Avoid creating empty variables in database
+  * meta_package: only direct dependencies
+  * add qt5-base prebuilt package for native targets
+  * python-setuptools: fix script interpreter path
+  * python-setuptools: fix PYTHONPATH
+  * Add missions directory in sdk
+  * allow to generate verity ext4 image
+  * allow to generate verity unsparsed EXT4 image
+  * Fail verity u-boot script if not all parameters are present.
+  * Do not exclude html during copy to final
+  * error if VERITYSETUP is empty
+  * Do not generate doxygen doc for python files
+  * use the proper metadata file for opencv with pkg-config
+  * Update the strategy to find qmake
+  * remove armv7 architecture for >= iOS 11
+  * Use a dedicated rule to compile objective-c++ files.
+  * Add opengl prebuilt package to native-chroot
+  * perf: use TARGET_ARCH and handle special cases (aarch64 and x64)
+  * prebuilt: add libxml2
+
+ -- Yves-Marie Morgan (Parrot) <yves-marie.morgan@parrot.com>  Fri, 18 Dec 2020 11:22:49 +0100
+
 parrot-tools-alchemy (1.3.6) unstable; urgency=low
   * Set HOST_xx on macOS to xcrun provided values
   * gcc 8.3 print-sysroot returns "" instead of "/"
