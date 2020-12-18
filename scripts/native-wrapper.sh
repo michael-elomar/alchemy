@@ -52,7 +52,7 @@ else
 	SCRIPT_PATH=$(cd $(dirname -- $0) >/dev/null && pwd -P)
 fi
 
-SYSROOT=${SCRIPT_PATH}
+export SYSROOT=${SCRIPT_PATH}
 
 # Determine if we are under Darwin (to use DYLD_LIBRARY_PATH instead of LD_LIBRARY_PATH
 is_darwin=0
