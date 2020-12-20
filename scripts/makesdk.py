@@ -329,6 +329,10 @@ def processModule(ctx, module, headersOnly=False):
     # Skip module not built
     if not module.build and not headersOnly:
         return
+    # Skip module from sdk
+    if module.fields.get("SDK", ""):
+        return
+
     logging.info("Processing module %s", module.name)
 
     # Remember modules not built but whose headers are required
@@ -651,6 +655,8 @@ def main():
     # Copy content of previous sdk
     for srcDir in ctx.sdkDirs:
         copySdk(ctx, srcDir, ctx.outDir)
+        with open(os.path.join(srcDir, "atom.mk")) as fin:
+            ctx.atom.write(fin.read())
 
     # Add some TARGET_XXX variables checks to make sure that the sdk is used
     # in the correct environment
