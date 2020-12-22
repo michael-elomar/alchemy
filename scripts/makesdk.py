@@ -219,6 +219,7 @@ def copyStaging(ctx, srcDir, dstDir):
 #===============================================================================
 def copySdk(ctx, srcDir, dstDir):
     logging.debug("Copy sdk: '%s' -> '%s'", srcDir, dstDir)
+    copyTree(ctx, os.path.join(srcDir, "config"), os.path.join(dstDir, "config"))
     copyStaging(ctx, srcDir, dstDir)
 
 #===============================================================================
