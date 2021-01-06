@@ -99,8 +99,8 @@ else
     TARGET_CC ?= $(TARGET_CROSS)gcc
     TARGET_CXX ?= $(TARGET_CROSS)g++
   else
-    TARGET_CC ?= clang
-    TARGET_CXX ?= clang++
+    TARGET_CC ?= $(TARGET_CROSS)clang
+    TARGET_CXX ?= $(TARGET_CROSS)clang++
   endif
   TARGET_AS ?= $(TARGET_CROSS)as
   TARGET_FC ?= $(TARGET_CROSS)gfortran
