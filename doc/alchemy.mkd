@@ -190,6 +190,8 @@ Optionally, some `TARGET_XXX` or `HOST_XXX` variables can be prefixed with
   </br>Default is `$(TARGET_CROSS)nm`.
 * `TARGET_STRIP` : full path to symbol stripper.
   </br>Default is `$(TARGET_CROSS)strip`.
+* `TARGET_LLVM` : full path to LLVM prefix (meaningful only when LLVM is used).
+  </br>Default is `$(TARGET_CROSS)llvm-`.
 
 ### Linux specific
 * `TARGET_LINUX_CROSS` : similar to `TARGET_CROSS` but to use a separate
