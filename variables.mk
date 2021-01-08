@@ -259,10 +259,16 @@ vars-LOCAL += MODULE_CLASS
 
 # List of files to copy
 # Format <src>:<dst>
-# src : source, relative to module path or abosulte path
-# dst : destination, relative to staging dir or abosulte path, ends with '/'
+# src : source, relative to module path or absolute path
+# dst : destination, relative to staging dir or absolute path, ends with '/'
 #       to use same basename as <src>
 vars-LOCAL += COPY_FILES
+
+# List of directories to copy
+# Format <src>:<dst>
+# src : source, relative to module path or absolute path
+# dst : destination, relative to staging dir or absolute path
+vars-LOCAL += COPY_DIRS
 
 # List of links to create
 # Format <name>:<target>
@@ -272,8 +278,8 @@ vars-LOCAL += CREATE_LINKS
 
 # List of headers to install
 # Format <src>[:<dst]>
-# src : source, relative to module path or abosulte path
-# dst : destination, relative to staging dir or abosulte path, ends with '/'
+# src : source, relative to module path or absolute path
+# dst : destination, relative to staging dir or absolute path, ends with '/'
 #       to use same basename as <src>. If not specified, will be put in
 #       usr/include directory of staging directory
 vars-LOCAL += INSTALL_HEADERS

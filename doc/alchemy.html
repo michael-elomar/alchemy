@@ -317,6 +317,7 @@ file compiled. The -I prefix will be appended so do not put it.</li>
 <li><code>TARGET_GLOBAL_LDLIBS</code> : Additional libraries to use when linking.</li>
 <li><code>TARGET_GLOBAL_PCHFLAGS</code> : Flags to pass when precompiling headers.</li>
 <li><code>TARGET_GLOBAL_OBJCFLAGS</code> : Flags to pass to the Objective-C compiler.</li>
+<li><code>TARGET_GLOBAL_OBJCXXFLAGS</code> : Flags to pass to the Objective-C++ compiler.</li>
 <li><code>TARGET_GLOBAL_FFLAGS</code> : Flags to pass to the Fortran compiler.</li>
 </ul>
 
@@ -861,6 +862,23 @@ on the one copying the file. If you want to make sure that copied files are
 available for other module, either put copied files in <code>LOCAL_EXPORT_PREREQUISITES</code>
 or use <code>LOCAL_INSTALL_HEADERS</code>.</p>
 
+<h4><code>LOCAL_COPY_DIRS</code></h4>
+
+<p>List of directories to be copied in the staging directory. Directories are specified like
+this: <code>src:dst</code></p>
+
+<ul>
+<li><code>src</code> is the source directory, relative to <code>LOCAL_PATH</code>.</li>
+<li><code>dst</code> is the destination directory, relative to <code>TARGET_OUT_STAGING</code>.</li>
+</ul>
+
+<p>If <code>src</code> or <code>dst</code> start with a <code>'/'</code> it is assumed to be a full path, in this
+case <code>LOCAL_PATH</code> is not prepended for <code>src</code> and <code>TARGET_OUT_STAGING</code> is not
+prepended for <code>dst</code>.</p>
+
+<p>Internally it simply lists the content of the source directory and copy each file
+as if it was given in <code>LOCAL_COPY_FILES</code></p>
+
 <h4><code>LOCAL_CREATE_LINKS</code></h4>
 
 <p>List of symbolic links to be created in the staging directory. Format is
@@ -1023,7 +1041,8 @@ argument and the list of files to format as its second argument.</p>
 <p>Available languages:
 * <code>C</code>: default formatter is <code>clang-format</code>.
 * <code>CXX</code>: default formatter is <code>clang-format</code>.
-* <code>OBJC</code>: default formatter is <code>clang-format</code>.</p>
+* <code>OBJC</code>: default formatter is <code>clang-format</code>.
+* <code>OBJCXX</code>: default formatter is <code>clang-format</code>.</p>
 
 <h4><code>LOCAL_CODECHECK_xxx</code> <code>LOCAL_CODECHECK_xxx_ARGS</code></h4>
 
@@ -1044,6 +1063,7 @@ argument and the list of files to check as its second argument.</p>
 * <code>C</code>: default checkers are <code>linux</code> and <code>clang-format</code>.
 * <code>CXX</code>: default checker is <code>clang-format</code>.
 * <code>OBJC</code>: default checker is <code>none</code>.
+* <code>OBJCXX</code>: default checker is <code>none</code>.
 * <code>VALA</code>: default checker is <code>valastyle</code>.
 * <code>FORTRAN</code>: default checker is <code>none</code>.</p>
 
@@ -1078,12 +1098,13 @@ specifying path under the <code>atom.mk</code>.</p>
 <p><strong>Note</strong> : The build directory and <code>LOCAL_PATH</code> are automatically added during
 compilation</p>
 
-<h4><code>LOCAL_ASFLAGS</code>, <code>LOCAL_CFLAGS</code>, <code>LOCAL_CXXFLAGS</code>, <code>LOCAL_OBJCFLAGS</code></h4>
+<h4><code>LOCAL_ASFLAGS</code>, <code>LOCAL_CFLAGS</code>, <code>LOCAL_CXXFLAGS</code>, <code>LOCAL_OBJCFLAGS</code>, <code>LOCAL_OBJCXXFLAGS</code></h4>
 
 <p>Flags to be passed during the compilation of source files. <code>LOCAL_ASFLAGS</code> is
 given only to <code>asm</code> files. <code>LOCAL_CFLAGS</code> is given to <strong>all</strong> files, whereas
 <code>LOCAL_CXXFLAGS</code> is given only to <code>c++</code> files, <code>LOCAL_OBJCFLAGS</code> to
-objective-C files and <code>LOCAL_FFLAGS</code> to Fortran files.</p>
+objective-C files, <code>LOCAL_OBJCXXFLAGS</code> is given only to <code>objc++</code> files and
+<code>LOCAL_FFLAGS</code> to Fortran files.</p>
 
 <p><strong>Note</strong> : some warning flags are automatically added by the build system,
 please do not add/remove any to let the build system decides which flags are

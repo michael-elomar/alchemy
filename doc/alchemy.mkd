@@ -792,6 +792,21 @@ on the one copying the file. If you want to make sure that copied files are
 available for other module, either put copied files in `LOCAL_EXPORT_PREREQUISITES`
 or use `LOCAL_INSTALL_HEADERS`.
 
+#### `LOCAL_COPY_DIRS`
+
+List of directories to be copied in the staging directory. Directories are specified like
+this: `src:dst`
+
+* `src` is the source directory, relative to `LOCAL_PATH`.
+* `dst` is the destination directory, relative to `TARGET_OUT_STAGING`.
+
+If `src` or `dst` start with a `'/'` it is assumed to be a full path, in this
+case `LOCAL_PATH` is not prepended for `src` and `TARGET_OUT_STAGING` is not
+prepended for `dst`.
+
+Internally it simply lists the content of the source directory and copy each file
+as if it was given in `LOCAL_COPY_FILES`
+
 #### `LOCAL_CREATE_LINKS`
 
 List of symbolic links to be created in the staging directory. Format is
