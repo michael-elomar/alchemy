@@ -1,7 +1,5 @@
 #!/bin/bash
 
-SCRIPT_PATH=$(cd $(dirname $0) && pwd -P)
-
 # Find newest clang-format available
 OLD_IFS=$IFS
 IFS=":"
