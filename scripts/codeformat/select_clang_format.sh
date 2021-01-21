@@ -3,7 +3,7 @@
 # Find newest clang-format available
 OLD_IFS=$IFS
 IFS=":"
-CLANG_FORMAT=$(ls ${PATH} 2>/dev/null | grep -E '^clang-format(-[0-9]\.[0-9])?$' | sort -r | head -n1)
+CLANG_FORMAT=$(ls ${PATH} 2>/dev/null | grep -E '^clang-format(-[0-9]+(\.[0-9]+)*)?$' | sort -V | tail -n1)
 IFS=$OLD_IFS
 
 echo ${CLANG_FORMAT}
