@@ -31,6 +31,7 @@ endif
 MKUBIFS ?= $(wildcard /usr/sbin/mkfs.ubifs)
 UBINIZE ?= $(wildcard /usr/sbin/ubinize)
 VERITYSETUP ?= $(wildcard /sbin/veritysetup)
+MKE2FS ?= $(wildcard /sbin/mke2fs)
 
 ###############################################################################
 ## Generic image generation macro.
@@ -102,9 +103,15 @@ endef
 ###############################################################################
 gen-image-tar = $(call gen-image,tar,$1,$(TARGET_IMAGE_OPTIONS),$(empty))
 gen-image-cpio = $(call gen-image,cpio,$1,$(TARGET_IMAGE_OPTIONS) --devnode "dev/console:622:0:0:c:5:1",$(empty))
+ifeq ("$(TARGET_IMAGE_FAST)","1")
+gen-image-ext2 = $(call gen-image,ext2,$1,$(TARGET_IMAGE_OPTIONS) --fast, MKE2FS=$(MKE2FS) fakeroot)
+gen-image-ext3 = $(call gen-image,ext3,$1,$(TARGET_IMAGE_OPTIONS) --fast, MKE2FS=$(MKE2FS) fakeroot)
+gen-image-ext4 = $(call gen-image,ext4,$1,$(TARGET_IMAGE_OPTIONS) --fast, MKE2FS=$(MKE2FS) fakeroot)
+else
 gen-image-ext2 = $(call gen-image,ext2,$1,$(TARGET_IMAGE_OPTIONS),$(empty))
 gen-image-ext3 = $(call gen-image,ext3,$1,$(TARGET_IMAGE_OPTIONS),$(empty))
 gen-image-ext4 = $(call gen-image,ext4,$1,$(TARGET_IMAGE_OPTIONS),$(empty))
+endif
 gen-image-sext2 = $(call gen-image-sparse,ext2,$1,$(TARGET_IMAGE_OPTIONS),$(empty))
 gen-image-sext3 = $(call gen-image-sparse,ext3,$1,$(TARGET_IMAGE_OPTIONS),$(empty))
 gen-image-sext4 = $(call gen-image-sparse,ext4,$1,$(TARGET_IMAGE_OPTIONS),$(empty))

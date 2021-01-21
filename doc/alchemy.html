@@ -427,7 +427,7 @@ final release packages.
 <li><code>TARGET_LDCONFIG_DIRS</code> : list of directories to add in ldconfig cache. Path
 should be absolute and for the target. Standard path are already included
 by <code>Alchemy</code> (/lib/<arch>, /lib, /usr/lib/<arch>, /usr/lib).</li>
-<li><code>TARGET_IMAGE_FORMAT</code> : format of the image file to generate wilth <code>image</code> command.
+<li><code>TARGET_IMAGE_FORMAT</code> : format of the image file to generate with <code>image</code> command.
 Supported value: <code>tar</code>, <code>cpio</code>, <code>ext2</code>, <code>ext3</code>, <code>ext4</code>, <code>plf</code> and the compressed
 forms <code>tar.gz</code>, <code>cpio.gz</code>, <code>ext2.gz</code>, <code>ext3.gz</code>, <code>ext4.gz</code>,
 <code>tar.bz2</code>, <code>cpio.bz2</code>, <code>ext2.bz2</code>, <code>ext3.bz2</code>, <code>ext4.bz2</code>,
@@ -439,6 +439,8 @@ forms <code>tar.gz</code>, <code>cpio.gz</code>, <code>ext2.gz</code>, <code>ext
 <li><code>--filter &lt;path&gt;</code> : path (relative to root fs) to skip during image generation
 </br>Default is empty.</li>
 </ul></li>
+<li><code>TARGET_IMAGE_FAST</code> : use mke2fs to generate the image in ext2/ext3/ext4 formats.
+</br>Default is <code>0</code>.</li>
 <li><code>TARGET_FINAL_MODE</code>: how to create the final directory. Supported value:
 <ul>
 <li><code>full</code>: nothing is filtered.</li>

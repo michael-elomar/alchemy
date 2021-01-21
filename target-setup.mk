@@ -332,6 +332,9 @@ TARGET_IMAGE_FORMAT ?= tar.gz
 # --sparse : generate a sparse image
 TARGET_IMAGE_OPTIONS ?=
 
+# Generate the image with mke2fs
+TARGET_IMAGE_FAST ?=
+
 # Customize how final tree is done (what will be filtered)
 # full: nothing filtered
 # firmware: filtered according to internal heuristics suitable for embedded execution
