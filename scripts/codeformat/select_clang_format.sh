@@ -19,7 +19,7 @@ lookup_6_or_higher ()
 
 lookup_default ()
 {
-    echo "$(basename "$(which clang-format)")"
+    basename "$(which clang-format)"
 }
 
 CLANG_FORMAT=$(lookup_6_or_higher)
