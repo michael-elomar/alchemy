@@ -82,12 +82,18 @@ PATH=${SYSROOT}/bin:${SYSROOT}/usr/bin:${OLD_PATH}
 # Update library path
 LIBRARY_PATH=${SYSROOT}/lib:${SYSROOT}/usr/lib:${OLD_LIBRARY_PATH}
 
+# Update python path
+PYTHONPATH=${SYSROOT}/usr/lib/python/site-packages
+
 export PATH=${PATH}
 if [ "${is_darwin}" = "0" ]; then
 	export LD_LIBRARY_PATH=${LIBRARY_PATH}
 else
 	export DYLD_LIBRARY_PATH=${LIBRARY_PATH}
 fi
+if [ -d $PYTHONPATH ]; then
+	export PYTHONPATH=${PYTHONPATH}
+endif
 
 # Execute given command line (only if not sourced)
 if [ "${sourced}" = "0" ]; then
