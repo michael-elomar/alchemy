@@ -65,7 +65,7 @@ else
   HOST_AS ?= llvm-as
   HOST_FC ?= gfortran
   HOST_AR ?= ar
-  HOST_LD ?= llvm-link
+  HOST_LD ?= ld.lld
   HOST_CPP ?= cpp
   HOST_NM ?= llvm-nm
   HOST_STRIP ?= strip
