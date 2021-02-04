@@ -93,7 +93,7 @@ else
 fi
 if [ -d $PYTHONPATH ]; then
 	export PYTHONPATH=${PYTHONPATH}
-endif
+fi
 
 # Execute given command line (only if not sourced)
 if [ "${sourced}" = "0" ]; then
