@@ -1405,7 +1405,8 @@ install-headers-setup = \
 ## Setup conditional libraries. It looks for pairs <var>:<lib> in
 ## LOCAL_CONDITIONAL_LIBRARIES and add <lib> in LOCAL_LIBRARIES if <var> is
 ## defined.
-## If <var> equals 'OPTIONAL', <lib> is added if it is in the build config.
+## If <var> equals 'OPTIONAL', <lib> is added if it is in the build config or if
+## <lib> is a host module (<lib> matches "host.<host_module_name>")
 ## $1 : module name.
 ###############################################################################
 conditional-libraries-setup = \
@@ -1416,6 +1417,10 @@ conditional-libraries-setup = \
 		$(if $(call streq,$(__w1),OPTIONAL), \
 			$(if $(call is-module-in-build-config,$(__w2)), \
 				$(eval __modules.$1.LIBRARIES += $(__w2)) \
+				, \
+				$(if $(and $(call is-module-host,$(__w2)),$(call is-module-registered,$(__w2))), \
+					$(eval __modules.$1.LIBRARIES += $(__w2)) \
+				) \
 			) \
 			, \
 			$(if $(call is-var-defined,$(__w1)), \
