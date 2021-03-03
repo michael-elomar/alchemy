@@ -313,6 +313,7 @@ module-add = \
 				$(call macro-copy,__modules.$(__mod).$(__local),LOCAL_$(__local)) \
 			) \
 		) \
+		$(call public-private-libraries-setup,$(__mod)) \
 		$(if $(or $(call streq,$(LOCAL_MODULE_CLASS),CUSTOM), \
 				$(call streq,$(LOCAL_MODULE_CLASS),META_PACKAGE)), \
 			$(if $(LOCAL_MODULE_FILENAME), \
@@ -1428,6 +1429,28 @@ conditional-libraries-setup = \
 			) \
 		) \
 	)
+
+###############################################################################
+## Setup public/private libraries dependencies.
+## If LOCAL_xxx_PUBLIC_LIBRARIES or LOCAL_xxx_PRIVATE_LIBRARIES is used,
+## define corresponding LOCAL_xxx_LIBRARIES as the union of both, giving
+## a warning if it was also set
+## $1 : module name.
+###############################################################################
+public-private-libraries-setup = \
+	$(call public-private-libraries-setup-internal,$1,LIBRARIES,PUBLIC_LIBRARIES,PRIVATE_LIBRARIES) \
+	$(foreach kind,STATIC WHOLE_STATIC SHARED EXTERNAL PREBUILT CONDITIONAL, \
+		$(call public-private-libraries-setup-internal,$1,$(kind)_LIBRARIES,$(kind)_PUBLIC_LIBRARIES,$(kind)_PRIVATE_LIBRARIES) \
+	)
+
+# $1: module name
+# $2: 'normal' variable name
+# $3: 'public' variable name
+# $4: 'private' variable name
+public-private-libraries-setup-internal = \
+	$(if $(or $(__modules.$1.$3),$(__modules.$1.$4)), \
+		$(eval __modules.$1.$2 += $(__modules.$1.$3) $(__modules.$1.$4)) \
+	) \
 
 ###############################################################################
 ## Check compatibility variables

@@ -439,8 +439,6 @@ forms <code>tar.gz</code>, <code>cpio.gz</code>, <code>ext2.gz</code>, <code>ext
 <li><code>--filter &lt;path&gt;</code> : path (relative to root fs) to skip during image generation
 </br>Default is empty.</li>
 </ul></li>
-<li><code>TARGET_IMAGE_FAST</code> : use mke2fs to generate the image in ext2/ext3/ext4 formats.
-</br>Default is <code>0</code>.</li>
 <li><code>TARGET_FINAL_MODE</code>: how to create the final directory. Supported value:
 <ul>
 <li><code>full</code>: nothing is filtered.</li>
@@ -760,6 +758,15 @@ prerequisites to be sure they are generated at the correct time. An example will
 be headers installed in staging directories. If they are not explicitly
 specified in prerequisites export, it will not work in a parallel build.</p>
 
+<p>When generating a public sdk, the set of dependencies should be split in 2.</p>
+
+<ul>
+<li><code>LOCAL_PUBLIC_LIBRARIES</code>: list of public module whose headers may be used in
+public headers of the current module.</li>
+<li><code>LOCAL_PRIVATE_LIBRARIES</code>: list of private modules only used when compiling
+the current module.</li>
+</ul>
+
 <h4><code>LOCAL_CONDITIONAL_LIBRARIES</code></h4>
 
 <p>This is a list of pair <code>variable:module</code> to indicate that a module is needed
@@ -776,10 +783,10 @@ several pairs <code>variable:module</code>.</p>
 <p>Internally modules will be added to <code>LOCAL_LIBRARIES</code> if the variable is defined
 in the configuration.</p>
 
-<p>If <code>variable</code> is <code>OPTIONAL</code>, the module is put as a dependency only if it is in
-the build configuration. This allow to depends on a module only if it is
-enabled. The <code>kconfig</code> tools will not display this dependency, only the build
-system will use it.</p>
+<p>If <code>variable</code> is <code>OPTIONAL</code>, the module is put as a dependency if it is in
+the build configuration or if it is a host module. This allow to depends on a
+module only if it is enabled. The <code>kconfig</code> tools will not display this
+dependency, only the build system will use it.</p>
 
 <h4><code>LOCAL_DEPENDS_HEADERS</code></h4>
 
@@ -1641,6 +1648,10 @@ this folder in <code>$(TARGET_OUT)/$(TARGET_PRODUCT_FULL_NAME)</code>.</p>
 transparent for users, dependencies shall be specified in the same way. The only
 difference is that modules from <code>SDK</code> won't appear in global config and will not
 be built.</p>
+
+<p>The variable <code>TARGET_SDK_PUBLIC_MODULES</code> can be used to specify a subset of
+module to include in the generated sdk. It will also include recursively
+dependencies markes as <code>PUBLIC</code>.</p>
 
 <h2>Codecheck for C false positives or intentional deviations</h2>
 

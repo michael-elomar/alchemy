@@ -377,7 +377,7 @@ Mainly used by the android wrapper.
 * `TARGET_LDCONFIG_DIRS` : list of directories to add in ldconfig cache. Path
   should be absolute and for the target. Standard path are already included
   by `Alchemy` (/lib/<arch>, /lib, /usr/lib/<arch>, /usr/lib).
-* `TARGET_IMAGE_FORMAT` : format of the image file to generate wilth `image` command.
+* `TARGET_IMAGE_FORMAT` : format of the image file to generate with `image` command.
   Supported value: `tar`, `cpio`, `ext2`, `ext3`, `ext4`, `plf` and the compressed
   forms `tar.gz`, `cpio.gz`, `ext2.gz`, `ext3.gz`, `ext4.gz`,
   `tar.bz2`, `cpio.bz2`, `ext2.bz2`, `ext3.bz2`, `ext4.bz2`,
@@ -692,6 +692,13 @@ compilation of modules depending on it, they shall be exported in the
 prerequisites to be sure they are generated at the correct time. An example will
 be headers installed in staging directories. If they are not explicitly
 specified in prerequisites export, it will not work in a parallel build.
+
+When generating a public sdk, the set of dependencies should be split in 2.
+
+* `LOCAL_PUBLIC_LIBRARIES`: list of public module whose headers may be used in
+  public headers of the current module.
+* `LOCAL_PRIVATE_LIBRARIES`: list of private modules only used when compiling
+  the current module.
 
 #### `LOCAL_CONDITIONAL_LIBRARIES`
 
@@ -1521,6 +1528,10 @@ To use a `SDK`, specify the directory where the `atom.mk` is in the variable
 transparent for users, dependencies shall be specified in the same way. The only
 difference is that modules from `SDK` won't appear in global config and will not
 be built.
+
+The variable `TARGET_SDK_PUBLIC_MODULES` can be used to specify a subset of
+module to include in the generated sdk. It will also include recursively
+dependencies markes as `PUBLIC`.
 
 ## Codecheck for C false positives or intentional deviations
 

@@ -54,28 +54,40 @@ vars-LOCAL += GENERATED_SRC_FILES
 # Static libraries that you want to include in your module
 # Names of modules in the build system, without path/prefix/suffix
 vars-LOCAL += STATIC_LIBRARIES
+vars-LOCAL += STATIC_PUBLIC_LIBRARIES
+vars-LOCAL += STATIC_PRIVATE_LIBRARIES
 
 # Static libraries that you want to include as a whole in your module
 # To generate a '.so' from a '.a' for ex
 # Names of modules in the build system, without path/prefix/suffix
 vars-LOCAL += WHOLE_STATIC_LIBRARIES
+vars-LOCAL += WHOLE_STATIC_PUBLIC_LIBRARIES
+vars-LOCAL += WHOLE_STATIC_PRIVATE_LIBRARIES
 
 # Libraries you directly link against
 # Names of modules in the build system, without path/prefix/suffix
 vars-LOCAL += SHARED_LIBRARIES
+vars-LOCAL += SHARED_PUBLIC_LIBRARIES
+vars-LOCAL += SHARED_PRIVATE_LIBRARIES
 
 # External libraries (not built directly by the build system rules)
 # Used as dependencies to trigger indirect build.
 vars-LOCAL += EXTERNAL_LIBRARIES
+vars-LOCAL += EXTERNAL_PUBLIC_LIBRARIES
+vars-LOCAL += EXTERNAL_PRIVATE_LIBRARIES
 
 # Prebuilt libraries
 vars-LOCAL += PREBUILT_LIBRARIES
+vars-LOCAL += PREBUILT_PUBLIC_LIBRARIES
+vars-LOCAL += PREBUILT_PRIVATE_LIBRARIES
 
 # Meta packages
 vars-LOCAL += META_PACKAGES
 
 # General libraries to add in dependency based on their actual class (STATIC/SHARED/EXTERNAL).
 vars-LOCAL += LIBRARIES
+vars-LOCAL += PUBLIC_LIBRARIES
+vars-LOCAL += PRIVATE_LIBRARIES
 
 # Force using static libraries as dependencies instead of shared libraries
 vars-LOCAL += FORCE_STATIC
@@ -85,6 +97,8 @@ vars-LOCAL += FORCE_STATIC
 # <var> : variable to test (can be special value OPTIONAL to check if in build config)
 # <lib> : library to add in LOCAL_LIBRARIES if <var> is defined
 vars-LOCAL += CONDITIONAL_LIBRARIES
+vars-LOCAL += CONDITIONAL_PUBLIC_LIBRARIES
+vars-LOCAL += CONDITIONAL_PRIVATE_LIBRARIES
 
 # Modules whose headers are required to build
 vars-LOCAL += DEPENDS_HEADERS
@@ -446,6 +460,7 @@ vars-TARGET += STRIP_FILTER
 vars-TARGET += LDCONFIG_DIRS
 vars-TARGET += DEPLOY_ROOT
 vars-TARGET += USE_CLANG
+vars-TARGET += SDK_PUBLIC_MODULES
 
 # Tools
 vars-TARGET += CROSS
