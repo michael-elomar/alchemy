@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from os import path
 import sys, os, logging
 import argparse
 import shutil
@@ -38,6 +39,8 @@ class Context(object):
         self.sdkDirs = []
         self.headerLibs = []
         self.files = {}
+        self.moduleList = None
+        self.privateFiles = None
 
         # Load modules from xml
         logging.info("Loading xml '%s'", self.dumpXmlPath)
@@ -136,11 +139,15 @@ class Context(object):
                     logging.debug("Copy: '%s' -> '%s'", srcFilePath, dstFilePath)
                     shutil.copy2(srcFilePath, dstFilePath)
 
+    def isPublicFile(self, filePath):
+        relPath = os.path.relpath(filePath, self.stagingDir)
+        return relPath not in self.privateFiles
+
 #===============================================================================
 # Copy elements based on their extensions and limiting to a max depth if any
 # If no extension is provided, any element will be took into account
 #===============================================================================
-def copyTree(ctx, srcDir, dstDir, includeExt=None, excludeExt=None, depth=-1):
+def copyTree(ctx, srcDir, dstDir, includeExt=None, excludeExt=None, depth=-1, publicOnly=False):
     rootDepth = os.path.normpath(srcDir).count(os.sep)
     for (dirPath, dirNames, fileNames) in os.walk(srcDir):
         # Check depth of directory
@@ -174,7 +181,8 @@ def copyTree(ctx, srcDir, dstDir, includeExt=None, excludeExt=None, depth=-1):
                 filePath = os.path.normpath(os.path.join(dirPath, fileName))
                 relPath = os.path.relpath(filePath, srcDir)
                 dstFilePath = os.path.normpath(os.path.join(dstDir, relPath))
-                ctx.addFile(filePath, dstFilePath)
+                if not publicOnly or ctx.isPublicFile(filePath):
+                    ctx.addFile(filePath, dstFilePath)
 
 #===============================================================================
 #===============================================================================
@@ -185,7 +193,7 @@ def copyHostStaging(ctx, srcDir, dstDir):
 
 #===============================================================================
 #===============================================================================
-def copyStaging(ctx, srcDir, dstDir):
+def copyStaging(ctx, srcDir, dstDir, publicOnly=False):
     logging.debug("Copy staging: '%s' -> '%s'", srcDir, dstDir)
     dirs_to_keep = ["lib",
         os.path.join("etc", "alternatives"),
@@ -213,7 +221,7 @@ def copyStaging(ctx, srcDir, dstDir):
         srcDirPath = os.path.normpath(os.path.join(srcDir, dirName))
         if os.path.exists(srcDirPath):
             dstDirPath = os.path.normpath(os.path.join(dstDir, dirName))
-            copyTree(ctx, srcDirPath, dstDirPath, excludeExt=exclude)
+            copyTree(ctx, srcDirPath, dstDirPath, excludeExt=exclude, publicOnly=publicOnly)
 
 #===============================================================================
 #===============================================================================
@@ -326,10 +334,59 @@ def getExportedIncludes(ctx, module):
 
 #===============================================================================
 #===============================================================================
-def processModule(ctx, module, headersOnly=False):
-    # Skip module not built
-    if not module.build and not headersOnly:
-        return
+PUBLIC_DEPS_FIELDS = [
+    "STATIC_PUBLIC_LIBRARIES",
+    "WHOLE_STATIC_PUBLIC_LIBRARIES",
+    "SHARED_PUBLIC_LIBRARIES",
+    "EXTERNAL_PUBLIC_LIBRARIES",
+    "PREBUILT_PUBLIC_LIBRARIES",
+    "PUBLIC_LIBRARIES",
+]
+PRIVATE_DEPS_FIELDS = [
+    "STATIC_PRIVATE_LIBRARIES",
+    "WHOLE_STATIC_PRIVATE_LIBRARIES",
+    "SHARED_PRIVATE_LIBRARIES",
+    "EXTERNAL_PRIVATE_LIBRARIES",
+    "PREBUILT_PRIVATE_LIBRARIES",
+    "PRIVATE_LIBRARIES",
+]
+_publicDepsWarnList = set()
+def getPublicDeps(module):
+    # To determine if a conditional dependency is actually used, check if it is
+    # found in 'direct' dependencies
+    def getConditionalDeps(module, field):
+        directDeps = module.fields.get("depends", "").split()
+        condDeps = [dep.split(":")[1] for dep in module.fields.get(field, "").split()]
+        return [dep for dep in condDeps if dep in directDeps]
+
+    def getRawPublicDeps(module):
+        publicDeps = " ".join([module.fields.get(field, "") for field in PUBLIC_DEPS_FIELDS]).split()
+        condDeps = getConditionalDeps(module, "CONDITIONAL_PUBLIC_LIBRARIES")
+        return publicDeps + condDeps
+
+    def getRawPrivateDeps(module):
+        privateDeps = " ".join([module.fields.get(field, "") for field in PRIVATE_DEPS_FIELDS]).split()
+        condDeps = getConditionalDeps(module, "CONDITIONAL_PRIVATE_LIBRARIES")
+        return privateDeps + condDeps
+
+    def getDirectDeps(module):
+        return module.fields.get("depends", "").split()
+
+    rawPublicDeps = getRawPublicDeps(module)
+    rawPrivateDeps = getRawPrivateDeps(module)
+    directDeps = getDirectDeps(module)
+
+    if not rawPublicDeps and not rawPrivateDeps and directDeps:
+        if module not in _publicDepsWarnList:
+            logging.warning("Module '%s' has no explicit public/private dependencies", module.name)
+            _publicDepsWarnList.add(module)
+        return directDeps
+    else:
+        return rawPublicDeps
+
+#===============================================================================
+#===============================================================================
+def processModule(ctx, module, headersOnly=False, publicOnly=False):
     # Skip module from sdk
     if module.fields.get("SDK", ""):
         return
@@ -441,9 +498,11 @@ def processModule(ctx, module, headersOnly=False):
                     module.name, configFileName))
             ctx.atom.write("$(call load-config)\n")
 
-    # Set LOCAL_LIBRARIES with the content of 'depends'
-    if not headersOnly and "depends" in module.fields:
-        ctx.atom.write("LOCAL_LIBRARIES := %s\n" % module.fields["depends"])
+    # Set LOCAL_LIBRARIES with the content of public dependencies only
+    if not headersOnly:
+        deps = getPublicDeps(module) if publicOnly else module.fields.get("depends", "").split()
+        if deps:
+            ctx.atom.write("LOCAL_LIBRARIES := %s\n" % " ".join(deps))
 
     # Register shared/static libraries as normal so we can manage dependencies
     # Other are simply put as prebuilt
@@ -536,7 +595,7 @@ def processModuleAndroidInternal(ctx, writer, module, name, libPath, kind):
 #===============================================================================
 def processModuleAndroid(ctx, module):
     # Ignore host modules
-    if module.name.startswith("host.") or not module.build:
+    if module.name.startswith("host."):
         return
     moduleClass = module.fields["MODULE_CLASS"]
 
@@ -627,6 +686,73 @@ def writeTargetSetupVars(ctx, name, val):
     ctx.setup.write("\n\n")
 
 #===============================================================================
+# If SDK_PUBLIC_MODULES is given only those modules and their recursive public
+# dependencies will be added, otherwise all build modules will be added.
+# During recursive public dependency analysis, if a module has no explicit
+# public/private dependencies but has some generic dependencies, a warning is
+# printed and a fallback on generic dependencies is done.
+#===============================================================================
+def computeModuleList(ctx):
+    # If a list of public modules is not given use all built modules
+    publicModules = ctx.moduledb.targetVars.get("SDK_PUBLIC_MODULES", "").split()
+    if not publicModules:
+        return [module for module in ctx.moduledb if module.build]
+
+    moduleList = set()
+    cache = dict()
+
+    def getDepsRecursive(module):
+        if module in cache:
+            return cache[module]
+        depsRecursive = set()
+        publicDeps = getPublicDeps(module)
+        depsRecursive.update(publicDeps)
+        for dep in publicDeps:
+            depsRecursive.update(getDepsRecursive(ctx.moduledb[dep]))
+        cache[module] = depsRecursive
+        return depsRecursive
+
+    for name in publicModules:
+        module = ctx.moduledb[name]
+        depsRecursive = getDepsRecursive(module)
+        moduleList.add(module)
+        moduleList.update(ctx.moduledb[dep] for dep in depsRecursive)
+
+    # Keep libc if present
+    if "libc" in ctx.moduledb:
+        moduleList.add(ctx.moduledb["libc"])
+
+    return moduleList
+
+#===============================================================================
+# Construct a list of private file that should not go in the sdk.
+# It only list .so and .a from modules that are not explicitely listed as public
+# Only module build by alchemy as 'internal' are added. Modules built as
+# 'external' (like autotools) are not handled. It would required to look for the
+# EXPORT_LDLIBS variable to get the name of the files. Moreover include files
+# are almost impossible to filter once installed in staging directory.
+#===============================================================================
+def computePrivateFiles(ctx):
+    privateFiles = set()
+    for module in ctx.moduledb:
+        if module in ctx.moduleList:
+            continue
+        moduleClass = module.fields["MODULE_CLASS"]
+        if moduleClass in ["STATIC_LIBRARY", "SHARED_LIBRARY", "LIBRARY"]:
+            destdir = module.fields["DESTDIR"]
+            filename = module.fields["MODULE_FILENAME"]
+            basename = os.path.splitext(filename)[0]
+            privateFiles.add(os.path.join(destdir, basename + ".so"))
+            privateFiles.add(os.path.join(destdir, basename + ".a"))
+        copyFiles = module.fields.get("COPY_FILES", "").split()
+        for copyFile in copyFiles:
+            src, dst = copyFile.split(":")
+            if dst.endswith("/"):
+                dst += os.path.basename("src")
+            privateFiles.add(dst)
+    return privateFiles
+
+#===============================================================================
 # Main function.
 #===============================================================================
 def main():
@@ -638,6 +764,12 @@ def main():
 
     # List of previous sdk to merge with the new one
     ctx.sdkDirs = ctx.moduledb.targetVars.get("SDK_DIRS", "").split()
+
+    # Compute list of modules to process
+    publicOnly = not not ctx.moduledb.targetVars.get("SDK_PUBLIC_MODULES", "")
+    ctx.moduleList = computeModuleList(ctx)
+    if publicOnly:
+        ctx.privateFiles = computePrivateFiles(ctx)
 
     # Setup output directory
     if ctx.tarFile is None:
@@ -653,7 +785,7 @@ def main():
 
     # Copy content of staging directory
     logging.info("Copying staging directory")
-    copyStaging(ctx, ctx.stagingDir, ctx.outDir)
+    copyStaging(ctx, ctx.stagingDir, ctx.outDir, publicOnly=publicOnly)
 
     # Copy content of previous sdk
     for srcDir in ctx.sdkDirs:
@@ -686,14 +818,16 @@ def main():
         ctx.setup.write("LINUX_BUILD_DIR := $(LOCAL_PATH)/usr/src/linux-sdk\n\n")
 
     # Process modules
-    for module in ctx.moduledb:
-        processModule(ctx, module)
+    for module in sorted(ctx.moduleList, key=lambda m: m.name):
+        processModule(ctx, module, publicOnly=publicOnly)
         if ctx.android is not None:
             processModuleAndroid(ctx, module)
 
-    # Process modules not built but whose headers are required
+    # Handle modules not already processed but whose headers are required
     for lib in ctx.headerLibs:
-        processModule(ctx, ctx.moduledb[lib], headersOnly=True)
+        module = ctx.moduledb[lib]
+        if module not in ctx.moduleList:
+            processModule(ctx, module, headersOnly=True, publicOnly=publicOnly)
 
     # Check  symlinks
     if ctx.tarFile is None:
