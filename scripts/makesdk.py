@@ -4,13 +4,44 @@ from os import path
 import sys, os, logging
 import argparse
 import shutil
+import subprocess
 import fnmatch
 import tarfile
+import tempfile
 import time
 import xml.parsers
 from io import StringIO
 
 import moduledb
+
+#===============================================================================
+# Determine if a file should be stripped.
+# - Elf file
+# - Windows binaries
+# - ar archive files
+#===============================================================================
+def shouldStrip(filePath):
+    try:
+        with open(filePath, "rb") as fd:
+            hdr = fd.read(7)
+            if hdr[:4] == b"\x7fELF" or hdr[:2] == b"MZ" or hdr[:7] == b"!<arch>":
+                return True
+    except IOError as ex:
+        logging.error("Failed to open file: %s ([err=%d] %s)",
+            filePath, ex.errno, ex.strerror)
+    return False
+
+#===============================================================================
+#===============================================================================
+def stripFile(stripProg, srcFilePath, dstFilePath):
+    # stripProg may already contains some arguments
+    cmd = "%s -o %s %s" % (stripProg, dstFilePath, srcFilePath)
+    try:
+        subprocess.check_call(cmd, shell=True)
+        return True
+    except subprocess.CalledProcessError as ex:
+        logging.exception(ex)
+        return False
 
 #===============================================================================
 #===============================================================================
@@ -100,20 +131,21 @@ class Context(object):
             self.android_static.write("endif\n")
             self.finishFile(self.android_static, "Android-static.mk")
 
-    def addFile(self, srcFilePath, dstFilePath):
+    def _addFile(self, srcFilePath, dstFilePath, origSrcFilePath):
         if dstFilePath in self.files:
             return
+
         self.files[dstFilePath] = srcFilePath
         if self.tarFile is not None:
             if os.path.islink(srcFilePath):
                 # Link file, ignore absolute links
                 linkto = os.readlink(srcFilePath)
                 if not os.path.isabs(linkto):
-                    logging.debug("Link: '%s' -> '%s'", srcFilePath, dstFilePath)
+                    logging.debug("Link: '%s' -> '%s'", origSrcFilePath, dstFilePath)
                     self.tarFile.add(srcFilePath, arcname=dstFilePath)
             else:
                 # Regular file
-                logging.debug("Copy: '%s' -> '%s'", srcFilePath, dstFilePath)
+                logging.debug("Copy: '%s' -> '%s'", origSrcFilePath, dstFilePath)
                 self.tarFile.add(srcFilePath, arcname=dstFilePath)
         else:
             # Create missing directories
@@ -124,7 +156,7 @@ class Context(object):
                 if not os.path.lexists(dstFilePath):
                     linkto = os.readlink(srcFilePath)
                     if not os.path.isabs(linkto):
-                        logging.debug("Link: '%s' -> '%s'", srcFilePath, dstFilePath)
+                        logging.debug("Link: '%s' -> '%s'", origSrcFilePath, dstFilePath)
                         os.symlink(linkto, dstFilePath)
             else:
                 # Regular file, copy if source is newer in case destination exists
@@ -136,12 +168,37 @@ class Context(object):
                     doCopy = srcStat.st_mtime > dstStat.st_mtime
 
                 if doCopy:
-                    logging.debug("Copy: '%s' -> '%s'", srcFilePath, dstFilePath)
+                    logging.debug("Copy: '%s' -> '%s'", origSrcFilePath, dstFilePath)
                     shutil.copy2(srcFilePath, dstFilePath)
+
+    def addFile(self, srcFilePath, dstFilePath):
+        if shouldStrip(srcFilePath):
+            stripProg = self.getStripProg(srcFilePath)
+            try:
+                tmpFileFd, tmpFilePath = tempfile.mkstemp()
+                logging.debug("Strip: '%s'", srcFilePath)
+                if stripFile(stripProg, srcFilePath, tmpFilePath):
+                    self._addFile(tmpFilePath, dstFilePath, srcFilePath)
+                else:
+                    self._addFile(srcFilePath, dstFilePath, srcFilePath)
+            finally:
+                os.close(tmpFileFd)
+                try:
+                    os.unlink(tmpFilePath)
+                except OSError:
+                    pass
+        else:
+            self._addFile(srcFilePath, dstFilePath, srcFilePath)
 
     def isPublicFile(self, filePath):
         relPath = os.path.relpath(filePath, self.stagingDir)
         return relPath not in self.privateFiles
+
+    def getStripProg(self, srcFilePath):
+        if srcFilePath.startswith(self.hostStagingDir):
+            return "strip -s"
+        else:
+            return self.moduledb.targetVars.get("STRIP", "strip -s")
 
 #===============================================================================
 # Copy elements based on their extensions and limiting to a max depth if any
