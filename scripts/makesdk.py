@@ -21,14 +21,15 @@ import moduledb
 # - ar archive files
 #===============================================================================
 def shouldStrip(filePath):
-    try:
-        with open(filePath, "rb") as fd:
-            hdr = fd.read(7)
-            if hdr[:4] == b"\x7fELF" or hdr[:2] == b"MZ" or hdr[:7] == b"!<arch>":
-                return True
-    except IOError as ex:
-        logging.error("Failed to open file: %s ([err=%d] %s)",
-            filePath, ex.errno, ex.strerror)
+    # FIXME: Disabled, it breaks a lot of things (at generation and use)
+    # try:
+    #     with open(filePath, "rb") as fd:
+    #         hdr = fd.read(7)
+    #         if hdr[:4] == b"\x7fELF" or hdr[:2] == b"MZ" or hdr[:7] == b"!<arch>":
+    #             return True
+    # except IOError as ex:
+    #     logging.error("Failed to open file: %s ([err=%d] %s)",
+    #         filePath, ex.errno, ex.strerror)
     return False
 
 #===============================================================================
