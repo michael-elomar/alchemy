@@ -407,6 +407,7 @@ PRIVATE_DEPS_FIELDS = [
     "EXTERNAL_PRIVATE_LIBRARIES",
     "PREBUILT_PRIVATE_LIBRARIES",
     "PRIVATE_LIBRARIES",
+    "DEPENDS_MODULES",
 ]
 _publicDepsWarnList = set()
 def getPublicDeps(module):
