@@ -610,12 +610,19 @@ def processModuleAndroidInternal(ctx, writer, module, name, libPath, kind):
         raw_deps_list = module.fields["depends"].split()
         static_libs_deps = []
         shared_libs_deps = []
-        for name in raw_deps_list:
+
+        while len(raw_deps_list) > 0:
+            name = raw_deps_list.pop(0)
             try:
                 mod = ctx.moduledb[name]
             except KeyError:
                 continue
             moduleClass = mod.fields["MODULE_CLASS"]
+
+            # follow meta-packages transitive dependencies
+            if moduleClass == "META_PACKAGE":
+                raw_deps_list[0:0] = mod.fields.get("depends", "").split()
+
             if moduleClass == "SHARED_LIBRARY" or (moduleClass == "LIBRARY" and kind == "SHARED"):
                 shared_libs_deps.append(name)
             elif moduleClass == "STATIC_LIBRARY" or (moduleClass == "LIBRARY" and kind == "STATIC"):
