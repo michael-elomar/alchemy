@@ -1597,6 +1597,7 @@ exec-custom-macro = \
 	$(foreach __var,$(vars-LOCAL), \
 		$(eval __modules.$(__mod).$(__var) := $(LOCAL_$(__var))) \
 	) \
+	$(call public-private-libraries-setup,$1) \
 
 ###############################################################################
 ## Check that custom macros of a module are well defined.
