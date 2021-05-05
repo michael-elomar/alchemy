@@ -1,3 +1,15 @@
+parrot-tools-alchemy (1.3.8) unstable; urgency=low
+  * Fix sdk usage when use in a chain
+  * Fix toolchain selection for clang
+  * Fix clangformat
+  * use pigz/pbzip2 to compress the image using threads
+  * Export SYSROOT/PYTHONPATH in native-wrapper
+  * use mke2fs to generate the image in ext2/ext3/ext4 formats
+  * qconf: build using Qt5
+  * Add support for public/private libraries
+
+ -- Yves-Marie Morgan (Parrot) <yves-marie.morgan@parrot.com>  Wed, 05 May 2021 10:45:01 +0200
+
 parrot-tools-alchemy (1.3.7) unstable; urgency=low
   * Add libav-ffmpeg as prebuilt module for linux native
   * Disable runtime deps when doing config-force-all
