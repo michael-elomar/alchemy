@@ -1280,6 +1280,42 @@ all-cxx-files-in = $(call all-files-in,$1,.cxx)
 all-cc-files-in = $(call all-files-in,$1,.cc)
 
 ###############################################################################
+## Search links matching an extension under LOCAL_PATH, recursively.
+###############################################################################
+
+# $1 : directory relative to LOCAL_PATH to search
+# $2 : extension to search (.c, .cpp ...)
+all-links-under = $(strip \
+	$(patsubst ./%,%, \
+		$(shell cd $(LOCAL_PATH); \
+			find $1 -type l -name "*$2" -and -not -name ".*") \
+	))
+
+# $1 : directory relative to LOCAL_PATH to search
+all-c-links-under = $(call all-links-under,$1,.c)
+all-cpp-links-under = $(call all-links-under,$1,.cpp)
+all-cxx-links-under = $(call all-links-under,$1,.cxx)
+all-cc-links-under = $(call all-links-under,$1,.cc)
+
+###############################################################################
+## Search links matching an extension under LOCAL_PATH, non-recursively.
+###############################################################################
+
+# $1 : directory relative to LOCAL_PATH to search
+# $2 : extension to search (.c, .cpp ...)
+all-links-in = $(strip \
+	$(patsubst ./%,%, \
+		$(shell cd $(LOCAL_PATH); \
+			find $1 -maxdepth 1 -type l -name "*$2" -and -not -name ".*") \
+	))
+
+# $1 : directory relative to LOCAL_PATH to search
+all-c-links-in = $(call all-links-in,$1,.c)
+all-cpp-links-in = $(call all-links-in,$1,.cpp)
+all-cxx-links-in = $(call all-links-in,$1,.cxx)
+all-cc-links-in = $(call all-links-in,$1,.cc)
+
+###############################################################################
 ## Check compilation flags for some forbidden stuff.
 ## $1 : variable to check (its name, not its value).
 ## $2 : list of flags to check for their presence in $1 (can be a pattern).
