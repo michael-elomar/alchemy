@@ -1362,10 +1362,13 @@ normalize-c-includes-rel = $(strip \
 
 # Same as normalize-c-includes but uses the -isystem instead of -I flag
 # Note gcc 4.4.3 of android seems to mess things up when this flag is uses in C++
+# Note yocto already includes a --sysroot which conflicts with the -isystem and
+# the #include_next macro
 # FIXME : adding a space between -isystem an the patch causes troubles when invoking
 # clangs' cpp (preprocessor) under darwin at least.
 normalize-system-c-includes = $(strip \
-	$(if $(call streq,$(TARGET_CC_VERSION),4.4.3), \
+	$(if $(or $(call streq,$(TARGET_CC_VERSION),4.4.3), \
+			$(call streq,$(TARGET_OS_FLAVOUR),yocto)), \
 		$(call normalize-c-includes,$1), \
 		\
 		$(foreach __inc,$1, \
@@ -1375,10 +1378,13 @@ normalize-system-c-includes = $(strip \
 
 # Same as normalize-c-includes-rel but uses the -isystem instead of -I flag
 # Note gcc 4.4.3 of android seems to mess things up when this flag is uses in C++
+# Note yocto already includes a --sysroot which conflicts with the -isystem and
+# the #include_next macro
 # FIXME : the extra space does not cause too much troubles for relative path it is
 # not used with the preprocessor (autotools only)
 normalize-system-c-includes-rel = $(strip \
-	$(if $(call streq,$(TARGET_CC_VERSION),4.4.3), \
+	$(if $(or $(call streq,$(TARGET_CC_VERSION),4.4.3), \
+			$(call streq,$(TARGET_OS_FLAVOUR),yocto)), \
 		$(call normalize-c-includes-rel,$1), \
 		\
 		$(foreach __inc,$1, \

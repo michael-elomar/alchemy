@@ -114,6 +114,18 @@ ifeq ("$(HOST_OS)","windows")
   TARGET_CMAKE_CONFIGURE_ARGS += -G "Unix Makefiles"
 endif
 
+# On yocto, the CC and CXX can contains arguments which is invalid for toolchain
+# files: we split the command and move arguments to C_FLAGS / CXX_FLAGS
+ifeq ("$(TARGET_OS_FLAVOUR)","yocto")
+  TARGET_CMAKE_CC := $(call first,$(TARGET_CC))
+  TARGET_CMAKE_C_FLAGS := $(call rest,$(TARGET_CC)) $(TARGET_CMAKE_C_FLAGS)
+  TARGET_CMAKE_CXX := $(call first,$(TARGET_CXX))
+  TARGET_CMAKE_CXX_FLAGS := $(call rest,$(TARGET_CXX)) $(TARGET_CMAKE_CXX_FLAGS)
+else
+  TARGET_CMAKE_CC := $(TARGET_CC)
+  TARGET_CMAKE_CXX := $(TARGET_CXX)
+endif
+
 ###############################################################################
 ## Generation of toolchain file.
 ###############################################################################
@@ -135,9 +147,9 @@ define _cmake-target-gen-toolchain-file
 	echo "set(CMAKE_SYSTEM_NAME $(TARGET_CMAKE_SYSTEM_NAME))"; \
 	echo "set(CMAKE_SYSTEM_PROCESSOR \"$(TARGET_CMAKE_SYSTEM_PROCESSOR)\")"; \
 	echo "set(CMAKE_C_COMPILER_LAUNCHER \"$(CCACHE)\")"; \
-	echo "set(CMAKE_C_COMPILER \"$(TARGET_CC)\")"; \
+	echo "set(CMAKE_C_COMPILER \"$(TARGET_CMAKE_CC)\")"; \
 	echo "set(CMAKE_CXX_COMPILER_LAUNCHER \"$(CCACHE)\")"; \
-	echo "set(CMAKE_CXX_COMPILER \"$(TARGET_CXX)\")"; \
+	echo "set(CMAKE_CXX_COMPILER \"$(TARGET_CMAKE_CXX)\")"; \
 	echo "set(CMAKE_AR \"$(TARGET_AR)\" CACHE FILEPATH "Archiver")"; \
 	echo "set(CMAKE_LINKER \"$(TARGET_LD)\")"; \
 	echo 'set(CMAKE_ASM_FLAGS \

@@ -83,6 +83,9 @@ ifeq ("$(TARGET_OS)","linux")
     ifeq ("$(TARGET_ARCH)","arm")
       __toolchain-sysroot-flags += $(TARGET_GLOBAL_CFLAGS_$(TARGET_DEFAULT_ARM_MODE))
     endif
+    ifeq ("$(TARGET_OS_FLAVOUR)","yocto")
+      __toolchain-sysroot-flags += $(call rest,$(TARGET_CC))
+    endif
     TARGET_TOOLCHAIN_SYSROOT := $(shell $(TARGET_CROSS)gcc $(__toolchain-sysroot-flags) -print-sysroot)
     ifeq ("$(wildcard $(TARGET_TOOLCHAIN_SYSROOT))","")
         TOOLCHAIN_LIBC := /

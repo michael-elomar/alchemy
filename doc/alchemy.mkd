@@ -258,7 +258,7 @@ Alchemy supports building by using Yocto SDK.
 * These options can be defined for Yocto build:
   * `TARGET_YOCTO_VERSION` : Yocto version.
   </br>Default is `1.8`
-  * `TARGET_YOKTO_SDK` : Path of Yocto SDK to use.
+  * `TARGET_YOCTO_SDK` : Path of Yocto SDK to use.
   </br>Default tries to auto-detect the SDK from a few somewhat standard location (`/opt/poky*`, `~/Library/poky*`, `~/poky*`, ...)
 
 ### Global flags for tools.
