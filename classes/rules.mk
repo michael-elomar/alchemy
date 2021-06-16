@@ -610,7 +610,7 @@ endif
 _module_all_copy_files_src :=
 _module_all_copy_files_dst :=
 
-ifneq ("$(LOCAL_COPY_FILES)","")
+ifneq ("$(strip $(LOCAL_COPY_FILES) $(LOCAL_COPY_DIRS))","")
 
 # Generate a rule to copy all files
 # Handle relative/absolute paths
