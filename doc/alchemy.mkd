@@ -1538,6 +1538,10 @@ The variable `TARGET_SDK_PUBLIC_MODULES` can be used to specify a subset of
 module to include in the generated sdk. It will also include recursively
 dependencies markes as `PUBLIC`.
 
+By default the generated sdk can only be used by the exact same environment and
+in particular the same version of the compiler. Variable `TARGET_SDK_ALLOW_OLDER_CC`
+and/or `TARGET_SDK_ALLOW_NEWER_CC` can be set to `1` to extend the compatibility.
+
 ## Codecheck for C false positives or intentional deviations
 
 You can ignore specific C codecheck warnings in a C source code file by inserting

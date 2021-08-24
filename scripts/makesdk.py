@@ -738,6 +738,27 @@ def checkTargetVar(ctx, name):
 
 #===============================================================================
 #===============================================================================
+def checkTargetCcVersion(ctx):
+    version = ctx.moduledb.targetVars.get("CC_VERSION", "")
+    allowOlder = ctx.moduledb.targetVars.get("SDK_ALLOW_OLDER_CC", "") == "1"
+    allowNewer = ctx.moduledb.targetVars.get("SDK_ALLOW_NEWER_CC", "") == "1"
+    if allowOlder and allowNewer:
+        # Everything allowed
+        return
+    if not allowOlder and not allowNewer:
+        # Strict match requested
+        checkTargetVar(ctx, "CC_VERSION")
+    if allowOlder:
+        ctx.atom.write("ifeq (\"$(call check-version,%s,$(TARGET_CC_VERSION))\",\"\")\n" % version)
+        ctx.atom.write("  $(error This sdk is for TARGET_CC_VERSION <= %s)\n" % version)
+        ctx.atom.write("endif\n\n")
+    if allowNewer:
+        ctx.atom.write("ifeq (\"$(call check-version,$(TARGET_CC_VERSION),%s)\",\"\")\n" % version)
+        ctx.atom.write("  $(error This sdk is for TARGET_CC_VERSION >= %s)\n" % version)
+        ctx.atom.write("endif\n\n")
+
+#===============================================================================
+#===============================================================================
 def writeTargetSetupVars(ctx, name, val):
     # Replace directory path referencing previous sdk or staging directory
     for dirPath in ctx.sdkDirs:
@@ -863,11 +884,12 @@ def main():
     # in the correct environment
     target_elements = [
         "OS", "OS_FLAVOUR",
-        "ARCH", "CPU", "CC_VERSION", "CC_FLAVOUR", "TOOLCHAIN_TRIPLET",
+        "ARCH", "CPU", "CC_FLAVOUR", "TOOLCHAIN_TRIPLET",
         "LIBC", "DEFAULT_ARM_MODE", "FLOAT_ABI"
     ]
     for element_to_check in target_elements:
         checkTargetVar(ctx, element_to_check)
+    checkTargetCcVersion(ctx)
 
     # Save initial TARGET_SETUP_XXX variables as TARGET_XXX
     for var in ctx.moduledb.targetSetupVars.keys():
