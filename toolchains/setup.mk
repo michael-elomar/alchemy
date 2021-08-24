@@ -20,7 +20,8 @@ ifndef TARGET_TOOLCHAIN_TRIPLET
       __toolchain_triplet_cmd := $(TARGET_CROSS)gcc $(TARGET_GLOBAL_CFLAGS)
     endif
   endif
-  TARGET_TOOLCHAIN_TRIPLET := $(shell $(__toolchain_triplet_cmd) -print-multiarch 2>&1)
+  # Ignore line with error message indicating LD_PRELOAD issues
+  TARGET_TOOLCHAIN_TRIPLET := $(shell $(__toolchain_triplet_cmd) -print-multiarch 2>&1 | grep -v LD_PRELOAD)
   ifeq ("$(TARGET_TOOLCHAIN_TRIPLET)","")
     TARGET_TOOLCHAIN_TRIPLET := $(shell $(__toolchain_triplet_cmd) -dumpmachine)
   else ifneq ("$(findstring -print-multiarch,$(TARGET_TOOLCHAIN_TRIPLET))","")
