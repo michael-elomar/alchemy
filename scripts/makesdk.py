@@ -839,6 +839,11 @@ def computePrivateFiles(ctx):
             privateFiles.add(dst)
     return privateFiles
 
+def copyBuildProp(ctx):
+    srcBuildProp = os.path.join(ctx.stagingDir, 'etc', 'build.prop')
+    dstBuildProp = os.path.join(ctx.outDir, 'build.prop')
+    ctx.addFile(srcBuildProp, dstBuildProp)
+
 #===============================================================================
 # Main function.
 #===============================================================================
@@ -928,6 +933,7 @@ def main():
         ctx.atom.write("\nendef\n")
         ctx.atom.write("$(call local-register-custom-macro,%s)\n" % macro.name)
 
+    copyBuildProp(ctx)
     ctx.finish()
 
 #===============================================================================
