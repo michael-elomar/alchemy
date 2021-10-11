@@ -29,6 +29,10 @@ def compile_file(filepath, sysroot):
 
     py_compile.compile(filepath, cfile=dstpath, dfile=runpath, doraise=True, optimize=2)
 
+    # Apply original file time to generated one
+    st = os.stat(filepath)
+    os.utime(dstpath, ns=(st.st_atime_ns, st.st_mtime_ns))
+
 #===============================================================================
 # Main function.
 #===============================================================================
