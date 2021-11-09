@@ -453,8 +453,11 @@ ifneq ($(filter $(LOCAL_MODULE) 1,$(USE_UNDEFINED_SANITIZER)),)
   LOCAL_LDFLAGS += -fsanitize=undefined
 endif
 ifneq ($(filter $(LOCAL_MODULE) 1,$(USE_COVERAGE)),)
-  LOCAL_CFLAGS  += -fprofile-arcs -ftest-coverage -O0 -D__COVERAGE__
-  LOCAL_LDFLAGS += -fprofile-arcs -ftest-coverage
+  LOCAL_CFLAGS  += --coverage -D__COVERAGE__
+  LOCAL_LDFLAGS += --coverage
+  ifeq ($(filter optimized,$(USE_COVERAGE)),)
+    LOCAL_CFLAGS  += -O0 -U_FORTIFY_SOURCE
+  endif
 endif
 endif
 endif
