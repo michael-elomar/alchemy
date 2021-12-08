@@ -450,6 +450,8 @@ def processModule(ctx, module, headersOnly=False, publicOnly=False):
     if module.fields.get("SDK", ""):
         return
 
+    isHostModule = module.name.startswith("host.")
+
     logging.info("Processing module %s", module.name)
 
     # Remember modules not built but whose headers are required
@@ -466,10 +468,12 @@ def processModule(ctx, module, headersOnly=False, publicOnly=False):
     modulePath = module.fields["PATH"]
     moduleClass = module.fields["MODULE_CLASS"]
 
-    if module.name.startswith("host."):
+    if isHostModule:
         ctx.atom.write("LOCAL_HOST_MODULE := %s\n" % module.name[5:])
+        outIncludeDir = os.path.join(ctx.outDir, "host")
     else:
         ctx.atom.write("LOCAL_MODULE := %s\n" % module.name)
+        outIncludeDir = ctx.outDir
 
     # Write verbatim some fields
     fields = ["DESCRIPTION", "CATEGORY_PATH",
@@ -536,7 +540,7 @@ def processModule(ctx, module, headersOnly=False, publicOnly=False):
         exportedIncludeDirs = getExportedIncludes(ctx, module)
         for exportedInclude in exportedIncludeDirs:
             if exportedInclude[0] is not None:
-                copyHeaders(ctx, exportedInclude[0], os.path.join(ctx.outDir, exportedInclude[1]))
+                copyHeaders(ctx, exportedInclude[0], os.path.join(outIncludeDir, exportedInclude[1]))
             if os.path.isabs(exportedInclude[1]):
                 ctx.atom.write(" \\\n\t%s" % exportedInclude[1])
             elif exportedInclude[1] != "usr/include" or moduleClass == "LINUX_MODULE":
