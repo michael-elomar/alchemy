@@ -109,10 +109,12 @@ endif
 ifeq ("$(TARGET_FINAL_PYTHON_GENERATE_PYC)","1")
 # Use compiled host version of python to generate pyc to make sure that at runtime
 # It works properly
-	@echo "Generating pyc files from python files"
-	$(Q) $(HOST_OUT_STAGING)/usr/bin/python $(GENPYC_SCRIPT) \
-		--sysroot $(TARGET_OUT_FINAL) \
-		$(TARGET_OUT_FINAL)
+	$(Q) if [ -e $(HOST_OUT_STAGING)/usr/bin/python ]; then \
+		@echo "Generating pyc files from python files"; \
+		$(HOST_OUT_STAGING)/usr/bin/python $(GENPYC_SCRIPT) \
+			--sysroot $(TARGET_OUT_FINAL) \
+			$(TARGET_OUT_FINAL); \
+	fi
 ifneq ("$(TARGET_FINAL_PYTHON_REMOVE_PY)","")
 # The '/' at the end of the directory is important in case it's a symlink
 	$(foreach __dir,$(TARGET_FINAL_PYTHON_REMOVE_PY), \
