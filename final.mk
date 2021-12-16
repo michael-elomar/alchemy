@@ -110,7 +110,7 @@ ifeq ("$(TARGET_FINAL_PYTHON_GENERATE_PYC)","1")
 # Use compiled host version of python to generate pyc to make sure that at runtime
 # It works properly
 	$(Q) if [ -e $(HOST_OUT_STAGING)/usr/bin/python ]; then \
-		@echo "Generating pyc files from python files"; \
+		echo "Generating pyc files from python files"; \
 		$(HOST_OUT_STAGING)/usr/bin/python $(GENPYC_SCRIPT) \
 			--sysroot $(TARGET_OUT_FINAL) \
 			$(TARGET_OUT_FINAL); \
