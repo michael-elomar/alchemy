@@ -360,6 +360,7 @@ is-targets-in-make-goals = $(strip \
 ###############################################################################
 is-module-in-make-goals = $(strip \
 	$(call is-targets-in-make-goals,$1 $1-clean $1-dirclean $1-path $1-cloc $1-doc \
+		$1-config $1-menuconfig $1-xconfig \
 		$(call codecheck-get-targets,$1) \
 		$(call codeformat-get-targets,$1) \
 		$(call genproject-get-targets,$1)))
