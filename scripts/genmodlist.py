@@ -127,7 +127,7 @@ class Context:
         return f"{major}.{minor}.{level}" if valid else None
 
     def extract_license(self, module):
-        git_root_dir = self.find_git_root_dir(module)
+        root_dir = self.find_git_root_dir(module) or self.workspace
 
         def find_license_file(dirpath):
             for entry in os.listdir(dirpath):
@@ -136,7 +136,7 @@ class Context:
                     return match.group(1)
 
             # Look in parent until root of git directory is reached
-            if os.path.samefile(dirpath, git_root_dir) or \
+            if os.path.samefile(dirpath, root_dir) or \
                     os.path.dirname(dirpath) == dirpath:
                 return None
             else:
