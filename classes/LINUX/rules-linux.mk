@@ -200,6 +200,9 @@ define linux-gen-sdk
 	$(Q) (cd $(PRIVATE_PATH); \
 		find arch/$(LINUX_SRCARCH)/include include scripts -type f \
 		>> $(LINUX_BUILD_DIR)/sdksrcfiles)
+	$(Q) (cd $(PRIVATE_PATH); \
+		find arch/$(LINUX_SRCARCH)/kernel -type f -name '*.lds' \
+		>> $(LINUX_BUILD_DIR)/sdksrcfiles)
 $(if $(call streq,$(LINUX_ARCH),arm), \
 	$(Q) (cd $(PRIVATE_PATH); \
 		find arch/$(LINUX_SRCARCH)/*/include -type f \
