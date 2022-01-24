@@ -39,10 +39,8 @@ endif
 $(call register-prebuilt-pkg-config-module,libav-ffmpeg,libavcodec \
 	libavresample libavutil libavformat)
 
-include $(CLEAR_VARS)
-LOCAL_MODULE := libjpeg-turbo
-LOCAL_EXPORT_LDLIBS := -ljpeg
-$(call local-register-prebuilt-overridable)
+# merge libjpeg and libturbo-jpeg into the libjpeg-turbo name
+$(call register-prebuilt-pkg-config-module,libjpeg-turbo,libjpeg libturbojpeg)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := libtiff
