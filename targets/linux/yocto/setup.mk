@@ -11,9 +11,9 @@ YOCTO_SDK_DEFAULT_PATHS := \
 	~/Library/poky* \
 	~/poky*
 
+ifndef TARGET_YOCTO_SDK
 TARGET_YOCTO_VERSION ?= 1.8
 
-ifndef TARGET_YOCTO_SDK
 TARGET_YOCTO_SDK := \
 	$(shell for path in $(wildcard $(YOCTO_SDK_DEFAULT_PATHS)) ; do \
 			if [ -e $$path/$(TARGET_YOCTO_VERSION) ]; then \
