@@ -15,7 +15,11 @@
 _autotools_install_bin := $(shell which install 2>/dev/null)
 
 # Update host compilation path
-_autotools_host_path := $(HOST_OUT_STAGING)/bin:$(HOST_OUT_STAGING)/$(HOST_DEFAULT_BIN_DESTDIR):$(PATH)
+ifeq ("$(HOST_OS)","windows")
+  _autotools_host_path := $(shell cygpath -u $(HOST_OUT_STAGING)/bin):$(shell cygpath -u $(HOST_OUT_STAGING)/$(HOST_DEFAULT_BIN_DESTDIR)):$(PATH)
+else
+  _autotools_host_path := $(HOST_OUT_STAGING)/bin:$(HOST_OUT_STAGING)/$(HOST_DEFAULT_BIN_DESTDIR):$(PATH)
+endif
 
 # Update target compilation path (use host binaries)
 _autotools_target_path := $(_autotools_host_path)

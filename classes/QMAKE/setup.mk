@@ -7,7 +7,7 @@
 ###############################################################################
 
 # Update host compilation path
-_qmake_host_path := $(HOST_OUT_STAGING)/bin:$(HOST_OUT_STAGING)/$(HOST_DEFAULT_BIN_DESTDIR):$(PATH)
+_qmake_host_path := $(_autotools_host_path)
 
 # Update target compilation path (use host binaries)
 _qmake_target_path := $(_qmake_host_path)
