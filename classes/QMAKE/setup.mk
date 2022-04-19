@@ -194,7 +194,7 @@ define _qmake-def-cmd-configure
 	$(Q) cd $(PRIVATE_BUILD_DIR) \
 		&& $(TARGET_QMAKE_ENV) $(QMAKE) $(TARGET_QMAKE_ARG) \
 			$(PRIVATE_QMAKE_CONFIGURE_ARGS) \
-			-early QMAKE_CC=$(TARGET_CC) QMAKE_CXX=$(TARGET_CXX) \
+			$(if $(PRIVATE_HAS_QT_SYSROOT),$(empty),-early QMAKE_CC=$(TARGET_CC) QMAKE_CXX=$(TARGET_CXX)) \
 			$(if $(call is-path-absolute,$(PRIVATE_QMAKE_PRO_FILE)), \
 				$(PRIVATE_QMAKE_PRO_FILE) \
 				, \
