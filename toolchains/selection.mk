@@ -158,7 +158,7 @@ else
 endif
 
 ifeq ("$(TARGET_CC_FLAVOUR)","clang")
-  ifneq ("$(TARGET_LLVM)","")
+  ifneq ("$(and $(TARGET_LLVM),$(wildcard $(TARGET_LLVM)config))","")
     TARGET_CC_VERSION := $(shell $(TARGET_LLVM)config --version)
   else
     TARGET_CC_VERSION := $(shell $(TARGET_CC) --version | head -1 | \
