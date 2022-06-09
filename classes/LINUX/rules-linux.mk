@@ -72,6 +72,7 @@ LINUX_EXPORTED_HEADERS_OVER := \
 	include/linux/media-bus-format.h \
 	include/linux/videodev2.h \
 	include/linux/v4l2-common.h \
+	include/linux/v4l2-controls.h \
 	include/linux/v4l2-mediabus.h \
 	include/linux/v4l2-subdev.h \
 	include/linux/i2c-dev.h \
