@@ -164,6 +164,14 @@ escape-xml = $(subst ",&quot;,$(subst ',&apos;,$(subst >,&gt;,$(subst <,&lt;,$(s
 # interpreted. Mainly seen if a '\1' has to be written.
 escape-echo = $(subst ",\",$(subst $(dollar),\$(dollar),$(subst $(endl),\n,$(subst \,\\\\,$1))))
 
+# Build a comma-separated list of items, from a space-separated
+# list of items:   a b c d  -->  a, b, c, d
+make-comma-list = $(subst $(space),$(comma)$(space),$(strip $1))
+
+# Build a comma-separated list of single-quoted items, from a space-separated
+# list of unquoted items:   a b c d  -->  'a', 'b', 'c', 'd'
+make-sq-comma-list = $(call make-comma-list,$(patsubst %,'%',$(strip $1)))
+
 ###############################################################################
 ## Call a function(macro) for each variable in a variable list.
 ## A variable list is a list of ';' separated <var>=<value> pairs.
@@ -261,6 +269,7 @@ module-add = \
 	) \
 	$(if $(LOCAL_HOST_MODULE), \
 		$(if $(or $(call streq,$(LOCAL_MODULE_CLASS),AUTOTOOLS), \
+				$(call streq,$(LOCAL_MODULE_CLASS),MESON), \
 				$(call streq,$(LOCAL_MODULE_CLASS),CUSTOM), \
 				$(call streq,$(LOCAL_MODULE_CLASS),EXECUTABLE), \
 				$(call streq,$(LOCAL_MODULE_CLASS),STATIC_LIBRARY), \
@@ -268,7 +277,7 @@ module-add = \
 				$(call streq,$(LOCAL_MODULE_CLASS),META_PACKAGE), \
 				$(call streq,$(LOCAL_MODULE_CLASS),PYTHON_PACKAGE)), \
 			$(eval LOCAL_MODULE := host.$(LOCAL_MODULE)), \
-			$(error $(LOCAL_PATH): Only AUTOTOOLS/CUSTOM/EXECUTABLE/STATIC_LIBRARY/PREBUILT/META_PACKAGE/PYTHON_PACKAGE supported for host modules) \
+			$(error $(LOCAL_PATH): Only AUTOTOOLS/MESON/CUSTOM/EXECUTABLE/STATIC_LIBRARY/PREBUILT/META_PACKAGE/PYTHON_PACKAGE supported for host modules) \
 		) \
 	) \
 	$(eval __mod := $(LOCAL_MODULE)) \
@@ -383,13 +392,14 @@ is-module-list-registered = $(call not,$(strip $(foreach __lib,$1, \
 ###############################################################################
 ## Check if a module is built externally (by autotools or custom rules).
 ## $1 : module to check.
-## AUTOTOOLS/CMAKE/QMAKE/PYTHON_EXTENSION/GENERIC/CUSTOM/META_PACKAGE class or empty
+## AUTOTOOLS/MESON/CMAKE/QMAKE/PYTHON_EXTENSION/GENERIC/CUSTOM/META_PACKAGE class or empty
 ## class means external.
 ## TODO: Use _classes_external list instead
 ###############################################################################
 is-module-external = $(strip \
 	$(eval __class := $(__modules.$1.MODULE_CLASS)) \
 	$(or $(call streq,$(__class),AUTOTOOLS), \
+		$(call streq,$(__class),MESON), \
 		$(call streq,$(__class),CMAKE), \
 		$(call streq,$(__class),QMAKE), \
 		$(call streq,$(__class),PYTHON_EXTENSION), \

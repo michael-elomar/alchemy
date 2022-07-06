@@ -166,9 +166,10 @@ HOST_AUTOTOOLS_LDFLAGS := \
 
 # Setup pkg-config
 # Use packages from both HOST_OUT_STAGING and standard places
+HOST_PKG_CONFIG_PATH := $(HOST_OUT_STAGING)/lib/pkgconfig:$(HOST_OUT_STAGING)/$(HOST_DEFAULT_LIB_DESTDIR)/pkgconfig
 HOST_PKG_CONFIG_ENV := \
 	PKG_CONFIG="$(PKGCONFIG_BIN)" \
-	PKG_CONFIG_PATH="$(HOST_OUT_STAGING)/lib/pkgconfig:$(HOST_OUT_STAGING)/$(HOST_DEFAULT_LIB_DESTDIR)/pkgconfig" \
+	PKG_CONFIG_PATH="$(HOST_PKG_CONFIG_PATH)" \
 	PKG_CONFIG_SYSROOT_DIR=""
 
 # Environment to use when executing configure script
