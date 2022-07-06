@@ -99,9 +99,11 @@ else
   ifneq ("$(TARGET_USE_CLANG)","1")
     TARGET_CC ?= $(TARGET_CROSS)gcc
     TARGET_CXX ?= $(TARGET_CROSS)g++
+    TARGET_CPP ?= $(TARGET_CROSS)cpp
   else
     TARGET_CC ?= $(TARGET_CROSS)clang
     TARGET_CXX ?= $(TARGET_CROSS)clang++
+    TARGET_CPP ?= $(TARGET_CROSS)clang-cpp
   endif
   TARGET_AS ?= $(TARGET_CROSS)as
   TARGET_FC ?= $(TARGET_CROSS)gfortran
@@ -109,7 +111,6 @@ else
   TARGET_LD ?= $(TARGET_CROSS)ld
   TARGET_NM ?= $(TARGET_CROSS)nm
   TARGET_STRIP ?= $(TARGET_CROSS)strip
-  TARGET_CPP ?= $(TARGET_CROSS)cpp
   TARGET_RANLIB ?= $(TARGET_CROSS)ranlib
   TARGET_OBJCOPY ?= $(TARGET_CROSS)objcopy
   TARGET_OBJDUMP ?= $(TARGET_CROSS)objdump
