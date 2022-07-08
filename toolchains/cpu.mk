@@ -247,6 +247,12 @@ ifeq ("$(TARGET_CPU)", "cortex-m0")
   TARGET_FLOAT_ABI ?= soft
 endif
 
+ifeq ("$(TARGET_CPU)", "cortex-m0plus")
+  cpu_flags += -mcpu=cortex-m0plus
+  TARGET_DEFAULT_ARM_MODE ?= thumb
+  TARGET_FLOAT_ABI ?= soft
+endif
+
 ifeq ("$(TARGET_CPU)", "cortex-m3")
   cpu_flags += -mcpu=cortex-m3
   TARGET_DEFAULT_ARM_MODE ?= thumb
