@@ -241,7 +241,7 @@ define _meson-def-cmd-configure
 		$(MESON) \
 		$($(PRIVATE_MODE)_MESON_CONFIGURE_ARGS) $(PRIVATE_CONFIGURE_ARGS) \
 		$(_meson-get-conf-file-args) \
-		$(PRIVATE_OBJ_DIR) $(PRIVATE_PATH)
+		$(PRIVATE_OBJ_DIR) $(PRIVATE_SRC_DIR)
 endef
 
 # Parallel build issue: ninja and make will not share the number of parallel jobs
