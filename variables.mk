@@ -564,6 +564,9 @@ vars-TARGET += ANDROID_SHARED_STL
 vars-TARGET += ANDROID_TOOLCHAIN
 vars-TARGET += ANDROID_TOOLCHAIN_VERSION
 
+# iOS
+vars-TARGET += IPHONE_VERSION
+
 # This variable can be modified by some makefiles (os that needs to install
 # headers prior to start anything)
 #vars-TARGET += GLOBAL_PREREQUISITES
@@ -651,3 +654,6 @@ vars-TARGET_SETUP += ANDROID_STL
 vars-TARGET_SETUP += ANDROID_SHARED_STL
 vars-TARGET_SETUP += ANDROID_TOOLCHAIN
 vars-TARGET_SETUP += ANDROID_TOOLCHAIN_VERSION
+
+# iOS
+vars-TARGET_SETUP += IPHONE_VERSION
