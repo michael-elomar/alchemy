@@ -1875,6 +1875,52 @@ $(1):
 	$(Q)rm -f $$@ && ln -s $(2) $$@
 endef
 
+
+###############################################################################
+## Returns non-empty if $2 is enabled in the $1 sanitizer list.
+## List syntax is the following:
+##  - `1' enables everything, unless manually disabled
+##  - `module_name' enables the given module
+##  - `-module_name' forbids the given module
+##  - `module_name*' enables the given module and all of its dependencies,
+##	as long as module_name is enabled
+##  - `-module_name*' forbids the given module and all of its dependencies,
+##	as long as module_name is enabled
+## Forbidden module will take precedence over enabled ones
+##
+## $1 : sanitizer variable
+## $2 : module name
+###############################################################################
+is-sanitizer-enabled = $(strip \
+	$(eval __result = $(strip $(foreach __tst,$1, \
+		$(filter $(__tst),1) \
+		$(filter $(__tst),$2) \
+		$(if $(filter $(__tst),-$2),KO,) \
+		$(foreach __mod,$(__modules), \
+			$(if $(and $(filter $(__tst),$(__mod)*), \
+				$(or $(call is-module-in-make-goals,$(__mod)), \
+				$(call is-module-in-build-config,$(__mod)))), \
+			$(call __module-depends-on,$(__mod),$2),) \
+		) \
+		$(foreach __mod,$(__modules), \
+			$(if $(and $(filter $(__tst),-$(__mod)*), \
+				$(or $(call is-module-in-make-goals,$(__mod)), \
+				$(call is-module-in-build-config,$(__mod)))), \
+			$(if $(call __module-depends-on,$(__mod),$2),KO,)) \
+		) \
+	))) \
+	$(and $(__result),$(if $(filter $(__result),KO),,OK) \
+	))
+
+# Check if module $1 depends on (or is) $2, recursively
+# $1 : module tested
+# $2 : potential depended-on module
+__module-depends-on = $(strip \
+	$(or $(filter $1,$2), \
+	$(foreach __dep,$(__modules.$1.depends.all), \
+		$(filter $(__dep),$2) \
+	)))
+
 ###############################################################################
 ## Commands callable from user makefiles.
 ###############################################################################
