@@ -13,7 +13,7 @@ _meson_host_path := $(_autotools_host_path)
 _meson_target_path := $(_meson_host_path)
 
 ifndef MESON
-  MESON := $(shell which meson 2>/dev/null)
+  MESON := $(shell (which $(HOME)/.local/bin/meson || which meson) 2>/dev/null)
 endif
 
 ifndef NINJA
