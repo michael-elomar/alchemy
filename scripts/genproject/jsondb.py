@@ -10,7 +10,7 @@ CXX_EXTENSIONS = ['.cpp', '.cxx', '.cc',
 C_EXTENSIONS = ['.c', '.C']
 
 def _build_base_command_c(project):
-    base_command_c = ["cc -c"]
+    base_command_c = [project.get_target_var("CC"), "-c"]
     for include in project.includes:
         base_command_c.append("-I" + include)
     for autoconf_h_file in project.autoconf_h_files:
@@ -25,7 +25,7 @@ def _build_base_command_c(project):
     return base_command_c
 
 def _build_base_command_cxx(project):
-    base_command_cxx = ["c++ -c"]
+    base_command_cxx = [project.get_target_var("CXX"), "-c"]
     for include in project.includes:
         base_command_cxx.append("-I" + include)
     for autoconf_h_file in project.autoconf_h_files:
