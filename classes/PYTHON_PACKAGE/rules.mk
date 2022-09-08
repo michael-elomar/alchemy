@@ -44,10 +44,12 @@ ifneq ("$(_python-pkg-use-native-python)","")
 _python-pkg-build-args :=
 
 ifeq ("$(_mode_host)","")
-  _python-pkg-env := $(TARGET_AUTOTOOLS_CONFIGURE_ENV)
+  _python-pkg-env := $(TARGET_AUTOTOOLS_CONFIGURE_ENV) \
+     DEB_PYTHON_INSTALL_LAYOUT='deb'
   _python-pkg-install-args := --prefix="$(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)"
 else
-  _python-pkg-env := $(HOST_AUTOTOOLS_CONFIGURE_ENV)
+  _python-pkg-env := $(HOST_AUTOTOOLS_CONFIGURE_ENV) \
+     DEB_PYTHON_INSTALL_LAYOUT='deb'
   _python-pkg-install-args := --prefix="$(HOST_OUT_STAGING)/$(HOST_ROOT_DESTDIR)"
 endif
 
@@ -66,6 +68,7 @@ else ifeq ("$(_mode_host)","")
 _python-pkg-env := \
 	$(TARGET_AUTOTOOLS_CONFIGURE_ENV) \
 	PYTHONNOUSERSITE=1 \
+	DEB_PYTHON_INSTALL_LAYOUT='deb' \
 	_python_sysroot="$(TARGET_OUT_STAGING)" \
 	_python_prefix="/$(TARGET_ROOT_DESTDIR)" \
 	_python_exec_prefix="/$(TARGET_ROOT_DESTDIR)"
