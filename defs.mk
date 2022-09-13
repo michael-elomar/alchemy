@@ -92,7 +92,8 @@ strneq = $(call not,$(call streq,$1,$2))
 # Check that a version is at least the one given.
 # $1 : version.
 # $2 : minimum version.
-check-version = $(call strneq,0,$(shell printf "$1\n$2\n" | sort --version-sort --check=silent && printf "0"))
+check-version = $(call streq,ge,$(shell printf "$1\n$2\n" \
+	| sort --version-sort --reverse --check=silent && echo "ge"))
 
 # Make sure an item appears only once in a list, keeping only the first reference.
 # $1 : input list.
