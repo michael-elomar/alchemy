@@ -68,6 +68,7 @@ else ifeq ("$(_mode_host)","")
 _python-pkg-env := \
 	$(TARGET_AUTOTOOLS_CONFIGURE_ENV) \
 	PYTHONNOUSERSITE=1 \
+	SETUPTOOLS_USE_DISTUTILS=stdlib \
 	DEB_PYTHON_INSTALL_LAYOUT='deb' \
 	_python_sysroot="$(TARGET_OUT_STAGING)" \
 	_python_prefix="/$(TARGET_ROOT_DESTDIR)" \
@@ -93,7 +94,8 @@ else
 
 _python-pkg-env := \
 	$(HOST_AUTOTOOLS_CONFIGURE_ENV) \
-	PYTHONNOUSERSITE=1
+	PYTHONNOUSERSITE=1 \
+	SETUPTOOLS_USE_DISTUTILS=stdlib
 
 _python-pkg-build-args := \
 
