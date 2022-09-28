@@ -94,7 +94,7 @@ $(Q) $(CCACHE) $(PRIVATE_CXX) \
 	$($1_GLOBAL_PCHFLAGS) \
 	-MD -MP -MF $(call path-from-top,$(2:.gch=.d)) -MT $(call path-from-top,$2) \
 	-o $(call path-from-top,$2) \
-	$(call path-from-top,$3)
+	-c $(call path-from-top,$3)
 $(call fix-deps-file,$(2:.gch=.d))
 endef
 
