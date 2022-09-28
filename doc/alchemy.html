@@ -636,7 +636,7 @@ include $(BUILD_XXX)
 <p>See below for possible <code>BUILD_XXX</code> values</p>
 
 <p>During module definition, only <code>LOCAL_XXX</code> variables shall be modified (except
-<code>LOCAL_PATH</code> set at the beginning of the <code>atom.k</code> file). It is also possible to
+<code>LOCAL_PATH</code> set at the beginning of the <code>atom.mk</code> file). It is also possible to
 define module specific variables by prefixing them with the module name. However,
 their use shall be limited to the scope of the <code>atom.mk</code> file where they are
 defined. No reference to a variable declared by another <code>atom.mk</code> file shall
@@ -1456,7 +1456,7 @@ one from the <code>native</code> host)</p>
 <p>For <code>native</code> build it is possible to simplify things and skip the compilation of python.
 You can simply create symlinks in staging directory to the python executable to use.
 Or you can use virtual env to install a dedicated python environment in the staging directory.
-An example of such <code>atom.k</code> is available here <a href="python-native-atom.mk">python-native-atom.mk</a>.</p>
+An example of such <code>atom.mk</code> is available here <a href="python-native-atom.mk">python-native-atom.mk</a>.</p>
 
 <h4>Customization variables</h4>
 
