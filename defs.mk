@@ -1378,9 +1378,12 @@ normalize-c-includes-rel = $(strip \
 # the #include_next macro
 # FIXME : adding a space between -isystem an the patch causes troubles when invoking
 # clangs' cpp (preprocessor) under darwin at least.
+# $2 can be HOST or TARGET. if empty TARGET is assumed
 normalize-system-c-includes = $(strip \
-	$(if $(or $(call streq,$(TARGET_CC_VERSION),4.4.3), \
-			$(call streq,$(TARGET_OS_FLAVOUR),yocto)), \
+	$(if $(and $(call strneq,$2,HOST), \
+		$(or $(call streq,$(TARGET_CC_VERSION),4.4.3), \
+			$(call streq,$(TARGET_OS_FLAVOUR),yocto)) \
+		), \
 		$(call normalize-c-includes,$1), \
 		\
 		$(foreach __inc,$1, \
@@ -1394,9 +1397,12 @@ normalize-system-c-includes = $(strip \
 # the #include_next macro
 # FIXME : the extra space does not cause too much troubles for relative path it is
 # not used with the preprocessor (autotools only)
+# $2 can be HOST or TARGET. if empty TARGET is assumed
 normalize-system-c-includes-rel = $(strip \
-	$(if $(or $(call streq,$(TARGET_CC_VERSION),4.4.3), \
-			$(call streq,$(TARGET_OS_FLAVOUR),yocto)), \
+	$(if $(and $(call strneq,$2,HOST), \
+		$(or $(call streq,$(TARGET_CC_VERSION),4.4.3), \
+			$(call streq,$(TARGET_OS_FLAVOUR),yocto))) \
+		, \
 		$(call normalize-c-includes-rel,$1), \
 		\
 		$(foreach __inc,$1, \
