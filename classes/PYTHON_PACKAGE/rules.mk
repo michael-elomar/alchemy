@@ -124,6 +124,14 @@ ifneq ("$(strip $(_external_add_LDFLAGS))","")
   _python-pkg-env += LDFLAGS="$$LDFLAGS $(_external_add_LDFLAGS)"
 endif
 
+# Remove -Wl,--unresolved-symbols=ignore-in-shared-libs from LDFLAGS found in env
+# Under linux, python extensions .so do not link anymore with -lpython as they
+# assume all symbols will be found in the main executable
+# The flag may be included in TARGET_GLOBAL_LDFLAGS in some configuration, so
+# remove them here
+_python-pkg-remove-ldflags := -Wl,--unresolved-symbols=ignore-in-shared-libs
+_python-pkg-env := $(filter-out $(_python-pkg-remove-ldflags),$(_python-pkg-env))
+
 include $(BUILD_SYSTEM)/classes/GENERIC/rules.mk
 
 # Build in a custom directory
