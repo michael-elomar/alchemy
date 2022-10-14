@@ -1480,7 +1480,11 @@ conditional-libraries-setup = \
 				$(eval __modules.$1.LIBRARIES += $(__w2)) \
 				, \
 				$(if $(and $(call is-module-host,$(__w2)),$(call is-module-registered,$(__w2))), \
-					$(eval __modules.$1.LIBRARIES += $(__w2)) \
+					$(if $(call is-module-host,$1), \
+						$(eval __modules.$1.LIBRARIES += $(__w2)) \
+						, \
+						$(eval __modules.$1.DEPENDS_HOST_MODULES += $(__w2)) \
+					) \
 				) \
 			) \
 			, \
