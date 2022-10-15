@@ -21,6 +21,7 @@ LOCAL_PATH := $(call my-dir)
 # $2: include directories to create symlink
 # $3: lib names to create symlink
 # $4: lib name to add in -Wl option
+# $5: extra dependencies
 define register-native-chroot-module
 
 include $(CLEAR_VARS)
@@ -40,6 +41,7 @@ endef
 
 LOCAL_EXPORT_C_INCLUDES := $$(call local-get-build-dir)/include
 LOCAL_EXPORT_LDLIBS := -Wl,--unresolved-symbols=ignore-in-shared-libs,-L$$(call local-get-build-dir)/lib,$(subst $(space),$(comma),$(strip $4))
+LOCAL_LIBRARIES := $5
 
 $$(call local-register-prebuilt-overridable)
 
@@ -47,27 +49,32 @@ endef
 
 $(eval $(call register-native-chroot-module, \
 	opengl, \
-	/usr/include/GL /usr/include/KHR,\
-	/usr/lib/$(TARGET_TOOLCHAIN_TRIPLET)/libGL.so,\
-	-lGL))
+	/usr/include/GL /usr/include/KHR, \
+	/usr/lib/$(TARGET_TOOLCHAIN_TRIPLET)/libGL.so, \
+	-lGL,\
+	$(empty)))
 
 $(eval $(call register-native-chroot-module, \
 	opengles,\
-	/usr/include/GLES2 /usr/include/GLES3,\
-	/usr/lib/$(TARGET_TOOLCHAIN_TRIPLET)/libGLESv2.so,\
-	-lGLESv2))
+	/usr/include/GLES2 /usr/include/GLES3, \
+	/usr/lib/$(TARGET_TOOLCHAIN_TRIPLET)/libGLESv2.so, \
+	-lGLESv2, \
+	opengl))
 
 $(eval $(call register-native-chroot-module, \
 	egl, \
-	/usr/include/EGL,\
-	/usr/lib/$(TARGET_TOOLCHAIN_TRIPLET)/libEGL.so,\
-	-lEGL))
+	/usr/include/EGL, \
+	/usr/lib/$(TARGET_TOOLCHAIN_TRIPLET)/libEGL.so, \
+	-lEGL, \
+	opengl))
+
 
 $(eval $(call register-native-chroot-module, \
 	x11, \
 	/usr/include/X11, \
 	/usr/lib/$(TARGET_TOOLCHAIN_TRIPLET)/libX11.so, \
-	-lX11))
+	-lX11 \
+	$(empty)))
 
 # Declare linux module if we have headers
 ifneq ("$(wildcard /lib/modules/$(TARGET_LINUX_RELEASE)/build)","")
