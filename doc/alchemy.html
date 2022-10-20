@@ -1662,6 +1662,11 @@ dependencies markes as <code>PUBLIC</code>.</p>
 in particular the same version of the compiler. Variable <code>TARGET_SDK_ALLOW_OLDER_CC</code>
 and/or <code>TARGET_SDK_ALLOW_NEWER_CC</code> can be set to <code>1</code> to extend the compatibility.</p>
 
+<p>Also, the <code>setup.mk</code> in generated sdk will contain the value of <code>TARGET_CROSS</code>.
+If the sdk is allowed to be used in other environment, vthe variable
+<code>TARGET_SDK_OPTIONAL_CROSS</code> can be set to 1 to check for existence silently
+and fallback on local toolchain in <code>PATH</code>.</p>
+
 <h2>Codecheck for C false positives or intentional deviations</h2>
 
 <p>You can ignore specific C codecheck warnings in a C source code file by inserting
