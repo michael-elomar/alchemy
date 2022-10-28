@@ -5,14 +5,14 @@ check_version ()
     printf "$1\n$2\n" | sort --reverse --version-sort --check=silent && printf "1"
 }
 
-lookup_10_or_higher ()
+lookup_11_or_higher ()
 {
     # Find oldest clang-format available, but matching minimum requirement
     OLD_IFS=$IFS
     IFS=":"
 
     find ${PATH} -name 'clang-format-*' 2>/dev/null | grep -oE '[0-9]+(\.[0-9]+)*)?$' | sort -V | uniq | while read v ; do
-        if [ "$(check_version $v 10)" = "1" ] ; then
+        if [ "$(check_version $v 11)" = "1" ] ; then
             echo "clang-format-$v"
             break
         fi
@@ -26,7 +26,7 @@ lookup_default ()
     basename "$(which clang-format)"
 }
 
-CLANG_FORMAT=$(lookup_10_or_higher)
+CLANG_FORMAT=$(lookup_11_or_higher)
 
 if test "x$CLANG_FORMAT" = "x"; then
     CLANG_FORMAT=$(lookup_default)
