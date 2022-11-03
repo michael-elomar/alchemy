@@ -213,6 +213,7 @@ endif
 # Makefile with the list of all makefiles available and include them
 USER_MAKEFILES_CACHE := $(TARGET_OUT_BUILD)/makefiles.mk
 USER_MAKEFILES :=
+internal-is-builtin := 0
 
 # Command to find files
 find-cmd := $(BUILD_SYSTEM)/scripts/findfiles.py \

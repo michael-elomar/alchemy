@@ -450,6 +450,10 @@ def processModule(ctx, module, headersOnly=False, publicOnly=False):
     if module.fields.get("SDK", ""):
         return
 
+    # Skip builtin modules (but keep libc)
+    if module.fields.get("BUILTIN", "") == "1" and module.name != "libc":
+        return
+
     isHostModule = module.name.startswith("host.")
 
     logging.info("Processing module %s", module.name)

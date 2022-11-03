@@ -308,6 +308,7 @@ module-add = \
 		) \
 	) \
 	$(if $(call streq,$(__add),1), \
+		$(if $(call streq,$(internal-is-builtin),1),$(eval LOCAL_BUILTIN := 1)) \
 		$(if $(LOCAL_EXPORT_CUSTOM_VARIABLES), \
 			$(eval LOCAL_EXPORT_CUSTOM_VARIABLES := $(LOCAL_EXPORT_CUSTOM_VARIABLES);)\
 		) \
