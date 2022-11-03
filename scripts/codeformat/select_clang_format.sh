@@ -1,35 +1,16 @@
 #!/bin/bash
 
-check_version ()
-{
-    printf "$1\n$2\n" | sort --reverse --version-sort --check=silent && printf "1"
-}
+# Selected clang-format version can be forced by setting the
+# ALCHEMY_CLANG_FORMAT_VERSION variable in the environment
 
-lookup_11_or_higher ()
-{
-    # Find oldest clang-format available, but matching minimum requirement
-    OLD_IFS=$IFS
-    IFS=":"
+if [ -z "${ALCHEMY_CLANG_FORMAT_VERSION}" ]; then
+    ALCHEMY_CLANG_FORMAT_VERSION=11
+fi
 
-    find ${PATH} -name 'clang-format-*' 2>/dev/null | grep -oE '[0-9]+(\.[0-9]+)*)?$' | sort -V | uniq | while read v ; do
-        if [ "$(check_version $v 11)" = "1" ] ; then
-            echo "clang-format-$v"
-            break
-        fi
-    done
+CLANG_FORMAT=$(basename "$(which clang-format-${ALCHEMY_CLANG_FORMAT_VERSION})")
 
-    IFS=$OLD_IFS
-}
-
-lookup_default ()
-{
-    basename "$(which clang-format)"
-}
-
-CLANG_FORMAT=$(lookup_11_or_higher)
-
-if test "x$CLANG_FORMAT" = "x"; then
-    CLANG_FORMAT=$(lookup_default)
+if [ -z "${CLANG_FORMAT}" ]; then
+    >&2 echo "Unable to find clang-format version ${ALCHEMY_CLANG_FORMAT_VERSION}"
 fi
 
 echo $CLANG_FORMAT
