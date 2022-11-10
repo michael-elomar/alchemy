@@ -37,7 +37,8 @@ EXCLUDE_DIRS = {
         "include", "vapi",
         "man", "doc", "info",
         "pkgconfig", "cmake",
-        "aclocal", "locale"
+        "aclocal", "locale",
+        "gtk-doc",
     ],
     MODE_FULL: EXCLUDE_DIRS_ALWAYS
 }
