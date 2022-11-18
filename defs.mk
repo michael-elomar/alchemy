@@ -1792,7 +1792,7 @@ $(eval __depsdata := $(strip \
 		$(__lib):$(call module-get-revision,$(__lib)) \
 	)))
 @( \
-	__tmpfile=$$(mktemp tmp.XXXXXXXXXX); \
+	__tmpfile=$$(mktemp -t tmp.XXXXXXXXXX); \
 	echo -e "$(call escape-echo,$(subst $(space),$(endl),$(__depsdata)))" > $${__tmpfile}; \
 	$(PRIVATE_OBJCOPY) --add-section \
 		$(TARGET_DEPENDS_SECTION_NAME)=$${__tmpfile} $@; \

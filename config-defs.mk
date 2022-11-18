@@ -170,7 +170,7 @@ __call-confwrapper-args = \
 
 # With a temp file holding the (potentially) long arguments
 __call-confwrapper-file = \
-	$(eval __tmpfile := $(shell mktemp alchemy.tmp.XXXXXXXXXX)) \
+	$(eval __tmpfile := $(shell mktemp -t alchemy.tmp.XXXXXXXXXX)) \
 	$(file >$(__tmpfile),$(call __generate-config-args)) \
 	@( \
 		function cleanup { rm -f $(__tmpfile); }; \
