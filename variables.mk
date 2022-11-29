@@ -269,6 +269,7 @@ vars-LOCAL += EXPORT_LDLIBS
 vars-LOCAL += EXPORT_LDFLAGS
 vars-LOCAL += EXPORT_PREREQUISITES
 vars-LOCAL += EXPORT_CUSTOM_VARIABLES
+vars-LOCAL += EXPORT_FILES
 
 # Inform that some exported variables need to be expanded in this module variables
 vars-LOCAL += EXPAND_CUSTOM_VARIABLES
@@ -289,6 +290,18 @@ vars-LOCAL += MODULE_CLASS
 # dst : destination, relative to staging dir or absolute path, ends with '/'
 #       to use same basename as <src>
 vars-LOCAL += COPY_FILES
+
+# List of files to copy from another module
+# Format <module>:<src_dir>:<dst_dir>:<file_pattern>
+# module : source module to copy files from. Only files explicitly exported with
+#          LOCAL_EXPORT_FILES or implicitly exported with LOCAL_COPY_FILES and
+#          LOCAL_INSTALL_HEADERS are considered.
+# src_dir : source directory, relative to module path or absolute path
+# dst_dir : destination directory, relative to staging dir or absolute path
+# file_pattern : file pattern as accepted by make `patsusbst` text function, files
+# matching this pattern in the source directory are copied to the destination
+# directory.
+vars-LOCAL += COPY_FROM
 
 # List of directories to copy
 # Format <src>:<dst>

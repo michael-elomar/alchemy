@@ -604,7 +604,7 @@ endif
 _module_all_copy_files_src :=
 _module_all_copy_files_dst :=
 
-ifneq ("$(strip $(LOCAL_COPY_FILES) $(LOCAL_COPY_DIRS))","")
+ifneq ("$(strip $(LOCAL_COPY_FILES))","")
 
 # Generate a rule to copy all files
 # Handle relative/absolute paths
@@ -622,6 +622,10 @@ $(foreach __pair,$(LOCAL_COPY_FILES), \
 	$(eval $(call copy-one-file,$(__src),$(__dst))) \
 )
 
+endif
+
+ifneq ("$(strip $(LOCAL_COPY_DIRS))","")
+
 $(foreach __pair,$(LOCAL_COPY_DIRS), \
 	$(eval __w1 := $(firstword $(subst :,$(space),$(__pair)))) \
 	$(eval __w2 := $(patsubst $(__w1):%,%,$(__pair))) \
@@ -636,12 +640,41 @@ $(foreach __pair,$(LOCAL_COPY_DIRS), \
 		$(eval _module_all_copy_files_src += $(__src2)) \
 		$(eval _module_all_copy_files_dst += $(__dst2)) \
 		$(eval $(call copy-one-file,$(__src2),$(__dst2))) \
+		$(eval __modules.$(LOCAL_MODULE).EXPORT_FILES += $(__dst2)) \
 	) \
 )
+endif
+
+ifneq ("$(strip $(LOCAL_COPY_FROM))","")
+__do_copy_from = \
+	$(eval $(call copy-one-file,$(1),$(2)))
+
+# Generate a rule to copy all files
+$(foreach __r0,$(LOCAL_COPY_FROM), \
+	$(eval __src_mod := $(firstword $(subst :,$(space),$($(strip __r0))))) \
+	$(eval __r1  := $(strip $(patsubst $(__src_mod):%,%,$(__r0)))) \
+	$(eval __src_dir := $(firstword $(subst :,$(space),$(__r1)))) \
+	$(eval __r2  := $(strip $(patsubst $(__src_dir):%,%,$(__r1)))) \
+	$(eval __dst_dir := $(firstword $(subst :,$(space),$(__r2)))) \
+	$(eval __r3  := $(strip $(patsubst $(__dst_dir):%,%,$(__r2)))) \
+	$(eval __src_pattern := $(firstword $(subst :,$(space),$(__r3)))) \
+	$(eval __src_files := $(filter $(__src_pattern),$(call module-get-export,$(__src_mod),FILES))) \
+	$(eval __dst_files := $(foreach __src_file,$(__src_files),$(patsubst $(__src_dir)/%,$(__dst_dir)/%,$(__src_file)))) \
+	$(call pairmap,__do_copy_from,$(__src_files),$(__dst_files)) \
+	$(foreach __src,$(__src_files), \
+		$(eval _module_all_copy_files_src += $(__src)) \
+	) \
+	$(foreach __dst,$(__dst_files), \
+		$(eval __modules.$(LOCAL_MODULE).EXPORT_FILES += $(__dst)) \
+		$(eval _module_all_copy_files_dst += $(__dst)) \
+	) \
+)
+endif
 
 
+ifneq ("$(strip $(LOCAL_COPY_FILES) $(LOCAL_COPY_DIRS) $(LOCAL_COPY_FROM) $(LOCAL_INSTALL_HEADERS))","")
 # Add an order-only dependency between sources and prerequisites
-# Also make sure bootstrap si done
+# Also make sure bootstrap is done
 _module_all_copy_files_prerequisites := \
 	$(filter-out $(_module_all_copy_files_src) $(_module_all_copy_files_dst),$(all_prerequisites)) \
 	$(_module_bootstrapped_stamp_file)

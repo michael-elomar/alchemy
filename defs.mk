@@ -116,6 +116,14 @@ uniq2 = \
 		$(if $(filter $(__f),$(__r)),,$(__f)) \
 	)
 
+## Call a function(macro) for each pair of items from two lists. If one of the list
+## is shorter than the other the remaining items from the later are not consumed.
+## $1 : function(macro) to call for each pair of items
+## $2 : first input list
+## $3 : second input list
+pairmap = $(and $(strip $2),$(strip $3),$(call $1,$(firstword $2),$(firstword $3)) \
+  $(call pairmap,$1,$(call rest,$2),$(call rest,$3)))
+
 # Determine if a variable has been defined
 # $1 : name of the variable (not its content)
 is-var-defined = $(call strneq,$(origin $1),undefined)
@@ -360,6 +368,7 @@ module-add = \
 			) \
 		) \
 		$(call install-headers-setup,$(LOCAL_MODULE)) \
+		$(call copy-files-export,$(LOCAL_MODULE)) \
 	) \
 	$(eval __var := GLOBAL_PREREQUISITES) \
 	$(if $(call macro-compare,TARGET_$(__var),saved-TARGET_$(__var)),$(empty), \
@@ -1456,7 +1465,8 @@ copy-get-dst-path-host = $(strip \
 	))
 
 ###############################################################################
-## Setup installed headers in LOCAL_COPY_FILES and LOCAL_EXPORT_PREREQUISITES.
+## Setup installed headers in LOCAL_COPY_FILES, LOCAL_EXPORT_PREREQUISITES and
+## LOCAL_EXPORT_FILES
 ## $1 : module name.
 ###############################################################################
 install-headers-setup = \
@@ -1479,8 +1489,45 @@ install-headers-setup = \
 			$(eval __dst := $(__dst)$(notdir $(__src))) \
 		) \
 		$(eval __modules.$1.COPY_FILES += $(__w1):$(__w2)) \
+		$(eval __modules.$1.EXPORT_FILES += $(__dst)) \
 		$(eval __modules.$1.EXPORT_PREREQUISITES += $(__dst)) \
 	)
+
+
+###############################################################################
+## Export destination of LOCAL_COPY_FILES and LOCAL_COPY_DIRS into
+## LOCAL_EXPORT_FILES
+## $1 : module name.
+###############################################################################
+copy-files-export = \
+	$(if $(call is-module-host, $1), \
+		$(eval _mode_suffix := -host), \
+		$(eval _mode_suffix := $(empty)) \
+	) \
+	$(foreach __pair,$(__modules.$1.COPY_FILES), \
+		$(eval __w1 := $(firstword $(subst :,$(space),$(__pair)))) \
+		$(eval __w2 := $(patsubst $(__w1):%,%,$(__pair))) \
+		$(eval __src := $(call copy-get-src-path,$(__w1))) \
+		$(eval __dst := $(call copy-get-dst-path$(_mode_suffix),$(__w2))) \
+		$(if $(call is-path-dir,$(__dst)), \
+			$(eval __dst := $(__dst)$(notdir $(__src))) \
+		) \
+		$(eval __modules.$1.EXPORT_FILES += $(__dst)) \
+	) \
+	$(foreach __pair,$(__modules.$1.COPY_DIRS), \
+		$(eval __w1 := $(firstword $(subst :,$(space),$(__pair)))) \
+		$(eval __w2 := $(patsubst $(__w1):%,%,$(__pair))) \
+		$(eval __src := $(call copy-get-src-path,$(__w1))) \
+		$(eval __dst := $(call copy-get-dst-path$(_mode_suffix),$(__w2))) \
+		$(eval __files := $(patsubst ./%,%, \
+			$(shell cd $(__src); find -type f -o -type l) \
+		)) \
+		$(foreach __f,$(__files), \
+			$(eval __dst2 := $(__dst)/$(__f)) \
+			$(eval __modules.$1.EXPORT_FILES += $(__dst2)) \
+		) \
+	)
+
 
 ###############################################################################
 ## Setup conditional libraries. It looks for pairs <var>:<lib> in

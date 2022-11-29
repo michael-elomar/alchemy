@@ -825,6 +825,28 @@ prepended for `dst`.
 Internally it simply lists the content of the source directory and copy each file
 as if it was given in `LOCAL_COPY_FILES`
 
+#### `LOCAL_EXPORT_FILES`
+
+List of files installed in the staging directory. Dependent modules can copy those
+files to an other staging directory location using `LOCAL_COPY_FROM`. Alternatively,
+dependent modules can access this list using
+`$(call module-get-export,protobuf-base,FILES)` from a macro (ex:
+`LOCAL_CMD_POST_INSTALL`, a custom macro, ...).
+
+#### `LOCAL_COPY_FROM`
+
+List of files to copy from another module. Files are specified like this:
+module:src_dir:dst_dir:file_pattern
+
+* `module` is the source module to copy files from. Only files explicitly exported with
+          LOCAL_EXPORT_FILES or implicitly exported with LOCAL_COPY_FILES and
+          LOCAL_INSTALL_HEADERS are considered.
+* `src_dir` is the  source directory, relative to module path or absolute path
+* `dst_dir` is the destination directory, relative to staging dir or absolute path
+* `file_pattern` is a file pattern as accepted by make `patsusbst` text function,
+files matching this pattern in the source directory are copied to the destination
+directory.
+
 #### `LOCAL_CREATE_LINKS`
 
 List of symbolic links to be created in the staging directory. Format is
