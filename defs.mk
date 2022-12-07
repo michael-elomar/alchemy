@@ -1383,6 +1383,7 @@ normalize-c-includes-rel = $(strip \
 normalize-system-c-includes = $(strip \
 	$(if $(and $(call strneq,$2,HOST), \
 		$(or $(call streq,$(TARGET_CC_VERSION),4.4.3), \
+			$(call streq,$(TARGET_CC_VERSION),4.9.3), \
 			$(call streq,$(TARGET_OS_FLAVOUR),yocto)) \
 		), \
 		$(call normalize-c-includes,$1), \
@@ -1402,8 +1403,9 @@ normalize-system-c-includes = $(strip \
 normalize-system-c-includes-rel = $(strip \
 	$(if $(and $(call strneq,$2,HOST), \
 		$(or $(call streq,$(TARGET_CC_VERSION),4.4.3), \
-			$(call streq,$(TARGET_OS_FLAVOUR),yocto))) \
-		, \
+			$(call streq,$(TARGET_CC_VERSION),4.9.3), \
+			$(call streq,$(TARGET_OS_FLAVOUR),yocto)) \
+		), \
 		$(call normalize-c-includes-rel,$1), \
 		\
 		$(foreach __inc,$1, \
