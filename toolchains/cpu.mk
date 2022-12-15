@@ -152,6 +152,7 @@ ifeq ("$(TARGET_CPU)","rcarm3n")
     TARGET_FLOAT_ABI ?= hard
   endif
 endif
+
 ###############################################################################
 # Qualcomm cpus.
 ###############################################################################
@@ -231,6 +232,11 @@ ifeq ("$(TARGET_CPU)","armv7a-neon")
   TARGET_CPU_ARMV7A_NEON := 1
   TARGET_CPU_HAS_NEON := 1
   TARGET_FLOAT_ABI ?= softfp
+endif
+
+# aarch64 has neon support, unless specifically set to the contrary
+ifeq ("$(TARGET_ARCH)","aarch64")
+  TARGET_CPU_HAS_NEON ?= 1
 endif
 
 ###############################################################################
