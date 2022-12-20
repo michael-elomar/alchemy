@@ -279,7 +279,6 @@ endif
 _target_pkg_config_dirs :=
 $(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
 	$(foreach __dir2,$(_target_pkg_config_subdirs), \
-		$(info _target_pkg_config_dirs += $(__dir)/$(__dir2)) \
 		$(eval _target_pkg_config_dirs += $(__dir)/$(__dir2)) \
 	) \
 )
