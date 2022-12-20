@@ -43,15 +43,26 @@ def _parse_flags(cflags, flags_list):
     return flags
 
 
+def _create_props(props):
+    data = {
+        "configurations": [{"name": "Linux", "intelliSenseMode": "${default}"}],
+        "version": 4
+    }
+    logging.warning('Creating file {}'.format(props))
+    os.makedirs(os.path.dirname(props), exist_ok=True)
+    try:
+        with open(props, 'w') as f:
+            json.dump(data, f, indent='\t')
+    except EnvironmentError as e:
+        logging.error('Failed to create file {}: {}'.format(props, e))
+        sys.exit(1)
+
+
 def _update_props(project, includes, defines):
     props = os.path.join(project.workspace_dir, '.vscode',
                          'c_cpp_properties.json')
     if not os.path.exists(props):
-        logging.error(
-            'file {} must exist. '.format(props) +
-            'Launch VSCode, install C/C++ extension, and run the '
-            '"C/C++: Edit Configurations (JSON)" task')
-        sys.exit(1)
+        _create_props(props)
 
     compiler = project.get_target_var('CC')
     if not os.path.isabs(compiler):
@@ -71,7 +82,11 @@ def _update_props(project, includes, defines):
     defs = [d for d in defs if len(d) > 0 and not d[0].isdigit()]
 
     with open(props, 'r') as f:
-        data = json.load(f)
+        try:
+            data = json.load(f)
+        except json.JSONDecodeError as e:
+            logging.error('Failed to parse {}: {}. You can try deleting this file.'.format(props, e))
+            sys.exit(1)
         configs = data['configurations']
         for c in configs:
             c['includePath'] = sorted(incs)
@@ -105,7 +120,12 @@ def _gen_tasks(project, build_args, modules):
     ncores = multiprocessing.cpu_count()
     ncores = max(ncores - 2, 1)
     tasks_path = os.path.join(project.workspace_dir, '.vscode', 'tasks.json')
-    with open(tasks_path, 'w') as f:
+    try:
+        f = open(tasks_path, 'w')
+    except EnvironmentError as e:
+        logging.error('Failed to create file {}: {}'.format(tasks_path, e))
+        sys.exit(1)
+    with f:
         data = {}
         data['version'] = '2.0.0'
         tasks = list()
