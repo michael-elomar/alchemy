@@ -59,7 +59,7 @@ def _create_props(props):
 
 
 def _update_props(project, includes, defines):
-    props = os.path.join(project.workspace_dir, '.vscode',
+    props = os.path.join(project.outdirpath, '.vscode',
                          'c_cpp_properties.json')
     if not os.path.exists(props):
         _create_props(props)
@@ -119,7 +119,7 @@ def _gen_tasks(project, build_args, modules):
     args = ' '.join(build_args.split(' ')[:-1])  # remove trailing -A
     ncores = multiprocessing.cpu_count()
     ncores = max(ncores - 2, 1)
-    tasks_path = os.path.join(project.workspace_dir, '.vscode', 'tasks.json')
+    tasks_path = os.path.join(project.outdirpath, '.vscode', 'tasks.json')
     try:
         f = open(tasks_path, 'w')
     except EnvironmentError as e:
