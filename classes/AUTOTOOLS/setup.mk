@@ -266,7 +266,7 @@ TARGET_AUTOTOOLS_LDFLAGS := \
 	$(TARGET_GLOBAL_LDFLAGS) \
 	$(TARGET_GLOBAL_LDLIBS)
 
-_target_pkg_config_dirs := \
+_target_pkg_config_subdirs := \
 	lib/$(TARGET_TOOLCHAIN_TRIPLET)/pkgconfig \
 	lib/pkgconfig \
 	$(TARGET_DEFAULT_LIB_DESTDIR)/$(TARGET_TOOLCHAIN_TRIPLET)/pkgconfig \
@@ -278,13 +278,14 @@ endif
 
 _target_pkg_config_dirs :=
 $(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
-	$(foreach __dir2,$(_target_pkg_config_dirs), \
+	$(foreach __dir2,$(_target_pkg_config_subdirs), \
+		$(info _target_pkg_config_dirs += $(__dir)/$(__dir2)) \
 		$(eval _target_pkg_config_dirs += $(__dir)/$(__dir2)) \
 	) \
 )
 TARGET_PKG_CONFIG_PATH := $(call make-path-list, \
 	$(call split-path-list,$(TARGET_PKG_CONFIG_PATH)) \
-	_target_pkg_config_dirs \
+	$(_target_pkg_config_dirs) \
 )
 
 # Setup pkg-config
