@@ -14,14 +14,12 @@ rwildcard = $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subs
 # Original data before import
 _module_src_files := $(addprefix $(LOCAL_PATH)/,$(__modules.$(LOCAL_MODULE).SRC_FILES))
 _module_c_includes := $(__modules.$(LOCAL_MODULE).C_INCLUDES)
+_module_c_includes += $(LOCAL_PATH)
 _module_exported_includes := $(__modules.$(LOCAL_MODULE).EXPORT_C_INCLUDES)
 
 # Search for include files in directories with source files
 _module_c_includes += $(sort $(foreach __src,$(_module_src_files),$(dir $(__src))))
-
-# Exclude directories not under LOCAL_PATH
-_module_c_includes := $(sort $(LOCAL_PATH) $(filter $(LOCAL_PATH)/%,$(_module_c_includes)))
-_module_exported_includes := $(sort $(filter $(LOCAL_PATH)/%,$(_module_exported_includes)))
+_module_c_includes := $(sort $(abspath $(_module_c_includes)))
 
 # Codecheck for asm files
 _codecheck_as_files := $(filter %.s,$(_module_src_files))
