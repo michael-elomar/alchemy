@@ -556,29 +556,17 @@ _external_add_LDFLAGS += $(LOCAL_LDFLAGS) $(LOCAL_LDLIBS)
 ## Copy to build dir.
 ###############################################################################
 
-_module_copy_to_build_dir_src_files :=
-_module_copy_to_build_dir_dst_dir := $(_module_build_dir)
-_module_copy_to_build_dir_dst_files :=
-
 ifeq ("$(LOCAL_COPY_TO_BUILD_DIR)","1")
 
-# All files under LOCAL_PATH
-_module_copy_to_build_dir_src_files := $(shell find $(LOCAL_PATH) \
-	-name '.git' -prune -o \
-	-name '$(USER_MAKEFILE_NAME)' -prune -o \
-	$(foreach __f,$(addprefix $(LOCAL_PATH)/,$(LOCAL_COPY_TO_BUILD_DIR_SKIP_FILES)),-path $(__f) -prune -o) \
-	-not -type d -print)
+_module_copy_to_build_dir_rsync_filter := \
+	--exclude=.git \
+	$(foreach __f,$(addprefix $(PRIVATE_PATH)/,$(LOCAL_COPY_TO_BUILD_DIR_SKIP_FILES)),--exclude $(__f))
 
-# Where they wil be copied
-_module_copy_to_build_dir_dst_files := $(patsubst $(LOCAL_PATH)/%,$(_module_copy_to_build_dir_dst_dir)/%, \
-	$(_module_copy_to_build_dir_src_files))
+$(LOCAL_MODULE).copy-to-build-dir: PRIVATE_RSYNC_FILTER := $(_module_copy_to_build_dir_rsync_filter)
+$(LOCAL_MODULE).copy-to-build-dir: .FORCE
+	$(Q) rsync -a $(PRIVATE_RSYNC_FILTER) $(PRIVATE_PATH)/ $(PRIVATE_BUILD_DIR)/
 
-# Add rule to copy them
-$(foreach __f,$(_module_copy_to_build_dir_src_files), \
-	$(eval $(call copy-one-file,$(__f),$(patsubst $(LOCAL_PATH)/%,$(_module_copy_to_build_dir_dst_dir)/%,$(__f)))) \
-)
-
-all_prerequisites += $(_module_copy_to_build_dir_dst_files)
+all_prerequisites += $(LOCAL_MODULE).copy-to-build-dir
 
 endif
 
