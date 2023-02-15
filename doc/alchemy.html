@@ -451,9 +451,11 @@ execution.
 <li><code>TARGET_LINUX_RELEASE</code> : linux kernel release to build kernel modules against it.
 This variable can be used only if building for <code>native</code> target.
 </br>Default is <code>$(shell uname -r)</code>.</li>
-<li><p><code>TARGET_NO_UNDEFINED</code> : Enable check of undefined symbols for dynamic libraries,
+<li><code>TARGET_NO_UNDEFINED</code> : Enable check of undefined symbols for dynamic libraries,
 which triggers error at dynamic libraries build.
-</br>Default is <code>1</code>.</p></li>
+</br>Default is <code>1</code>.</li>
+<li><p><code>TARGET_LIBC_COPY_DBG_FILES</code> : manage copy of libc debug files in final tree
+</br>Default is <code>1</code> for embedded eglibc, <code>0</code> for native-chroot build.</p></li>
 <li><p><code>USE_CLANG</code> <code>TARGET_USE_CLANG</code>: Use clang instead of gcc for compilation.
 </br>Default is <code>0</code>.</p></li>
 <li><code>USE_CCACHE</code> : Use ccache to speed up compilation.

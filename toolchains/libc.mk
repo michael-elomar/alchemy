@@ -76,10 +76,6 @@ endif
 _libc_usrlib_dir := $(_libc_sysroot)/usr/lib
 _libc_usrlib_arch_dir := $(_libc_sysroot)/usr/lib/$(_libc_arch_subdir)
 
-# 'usr/lib/debug/lib' directory
-_libc_lib_dbg_dir := $(_libc_sysroot)/usr/lib/debug/lib
-_libc_lib_dbg_arch_dir := $(_libc_sysroot)/usr/lib/debug/lib/$(_libc_arch_subdir)
-
 # List of files to be put in /lib and /lib/<arch>
 _libc_lib_files :=
 _libc_lib_arch_files :=
@@ -116,10 +112,14 @@ $(foreach __f,$(_libc_usrlib_names), \
 )
 
 # debug directories
+ifneq ("$(TARGET_LIBC_COPY_DBG_FILES)","0")
 _libc_dbg_dirs := \
 	$(wildcard $(_libc_sysroot)/usr/lib/debug/.build-id) \
 	$(wildcard $(_libc_sysroot)/lib/.debug) \
 	$(wildcard $(_libc_sysroot)/usr/lib/.debug)
+else
+_libc_dbg_dirs :=
+endif
 
 # Some toolchains (like Linaro Toolchain 2014.04), store GCC support libraries
 # (libstdc++, ) outside of the sysroot

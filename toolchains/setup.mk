@@ -71,12 +71,16 @@ TOOLCHAIN_GDBSERVER ?=
 ifeq ("$(TARGET_OS)","linux")
   ifeq ("$(TARGET_OS_FLAVOUR)","native-chroot")
     __need_sysroot := 1
+    TARGET_LIBC_COPY_DBG_FILES ?= 0
   else ifeq ("$(TARGET_LIBC)","eglibc")
     __need_sysroot := 1
+    TARGET_LIBC_COPY_DBG_FILES ?= 1
   else ifeq ("$(TARGET_LIBC)","musl")
     __need_sysroot := 1
+    TARGET_LIBC_COPY_DBG_FILES ?= 1
   else
     __need_sysroot := 0
+    TARGET_LIBC_COPY_DBG_FILES ?= 0
   endif
   ifeq ("$(__need_sysroot)","1")
     __toolchain-sysroot-flags := $(TARGET_GLOBAL_CFLAGS)
@@ -103,6 +107,8 @@ ifeq ("$(TARGET_OS)","linux")
                                    /../host_bin                         \
                                   ))))
   endif
+else
+  TARGET_LIBC_COPY_DBG_FILES ?= 0
 endif
 
 ###############################################################################
