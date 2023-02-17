@@ -38,7 +38,7 @@ help:
 	@echo "Other available frontends for configuration:"
 	@echo "  xconfig   : use qconf (Qt), default."
 	@echo "  menuconfig: use mconf (ncurses)."
-	@echo "  nconf     : use nconf (ncurses, basic)."
+	@echo "  nconfig   : use nconfig (ncurses, pretty)."
 	@echo ""
 	@echo "Other targets:"
 	@echo "  help        : display this help message."

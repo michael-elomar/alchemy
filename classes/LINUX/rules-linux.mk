@@ -352,6 +352,14 @@ linux-xconfig: $(LINUX_BUILD_DIR)/.config
 	$(Q) $(MAKE) $(LINUX_MAKE_ARGS) xconfig
 	$(Q) $(linux-save-config)
 
+.PHONY: linux-nconfig
+linux-nconfig: $(LINUX_BUILD_DIR)/.config
+	@echo "Configuring linux kernel: $(LINUX_CONFIG_FILE)"
+	$(if $(call is-var-defined,custom.linux.config.sedfiles), \
+		$(error Sed files found. We cannot save in this case))
+	$(Q) $(MAKE) $(LINUX_MAKE_ARGS) nconfig
+	$(Q) $(linux-save-config)
+
 .PHONY: linux-config
 linux-config: linux-xconfig
 
