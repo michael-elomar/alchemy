@@ -85,8 +85,10 @@ LIBRARY_PATH=${SYSROOT}/lib:${SYSROOT}/usr/lib:${OLD_LIBRARY_PATH}
 # Update python path
 PYTHONPATH=${SYSROOT}/usr/lib/python/site-packages
 
-# Update product root configuration path
-PRODUCT_ROOT_CFG=${SYSROOT}
+if [ "${PRODUCT_ROOT_CFG}" = "" ]; then
+	# If empty update product root configuration path
+	PRODUCT_ROOT_CFG=${SYSROOT}
+fi
 
 export PATH=${PATH}
 if [ "${is_darwin}" = "0" ]; then
