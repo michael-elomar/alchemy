@@ -10,6 +10,8 @@ MODULE_DIR=$4
 for FORMATTER in ${FORMATTERS}; do
 	if [ "${FORMATTER}" = "pep8" ]; then
 		 python3 -m autopep8 -i ${FILES}
+	elif [ "${FORMATTER}" = "autoflake8" ]; then
+                autoflake8 -i ${ARGS} ${FILES}
 	else
 		echo "Unknown 'python' formatter '${FORMATTER}'"
 	fi

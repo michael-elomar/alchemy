@@ -334,11 +334,13 @@ vars-LOCAL += DOXYGEN_INPUT
 vars-LOCAL += CODEFORMAT_C
 vars-LOCAL += CODEFORMAT_CXX
 vars-LOCAL += CODEFORMAT_OBJC
+vars-LOCAL += CODEFORMAT_PYTHON
 
 # Arguments to give to code formatter
 vars-LOCAL += CODEFORMAT_C_ARGS
 vars-LOCAL += CODEFORMAT_CXX_ARGS
 vars-LOCAL += CODEFORMAT_OBJC_ARGS
+vars-LOCAL += CODEFORMAT_PYTHON_ARGS
 
 # Code check to use (depending on source code kind)
 # If empty or 'default' an internal default with be used
