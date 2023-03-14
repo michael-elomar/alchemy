@@ -85,7 +85,7 @@ LIBRARY_PATH=${SYSROOT}/lib:${SYSROOT}/usr/lib:${OLD_LIBRARY_PATH}
 # Update python path
 PYTHONPATH=${SYSROOT}/usr/lib/python/site-packages
 
-if [ "${PRODUCT_ROOT_CFG}" = "" ]; then
+if [ -z "${PRODUCT_ROOT_CFG-}" ]; then
 	# If empty update product root configuration path
 	PRODUCT_ROOT_CFG=${SYSROOT}
 fi
