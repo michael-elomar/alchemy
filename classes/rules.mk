@@ -564,6 +564,7 @@ _module_copy_to_build_dir_rsync_filter := \
 
 $(LOCAL_MODULE).copy-to-build-dir: PRIVATE_RSYNC_FILTER := $(_module_copy_to_build_dir_rsync_filter)
 $(LOCAL_MODULE).copy-to-build-dir: .FORCE
+	@mkdir -p $(PRIVATE_BUILD_DIR)
 	$(Q) rsync -a $(PRIVATE_RSYNC_FILTER) $(PRIVATE_PATH)/ $(PRIVATE_BUILD_DIR)/
 
 all_prerequisites += $(LOCAL_MODULE).copy-to-build-dir
