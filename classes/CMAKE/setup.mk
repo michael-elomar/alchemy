@@ -13,6 +13,7 @@
 define _cmake-def-cmd-configure
 	@mkdir -p $(PRIVATE_OBJ_DIR)
 	$(Q) cd $(PRIVATE_OBJ_DIR) && rm -f CMakeCache.txt && \
+		$($(PRIVATE_MODE)_CMAKE_CONFIGURE_ENV) $(PRIVATE_CONFIGURE_ENV) \
 		$(PKG_CONFIG_ENV) $(CMAKE) \
 			-DCMAKE_TOOLCHAIN_FILE="$($(PRIVATE_MODE)_CMAKE_TOOLCHAIN_FILE)" \
 			$($(PRIVATE_MODE)_CMAKE_CONFIGURE_ARGS) $(PRIVATE_CONFIGURE_ARGS) \
@@ -20,13 +21,15 @@ define _cmake-def-cmd-configure
 endef
 
 define _cmake-def-cmd-build
-	$(Q) $(MAKE) -C $(PRIVATE_OBJ_DIR) \
-		$($(PRIVATE_MODE)_CMAKE_MAKE_ARGS) $(PRIVATE_MAKE_BUILD_ARGS)
+	$(Q) $($(PRIVATE_MODE)_CMAKE_MAKE_ENV) $(PRIVATE_MAKE_BUILD_ENV) \
+		$(MAKE) -C $(PRIVATE_OBJ_DIR) \
+			$($(PRIVATE_MODE)_CMAKE_MAKE_ARGS) $(PRIVATE_MAKE_BUILD_ARGS)
 endef
 
 define _cmake-def-cmd-install
-	$(Q) $(MAKE) -C $(PRIVATE_OBJ_DIR) \
-		$($(PRIVATE_MODE)_CMAKE_MAKE_ARGS) $(PRIVATE_MAKE_INSTALL_ARGS) install/fast
+	$(Q) $($(PRIVATE_MODE)_CMAKE_MAKE_ENV) $(PRIVATE_MAKE_INSTALL_ENV) \
+		$(MAKE) -C $(PRIVATE_OBJ_DIR) \
+			$($(PRIVATE_MODE)_CMAKE_MAKE_ARGS) $(PRIVATE_MAKE_INSTALL_ARGS) install/fast
 endef
 
 # Force success for command in case "uninstall" or "clean" is not supported

@@ -1280,8 +1280,11 @@ particular a toolchain file.
 
 #### Customization variables
 
+* `LOCAL_CMAKE_CONFIGURE_ENV` : Extra environment variables for the configure step.
 * `LOCAL_CMAKE_CONFIGURE_ARGS` : Extra arguments for the configure step.
-* `LOCAL_CMAKE_MAKE_BUILD_ARGS` : extra arguments for the build step.
+* `LOCAL_CMAKE_MAKE_BUILD_ENV` : Extra environment variables for the build step.
+* `LOCAL_CMAKE_MAKE_BUILD_ARGS` : Extra arguments for the build step.
+* `LOCAL_CMAKE_MAKE_INSTALL_ENV` : Extra environment variables for the install step.
 * `LOCAL_CMAKE_MAKE_INSTALL_ARGS` : Extra arguments for the install step.
 
 #### Custom commands
