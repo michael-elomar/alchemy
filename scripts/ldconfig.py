@@ -648,7 +648,7 @@ class Context(object):
     @staticmethod
     def _is_linker_script(filepath):
         # Look for some text in beginning of file
-        with open(filepath, "r") as fin:
+        with open(filepath, "r", errors="ignore") as fin:
             contents = fin.read(512)
             return "GROUP" in contents or \
                 "INPUT" in contents or \
