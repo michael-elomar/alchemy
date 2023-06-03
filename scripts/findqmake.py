@@ -3,10 +3,9 @@
 import argparse
 import glob
 import os
+import re
 import subprocess
 import sys
-
-from distutils.version import LooseVersion
 
 DEFAULT_PLATFORM = "gcc_64"
 
@@ -18,6 +17,52 @@ SDKROOT_PATTERNS = [
     os.path.expanduser("~/Qt*"),
 ]
 
+# Extracted from distutils.version that is deprecated and planned for removal
+class LooseVersion:
+    RE_COMPONENT = re.compile(r'(\d+ | [a-z]+ | \.)', re.VERBOSE)
+    def __init__(self, vstring):
+        self.vstring = vstring
+        components = [x for x in self.RE_COMPONENT.split(vstring)
+                if x and x != '.']
+        for i, obj in enumerate(components):
+            try:
+                components[i] = int(obj)
+            except ValueError:
+                pass
+        self.version = components
+
+    def __eq__(self, other):
+        c = self._cmp(other)
+        return c if c is NotImplemented else c == 0
+
+    def __lt__(self, other):
+        c = self._cmp(other)
+        return c if c is NotImplemented else c < 0
+
+    def __le__(self, other):
+        c = self._cmp(other)
+        return c if c is NotImplemented else c <= 0
+
+    def __gt__(self, other):
+        c = self._cmp(other)
+        return c if c is NotImplemented else c > 0
+
+    def __ge__(self, other):
+        c = self._cmp(other)
+        return c if c is NotImplemented else c >= 0
+
+    def _cmp (self, other):
+        if isinstance(other, str):
+            other = LooseVersion(other)
+        elif not isinstance(other, LooseVersion):
+            return NotImplemented
+
+        if self.version == other.version:
+            return 0
+        if self.version < other.version:
+            return -1
+        if self.version > other.version:
+            return 1
 
 def find_qmake_in_sdk(sdk):
     qmake = os.path.join(sdk, "bin", "qmake")
