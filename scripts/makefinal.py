@@ -145,7 +145,13 @@ class Makefile(object):
             self.fout.write("\t$(call PRINT,\"Alchemy install: %s\")\n" %
                     os.path.relpath(dstFileName))
             for cmd in cmds:
-                self.fout.write("\t@%s\n" % cmd.replace("$", "$$"))
+                if "strip" in cmd:
+                    # If there is some kind of stripping error, just copy the file
+                    self.fout.write("\t@if ! %s; \
+                    then cp -af \"%s\" \"%s\"; \
+                    fi\n" % (cmd.replace("$", "$$"), srcFileName, dstFileName))
+                else:
+                    self.fout.write("\t@%s\n" % cmd.replace("$", "$$"))
             self.fout.write("\n")
         self._writeFooter()
 
@@ -169,25 +175,6 @@ def isExec(filePath):
         logging.error("Failed to open file: %s ([err=%d] %s)",
             filePath, ex.errno, ex.strerror)
     return False
-
-#===============================================================================
-# Determine if a file can be stripped.
-# Required under android because soslim crashes when trying to strip
-# static executables compiled with eglibc.
-#===============================================================================
-def canStrip(filePath):
-    result = False
-    try:
-        # get error output from nm command to check for 'no symbols'
-        res = subprocess.run("nm %s" % filePath,
-            stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
-            shell=True, check=True)
-        res = res.stderr.decode("UTF-8").rstrip("\n").split("\n")
-        result = (len(res) == 0 or res[0].find("no symbols") < 0)
-    except (IOError, subprocess.CalledProcessError):
-        # assume not strippable if nm failed
-        result = False
-    return result
 
 #===============================================================================
 # Resolve links using finalDir as root for absolute path.
@@ -311,8 +298,7 @@ def doCopy(dstFileName, srcFileName, options, forceCopy=False):
     doStrip = False
     if options.strip is not None \
             and not os.path.islink(srcFileName) \
-            and isExec(srcFileName) \
-            and canStrip(srcFileName):
+            and isExec(srcFileName):
         doStrip = True
 
     # Files in usr/lib/debug, usr/lib/.debug or lib/.debug are never to be stripped
