@@ -7,6 +7,7 @@
 
 use strict;
 use POSIX;
+use Encode;
 
 my $P = $0;
 $P =~ s@.*/@@g;
@@ -511,7 +512,7 @@ for my $filename (@ARGV) {
 	}
 	while (<$FILE>) {
 		chomp;
-		push(@rawlines, $_);
+		push(@rawlines, Encode::decode('utf8', $_, Encode::FB_CROAK));
 	}
 	close($FILE);
 	if (!process($filename)) {
