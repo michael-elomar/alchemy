@@ -8,8 +8,6 @@
 
 LOCAL_PATH := $(call my-dir)
 
-ifneq ("$(TARGET_ARCH)","$(HOST_ARCH)")
-
 $(call register-prebuilt-pkg-config-module-with-path,json,json-c,$(TARGET_PKG_CONFIG_PATH))
 $(call register-prebuilt-pkg-config-module-with-path,libarchive,libarchive,$(TARGET_PKG_CONFIG_PATH))
 $(call register-prebuilt-pkg-config-module-with-path,liblz4,liblz4,$(TARGET_PKG_CONFIG_PATH))
@@ -41,6 +39,4 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := gst-plugins-base
 LOCAL_LIBRARIES := $(_gst-plugins-base_deps)
 $(call local-register-prebuilt-overridable)
-endif
-
 endif
