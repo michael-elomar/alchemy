@@ -6,6 +6,15 @@
 ## Rules for QMAKE modules.
 ###############################################################################
 
+# Check if there is a qmake built inside a used sdk
+ifndef TARGET_QMAKE
+  $(foreach __dir,$(TARGET_SDK_DIRS), \
+     $(if $(wildcard $(__dir)/host/usr/bin/qmake), \
+       $(eval TARGET_QMAKE := $(__dir)/host/usr/bin/qmake) \
+     ) \
+  )
+endif
+
 # Find qmake binary
 ifndef TARGET_QMAKE
   ifdef QTSDK_QMAKE
