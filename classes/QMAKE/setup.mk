@@ -191,10 +191,11 @@ _qmake-gen-deps = $(if $(call streq,$($(PRIVATE_MODE)_OS),darwin), \
 
 define _qmake-def-cmd-configure
 	$(_qmake-gen-deps)
+	$(eval _qt_version := $(shell $(QMAKE) -query QT_VERSION))
 	$(Q) cd $(PRIVATE_BUILD_DIR) \
 		&& $(TARGET_QMAKE_ENV) $(QMAKE) $(TARGET_QMAKE_ARG) \
 			$(PRIVATE_QMAKE_CONFIGURE_ARGS) \
-			$(if $(PRIVATE_HAS_QT_SYSROOT),$(empty),-early QMAKE_CC=$(TARGET_CC) QMAKE_CXX=$(TARGET_CXX)) \
+			$(if $(call check-version,$(_qt_version),5.12.3),-early QMAKE_CC=$(TARGET_CC) QMAKE_CXX=$(TARGET_CXX)) \
 			$(if $(call is-path-absolute,$(PRIVATE_QMAKE_PRO_FILE)), \
 				$(PRIVATE_QMAKE_PRO_FILE) \
 				, \
