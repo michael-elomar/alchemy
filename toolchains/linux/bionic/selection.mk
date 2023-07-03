@@ -34,7 +34,7 @@ ANDROID_NDK_MINOR_VERSION := $(word 2,$(subst ., ,$(ANDROID_NDK_VERSION)))
 ifneq ("$(firstword $(sort $(ANDROID_NDK_MAJOR_VERSION) 17))", "17")
   $(error NDK $(ANDROID_NDK_VERSION) is too old for this version of Alchemy)
 endif
-ifeq ("$(firstword $(sort $(ANDROID_NDK_MAJOR_VERSION) 22))", "22")
+ifeq ("$(firstword $(sort $(ANDROID_NDK_MAJOR_VERSION) 26))", "26")
   $(error NDK $(ANDROID_NDK_VERSION) is too recent for this version of Alchemy)
 endif
 
@@ -101,7 +101,13 @@ else
     $(error Unsupported target arch $(TARGET_ARCH))
   endif
   ANDROID_CROSS_BASE := $(TARGET_ANDROID_NDK)/toolchains/llvm/prebuilt/$(HOST_OS)-$(ANDROID_HOST_ARCH)/bin/
+
+ifeq ("$(firstword $(sort $(ANDROID_NDK_MAJOR_VERSION) 22))", "22")
+  ANDROID_CROSS_TOOLS := $(ANDROID_CROSS_BASE)llvm-
+else
   ANDROID_CROSS_TOOLS := $(ANDROID_CROSS_BASE)$(ANDROID_TOOLCHAIN_BASE)-
+endif
+
   ANDROID_CROSS_CC := $(ANDROID_CROSS_BASE)$(ANDROID_CC_BASE)$(TARGET_ANDROID_MINAPILEVEL)-
 endif
 
