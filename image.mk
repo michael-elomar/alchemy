@@ -33,6 +33,9 @@ UBINIZE ?= $(wildcard /usr/sbin/ubinize)
 VERITYSETUP ?= $(wildcard /sbin/veritysetup)
 MKE2FS ?= $(wildcard /sbin/mke2fs)
 
+PIGZ := $(shell which pigz 2>/dev/null)
+PBZIP2 := $(shell which pbzip2 2>/dev/null)
+
 ###############################################################################
 ## Generic image generation macro.
 ## $1: image type.
@@ -139,27 +142,19 @@ image-$1: __image-$1-internal
 	@echo "Image $1: done -> $(__image-$1-file)"
 image-$1-gz: __image-$1-internal
 	@echo "Image $1: compressing"
-	$(Q) if [ "$(shell which pigz 2>/dev/null)" = "" ]; then \
-		gzip $(__image-$1-file); \
-	else \
-		pigz $(__image-$1-file); \
-	fi
+	$(Q) $(if $(PIGZ),pigz,gzip) $(__image-$1-file)
 	@echo "Image $1: done -> $(__image-$1-file).gz"
 image-$1-bz2: __image-$1-internal
 	@echo "Image $1: compressing"
-	$(Q) if [ "$(shell which pbzip2 2>/dev/null)" = "" ]; then \
-		bzip2 $(__image-$1-file); \
-	else \
-		pbzip2 $(__image-$1-file); \
-	fi
+	$(Q) $(if $(PBZIP2),pbzip2,bzip2) $(__image-$1-file)
 	@echo "Image $1: done -> $(__image-$1-file).bz2"
 image-$1-zip: __image-$1-internal
 	@echo "Image $1: compressing"
-	$(Q) if [ "$(shell which pigz 2>/dev/null)" = "" ]; then \
-		zip --junk-paths $(__image-$1-file).zip $(__image-$1-file); \
-	else \
-		pigz --zip $(__image-$1-file) --stdout > $(__image-$1-file).zip; \
-	fi
+	$(Q) $(if $(PIGZ), \
+		pigz --zip $(__image-$1-file) --stdout > $(__image-$1-file).zip \
+		, \
+		zip --junk-paths $(__image-$1-file).zip $(__image-$1-file) \
+	)
 	$(Q) /sbin/blkid -c /dev/null -o value -s UUID $(__image-$1-file) | \
 		zip --archive-comment $(__image-$1-file).zip
 	@echo "Image $1: done -> $(__image-$1-file).zip"
