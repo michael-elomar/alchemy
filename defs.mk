@@ -190,6 +190,11 @@ make-path-list = $(call make-colon-list,$(call normalize-paths,$1))
 # Split a PATH style list (colon separated directories) to a space separated list
 split-path-list = $(subst $(colon),$(space),$1)
 
+# Recursive wildcard
+# $1 base directory
+# $2 pattern
+rwildcard = $(foreach d,$(wildcard $1/*),$(call rwildcard,$d,$2) $(filter $(subst *,%,$2),$d))
+
 ###############################################################################
 ## Call a function(macro) for each variable in a variable list.
 ## A variable list is a list of ';' separated <var>=<value> pairs.
@@ -1279,17 +1284,13 @@ endef
 
 # $1 : directory relative to LOCAL_PATH to search
 # $2 : extension to search (.c, .cpp ...)
-all-files-under = $(strip \
-	$(patsubst ./%,%, \
-		$(shell cd $(LOCAL_PATH); \
-			find $1 -type f -name "*$2" -and -not -name ".*") \
-	))
+all-files-under = $(patsubst $(LOCAL_PATH)/%,%,$(call rwildcard,$(LOCAL_PATH)/$1,*$2))
 
 # $1 : directory relative to LOCAL_PATH to search
-all-c-files-under = $(call all-files-under,$1,.c)
-all-cpp-files-under = $(call all-files-under,$1,.cpp)
-all-cxx-files-under = $(call all-files-under,$1,.cxx)
-all-cc-files-under = $(call all-files-under,$1,.cc)
+all-c-files-under = $(call all-files-under,$(strip $1),.c)
+all-cpp-files-under = $(call all-files-under,$(strip $1),.cpp)
+all-cxx-files-under = $(call all-files-under,$(strip $1),.cxx)
+all-cc-files-under = $(call all-files-under,$(strip $1),.cc)
 
 ###############################################################################
 ## Search files matching an extension under LOCAL_PATH, non-recursively.
@@ -1297,17 +1298,13 @@ all-cc-files-under = $(call all-files-under,$1,.cc)
 
 # $1 : directory relative to LOCAL_PATH to search
 # $2 : extension to search (.c, .cpp ...)
-all-files-in = $(strip \
-	$(patsubst ./%,%, \
-		$(shell cd $(LOCAL_PATH); \
-			find $1 -maxdepth 1 -type f -name "*$2" -and -not -name ".*") \
-	))
+all-files-in = $(patsubst $(LOCAL_PATH)/%,%,$(wildcard $(LOCAL_PATH)/$1/*$2))
 
 # $1 : directory relative to LOCAL_PATH to search
-all-c-files-in = $(call all-files-in,$1,.c)
-all-cpp-files-in = $(call all-files-in,$1,.cpp)
-all-cxx-files-in = $(call all-files-in,$1,.cxx)
-all-cc-files-in = $(call all-files-in,$1,.cc)
+all-c-files-in = $(call all-files-in,$(strip $1),.c)
+all-cpp-files-in = $(call all-files-in,$(strip $1),.cpp)
+all-cxx-files-in = $(call all-files-in,$(strip $1),.cxx)
+all-cc-files-in = $(call all-files-in,$(strip $1),.cc)
 
 ###############################################################################
 ## Search links matching an extension under LOCAL_PATH, recursively.

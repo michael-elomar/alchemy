@@ -6,11 +6,6 @@
 ## Rules for codecheck.
 ###############################################################################
 
-# Recursive wildcard
-# $1 base directory
-# $2 pattern
-rwildcard = $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
-
 # Original data before import
 _module_src_files := $(addprefix $(LOCAL_PATH)/,$(__modules.$(LOCAL_MODULE).SRC_FILES))
 _module_c_includes := $(__modules.$(LOCAL_MODULE).C_INCLUDES)
