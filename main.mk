@@ -106,6 +106,13 @@ USER_MAKEFILE_NAME := atom.mk
 include $(BUILD_SYSTEM)/target-setup.mk
 include $(BUILD_SYSTEM)/toolchain-setup.mk
 
+# Make sure all TARGET_xxx variables are 'simple' and not 'recursive'
+$(foreach __var,$(vars-TARGET), \
+	$(if $(call is-var-defined,TARGET_$(__var)), \
+		$(eval TARGET_$(__var) := $(TARGET_$(__var))) \
+	) \
+)
+
 ###############################################################################
 ## Default rules of makefile add TARGET_ARCH in CFLAGS.
 ## As it is not the way we use it, prevent export of this variable
