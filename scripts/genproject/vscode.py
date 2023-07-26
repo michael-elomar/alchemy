@@ -130,7 +130,7 @@ def _gen_tasks(project, build_args, modules):
         data['version'] = '2.0.0'
         tasks = list()
         data['tasks'] = tasks
-        build_task = '${{workspaceFolder}}/build.sh {}'.format(args)
+        build_task = '{}/build.sh {}'.format(project.workspace_dir, args)
         if os.environ.get('TARGET_TEST', '0') == '1':
             build_task = 'env TARGET_TEST=1 ' + build_task
         tasks.append(_single_task(
