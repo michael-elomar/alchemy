@@ -107,11 +107,12 @@ include $(BUILD_SYSTEM)/target-setup.mk
 include $(BUILD_SYSTEM)/toolchain-setup.mk
 
 # Make sure all TARGET_xxx variables are 'simple' and not 'recursive'
-$(foreach __var,$(vars-TARGET), \
-	$(if $(call is-var-defined,TARGET_$(__var)), \
-		$(eval TARGET_$(__var) := $(TARGET_$(__var))) \
-	) \
-)
+# FIXME: does not work if the value contsains some escaped dollar like \$$ORIGIN.
+#$(foreach __var,$(vars-TARGET), \
+#	$(if $(call is-var-defined,TARGET_$(__var)), \
+#		$(eval TARGET_$(__var) := $(TARGET_$(__var))) \
+#	) \
+#)
 
 ###############################################################################
 ## Default rules of makefile add TARGET_ARCH in CFLAGS.
