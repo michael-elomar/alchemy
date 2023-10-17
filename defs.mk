@@ -1284,7 +1284,7 @@ endef
 
 # $1 : directory relative to LOCAL_PATH to search
 # $2 : extension to search (.c, .cpp ...)
-all-files-under = $(patsubst $(LOCAL_PATH)/%,%,$(call rwildcard,$(LOCAL_PATH)/$1,*$2))
+all-files-under = $(patsubst $(LOCAL_PATH)/%,%,$(call rwildcard,$(LOCAL_PATH)/$1,*$(2:*%=%)))
 
 # $1 : directory relative to LOCAL_PATH to search
 all-c-files-under = $(call all-files-under,$(strip $1),.c)
