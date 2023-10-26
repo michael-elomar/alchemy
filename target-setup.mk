@@ -223,6 +223,9 @@ TARGET_FINAL_PYTHON_KEEP_PY ?= 0
 # Force compilation of all modules as static (disable shared libraries)
 TARGET_FORCE_STATIC ?= 0
 
+# Prefer static libraries when using generic BUILD_LIBRARY
+TARGET_PREFER_STATIC ?= $(TARGET_FORCE_STATIC)
+
 # Force using static libraries instead of shared for module that specifies they support it
 ifeq ("$(TARGET_FORCE_STATIC)","1")
   TARGET_PBUILD_FORCE_STATIC := 1

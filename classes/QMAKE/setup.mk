@@ -93,7 +93,7 @@ define _internal-qmake-gen-deps-darwin
 	@( \
 		echo "equals(TEMPLATE, lib) {"; \
 		echo "    target.path = $(if $(PRIVATE_HAS_QT_SYSROOT),$(TARGET_OUT_STAGING))/$(TARGET_DEFAULT_LIB_DESTDIR)"; \
-		$(if $(call streq,$(TARGET_FORCE_STATIC),1),echo "    CONFIG += staticlib";) \
+		$(if $(call streq,$(TARGET_PREFER_STATIC),1),echo "    CONFIG += staticlib";) \
 		echo "} else {"; \
 		echo "    target.path = $(if $(PRIVATE_HAS_QT_SYSROOT),$(TARGET_OUT_STAGING))/$(TARGET_DEFAULT_BIN_DESTDIR)"; \
 		echo "}"; \
@@ -128,7 +128,7 @@ define _internal-qmake-gen-deps
 	@( \
 		echo "equals(TEMPLATE, lib) {"; \
 		echo "    target.path = $(if $(PRIVATE_HAS_QT_SYSROOT),$(TARGET_OUT_STAGING))/$(TARGET_DEFAULT_LIB_DESTDIR)"; \
-		$(if $(call streq,$(TARGET_FORCE_STATIC),1),echo "    CONFIG += staticlib";) \
+		$(if $(call streq,$(TARGET_PREFER_STATIC),1),echo "    CONFIG += staticlib";) \
 		$(if $(call streq,$(TARGET_OS),windows), \
 			echo "    CONFIG += skip_target_version_ext"; \
 			echo "    CONFIG(debug, debug|release): TARGET = \$$\$${TARGET}_debug"; \

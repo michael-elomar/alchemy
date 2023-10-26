@@ -301,6 +301,10 @@ Mainly used by the android wrapper.
   as static even if module requested to build a shared one. This option impacts
   all modules (internal AND external).
   </br>Default is `0`.
+* `TARGET_PREFER_STATIC` : Can be set to `1` to prefer the compilation of libraries
+  as static. This option impacts all modules (internal AND external). Only
+  explicit modules registered as `SHARED_LIBRARY` will stay shared.
+  </br>Default is `0`.
 * `TARGET_PBUILD_FORCE_STATIC` : Similar to `TARGET_FORCE_STATIC` but module
   shall also set `LOCAL_PBUILD_ALLOW_FORCE_STATIC` to `1` to be compiled as static.
   This option only impacts modules of class `SHARED` and `LIBRARY`.

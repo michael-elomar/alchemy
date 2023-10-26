@@ -11,6 +11,7 @@ ifneq ("$(LOCAL_HOST_MODULE)","")
 endif
 
 # check if we want to force static libraries
+# Here, use TARGET_FORCE_STATIC instead of TARGET_PREFER_STATIC
 force_static := 0
 ifneq ("$(LOCAL_HOST_MODULE)","")
   force_static := 1

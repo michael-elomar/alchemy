@@ -358,7 +358,7 @@ else
 endif
 
 # Force static compilation if required
-ifeq ("$(TARGET_FORCE_STATIC)","1")
+ifeq ("$(TARGET_PREFER_STATIC)","1")
   TARGET_AUTOTOOLS_CONFIGURE_ARGS += \
 	--enable-static \
 	--disable-shared

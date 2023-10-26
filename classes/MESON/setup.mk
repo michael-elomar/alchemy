@@ -72,7 +72,7 @@ TARGET_MESON_CONFIGURE_ARGS += \
 endif
 
 # Force static compilation if required
-ifeq ("$(TARGET_FORCE_STATIC)","1")
+ifeq ("$(TARGET_PREFER_STATIC)","1")
 TARGET_MESON_CONFIGURE_ARGS += \
 	--default-library=static \
 	--prefer-static

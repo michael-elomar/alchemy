@@ -18,7 +18,7 @@ endif
 force_static := 0
 ifneq ("$(LOCAL_HOST_MODULE)","")
   force_static := 1
-else ifeq ("$(TARGET_FORCE_STATIC)","1")
+else ifeq ("$(TARGET_PREFER_STATIC)","1")
   force_static := 1
 else ifeq ("$(TARGET_PBUILD_FORCE_STATIC)","1")
   ifeq ("$(LOCAL_PBUILD_ALLOW_FORCE_STATIC)","1")
