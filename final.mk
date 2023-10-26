@@ -57,6 +57,10 @@ endif
 ifneq ("$(call is-module-in-build-config,python3)","")
   MAKEFINAL_ARGS += --keep-python-files
 endif
+# force to keep python files
+ifeq ("$(TARGET_FINAL_PYTHON_KEEP_PY)","1")
+  MAKEFINAL_ARGS += --keep-python-files
+endif
 
 # Remove write access to 'group' and 'other'. For native only, a fixstat tools
 # is used on other variant when generating the image
