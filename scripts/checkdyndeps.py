@@ -55,6 +55,7 @@ def main():
     setupLog(options)
 
     ctx = Context()
+    success = True
 
     # Process all ELF files in given root directory
     for (dirPath, dirNames, fileNames) in os.walk(options.rootDir):
@@ -71,6 +72,11 @@ def main():
     for (dirPath, dirNames, fileNames) in os.walk(options.rootDir):
         for fileName in fileNames:
             if fileName in ctx.libraries:
+                if options.check_lib_prefix and \
+                        not fileName.startswith("lib") and \
+                        not fileName.startswith("ld-linux-"):
+                    logging.error("Wrong library prefix: '%s'", fileName)
+                    success = False
                 ctx.libraries[fileName] = True
 
     # Print result
@@ -84,6 +90,8 @@ def main():
                     break
             logging.warning("Missing library: '%s' needed by %s", library, neededBy)
 
+    sys.exit(0 if success else -1)
+
 #===============================================================================
 # Setup option parser and parse command line.
 #===============================================================================
@@ -94,6 +102,12 @@ def parseArgs():
             nargs="?",
             default=os.getcwd(),
             help="Root directoty to check")
+
+    parser.add_argument("--check-lib-prefix",
+        dest="check_lib_prefix",
+        action="store_true",
+        default=False,
+        help="check that libraries start with 'lib' prefix")
 
     parser.add_argument("-q",
         dest="quiet",

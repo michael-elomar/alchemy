@@ -220,6 +220,9 @@ TARGET_FINAL_PYTHON_GENERATE_PYC ?= 0
 TARGET_FINAL_PYTHON_REMOVE_PY ?= 0
 TARGET_FINAL_PYTHON_KEEP_PY ?= 0
 
+# Linux specific, check library prefix
+TARGET_FINAL_CHECK_LIB_PREFIX ?= 0
+
 # Force compilation of all modules as static (disable shared libraries)
 TARGET_FORCE_STATIC ?= 0
 

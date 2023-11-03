@@ -151,7 +151,9 @@ endif
 endif
 endif
 ifeq ("$(is-full-system)","1")
-	$(Q) $(BUILD_SYSTEM)/scripts/checkdyndeps.py $(TARGET_OUT_FINAL)
+	$(Q) $(BUILD_SYSTEM)/scripts/checkdyndeps.py \
+		$(if $(call streq,$(TARGET_FINAL_CHECK_LIB_PREFIX),1),--check-lib-prefix) \
+		$(TARGET_OUT_FINAL)
 endif
 	@echo `date +%s` > $(TARGET_OUT_FINAL)/$(TARGET_DEFAULT_ETC_DESTDIR)/final.stamp
 	@echo "Done generating final tree"
