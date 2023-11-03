@@ -12,3 +12,8 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := zlib
 LOCAL_EXPORT_LDLIBS := -lz
 include $(BUILD_PREBUILT)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := libpng
+LOCAL_EXPORT_LDLIBS := -lpng16
+include $(BUILD_PREBUILT)
