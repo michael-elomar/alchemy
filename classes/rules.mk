@@ -294,9 +294,14 @@ $(foreach __mod,$(all_static_libs) $(all_whole_static_libs), \
 all_prerequisites :=
 
 # We need all external libraries installed as prerequisites.
+# As well as prebuilt ones
 all_prerequisites += \
 	$(foreach __lib,$(all_depends), \
-		$(if $(call is-module-external,$(__lib)), \
+		$(if $(or \
+				$(call is-module-external,$(__lib)) \
+				, \
+				$(call streq,$(__modules.$(__lib).MODULE_CLASS),PREBUILT) \
+			), \
 			$(call module-get-stamp-file,$(__lib),installed) \
 		) \
 	)
