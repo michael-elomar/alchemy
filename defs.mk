@@ -23,6 +23,9 @@ left-paren := (
 right-paren := )
 percent := %
 currency := $(shell echo $$'\xa4')
+define hash
+\#
+endef
 
 # True/False values. Any non-empty test is considered as True
 true := T

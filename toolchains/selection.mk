@@ -10,39 +10,33 @@ HOST_USE_CLANG ?= $(USE_CLANG)
 TARGET_USE_CLANG ?= $(USE_CLANG)
 
 # If the host is darwin, use the toolchain from the macosx SDK
+# Use xcrun directly so it automatically provides the good sysroot to the tools
 ifeq ("$(HOST_OS)","darwin")
-  HOST_GLOBAL_CFLAGS += -isysroot $(shell xcrun --sdk macosx --show-sdk-path)
-  HOST_GLOBAL_LDFLAGS += -isysroot $(shell xcrun --sdk macosx --show-sdk-path)
-  ifndef HOST_CC
-    HOST_CC := $(shell xcrun --find --sdk macosx clang)
-  endif
-  ifndef HOST_CXX
-    HOST_CXX := $(shell xcrun --find --sdk macosx clang++)
-  endif
-  ifndef HOST_AS
-    HOST_AS := $(shell xcrun --find --sdk macosx as)
-  endif
-  ifndef HOST_AR
-    HOST_AR := $(shell xcrun --find --sdk macosx ar)
-  endif
-  ifndef HOST_LD
-    HOST_LD := $(shell xcrun --find --sdk macosx ld)
-  endif
-  ifndef HOST_CPP
-    HOST_CPP := $(shell xcrun --find --sdk macosx cpp)
-  endif
-  ifndef HOST_NM
-    HOST_NM := $(shell xcrun --find --sdk macosx nm)
-  endif
-  ifndef HOST_STRIP
-    HOST_STRIP := $(shell xcrun --find --sdk macosx strip)
-  endif
-  ifndef HOST_RANLIB
-    HOST_RANLIB := $(shell xcrun --find --sdk macosx ranlib)
-  endif
-  ifndef HOST_OBJDUMP
-    HOST_OBJDUMP := $(shell xcrun --find --sdk macosx objdump)
-  endif
+  DARWIN_TOOLCHAIN_PATH := $(TARGET_OUT)/toolchain
+  gen_xcrun_wrapper = $(shell FPATH=$(DARWIN_TOOLCHAIN_PATH)/xcrun_$1_$(subst $(space),_,$2)_wrapper;\
+    if ! test -f $$FPATH; then\
+     mkdir -p $$(dirname $$FPATH);\
+     echo -e $(hash)!/bin/sh\\\nxcrun --sdk $1 $2 \$$\* > $$FPATH;\
+     chmod +x $$FPATH;\
+    fi;\
+    echo $$FPATH)
+
+  HOST_CC ?= $(call gen_xcrun_wrapper,macosx,clang)
+  HOST_CXX ?= $(call gen_xcrun_wrapper,macosx,clang++)
+  HOST_AS ?= $(call gen_xcrun_wrapper,macosx,as)
+  HOST_AR ?= $(call gen_xcrun_wrapper,macosx,ar)
+  HOST_LD ?= $(call gen_xcrun_wrapper,macosx,ld)
+  # Do *not* provide "cpp" as the preprocessor as it fails to pre-process some
+  # Apple-provided headers (as of macOS Ventura) :
+  # `echo "#include <AvailabilityInternal.h>" | cpp - >/dev/null`
+  # fails while
+  # `echo "#include <AvailabilityInternal.h>" | clang -E - >/dev/null`
+  # works correclty
+  HOST_CPP ?= $(call gen_xcrun_wrapper,macosx,clang -E)
+  HOST_NM ?= $(call gen_xcrun_wrapper,macosx,nm)
+  HOST_STRIP ?= $(call gen_xcrun_wrapper,macosx,strip)
+  HOST_RANLIB ?= $(call gen_xcrun_wrapper,macosx,ranlib)
+  HOST_OBJDUMP ?= $(call gen_xcrun_wrapper,macosx,objdump)
 endif
 
 ifneq ("$(HOST_USE_CLANG)","1")

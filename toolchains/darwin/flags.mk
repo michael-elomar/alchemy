@@ -13,6 +13,5 @@ TARGET_GLOBAL_LDFLAGS += -lc++
 
 endif
 
-TARGET_GLOBAL_CFLAGS += $(APPLE_ARCH) $(APPLE_MINVERSION) -isysroot $(shell xcrun --sdk $(APPLE_SDK) --show-sdk-path)
-TARGET_GLOBAL_LDFLAGS += $(APPLE_ARCH) $(APPLE_MINVERSION) -isysroot $(shell xcrun --sdk $(APPLE_SDK) --show-sdk-path)
-TARGET_TOOLCHAIN_SYSROOT := $(shell xcrun --sdk $(APPLE_SDK) --show-sdk-path)
+TARGET_GLOBAL_CFLAGS += $(APPLE_ARCH) $(APPLE_MINVERSION)
+TARGET_GLOBAL_LDFLAGS += $(APPLE_ARCH) $(APPLE_MINVERSION)

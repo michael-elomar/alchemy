@@ -23,35 +23,25 @@ endif
 
 TARGET_CROSS ?=
 
-# Avoid using ?= when invoking shell to make sure we have an immediate expansion
-ifndef TARGET_CC
-  TARGET_CC := $(shell xcrun --find --sdk $(APPLE_SDK) clang)
-endif
-ifndef TARGET_CXX
-  TARGET_CXX := $(shell xcrun --find --sdk $(APPLE_SDK) clang++)
-endif
-ifndef TARGET_AS
-  TARGET_AS := $(shell xcrun --find --sdk $(APPLE_SDK) as)
-endif
-ifndef TARGET_AR
-  TARGET_AR := $(shell xcrun --find --sdk $(APPLE_SDK) ar)
-endif
-ifndef TARGET_LD
-  TARGET_LD := $(shell xcrun --find --sdk $(APPLE_SDK) ld)
-endif
-ifndef TARGET_NM
-  TARGET_NM := $(shell xcrun --find --sdk $(APPLE_SDK) nm)
-endif
-ifndef TARGET_STRIP
-  TARGET_STRIP := $(shell xcrun --find --sdk $(APPLE_SDK) strip)
-endif
-ifndef TARGET_CPP
-  TARGET_CPP := $(shell xcrun --find --sdk $(APPLE_SDK) cpp)
-endif
-ifndef TARGET_RANLIB
-  TARGET_RANLIB := $(shell xcrun --find --sdk $(APPLE_SDK) ranlib)
-endif
+TARGET_CC ?= $(call gen_xcrun_wrapper,$(APPLE_SDK),clang)
+TARGET_CXX ?= $(call gen_xcrun_wrapper,$(APPLE_SDK),clang++)
+TARGET_AS ?= $(call gen_xcrun_wrapper,$(APPLE_SDK),as)
+TARGET_AR ?= $(call gen_xcrun_wrapper,$(APPLE_SDK),ar)
+TARGET_LD ?= $(call gen_xcrun_wrapper,$(APPLE_SDK),ld)
+# Do *not* provide "cpp" as the preprocessor as it fails to pre-process some
+# Apple-provided headers (as of macOS Ventura) :
+# `echo "#include <AvailabilityInternal.h>" | cpp - >/dev/null`
+# fails while
+# `echo "#include <AvailabilityInternal.h>" | clang -E - >/dev/null`
+# works correclty
+# Moreover, some headers checks the target architecture, and fail to
+# preprocess if clang -E is not given the proper -arch flag, so we also include
+# it here.
+TARGET_CPP ?= $(call gen_xcrun_wrapper,$(APPLE_SDK),clang -E $(APPLE_ARCH))
+TARGET_NM ?= $(call gen_xcrun_wrapper,$(APPLE_SDK),nm)
+TARGET_STRIP ?= $(call gen_xcrun_wrapper,$(APPLE_SDK),strip)
+TARGET_RANLIB ?= $(call gen_xcrun_wrapper,$(APPLE_SDK),ranlib)
+TARGET_OBJDUMP ?= $(call gen_xcrun_wrapper,$(APPLE_SDK),objdump)
 
 #TODO: use lipo wrapper....
 TARGET_OBJCOPY ?= $(TARGET_CROSS)objcopy
-TARGET_OBJDUMP ?= $(TARGET_CROSS)objdump
