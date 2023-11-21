@@ -8,12 +8,5 @@
 
 LOCAL_PATH := $(call my-dir)
 
-include $(CLEAR_VARS)
-LOCAL_MODULE := zlib
-LOCAL_EXPORT_LDLIBS := -lz
-include $(BUILD_PREBUILT)
+$(call register-prebuilt-pkg-config-module,libpng,libpng)
 
-include $(CLEAR_VARS)
-LOCAL_MODULE := libpng
-LOCAL_EXPORT_LDLIBS := -lpng16
-include $(BUILD_PREBUILT)
