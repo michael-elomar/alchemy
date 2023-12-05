@@ -73,8 +73,8 @@ TARGET_GLOBAL_LDFLAGS    := $(TARGET_GLOBAL_LDFLAGS)    $(call yocto_get_variabl
 TARGET_GLOBAL_C_INCLUDES := $(TARGET_GLOBAL_C_INCLUDES) $(YOCTO_SDK_TARGET_SYSROOT)/usr/include
 
 # Qt variables
+ifneq ("$(wildcard $(YOCTO_SDK_HOST_SYSROOT)/usr/bin/qt5/qmake)","")
 TARGET_QMAKE := $(YOCTO_SDK_HOST_SYSROOT)/usr/bin/qt5/qmake
-ifneq ("$(wildcard $(TARGET_QMAKE))","")
 export OE_QMAKE_CFLAGS    := $(TARGET_GLOBAL_CFLAGS)
 export OE_QMAKE_CXXFLAGS  := $(TARGET_GLOBAL_CXXFLAGS)
 export OE_QMAKE_LDFLAGS   := $(TARGET_GLOBAL_LDFLAGS)
