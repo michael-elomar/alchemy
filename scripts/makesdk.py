@@ -322,6 +322,26 @@ def checkSymlinks(srcDir):
 
 #===============================================================================
 #===============================================================================
+def createQtConf(filePath):
+    with open(filePath, "w") as fout:
+        fout.write(
+            """[Paths]
+            Sysroot = ../../../usr
+            Prefix =
+            ArchData = lib/qt5
+            Data = share/qt5
+            LibraryExecutables = lib/qt5/libexec
+            Plugins = lib/qt5/plugins
+            Imports = lib/qt5/imports
+            Qml2Imports = lib/qt5/qml
+            Translations = share/qt5/translations
+            HostPrefix = ..
+            HostData = share/qt5
+            TargetSpec = linux-alchemy-g++
+            """)
+
+#===============================================================================
+#===============================================================================
 def getExportedIncludes(ctx, module):
     modulePath = module.fields["PATH"]
     includeDirs = module.fields["EXPORT_C_INCLUDES"].split()
@@ -902,6 +922,11 @@ def main():
         copySdk(ctx, srcDir, ctx.outDir)
         with open(os.path.join(srcDir, "atom.mk")) as fin:
             ctx.atom.write(fin.read())
+
+    # Create qt.conf to adjust sysroot and paths
+    if os.path.exists(os.path.join(ctx.outDir, "host", "usr", "bin", "qmake")) \
+            and not os.path.exists(os.path.join(ctx.outDir, "host", "usr", "bin", "qt.conf")):
+        createQtConf(os.path.join(ctx.outDir, "host", "usr", "bin", "qt.conf"))
 
     # Add some TARGET_XXX variables checks to make sure that the sdk is used
     # in the correct environment
