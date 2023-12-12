@@ -38,8 +38,12 @@ def processFile(ctx, filePath):
                     and dynEntry.valstr not in libraries:
                 libraries.append(dynEntry.valstr)
             if dynEntry.d_tag == libelf.DT_RPATH:
-                logging.warning("%s: uses DT_RPATH '%s'",
-                        filePath, dynEntry.valstr)
+                # DT_RPATH starting with $ORIGIN is ok
+                for dtpath in dynEntry.valstr.split(":"):
+                    if dtpath and not dtpath.startswith("$ORIGIN"):
+                        logging.warning("%s: uses DT_RPATH '%s'",
+                                filePath, dynEntry.valstr)
+                        break
         ctx.binaries[filePath] = libraries
         for lib in libraries:
             if lib not in ctx.libraries:
