@@ -267,6 +267,7 @@ def copyStaging(ctx, srcDir, dstDir, publicOnly=False):
         "android",
         "toolchain",
         "opt",
+        "dsp",
     ]
     exclude = ["*.la"]
 
