@@ -15,7 +15,7 @@ wrap_mode = 'nodownload'
 
 [properties]
 needs_exe_wrapper = true
-sys_root = '@TARGET_OUT_STAGING@'
+sys_root = '@MESON_SYS_ROOT@'
 pkg_config_libdir = '@TARGET_PKG_CONFIG_PATH@'
 #pkg_config_static = '@STATIC@'
 # enable meson build to pass a toolchain file to cmake

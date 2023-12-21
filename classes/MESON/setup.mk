@@ -186,6 +186,12 @@ else
   _meson_target_cxx := $(TARGET_CXX)
 endif
 
+ifeq ("$(TARGET_OS_FLAVOUR)","native")
+  _meson_sys_root :=
+else
+  _meson_sys_root := $(TARGET_OUT_STAGING)
+endif
+
 # Sed command to update template
 define _meson_cross-compile-conf-sed
 	-e "s%@TARGET_CC@%$(_meson_target_cc)%g" \
@@ -200,7 +206,7 @@ define _meson_cross-compile-conf-sed
 	-e "s%@MESON_CPP_ARGS@%$(call make-sq-comma-list,$(_meson_target_cxxflags) $(PRIVATE_CXXFLAGS))%g" \
 	-e "s%@MESON_CPP_LINK_ARGS@%$(call make-sq-comma-list,$(_meson_target_ldflags) $(PRIVATE_LDFLAGS))%g" \
 	\
-	-e "s%@TARGET_OUT_STAGING@%$(TARGET_OUT_STAGING)%g" \
+	-e "s%@MESON_SYS_ROOT@%$(_meson_sys_root)%g" \
 	-e "s%@TARGET_PKG_CONFIG_PATH@%$(TARGET_PKG_CONFIG_PATH)%g" \
 	\
 	-e "s%@MESON_SYSTEM@%$(_meson_target_system)%g" \
