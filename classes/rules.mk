@@ -31,6 +31,28 @@ else
   _mode_suffix :=
 endif
 
+# Check if we need to customize sanitizers flags (done first in case it changes
+# the toolchain)
+ifeq ("$(LOCAL_HOST_MODULE)","")
+  ifneq ("$(TARGET_SANITIZER_EXTRA_MACRO)","")
+    ifeq ("$(and $(call is-module-external,$(LOCAL_MODULE)),$(call strneq,$(LOCAL_MODULE_CLASS),QMAKE))","")
+      ifneq ($(call is-sanitizer-enabled,$(USE_ADDRESS_SANITIZER),$(LOCAL_MODULE)),)
+        $(call $(TARGET_SANITIZER_EXTRA_MACRO),address)
+      endif
+      ifneq ($(call is-sanitizer-enabled,$(USE_MEMORY_SANITIZER),$(LOCAL_MODULE)),)
+        $(call $(TARGET_SANITIZER_EXTRA_MACRO),memory)
+      endif
+      ifneq ($(call is-sanitizer-enabled,$(USE_THREAD_SANITIZER),$(LOCAL_MODULE)),)
+        $(call $(TARGET_SANITIZER_EXTRA_MACRO),thread)
+      endif
+      ifneq ($(call is-sanitizer-enabled,$(USE_UNDEFINED_SANITIZER),$(LOCAL_MODULE)),)
+        $(call $(TARGET_SANITIZER_EXTRA_MACRO),undefined)
+      endif
+    endif
+  endif
+endif
+
+
 # Build directory
 _module_build_dir := $(call module-get-build-dir,$(LOCAL_MODULE))
 

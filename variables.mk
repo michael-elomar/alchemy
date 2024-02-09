@@ -499,6 +499,10 @@ vars-TARGET += FINAL_PYTHON_REMOVE_PY
 vars-TARGET += LIBC_COPY_DBG_FILES
 vars-TARGET += FINAL_CHECK_LIB_PREFIX
 
+# Name of a macro to call to setup toolchain sanitizer, the first argument will
+# be the type of sanitizer
+vars-TARGET += SANITIZER_EXTRA_MACRO
+
 # Tools
 vars-TARGET += CROSS
 vars-TARGET += CC
