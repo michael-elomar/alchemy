@@ -464,7 +464,7 @@ $(call add-debug-flags)
 ifeq ("$(_mode_host)","")
 ifeq ("$(and $(call is-module-external,$(LOCAL_MODULE)),$(call strneq,$(LOCAL_MODULE_CLASS),QMAKE))","")
 ifneq ($(call is-sanitizer-enabled,$(USE_ADDRESS_SANITIZER),$(LOCAL_MODULE)),)
-  LOCAL_CFLAGS += -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls -O1 -D__ADDRESSSANITIZER__
+  LOCAL_CFLAGS += -fsanitize=address -fsanitize-recover=address -fno-omit-frame-pointer -fno-optimize-sibling-calls -O1 -D__ADDRESSSANITIZER__
   LOCAL_LDFLAGS += -fsanitize=address
 endif
 ifneq ($(call is-sanitizer-enabled,$(USE_MEMORY_SANITIZER),$(LOCAL_MODULE)),)
