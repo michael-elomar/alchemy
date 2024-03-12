@@ -39,6 +39,9 @@ ifeq ("$(LOCAL_HOST_MODULE)","")
       ifneq ($(call is-sanitizer-enabled,$(USE_ADDRESS_SANITIZER),$(LOCAL_MODULE)),)
         $(call $(TARGET_SANITIZER_EXTRA_MACRO),address)
       endif
+      ifneq ($(call is-sanitizer-enabled,$(USE_HWADDRESS_SANITIZER),$(LOCAL_MODULE)),)
+        $(call $(TARGET_SANITIZER_EXTRA_MACRO),hwaddress)
+      endif
       ifneq ($(call is-sanitizer-enabled,$(USE_MEMORY_SANITIZER),$(LOCAL_MODULE)),)
         $(call $(TARGET_SANITIZER_EXTRA_MACRO),memory)
       endif
@@ -466,6 +469,10 @@ ifeq ("$(and $(call is-module-external,$(LOCAL_MODULE)),$(call strneq,$(LOCAL_MO
 ifneq ($(call is-sanitizer-enabled,$(USE_ADDRESS_SANITIZER),$(LOCAL_MODULE)),)
   LOCAL_CFLAGS += -fsanitize=address -fsanitize-recover=address -fno-omit-frame-pointer -fno-optimize-sibling-calls -O1 -D__ADDRESSSANITIZER__
   LOCAL_LDFLAGS += -fsanitize=address
+endif
+ifneq ($(call is-sanitizer-enabled,$(USE_HWADDRESS_SANITIZER),$(LOCAL_MODULE)),)
+  LOCAL_CFLAGS += -fsanitize=hwaddress -fno-omit-frame-pointer -O1 -D__ADDRESSSANITIZER__
+  LOCAL_LDFLAGS += -fsanitize=hwaddress
 endif
 ifneq ($(call is-sanitizer-enabled,$(USE_MEMORY_SANITIZER),$(LOCAL_MODULE)),)
   LOCAL_CFLAGS += -fsanitize=memory -fno-omit-frame-pointer -fno-optimize-sibling-calls -O1 -D__MEMORYSANITIZER__

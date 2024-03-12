@@ -406,6 +406,7 @@ $(Q) $(PRIVATE_CXX) \
 	-shared \
 	-Wl,-soname -Wl,$(notdir $2) \
 	$(if $(and $(call streq,$(USE_ADDRESS_SANITIZER),0), \
+		$(call streq,$(USE_HWADDRESS_SANITIZER),0), \
 		$(call strneq,$(PRIVATE_NO_UNDEFINED),0)), \
 		-Wl$(comma)--no-undefined\
 	) \

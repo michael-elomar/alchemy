@@ -30,11 +30,11 @@ ANDROID_NDK_VERSION := $(shell test -f $(ANDROID_NDK_SOURCE_PROP) \
 ANDROID_NDK_MAJOR_VERSION := $(firstword $(subst ., ,$(ANDROID_NDK_VERSION)))
 ANDROID_NDK_MINOR_VERSION := $(word 2,$(subst ., ,$(ANDROID_NDK_VERSION)))
 
-# Alchemy only supports r17 to r20 NDKs
+# Alchemy only supports r17 to r26 NDKs
 ifneq ("$(firstword $(sort $(ANDROID_NDK_MAJOR_VERSION) 17))", "17")
   $(error NDK $(ANDROID_NDK_VERSION) is too old for this version of Alchemy)
 endif
-ifeq ("$(firstword $(sort $(ANDROID_NDK_MAJOR_VERSION) 26))", "26")
+ifeq ("$(firstword $(sort $(ANDROID_NDK_MAJOR_VERSION) 27))", "27")
   $(error NDK $(ANDROID_NDK_VERSION) is too recent for this version of Alchemy)
 endif
 
@@ -42,6 +42,13 @@ endif
 ifeq ("$(firstword $(sort $(ANDROID_NDK_MAJOR_VERSION) 18))", "18")
   ifneq ("$(TARGET_ANDROID_STL)","libc++")
     $(error NDK $(ANDROID_NDK_VERSION) requires TARGET_ANDROID_STL to be 'libc++')
+  endif
+endif
+
+# USE_HWADDRESS_SANITIZER is only available on r26 and newer
+ifneq ("$(USE_HWADDRESS_SANITIZER)", "0")
+  ifneq ("$(firstword $(sort $(ANDROID_NDK_MAJOR_VERSION) 26))", "26")
+    $(error USE_HWADDRESS_SANITIZER is not available on ndk-r$(ANDROID_NDK_MAJOR_VERSION))
   endif
 endif
 

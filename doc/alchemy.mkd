@@ -426,6 +426,8 @@ Mainly used by the android wrapper.
   </br>Default is `0`. Can be set to a list of modules or 1 for all modules.
 * `USE_ADDRESS_SANITIZER` : Enable options for address sanitizer.
   </br>Default is `0`. Can be set to a list of modules or 1 for all modules.
+* `USE_HWADDRESS_SANITIZER` : Enable options for hardware assisted address sanitizer.
+  </br>Default is `0`. Can be set to a list of modules or 1 for all modules.
 * `USE_MEMORY_SANITIZER` : Enable options for memory sanitizer.
   </br>Default is `0`. Set to 1 to enable.
 * `USE_THREAD_SANITIZER` : Enable options for thread sanitizer.
