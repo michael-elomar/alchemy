@@ -13,14 +13,6 @@ include $(BUILD_SYSTEM)/classes/GENERIC/rules.mk
 ###############################################################################
 ###############################################################################
 
-# Make sure this variable is defined (so make --warn-undefined-variables is quiet)
-# It can be defined by the user makefile to specify a list of headers to be
-# copied from linux source tree (list of absolute path)
-# They will be copied in $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/include/linux
-ifndef LINUX_EXPORTED_HEADERS
-  LINUX_EXPORTED_HEADERS :=
-endif
-
 # Linux image to generate
 ifndef TARGET_LINUX_IMAGE
   ifeq ("$(TARGET_LINUX_GENERATE_UIMAGE)","1")
@@ -62,40 +54,6 @@ ifeq ("$(wildcard $(LINUX_CONFIG_FILE))","")
     endif
   endif
 endif
-
-###############################################################################
-###############################################################################
-
-# Headers to be copied in $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)
-LINUX_EXPORTED_HEADERS_OVER := \
-	include/linux/media.h \
-	include/linux/media-bus-format.h \
-	include/linux/videodev2.h \
-	include/linux/v4l2-common.h \
-	include/linux/v4l2-controls.h \
-	include/linux/v4l2-mediabus.h \
-	include/linux/v4l2-subdev.h \
-	include/linux/i2c-dev.h \
-	include/linux/hid.h \
-	include/linux/hidraw.h \
-	include/linux/hiddev.h \
-	include/linux/const.h \
-	include/linux/ethtool.h \
-	include/linux/net.h \
-	include/linux/uinput.h \
-	include/linux/input.h \
-	include/linux/watchdog.h \
-	include/linux/spi/spidev.h \
-	include/linux/uhid.h \
-	include/linux/ion.h \
-	include/linux/sock_diag.h \
-	include/linux/inet_diag.h \
-	include/linux/iio/events.h \
-	include/linux/iio/types.h \
-	include/linux/cn_proc.h \
-	include/linux/prctl.h \
-	include/linux/input-event-codes.h \
-	include/linux/mii.h
 
 ###############################################################################
 ###############################################################################
@@ -289,22 +247,15 @@ ifneq ("$(LINUX_ARCH)","um")
 	$(Q) $(MAKE) $(LINUX_MAKE_ARGS) headers_install
 	@mkdir -p $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/include/linux
 	@mkdir -p $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/include/linux/spi
-	$(foreach header,$(LINUX_EXPORTED_HEADERS), \
-		$(Q) install -m 0644 -p -D $(header) \
-			$(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/include/linux/$(notdir $(header))$(endl) \
-	)
-	$(foreach header,$(LINUX_EXPORTED_HEADERS_OVER), \
-		$(Q) if [ -f $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/src/linux-headers/$(header) ]; then \
-			install -m 0644 -p -D $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/src/linux-headers/$(header) \
-				$(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/$(header); \
-		fi$(endl) \
-	)
+	@cp -r $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/src/linux-headers/include/* $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/include
 endif
 	@echo "Installing linux kernel headers: done"
 	@touch $@
 
 ###############################################################################
 ###############################################################################
+
+HEADERS_TO_CLEAN := $(notdir $(wildcard $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/src/linux-headers/include/*))
 
 # Custom clean rule. LOCAL_MODULE_FILENAME already deleted by common rule
 # make clean may fail, so ignore its error
@@ -320,14 +271,9 @@ linux-clean:
 	$(Q) rm -f $(TARGET_OUT_STAGING)/boot/bzImage
 	$(Q) rm -f $(TARGET_OUT_STAGING)/boot/uImage
 	$(Q) rm -f $(LINUX_HEADERS_DONE_FILE)
+	$(Q) rm -rf $(addprefix $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/include/,$(HEADERS_TO_CLEAN))
 	$(Q) rm -rf $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/src/linux-headers
 	$(Q) rm -rf $(LINUX_SDK_DIR)
-	$(foreach header,$(LINUX_EXPORTED_HEADERS),\
-		$(Q) rm -f $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/include/linux/$(notdir $(header))$(endl) \
-	)
-	$(foreach header,$(LINUX_EXPORTED_HEADERS_OVER),\
-		$(Q) rm -f $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/$(header)$(endl) \
-	)
 ifneq ("$(TARGET_LINUX_LINK_CPIO_IMAGE)","0")
 	$(Q) rm -f $(LINUX_BUILD_DIR)/rootfs.cpio.gz
 endif
