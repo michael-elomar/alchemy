@@ -82,11 +82,9 @@ ifneq ("$(firstword $(sort $(ANDROID_NDK_MAJOR_VERSION) 19))", "19")
   ANDROID_CROSS_TOOLS := $(ANDROID_CROSS_CC)
 else
   # Map host arch to android cross host arch
-  ifeq ("$(HOST_ARCH)","x64")
-    ANDROID_HOST_ARCH := x86_64
-  else
-    ANDROID_HOST_ARCH := $(HOST_ARCH)
-  endif
+  # This is fixed to x86_64 because even on macOS with apple silicon, the NDK is distributed with
+  # fat binaries (containing both x86_64 and aarch64) found in the darwin-x86_64 folder 
+  ANDROID_HOST_ARCH := x86_64
   # Map target arch to android toolchain base
   ifeq ("$(TARGET_ARCH)","arm")
     ifeq ("$(TARGET_CPU)","armv7a")
