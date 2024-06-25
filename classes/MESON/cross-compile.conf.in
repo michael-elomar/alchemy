@@ -4,6 +4,11 @@ c = '@TARGET_CC@'
 cpp = '@TARGET_CXX@'
 ar = '@TARGET_AR@'
 strip = '@TARGET_STRIP@'
+# both pkgconfig & pkg-config are provided because:
+# - meson 0.X versions only search for pkgconfig and will ignore png-config
+# - meson 1.X versions warn for deprecation when pkgconfig is provided, BUT
+#   will stop complaining if pkg-config is also supplied.
+pkgconfig = '@PKGCONFIG_BIN@'
 pkg-config = '@PKGCONFIG_BIN@'
 
 [built-in options]
