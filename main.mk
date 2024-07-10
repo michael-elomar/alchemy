@@ -130,6 +130,7 @@ unexport TARGET_ARCH
 msg = $(info $(CLR_CYAN)$1$(CLR_DEFAULT))
 $(info ----------------------------------------------------------------------)
 $(call msg,+ ALCHEMY_WORKSPACE_DIR = $(ALCHEMY_WORKSPACE_DIR))
+ifeq ("$(V)", "0")
 $(call msg,+ TARGET_PRODUCT = $(TARGET_PRODUCT))
 $(call msg,+ TARGET_PRODUCT_VARIANT = $(TARGET_PRODUCT_VARIANT))
 $(call msg,+ TARGET_OS = $(TARGET_OS))
@@ -141,6 +142,12 @@ $(call msg,+ TARGET_OUT = $(TARGET_OUT))
 $(call msg,+ TARGET_CONFIG_DIR = $(TARGET_CONFIG_DIR))
 $(call msg,+ TARGET_CC_PATH = $(TARGET_CC_PATH))
 $(call msg,+ TARGET_CC_VERSION = $(TARGET_CC_VERSION))
+else
+$(foreach v, $(sort $(filter HOST_%, $(.VARIABLES))), \
+      $(call msg,+ $(v) = $($(v))))
+$(foreach v, $(sort $(filter TARGET_%, $(.VARIABLES))), \
+      $(call msg,+ $(v) = $($(v))))
+endif
 $(info ----------------------------------------------------------------------)
 
 # Do some checking
