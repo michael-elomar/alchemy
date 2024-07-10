@@ -6,9 +6,9 @@
 ## Setup variables for darwin/iphonesimulator target.
 ###############################################################################
 
-TARGET_ARCH ?= x64
+TARGET_ARCH ?= $(HOST_ARCH)
 TARGET_FORCE_STATIC := 1
 
 TARGET_IPHONE_VERSION ?= 8.2
 APPLE_SDK := iphonesimulator
-APPLE_MINVERSION := -miphoneos-version-min=$(TARGET_IPHONE_VERSION)
+APPLE_MINVERSION := -miphonesimulator-version-min=$(TARGET_IPHONE_VERSION)
