@@ -354,9 +354,16 @@ else
   ifndef GNU_TARGET_NAME
     GNU_TARGET_NAME := $(TARGET_TOOLCHAIN_TRIPLET)
   endif
-  TARGET_AUTOTOOLS_CONFIGURE_ARGS += \
-	--build="$(GNU_BUILD_NAME)" \
-	--host="$(GNU_TARGET_NAME)"
+  ifeq ("$(GNU_BUILD_NAME)","$(GNU_TARGET_NAME)")
+    # When --build is equal to --host configure might wrongly assume that we are
+    # not cross compiling, in this case, pass only --host
+    TARGET_AUTOTOOLS_CONFIGURE_ARGS += \
+      --host="$(GNU_TARGET_NAME)"
+  else
+    TARGET_AUTOTOOLS_CONFIGURE_ARGS += \
+      --build="$(GNU_BUILD_NAME)" \
+      --host="$(GNU_TARGET_NAME)"
+  endif
 endif
 
 # Force static compilation if required
