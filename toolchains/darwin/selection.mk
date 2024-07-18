@@ -36,8 +36,8 @@ TARGET_LD ?= $(call gen_xcrun_wrapper,$(APPLE_SDK),ld)
 # works correclty
 # Moreover, some headers checks the target architecture, and fail to
 # preprocess if clang -E is not given the proper -arch flag, so we also include
-# it here.
-TARGET_CPP ?= $(call gen_xcrun_wrapper,$(APPLE_SDK),clang -E $(APPLE_ARCH))
+# the first one here (as clang -E is not able to work with multiple -arch flags)
+TARGET_CPP ?= $(call gen_xcrun_wrapper,$(APPLE_SDK),clang -E $(wordlist 1,2,$(APPLE_ARCH)))
 TARGET_NM ?= $(call gen_xcrun_wrapper,$(APPLE_SDK),nm)
 TARGET_STRIP ?= $(call gen_xcrun_wrapper,$(APPLE_SDK),strip)
 TARGET_RANLIB ?= $(call gen_xcrun_wrapper,$(APPLE_SDK),ranlib)
