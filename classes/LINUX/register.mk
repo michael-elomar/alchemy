@@ -50,8 +50,20 @@ else
   LINUX_SRCARCH := $(TARGET_LINUX_ARCH)
 endif
 
-# How to build
-LINUX_MAKE_ARGS := \
+ifneq ("$(TARGET_LINUX_USE_LLVM)", "")
+  # How to build
+  LINUX_MAKE_ARGS := \
+	ARCH="$(LINUX_ARCH)" \
+	LLVM=$(TARGET_LINUX_LLVM_ROOT_DIR)/ \
+	-C $(LOCAL_PATH) \
+	INSTALL_MOD_PATH="$(TARGET_OUT_STAGING)" \
+	INSTALL_HDR_PATH="$(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/src/linux-headers" \
+	O="$(LINUX_BUILD_DIR)" \
+	$(TARGET_LINUX_MAKE_BUILD_ARGS) $(LOCAL_LINUX_MAKE_BUILD_ARGS) \
+	DEPMOD="$(LINUX_DEPMOD)"
+else
+  # How to build
+  LINUX_MAKE_ARGS := \
 	ARCH="$(LINUX_ARCH)" \
 	CC="$(CCACHE) $(TARGET_LINUX_CROSS)gcc" \
 	CROSS_COMPILE="$(TARGET_LINUX_CROSS)" \
@@ -61,6 +73,8 @@ LINUX_MAKE_ARGS := \
 	O="$(LINUX_BUILD_DIR)" \
 	$(TARGET_LINUX_MAKE_BUILD_ARGS) $(LOCAL_LINUX_MAKE_BUILD_ARGS) \
 	DEPMOD="$(LINUX_DEPMOD)"
+endif
+
 
 # As a special exception, this variable is modified to make sure linux headers
 # are created before anything happens

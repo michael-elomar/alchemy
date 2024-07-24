@@ -31,7 +31,8 @@ define _linux-module-def-cmd-build
 	$(Q) $(MAKE) -C $(PRIVATE_LINUX_BUILD_DIR) M=$(PRIVATE_OBJ_DIR) \
 		$(if $(wildcard $(PRIVATE_LINUX_BUILD_DIR)/linuxarch),ARCH=$$(cat $(PRIVATE_LINUX_BUILD_DIR)/linuxarch)) \
 		$(PRIVATE_KBUILD_FLAGS) \
-		CROSS_COMPILE=$(if $(TARGET_LINUX_CROSS),$(TARGET_LINUX_CROSS),$(TARGET_CROSS)) \
+		$(if $(TARGET_LINUX_USE_LLVM),LLVM=$(TARGET_LINUX_LLVM_ROOT_DIR)/,) \
+		$(if $(TARGET_LINUX_USE_LLVM),,CROSS_COMPILE=$(if $(TARGET_LINUX_CROSS),$(TARGET_LINUX_CROSS),$(TARGET_CROSS))) \
 		KBUILD_EXTRA_SYMBOLS="$(call module-get-linux-extra-symbols,$(PRIVATE_ALL_LIBS))" \
 		modules
 endef
@@ -41,7 +42,8 @@ define _linux-module-def-cmd-install
 	$(Q) $(MAKE) -C $(PRIVATE_LINUX_BUILD_DIR) M=$(PRIVATE_OBJ_DIR) \
 		$(if $(wildcard $(PRIVATE_LINUX_BUILD_DIR)/linuxarch),ARCH=$$(cat $(PRIVATE_LINUX_BUILD_DIR)/linuxarch)) \
 		$(PRIVATE_KBUILD_FLAGS) \
-		CROSS_COMPILE=$(if $(TARGET_LINUX_CROSS),$(TARGET_LINUX_CROSS),$(TARGET_CROSS)) \
+		$(if $(TARGET_LINUX_USE_LLVM),LLVM=$(TARGET_LINUX_LLVM_ROOT_DIR)/,) \
+		$(if $(TARGET_LINUX_USE_LLVM),,CROSS_COMPILE=$(if $(TARGET_LINUX_CROSS),$(TARGET_LINUX_CROSS),$(TARGET_CROSS))) \
 		DEPMOD="$(LINUX_DEPMOD)" \
 		KBUILD_EXTRA_SYMBOLS="$(call module-get-linux-extra-symbols,$(PRIVATE_ALL_LIBS))" \
 		modules_install
@@ -58,7 +60,8 @@ define _linux-module-def-cmd-clean
 		$(MAKE) -C $(PRIVATE_LINUX_BUILD_DIR) M=$(PRIVATE_OBJ_DIR) \
 			$(if $(wildcard $(PRIVATE_LINUX_BUILD_DIR)/linuxarch),ARCH=$$(cat $(PRIVATE_LINUX_BUILD_DIR)/linuxarch)) \
 			$(PRIVATE_KBUILD_FLAGS) \
-			CROSS_COMPILE=$(if $(TARGET_LINUX_CROSS),$(TARGET_LINUX_CROSS),$(TARGET_CROSS)) \
+			$(if $(TARGET_LINUX_USE_LLVM),LLVM=$(TARGET_LINUX_LLVM_ROOT_DIR)/,) \
+			$(if $(TARGET_LINUX_USE_LLVM),,CROSS_COMPILE=$(if $(TARGET_LINUX_CROSS),$(TARGET_LINUX_CROSS),$(TARGET_CROSS))) \
 			clean || echo "Ignoring clean errors"; \
 	fi
 	$(Q) rm -f $(PRIVATE_BUILD_DIR)/$(PRIVATE_MODULE_FILENAME)
