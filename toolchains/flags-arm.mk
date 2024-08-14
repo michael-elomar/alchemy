@@ -33,8 +33,7 @@ endif
 # Arm mode specific flags
 TARGET_GLOBAL_CFLAGS_arm ?= \
 	-marm \
-	-O2 \
-	-fstrict-aliasing
+	-O2
 
 TARGET_GLOBAL_LDFLAGS_arm ?= \
 	-marm \
@@ -45,8 +44,7 @@ ifneq ("$(TARGET_DEFAULT_ARM_MODE)","arm")
 
 TARGET_GLOBAL_CFLAGS_thumb ?= \
 	-mthumb \
-	-Os \
-	-fno-strict-aliasing
+	-Os
 
 TARGET_GLOBAL_LDFLAGS_thumb ?= \
 	-mthumb \
