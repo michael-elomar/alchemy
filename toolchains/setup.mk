@@ -127,13 +127,16 @@ TARGET_GLOBAL_LDFLAGS += $(TARGET_GLOBAL_LDFLAGS_$(TARGET_CC_FLAVOUR))
 ## Update host include/lib directories.
 ###############################################################################
 
-# Make sure that staging dir are found first in case we want to override something
 # TODO add SDK dirs
 __extra-host-c-includes := $(strip \
 	$(foreach __dir,$(HOST_OUT_STAGING), \
 		$(__dir)/$(HOST_ROOT_DESTDIR)/include \
 	))
-HOST_GLOBAL_C_INCLUDES := $(__extra-host-c-includes) $(HOST_GLOBAL_C_INCLUDES)
+# -isystem is used to make sure packages (e.g perf) can override system headers by
+# putting a header with the same name in a -Ied directory.
+# Use *absolute* normalized paths, otherwise e.g autotools-based packages will break
+# since their compilation commands aren't launched from $TOP_DIR.
+HOST_GLOBAL_C_INCLUDES := $(call normalize-system-c-includes,$(__extra-host-c-includes)) $(HOST_GLOBAL_C_INCLUDES)
 
 # Add staging/sdk dirs to linker
 # To make sure linker does not hardcode path to libs, set rpath-link.
@@ -170,7 +173,11 @@ __extra-target-c-includes := $(strip \
 			$(__dir)/$(TARGET_ROOT_DESTDIR)/include \
 		) \
 	))
-TARGET_GLOBAL_C_INCLUDES := $(__extra-target-c-includes) $(TARGET_GLOBAL_C_INCLUDES)
+# -isystem is used to make sure packages (e.g perf) can override system headers by
+# putting a header with the same name in a -Ied directory.
+# Use *absolute* normalized paths, otherwise e.g autotools-based packages will break
+# since their compilation commands aren't launched from $TOP_DIR.
+TARGET_GLOBAL_C_INCLUDES := $(call normalize-system-c-includes,$(__extra-target-c-includes)) $(TARGET_GLOBAL_C_INCLUDES)
 
 # Add staging/sdk dirs to linker
 # To make sure linker does not hardcode path to libs, set rpath-link
