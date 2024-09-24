@@ -266,7 +266,9 @@ Normally not needed, default values are determined based on target setting.
 Mainly used by the android wrapper.
 
 * `TARGET_GLOBAL_C_INCLUDES` : List of full path to directories to add for all
-  file compiled. The -I prefix will be appended so do not put it.
+  file compiled. `-I` is prepended if neither `-I` nor `-isystem` are already prefixed.
+  Existing prefixes are not changed. Unless you're hacking on Alchemy internals,
+  don't specify a prefix.
 * `TARGET_GLOBAL_ASFLAGS` : Flags to pass to the assembler.
 * `TARGET_GLOBAL_CFLAGS` : Flags to pass to the C **and** C++ compiler.
 * `TARGET_GLOBAL_CXXFLAGS` : Flags to pass to the C++ compiler only.
@@ -832,7 +834,7 @@ as if it was given in `LOCAL_COPY_FILES`
 List of files installed in the staging directory. Dependent modules can copy those
 files to an other staging directory location using `LOCAL_COPY_FROM`. Alternatively,
 dependent modules can access this list using
-`$(call module-get-export,protobuf-base,FILES)` from a macro (ex:
+`$(call module-get-export,somemodulename,FILES)` from a macro (ex:
 `LOCAL_CMD_POST_INSTALL`, a custom macro, ...).
 
 #### `LOCAL_COPY_FROM`

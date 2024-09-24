@@ -95,7 +95,7 @@ TARGET_MESON_INSTALL_ARGS :=
 
 # Flags
 _meson_host_cflags := \
-	$(call normalize-system-c-includes,$(HOST_GLOBAL_C_INCLUDES),HOST) \
+	$(call normalize-c-includes,$(HOST_GLOBAL_C_INCLUDES)) \
 	$(HOST_GLOBAL_CFLAGS)
 
 _meson_host_cxxflags := \
@@ -162,7 +162,7 @@ _meson_target_endian := little
 
 # Flags
 _meson_target_cflags := \
-	$(call normalize-system-c-includes,$(TARGET_GLOBAL_C_INCLUDES),TARGET) \
+	$(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(TARGET_GLOBAL_CFLAGS)
 
 _meson_target_cxxflags := \

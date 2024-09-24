@@ -150,7 +150,7 @@ HOST_AUTOTOOLS_ASFLAGS := \
 	$(HOST_GLOBAL_ASFLAGS)
 
 HOST_AUTOTOOLS_CPPFLAGS := \
-	$(call normalize-system-c-includes,$(HOST_GLOBAL_C_INCLUDES),HOST)
+	$(call normalize-c-includes,$(HOST_GLOBAL_C_INCLUDES))
 
 HOST_AUTOTOOLS_CFLAGS := \
 	$(HOST_AUTOTOOLS_CPPFLAGS) \
@@ -253,7 +253,7 @@ TARGET_AUTOTOOLS_ASFLAGS := \
 
 TARGET_AUTOTOOLS_CPPFLAGS := \
 	$(filter --sysroot=%,$(TARGET_GLOBAL_CFLAGS)) \
-	$(call normalize-system-c-includes,$(TARGET_GLOBAL_C_INCLUDES),TARGET)
+	$(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES))
 
 TARGET_AUTOTOOLS_CFLAGS := \
 	$(TARGET_AUTOTOOLS_CPPFLAGS) \

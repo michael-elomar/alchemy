@@ -76,7 +76,7 @@ TARGET_CMAKE_ASM_FLAGS := \
 	$(TARGET_GLOBAL_ASFLAGS)
 
 TARGET_CMAKE_C_FLAGS := \
-	$(call normalize-system-c-includes,$(TARGET_GLOBAL_C_INCLUDES),TARGET) \
+	$(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES)) \
 	$(TARGET_GLOBAL_CFLAGS)
 
 TARGET_CMAKE_CXX_FLAGS := \

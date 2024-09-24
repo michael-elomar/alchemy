@@ -309,7 +309,9 @@ Mainly used by the android wrapper.</p>
 
 <ul>
 <li><code>TARGET_GLOBAL_C_INCLUDES</code> : List of full path to directories to add for all
-file compiled. The -I prefix will be appended so do not put it.</li>
+file compiled. <code>-I</code> is prepended if neither <code>-I</code> nor <code>-isystem</code> are already prefixed.
+Existing prefixes are not changed. Unless you're hacking on Alchemy internals,
+don't specify a prefix.</li>
 <li><code>TARGET_GLOBAL_ASFLAGS</code> : Flags to pass to the assembler.</li>
 <li><code>TARGET_GLOBAL_CFLAGS</code> : Flags to pass to the C <strong>and</strong> C++ compiler.</li>
 <li><code>TARGET_GLOBAL_CXXFLAGS</code> : Flags to pass to the C++ compiler only.</li>
@@ -900,6 +902,30 @@ prepended for <code>dst</code>.</p>
 
 <p>Internally it simply lists the content of the source directory and copy each file
 as if it was given in <code>LOCAL_COPY_FILES</code></p>
+
+<h4><code>LOCAL_EXPORT_FILES</code></h4>
+
+<p>List of files installed in the staging directory. Dependent modules can copy those
+files to an other staging directory location using <code>LOCAL_COPY_FROM</code>. Alternatively,
+dependent modules can access this list using
+<code>$(call module-get-export,somemodulename,FILES)</code> from a macro (ex:
+<code>LOCAL_CMD_POST_INSTALL</code>, a custom macro, ...).</p>
+
+<h4><code>LOCAL_COPY_FROM</code></h4>
+
+<p>List of files to copy from another module. Files are specified like this:
+module:src<em>dir:dst</em>dir:file_pattern</p>
+
+<ul>
+<li><code>module</code> is the source module to copy files from. Only files explicitly exported with
+      LOCAL<em>EXPORT</em>FILES or implicitly exported with LOCAL<em>COPY</em>FILES and
+      LOCAL<em>INSTALL</em>HEADERS are considered.</li>
+<li><code>src_dir</code> is the  source directory, relative to module path or absolute path</li>
+<li><code>dst_dir</code> is the destination directory, relative to staging dir or absolute path</li>
+<li><code>file_pattern</code> is a file pattern as accepted by make <code>patsusbst</code> text function,
+files matching this pattern in the source directory are copied to the destination
+directory.</li>
+</ul>
 
 <h4><code>LOCAL_CREATE_LINKS</code></h4>
 

@@ -1385,59 +1385,40 @@ add-debug-flags = \
 	)
 
 ###############################################################################
-## Normalize a list of includes. It adds -I if needed.
-## $1 : list of includes
+## Normalize include search paths.
 ###############################################################################
-normalize-c-includes = $(strip \
+
+# $1: prefix
+# $2: word to check
+isprefix = \
+	$(if $(filter $1%,$2),$(true),$(false))
+
+isincludedirective = $(if $(call isprefix,-I,$1),$(true),$(call isprefix,-isystem,$1))
+
+normalize-c-includes-internal = $(strip \
 	$(foreach __inc,$1, \
-		$(addprefix -I,$(patsubst -I%,%,$(__inc))) \
+		$(if $(call isincludedirective,$(__inc)),$(__inc),$(addprefix $2,$(__inc))) \
 	))
 
 # Same but convert path relative to top
-normalize-c-includes-rel = $(strip \
+normalize-c-includes-rel-internal = $(strip \
 	$(foreach __inc,$1, \
-		$(addprefix -I,$(call path-from-top,$(patsubst -I%,%,$(__inc)))) \
+		$(if $(call isincludedirective,$(__inc)),$(__inc),$(addprefix $2,$(call path-from-top,$(__inc)))) \
 	))
 
-# Same as normalize-c-includes but uses the -isystem instead of -I flag
-# Note gcc 4.4.3 of android seems to mess things up when this flag is uses in C++
-# Note yocto already includes a --sysroot which conflicts with the -isystem and
-# the #include_next macro
-# FIXME : adding a space between -isystem an the patch causes troubles when invoking
-# clangs' cpp (preprocessor) under darwin at least.
-# $2 can be HOST or TARGET. if empty TARGET is assumed
-normalize-system-c-includes = $(strip \
-	$(if $(and $(call strneq,$2,HOST), \
-		$(or $(call streq,$(TARGET_CC_VERSION),4.4.3), \
-			$(call streq,$(TARGET_CC_VERSION),4.9.3), \
-			$(call streq,$(TARGET_OS_FLAVOUR),yocto)) \
-		), \
-		$(call normalize-c-includes,$1), \
-		\
-		$(foreach __inc,$1, \
-			$(addprefix -isystem,$(patsubst -I%,%,$(__inc))) \
-		)) \
-	)
+# All of these take a list of words, and adds -I or -isystem as a prefix to each word
+# that isn't already prefixed. The intent is that if a specific path should use -isystem
+# and not -I, calling normalize-c-includes(-rel) doesn't mess with it.
+# This allows toolchain definitions to specify whether they want -isystem or -I.
+#
+# The -rel versions, when substituting, also make the paths relative to TOP_DIR.
 
-# Same as normalize-c-includes-rel but uses the -isystem instead of -I flag
-# Note gcc 4.4.3 of android seems to mess things up when this flag is uses in C++
-# Note yocto already includes a --sysroot which conflicts with the -isystem and
-# the #include_next macro
-# FIXME : the extra space does not cause too much troubles for relative path it is
-# not used with the preprocessor (autotools only)
-# $2 can be HOST or TARGET. if empty TARGET is assumed
-normalize-system-c-includes-rel = $(strip \
-	$(if $(and $(call strneq,$2,HOST), \
-		$(or $(call streq,$(TARGET_CC_VERSION),4.4.3), \
-			$(call streq,$(TARGET_CC_VERSION),4.9.3), \
-			$(call streq,$(TARGET_OS_FLAVOUR),yocto)) \
-		), \
-		$(call normalize-c-includes-rel,$1), \
-		\
-		$(foreach __inc,$1, \
-			$(addprefix -isystem ,$(call path-from-top,$(patsubst -I%,%,$(__inc)))) \
-		)) \
-	)
+normalize-c-includes = $(call normalize-c-includes-internal,$1,-I)
+normalize-c-includes-rel = $(call normalize-c-includes-rel-internal,$1,-I)
+
+# Unless you know for sure that you want -isystem, use normalize-c-includes(-rel) instead.
+normalize-system-c-includes = $(call normalize-c-includes-internal,$1,-isystem)
+normalize-system-c-includes-rel = $(call normalize-c-includes-rel-internal,$1,-isystem)
 
 ###############################################################################
 ## Copy files helpers.
