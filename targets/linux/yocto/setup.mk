@@ -70,7 +70,6 @@ TARGET_NM      := $(YOCTO_TOOLCHAIN_PATH)/$(call yocto_get_variable,NM)
 TARGET_GLOBAL_CFLAGS     := $(TARGET_GLOBAL_CFLAGS)     $(call yocto_get_variable,CFLAGS)
 TARGET_GLOBAL_CXXFLAGS   := $(TARGET_GLOBAL_CXXFLAGS)   $(call yocto_get_variable,CXXFLAGS)
 TARGET_GLOBAL_LDFLAGS    := $(TARGET_GLOBAL_LDFLAGS)    $(call yocto_get_variable,LDFLAGS)
-TARGET_GLOBAL_C_INCLUDES := $(TARGET_GLOBAL_C_INCLUDES) -isystem$(YOCTO_SDK_TARGET_SYSROOT)/usr/include
 
 # Qt variables
 ifneq ("$(wildcard $(YOCTO_SDK_HOST_SYSROOT)/usr/bin/qt5/qmake)","")
