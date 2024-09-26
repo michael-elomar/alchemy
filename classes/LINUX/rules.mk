@@ -8,6 +8,8 @@
 
 ifeq ("$(LOCAL_MODULE)", "linux")
   include $(BUILD_SYSTEM)/classes/LINUX/rules-linux.mk
+else ifeq ("$(LOCAL_MODULE)", "linux-headers")
+  include $(BUILD_SYSTEM)/classes/LINUX/rules-linux-headers.mk
 else ifeq ("$(LOCAL_MODULE)", "perf")
   include $(BUILD_SYSTEM)/classes/LINUX/rules-perf.mk
 endif

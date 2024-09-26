@@ -190,7 +190,7 @@ endef
 ###############################################################################
 
 # Avoid compiling kernel at same time than header installation by adding a prerequisite
-$(LINUX_BUILD_DIR)/$(LOCAL_MODULE_FILENAME): $(LINUX_BUILD_DIR)/.config $(LINUX_HEADERS_DONE_FILE)
+$(LINUX_BUILD_DIR)/$(LOCAL_MODULE_FILENAME): $(LINUX_BUILD_DIR)/.config
 	@mkdir -p $(LINUX_BUILD_DIR)/drivers/parrot/nand
 	@echo "Checking linux kernel config: $(LINUX_CONFIG_FILE)"
 	$(Q) yes "" 2>/dev/null | $(MAKE) $(LINUX_MAKE_ARGS) oldconfig
@@ -231,52 +231,6 @@ endif
 	$(Q) echo "$(LINUX_ARCH)" > $(LINUX_BUILD_DIR)/linuxarch
 	@echo "Linux kernel built"
 	@touch $@
-
-###############################################################################
-###############################################################################
-
-# Linux headers
-# Order-only dependency on config to avoid parallel execution of linux makefile
-.PHONY: linux-headers
-linux-headers: $(LINUX_HEADERS_DONE_FILE)
-$(LINUX_HEADERS_DONE_FILE): | $(LINUX_BUILD_DIR)/.config
-ifneq ("$(LINUX_ARCH)","um")
-	@mkdir -p $(LINUX_BUILD_DIR)
-	@mkdir -p $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/src/linux-headers
-	@echo "Installing linux kernel headers"
-	$(Q) $(MAKE) $(LINUX_MAKE_ARGS) headers_install
-	@mkdir -p $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/include/linux
-	@mkdir -p $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/include/linux/spi
-	@cp -r $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/src/linux-headers/include/* $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/include
-endif
-	@echo "Installing linux kernel headers: done"
-	@touch $@
-
-###############################################################################
-###############################################################################
-
-HEADERS_TO_CLEAN := $(notdir $(wildcard $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/src/linux-headers/include/*))
-
-# Custom clean rule. LOCAL_MODULE_FILENAME already deleted by common rule
-# make clean may fail, so ignore its error
-.PHONY: linux-clean
-linux-clean:
-	$(Q) if [ -d $(LINUX_BUILD_DIR) ]; then \
-		$(MAKE) $(LINUX_MAKE_ARGS) --ignore-errors \
-			clean || echo "Ignoring clean errors"; \
-	fi
-	$(Q) rm -rf $(TARGET_OUT_STAGING)/lib/modules
-	$(Q) rm -f $(TARGET_OUT_STAGING)/boot/Image
-	$(Q) rm -f $(TARGET_OUT_STAGING)/boot/zImage
-	$(Q) rm -f $(TARGET_OUT_STAGING)/boot/bzImage
-	$(Q) rm -f $(TARGET_OUT_STAGING)/boot/uImage
-	$(Q) rm -f $(LINUX_HEADERS_DONE_FILE)
-	$(Q) rm -rf $(addprefix $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/include/,$(HEADERS_TO_CLEAN))
-	$(Q) rm -rf $(TARGET_OUT_STAGING)/$(TARGET_ROOT_DESTDIR)/src/linux-headers
-	$(Q) rm -rf $(LINUX_SDK_DIR)
-ifneq ("$(TARGET_LINUX_LINK_CPIO_IMAGE)","0")
-	$(Q) rm -f $(LINUX_BUILD_DIR)/rootfs.cpio.gz
-endif
 
 ###############################################################################
 ###############################################################################
