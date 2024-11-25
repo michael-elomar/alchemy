@@ -98,9 +98,11 @@ define _internal-qmake-gen-deps-darwin
 		echo "    target.path = $(if $(PRIVATE_HAS_QT_SYSROOT),$(TARGET_OUT_STAGING))/$(TARGET_DEFAULT_BIN_DESTDIR)"; \
 		echo "}"; \
 		echo "INSTALLS += target"; \
-		echo "INCLUDEPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
-		echo "DEPENDPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
+		echo "INCLUDEPATH += $(PRIVATE_C_INCLUDES)"; \
+		echo "DEPENDPATH += $(PRIVATE_C_INCLUDES)"; \
 		echo "QMAKE_CFLAGS += $(filter-out -O0 -O1 -O2 -O3,$(TARGET_QMAKE_CFLAGS) $(PRIVATE_CFLAGS))"; \
+		echo "QMAKE_CFLAGS += $(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES))"; \
+		echo "QMAKE_CXXFLAGS += $(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES))"; \
 		echo "QMAKE_CXXFLAGS += $(filter-out -O0 -O1 -O2 -O3,$(filter-out -std=%,$(TARGET_QMAKE_CFLAGS)))"; \
 		echo "QMAKE_CXXFLAGS += $(filter-out -O0 -O1 -O2 -O3,$(TARGET_GLOBAL_CXXFLAGS))"; \
 		echo "QMAKE_CXXFLAGS += $(filter-out -O0 -O1 -O2 -O3,$(filter-out -std=%,$(PRIVATE_CFLAGS)))"; \
@@ -142,14 +144,16 @@ define _internal-qmake-gen-deps
 		echo "    target.path = $(if $(PRIVATE_HAS_QT_SYSROOT),$(TARGET_OUT_STAGING))/$(TARGET_DEFAULT_BIN_DESTDIR)"; \
 		echo "}"; \
 		echo "INSTALLS += target"; \
-		echo "INCLUDEPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
-		echo "DEPENDPATH += $(PRIVATE_C_INCLUDES) $(TARGET_GLOBAL_C_INCLUDES)"; \
+		echo "INCLUDEPATH += $(PRIVATE_C_INCLUDES)"; \
+		echo "DEPENDPATH += $(PRIVATE_C_INCLUDES)"; \
 		echo "QMAKE_CC = $(TARGET_CC)"; \
 		echo "QMAKE_CXX = $(TARGET_CXX)"; \
 		echo "QMAKE_LINK = $(TARGET_CXX)"; \
 		echo "QMAKE_LINK_C = $(TARGET_CC)"; \
 		echo "QMAKE_RC = $(TARGET_WINDRES)"; \
 		echo "QMAKE_CFLAGS += $(filter-out -O0 -O1 -O2 -O3,$(TARGET_QMAKE_CFLAGS) $(PRIVATE_CFLAGS))"; \
+		echo "QMAKE_CFLAGS += $(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES))"; \
+		echo "QMAKE_CXXFLAGS += $(call normalize-c-includes,$(TARGET_GLOBAL_C_INCLUDES))"; \
 		echo "QMAKE_CXXFLAGS += $(filter-out -O0 -O1 -O2 -O3,$(filter-out -std=%,$(TARGET_QMAKE_CFLAGS)))"; \
 		echo "QMAKE_CXXFLAGS += $(filter-out -O0 -O1 -O2 -O3,$(TARGET_GLOBAL_CXXFLAGS))"; \
 		echo "QMAKE_CXXFLAGS += $(filter-out -O0 -O1 -O2 -O3,$(filter-out -std=%,$(PRIVATE_CFLAGS)))"; \
