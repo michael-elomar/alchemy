@@ -30,7 +30,8 @@ ifneq ("$(TARGET_NOSTRIP_FINAL)","1")
   endif
   ifeq ("$(TARGET_OS)","linux")
     ifneq ("$(TARGET_LINUX_CROSS)","")
-      MAKEFINAL_ARGS += --strip-kernel="$(TARGET_LINUX_CROSS)strip --strip-debug"
+      TARGET_LINUX_STRIP ?= $(TARGET_LINUX_CROSS)strip
+      MAKEFINAL_ARGS += --strip-kernel="$(TARGET_LINUX_STRIP) --strip-debug"
     endif
   endif
 endif
