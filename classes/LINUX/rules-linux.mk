@@ -235,30 +235,26 @@ endif
 ###############################################################################
 ###############################################################################
 
+define linux-config-rule
+@echo "Configuring linux kernel: $(LINUX_CONFIG_FILE)"
+$(if $(call is-var-defined,custom.linux.config.sedfiles), \
+	$(error Sed files found. We cannot save in this case))
+$(Q) $(MAKE) $(LINUX_MAKE_ARGS) $(call subst,linux-,,$@)
+$(Q) $(linux-save-config)
+endef
+
 # Kernel configuration
 .PHONY: linux-menuconfig
 linux-menuconfig: $(LINUX_BUILD_DIR)/.config
-	@echo "Configuring linux kernel: $(LINUX_CONFIG_FILE)"
-	$(if $(call is-var-defined,custom.linux.config.sedfiles), \
-		$(error Sed files found. We cannot save in this case))
-	$(Q) $(MAKE) $(LINUX_MAKE_ARGS) menuconfig
-	$(Q) $(linux-save-config)
+	$(linux-config-rule)
 
 .PHONY: linux-xconfig
 linux-xconfig: $(LINUX_BUILD_DIR)/.config
-	@echo "Configuring linux kernel: $(LINUX_CONFIG_FILE)"
-	$(if $(call is-var-defined,custom.linux.config.sedfiles), \
-		$(error Sed files found. We cannot save in this case))
-	$(Q) $(MAKE) $(LINUX_MAKE_ARGS) xconfig
-	$(Q) $(linux-save-config)
+	$(linux-config-rule)
 
 .PHONY: linux-nconfig
 linux-nconfig: $(LINUX_BUILD_DIR)/.config
-	@echo "Configuring linux kernel: $(LINUX_CONFIG_FILE)"
-	$(if $(call is-var-defined,custom.linux.config.sedfiles), \
-		$(error Sed files found. We cannot save in this case))
-	$(Q) $(MAKE) $(LINUX_MAKE_ARGS) nconfig
-	$(Q) $(linux-save-config)
+	$(linux-config-rule)
 
 .PHONY: linux-config
 linux-config: linux-xconfig
@@ -287,11 +283,15 @@ linux-reset-config:
 ###############################################################################
 ###############################################################################
 
-# Default rule to invoke kernel specific targets (like cscope, tags, help ...)
-ifneq ("$(filter linux-%,$(MAKECMDGOALS))","")
-.PHONY: linux-%
-linux-%: $(LINUX_BUILD_DIR)/.config
-	@echo "Building linux kernel $* target with $(LINUX_CONFIG_FILE)"
-	$(Q) $(MAKE) $(LINUX_MAKE_ARGS) $*
-	$(Q) $(linux-save-config)
-endif
+# Any custom targets defined here must be in linux-get-targets (see setup.mk),
+# otherwise Alchemy won't load this file when only given -A linux-something.
+
+define linux-generic-rule
+@echo "Building linux kernel $@ target with $(LINUX_CONFIG_FILE)"
+$(Q) $(MAKE) $(LINUX_MAKE_ARGS) $(patsubst linux-%,%,$@)
+$(Q) $(linux-save-config)
+endef
+
+.PHONY: linux-dtbs
+linux-dtbs: $(LINUX_BUILD_DIR)/.config
+	$(linux-generic-rule)
