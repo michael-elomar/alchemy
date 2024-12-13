@@ -85,7 +85,9 @@ LINUX_HEADERS_DONE_FILE := $(LINUX_HEADERS_BUILD_DIR)/linux-headers.done
 
 # As a special exception, this variable is modified to make sure linux headers
 # are created before anything happens
-TARGET_GLOBAL_PREREQUISITES += $(LINUX_HEADERS_DONE_FILE)
+# Some product variants don't need to build the Linux kernel (e.g classic_airsdk),
+# in which case linux-headers mustn't be a global prerequisite.
+TARGET_GLOBAL_PREREQUISITES += $(if $(call is-module-in-build-config,$(LOCAL_MODULE)),$(LINUX_HEADERS_DONE_FILE),)
 
 LINUX_HEADERS_MAKE_ARGS := \
 	ARCH="$(LINUX_ARCH)" \
