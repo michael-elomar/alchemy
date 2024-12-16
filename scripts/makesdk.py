@@ -575,16 +575,21 @@ def processModule(ctx, module, headersOnly=False, publicOnly=False):
     # Config file
     # Note: for sdk modules, LOCAL_CONFIG_FILES will simply indicate that a
     # config file is present, reconfiguration will not be possible.
-    if "CONFIG_FILES" in module.fields:
+    if "CONFIG_FILES" in module.fields or "CUSTOM_CONFIG_FILE" in module.fields:
         configFileName = "%s.config" % module.name
-        srcFilePath = os.path.join(ctx.buildDir, module.name, configFileName)
+        if "CUSTOM_CONFIG_FILE" in module.fields:
+            srcFilePath = module.fields['CUSTOM_CONFIG_FILE']
+        else:
+            srcFilePath = os.path.join(ctx.buildDir, module.name, configFileName)
+
         dstFilePath = os.path.join(ctx.outDir, "config", configFileName)
         if os.path.exists(srcFilePath):
             ctx.addFile(srcFilePath, dstFilePath)
-            ctx.atom.write("LOCAL_CONFIG_FILES := 1\n")
-            ctx.atom.write("sdk.%s.config := $(LOCAL_PATH)/config/%s\n" % (
+            if not "CUSTOM_CONFIG_FILE" in module.fields:
+                ctx.atom.write("LOCAL_CONFIG_FILES := 1\n")
+                ctx.atom.write("sdk.%s.config := $(LOCAL_PATH)/config/%s\n" % (
                     module.name, configFileName))
-            ctx.atom.write("$(call load-config)\n")
+                ctx.atom.write("$(call load-config)\n")
 
     # Set LOCAL_LIBRARIES with the content of public dependencies only
     if not headersOnly:

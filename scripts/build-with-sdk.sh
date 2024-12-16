@@ -17,8 +17,9 @@ export ALCHEMY_TARGET_OUT=$(pwd)/out
 export ALCHEMY_TARGET_SDK_DIRS=$(cd $(pwd)/sdk && pwd -P)
 
 # Generate a full config
-rm -f ${ALCHEMY_TARGET_CONFIG_DIR}/global.config
+rm -f ${ALCHEMY_TARGET_CONFIG_DIR}/*.config
 ${ALCHEMAKE} config-force-all config-update
+cp -r ${ALCHEMY_TARGET_SDK_DIRS}/config/*.config ${ALCHEMY_TARGET_CONFIG_DIR}
 
 # Go !
 if [ "${JKS_DO_SAST}" = "true" ]; then

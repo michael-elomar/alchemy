@@ -274,6 +274,11 @@ vars-LOCAL += EXPORT_FILES
 # Inform that some exported variables need to be expanded in this module variables
 vars-LOCAL += EXPAND_CUSTOM_VARIABLES
 
+# Packages that use config files in product/.../.../config for their own purposes
+# (e.g linux, busybox, ...) need to set this to true to make sure that makesdk
+# puts said config in the SDK without treating it as an usual Alchemy config.
+vars-LOCAL += CUSTOM_CONFIG_FILE
+
 # Module class :
 # STATIC_LIBRARY
 # SHARED_LIBRARY

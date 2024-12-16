@@ -864,6 +864,19 @@ ifeq ($(CONFIG_XXX),y)
 <p>It is shorter and allow to use the flag <code>--warn-undefined-variables</code> during
 <code>make</code> invocation.</p>
 
+<h4><code>LOCAL_CUSTOM_CONFIG_FILE</code></h4>
+
+<p>This tells Alchemy to include the configuration file for this package in the
+SDK without parsing it. The Linux kernel is a typical example: its .config
+file uses the same syntax (Kconfig) as Alchemy's config file, but Alchemy has
+no business parsing it.</p>
+
+<p>Typical usage:</p>
+
+<pre>
+LOCAL_CUSTOM_CONFIG_FILE := $(call module-get-config,$(LOCAL_MODULE))
+</pre>
+
 <h4><code>LOCAL_COPY_FILES</code></h4>
 
 <p>List of files to be copied in the staging directory. Files are specified like
