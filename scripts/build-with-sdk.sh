@@ -22,12 +22,18 @@ ${ALCHEMAKE} config-force-all config-update
 
 # Go !
 if [ "${JKS_DO_SAST}" = "true" ]; then
-    BUILD_COMMAND="${ALCHEMAKE} $@"
 
     if [ "${CODECHECKER_HOME}" = "" ]; then
         export CODECHECKER_HOME=/opt/codechecker
     fi
+    if [ ! -d "${CODECHECKER_HOME}" ]; then
+        echo "\e[1;31mPlease set the CODECHECKER_HOME environment variable to a valid location... Aborting.\e[0m"
+        exit 1
+    fi
+
     . ${CODECHECKER_HOME}/venv/bin/activate
+
+    BUILD_COMMAND="${ALCHEMAKE} $@"
 
     CodeChecker log -b "${BUILD_COMMAND}" \
         --keep-link \
