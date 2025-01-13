@@ -37,10 +37,6 @@ else
     yocto_sanitize_env :=
 endif
 
-ifneq ("$(findstring codechecker,$(LD_LIBRARY_PATH))","")
-    yocto_sanitize_env := unset LD_LIBRARY_PATH;
-endif
-
 # Get a variable from the environment file
 # $1: variable name
 yocto_get_variable = $(shell $(yocto_sanitize_env) . $(YOCTO_ENV_FILE) && echo $$$1)
