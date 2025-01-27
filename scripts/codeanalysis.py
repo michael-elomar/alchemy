@@ -6,13 +6,7 @@ import os
 import subprocess
 import sys
 
-_IGNORE_LIST = [
-    "clang-diagnostic-unused-parameter",
-    "clang-diagnostic-double-promotion",
-    "clang-diagnostic-reserved-identifier",
-    "clang-diagnostic-reserved-macro-identifier",
-    "cert-err33-c",
-]
+_IGNORE_LIST = []
 
 
 def _exec_cmd(cmd: str) -> None:
