@@ -6,7 +6,26 @@ import os
 import subprocess
 import sys
 
-_IGNORE_LIST = []
+_ANALYZE_OPTIONS_LIST =[
+    # Delete analysis reports stored in the output directory.
+    "--clean",
+
+    # Perform Cross Translation Unit (CTU) analysis, both 'collect' and 'analyze' phases.
+    "--ctu",
+
+    # If Cross-TU analysis is enabled and fails for some reason, try to re analyze the same
+    # translation unit without Cross-TU enabled.
+    "--ctu-reanalyze-on-failure",
+
+    # Filter out reports from files that were skipped from the analysis.
+    "--drop-reports-from-skipped-files",
+
+    # There are some implicit include paths which are only used by GCC (include-fixed).
+    # This flag determines whether these should be kept among the implicit include paths.
+    "--keep-gcc-include-fixed"
+]
+
+_DISABLE_LIST = []
 
 
 def _exec_cmd(cmd: str) -> None:
@@ -39,6 +58,9 @@ def main() -> None:
     parser.add_argument("-j", "--jobs", help="parallel jobs", default="1")
     parser.add_argument("-n", "--name", help="name of analysis")
     parser.add_argument("-r", "--root", help="root directory")
+    parser.add_argument("-i",
+        "--ignore",
+        help="Path to the Skipfile dictating which project files should be omitted from analysis")
 
     options = parser.parse_args()
 
@@ -53,11 +75,16 @@ def main() -> None:
     logging.addLevelName(logging.DEBUG, "D")
     logging.getLogger().setLevel(logging.INFO)
 
+    analyze_options = " ".join(_ANALYZE_OPTIONS_LIST)
+    analyze_disable = "".join([f" --disable {x}" for x in _DISABLE_LIST])
+    analyze_ignore  = " --ignore {options.ignore}" if options.ignore else ""
+
     _exec_cmd(
         f"CodeChecker analyze {options.jsondb}"
-        f" --clean"
         f" --name {options.name}"
-        + "".join([f" --disable {x}" for x in _IGNORE_LIST]) +
+        f" {analyze_options}"
+        f" {analyze_disable}"
+        f" {analyze_ignore}"
         f" --jobs {options.jobs}"
         f" --output {options.output}")
 
