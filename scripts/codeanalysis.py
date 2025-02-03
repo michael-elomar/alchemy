@@ -77,7 +77,7 @@ def main() -> None:
 
     analyze_options = " ".join(_ANALYZE_OPTIONS_LIST)
     analyze_disable = "".join([f" --disable {x}" for x in _DISABLE_LIST])
-    analyze_ignore  = " --ignore {options.ignore}" if options.ignore else ""
+    analyze_ignore  = f" --ignore {options.ignore}" if options.ignore else ""
 
     _exec_cmd(
         f"CodeChecker analyze {options.jsondb}"
