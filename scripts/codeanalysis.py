@@ -6,6 +6,9 @@ import os
 import subprocess
 import sys
 
+from re import match
+
+
 _ANALYZE_OPTIONS_LIST =[
     # Delete analysis reports stored in the output directory.
     "--clean",
@@ -26,6 +29,12 @@ _ANALYZE_OPTIONS_LIST =[
 ]
 
 _DISABLE_LIST = []
+
+_EXCLUDE_SUBDIRS_LIST = [".git", "docs", "host", "linux-sdk"]
+
+_PRJ_PATH = os.path.join(os.getcwd(), "prj")
+
+_SDK_USR_INCLUDE_PATH = os.path.join(os.getcwd(), "sdk", "usr", "include")
 
 
 def _exec_cmd(cmd: str) -> None:
@@ -48,6 +57,28 @@ def _exec_cmd(cmd: str) -> None:
     except OSError as ex:
         logging.error(f"Exception caught ([err={ex.errno}] {ex.strerror})")
         sys.exit(1)
+
+
+def _export_cpath() -> None:
+    cpath = os.environ["CPATH"].split(":") if os.getenv("CPATH") else []
+    cwd = os.getcwd()
+
+    cpath.append(_SDK_USR_INCLUDE_PATH)
+
+    for subpath in [_PRJ_PATH, _SDK_USR_INCLUDE_PATH]:
+        for root, dirs, files in os.walk(subpath, topdown=True):
+            dirs[:] = [d for d in dirs if d not in _EXCLUDE_SUBDIRS_LIST]
+            filtered_files = list(filter(lambda v: match('^.*(\.h|\.hpp)$', v), files))
+            if not filtered_files:
+                continue
+            if subpath == _PRJ_PATH:
+                cpath.append(root)
+            elif subpath == _SDK_USR_INCLUDE_PATH \
+                    and os.getenv("JKS_SAST_RUN_NAME_PREFIX") in os.path.basename(root) \
+                    and os.path.basename(os.path.dirname(root)) == "gen":
+                cpath.append(os.path.dirname(root))
+
+    os.environ["CPATH"] = ":".join(cpath)
 
 
 def main() -> None:
@@ -78,6 +109,8 @@ def main() -> None:
     analyze_options = " ".join(_ANALYZE_OPTIONS_LIST)
     analyze_disable = "".join([f" --disable {x}" for x in _DISABLE_LIST])
     analyze_ignore  = f" --ignore {options.ignore}" if options.ignore else ""
+
+    _export_cpath()
 
     _exec_cmd(
         f"CodeChecker analyze {options.jsondb}"
