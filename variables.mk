@@ -109,6 +109,9 @@ vars-LOCAL += REQUIRED_MODULES
 # Other modules required to build
 vars-LOCAL += DEPENDS_MODULES
 
+# Optional modules required to build when enabled in config
+vars-LOCAL += DEPENDS_OPTIONAL_MODULES
+
 # Host modules required to build
 vars-LOCAL += DEPENDS_HOST_MODULES
 

@@ -822,8 +822,20 @@ __module-compute-depends-direct = \
 	$(call __module-add-depends-direct,$1,$(__modules.$1.PREBUILT_LIBRARIES)) \
 	$(call __module-add-depends-direct,$1,$(__modules.$1.EXTERNAL_LIBRARIES)) \
 	$(call __module-add-depends-direct,$1,$(__modules.$1.DEPENDS_MODULES)) \
+	$(call __module-add-optional-depends-direct,$1,$(__modules.$1.DEPENDS_OPTIONAL_MODULES)) \
 	$(eval __modules.$1.depends.headers := $(__modules.$1.DEPENDS_HEADERS)) \
 	$(eval __modules.$1.depends.runtime += $(__modules.$1.REQUIRED_MODULES))
+
+# Add direct optional dependencies to a module; dependency is added only if
+# enabled in config.
+# $1 : module name
+# $2 : list of optional modules to add to the dependency list
+__module-add-optional-depends-direct = \
+	$(foreach __dep,$2, \
+		$(if $(call is-module-in-build-config,$(__dep)), \
+			$(call __module-add-depends-direct,$1,$(__dep)) \
+		) \
+	)
 
 # Add direct dependencies to a module
 # $1 : module name.
@@ -988,7 +1000,7 @@ module-get-all-depends = \
 	$(__modules.$1.depends.all)
 
 # Get all build dependencies (stuff required to be present but not necessarily
-# built first)
+# built first). Includes module-get-all-depends()
 module-get-build-depends = \
 	$(__modules.$1.depends.all) \
 	$(__modules.$1.depends.headers) \

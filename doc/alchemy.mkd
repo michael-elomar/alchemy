@@ -749,6 +749,12 @@ needed, use a `CUSTOM` class module which exports headers.
 This is a list of modules required at build time. They will be built before
 this module but nothing will be imported from them (flags, headers, libs).
 
+#### `LOCAL_DEPENDS_OPTIONAL_MODULES`
+
+Just like `LOCAL_DEPENDS_MODULES`, except that the dependencies are ignored if
+they are not enabled in the config. But unlike `LOCAL_CONDITIONAL_LIBRARIES`,
+values exported by dependencies (CFLAGS, etc...) are ignored.
+
 #### `LOCAL_REQUIRED_MODULES`
 
 This is a list of modules required at runtime that will automatically be

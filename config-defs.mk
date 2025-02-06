@@ -106,6 +106,7 @@ __generate-config-module-args = $(strip \
 		$(eval __depends := $(call module-get-config-depends,$(__mod))) \
 	) \
 	$(eval __dependsCond := $(__modules.$(__mod).CONDITIONAL_LIBRARIES)) \
+	$(eval __dependsCond += $(addprefix OPTIONAL:,$(__modules.$(__mod).DEPENDS_OPTIONAL_MODULES))) \
 	$(eval __modPath := $(call path-from-top,$(__modules.$(__mod).PATH))) \
 	$(eval __categoryPath := $(__modules.$(__mod).CATEGORY_PATH)) \
 	$(eval __sdk := $(__modules.$(__mod).SDK)) \
