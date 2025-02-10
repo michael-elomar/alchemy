@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 
 import argparse
+import json
 import logging
 import os
+import re
 import subprocess
 import sys
 
-from re import match
 
-
-_ANALYZE_OPTIONS_LIST =[
+_ANALYZE_OPTIONS_LIST = [
     # Delete analysis reports stored in the output directory.
     "--clean",
 
@@ -28,6 +28,11 @@ _ANALYZE_OPTIONS_LIST =[
     "--keep-gcc-include-fixed"
 ]
 
+_CLANG_OPTIONS_REPLACEMENT_MAP = {
+    '-B .* --sysroot': '--sysroot',
+    '-fdump-preamble': ''
+}
+
 _DISABLE_LIST = []
 
 _EXCLUDE_SUBDIRS_LIST = [".git", "docs", "host", "linux-sdk"]
@@ -39,7 +44,7 @@ _SDK_USR_INCLUDE_PATH = os.path.join(os.getcwd(), "sdk", "usr", "include")
 
 def _exec_cmd(cmd: str) -> None:
     """
-    Execute command in current directory and ignore errors
+    Execute command in current directory and ignore errors.
     """
     cwd = os.getcwd()
     logging.info("In '%s': %s", cwd, cmd)
@@ -60,6 +65,10 @@ def _exec_cmd(cmd: str) -> None:
 
 
 def _export_cpath() -> None:
+    """
+    Export CPATH env variable to include project and SDK directories that contain headers
+    as part of the cross-translation unit analysis.
+    """
     cpath = os.environ["CPATH"].split(":") if os.getenv("CPATH") else []
     cwd = os.getcwd()
 
@@ -68,7 +77,7 @@ def _export_cpath() -> None:
     for subpath in [_PRJ_PATH, _SDK_USR_INCLUDE_PATH]:
         for root, dirs, files in os.walk(subpath, topdown=True):
             dirs[:] = [d for d in dirs if d not in _EXCLUDE_SUBDIRS_LIST]
-            filtered_files = list(filter(lambda v: match('^.*(\.h|\.hpp)$', v), files))
+            filtered_files = list(filter(lambda v: re.match('^.*(\.h|\.hpp)$', v), files))
             if not filtered_files:
                 continue
             if subpath == _PRJ_PATH:
@@ -81,24 +90,45 @@ def _export_cpath() -> None:
     os.environ["CPATH"] = ":".join(cpath)
 
 
+def _validate_jsondb(jsondb_filepath: str) -> None:
+    """
+    Parse json DB file and override the clang commands containing specific error-prone options.
+    """
+    if not jsondb_filepath or not os.path.isfile(jsondb_filepath):
+        return
+
+    jsondb_data = None
+    with open(jsondb_filepath, 'r') as f:
+        jsondb_data = json.load(f)
+        for entry in jsondb_data:
+            if "command" not in entry or not entry["command"]:
+                continue
+
+            for option, replacement in _CLANG_OPTIONS_REPLACEMENT_MAP.items():
+                command = entry["command"]
+                if re.search(option, command):
+                    entry["command"] = re.sub(option, replacement, command)
+
+    if jsondb_data:
+        logging.warning(f"Overriding {jsondb_filepath} file with validated clang commands...")
+        with open(jsondb_filepath, 'w', encoding='utf-8') as f:
+            json.dump(jsondb_data, f, ensure_ascii=False, indent=4)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("jsondb", help="compile_commands.json file")
+    parser.add_argument("jsondb", help="compilation_commands.json file")
     parser.add_argument("-o", "--output", help="output directory", default=".")
     parser.add_argument("-j", "--jobs", help="parallel jobs", default="1")
     parser.add_argument("-n", "--name", help="name of analysis")
     parser.add_argument("-r", "--root", help="root directory")
-    parser.add_argument("-i",
-        "--ignore",
+    parser.add_argument("-i", "--ignore",
         help="Path to the Skipfile dictating which project files should be omitted from analysis")
 
     options = parser.parse_args()
 
-    logging.basicConfig(
-        level=logging.WARNING,
-        format="[%(levelname)s] %(message)s",
-        stream=sys.stderr)
+    logging.basicConfig(level=logging.WARNING, format="[%(levelname)s] %(message)s", stream=sys.stderr)
     logging.addLevelName(logging.CRITICAL, "C")
     logging.addLevelName(logging.ERROR, "E")
     logging.addLevelName(logging.WARNING, "W")
@@ -111,6 +141,7 @@ def main() -> None:
     analyze_ignore  = f" --ignore {options.ignore}" if options.ignore else ""
 
     _export_cpath()
+    _validate_jsondb(options.jsondb)
 
     _exec_cmd(
         f"CodeChecker analyze {options.jsondb}"
