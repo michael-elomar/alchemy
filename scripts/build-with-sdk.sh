@@ -32,15 +32,12 @@ if [ "${JKS_DO_SAST}" = "true" ]; then
         exit 1
     fi
 
-    . ${CODECHECKER_HOME}/venv/bin/activate
-
     BUILD_COMMAND="${ALCHEMAKE} $@"
 
     CodeChecker log -b "${BUILD_COMMAND}" \
         --keep-link \
         --output "${ALCHEMY_TARGET_OUT}"/compilation_commands.json
 
-    deactivate
 else
     ${ALCHEMAKE} "$@"
 fi
