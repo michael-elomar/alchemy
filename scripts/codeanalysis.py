@@ -16,10 +16,6 @@ _ANALYZE_OPTIONS_LIST = [
     # Perform Cross Translation Unit (CTU) analysis, both 'collect' and 'analyze' phases.
     "--ctu",
 
-    # If Cross-TU analysis is enabled and fails for some reason, try to re analyze the same
-    # translation unit without Cross-TU enabled.
-    "--ctu-reanalyze-on-failure",
-
     # Filter out reports from files that were skipped from the analysis.
     "--drop-reports-from-skipped-files",
 
