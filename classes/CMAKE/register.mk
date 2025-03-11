@@ -16,7 +16,7 @@ LOCAL_MODULE_FILENAME := $(LOCAL_MODULE).done
 LOCAL_DONE_FILES += $(LOCAL_MODULE).done
 
 # Add host.cmake dependency
-$(if $(call is-module-registered, host.cmake), \
+$(if $(call is-module-registered,host.cmake), \
 	$(eval CMAKE := $(HOST_OUT_STAGING)/bin/cmake) \
 	$(eval LOCAL_DEPENDS_HOST_MODULES += host.cmake) \
 )
