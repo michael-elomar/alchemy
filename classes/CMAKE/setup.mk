@@ -45,12 +45,20 @@ define _cmake-def-cmd-clean
 	fi;
 endef
 
+# Update host compilation path
+_cmake_host_path := $(call make-path-list, \
+        $(HOST_OUT_STAGING)/bin \
+        $(HOST_OUT_STAGING)/$(HOST_DEFAULT_BIN_DESTDIR) \
+        $(call split-path-list,$(PATH)) \
+)
+
 ###############################################################################
 ## Variables used for cmake.
 ###############################################################################
 
+
 ifndef CMAKE
-  CMAKE := $(shell which cmake 2>/dev/null)
+  CMAKE := $(shell PATH="$(_cmake_host_path)" which cmake 2>/dev/null)
 endif
 
 ifeq ("$(TARGET_OS)","linux")
