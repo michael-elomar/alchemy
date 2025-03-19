@@ -76,14 +76,26 @@ def _export_cpath() -> None:
             filtered_files = list(filter(lambda v: re.match('^.*(\.h|\.hpp)$', v), files))
             if not filtered_files:
                 continue
+
+            # 'prj' subfolder
             if subpath == _PRJ_PATH:
                 cpath.append(root)
-            elif subpath == _SDK_USR_INCLUDE_PATH \
-                    and os.getenv("JKS_SAST_RUN_NAME_PREFIX") in os.path.basename(root) \
-                    and os.path.basename(os.path.dirname(root)) == "gen":
-                cpath.append(os.path.dirname(root))
 
-    os.environ["CPATH"] = ":".join(cpath)
+            # 'sdk' subfolder
+            elif subpath == _SDK_USR_INCLUDE_PATH:
+
+                if os.getenv("JKS_SAST_RUN_NAME_PREFIX") in os.path.basename(root) \
+                        and os.path.basename(os.path.dirname(root)) == "gen":
+                    cpath.append(os.path.dirname(root))
+
+                if os.path.dirname(root) != _SDK_USR_INCLUDE_PATH:
+                    root_relpath = root.replace(_SDK_USR_INCLUDE_PATH, '')
+                    res = re.match("^/(.*/include)/.*$", root_relpath)
+                    if not res or not res.group(1):
+                        continue
+                    cpath.append(os.path.join(_SDK_USR_INCLUDE_PATH, res.group(1)))
+
+    os.environ["CPATH"] = ":".join(list(set(cpath)))
 
 
 def _validate_jsondb(jsondb_filepath: str) -> None:
@@ -97,13 +109,26 @@ def _validate_jsondb(jsondb_filepath: str) -> None:
     with open(jsondb_filepath, 'r') as f:
         jsondb_data = json.load(f)
         for entry in jsondb_data:
+
+            # 'command' attr of current jsondb entry
             if "command" not in entry or not entry["command"]:
                 continue
-
             for option, replacement in _CLANG_OPTIONS_REPLACEMENT_MAP.items():
                 command = entry["command"]
                 if re.search(option, command):
                     entry["command"] = re.sub(option, replacement, command)
+
+            # 'file' attr of current jsondb entry
+            if "file" not in entry or not entry["file"]:
+                continue
+            files = entry["file"].split(' ')
+            if len(files) <= 1:
+                continue
+            for filename in files:
+                if filename.endswith('.h'):
+                    continue
+                entry["file"] = filename
+                break
 
     if jsondb_data:
         logging.warning(f"Overriding {jsondb_filepath} file with validated clang commands...")
