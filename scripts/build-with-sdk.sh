@@ -22,22 +22,4 @@ ${ALCHEMAKE} config-force-all config-update
 cp -r ${ALCHEMY_TARGET_SDK_DIRS}/config/*.config ${ALCHEMY_TARGET_CONFIG_DIR}
 
 # Go !
-if [ "${JKS_DO_SAST}" = "true" ]; then
-
-    if [ "${CODECHECKER_HOME}" = "" ]; then
-        export CODECHECKER_HOME=/opt/codechecker
-    fi
-    if [ ! -d "${CODECHECKER_HOME}" ]; then
-        echo "\e[1;31mPlease set the CODECHECKER_HOME environment variable to a valid location... Aborting.\e[0m"
-        exit 1
-    fi
-
-    BUILD_COMMAND="${ALCHEMAKE} $@"
-
-    CodeChecker log -b "${BUILD_COMMAND}" \
-        --keep-link \
-        --output "${ALCHEMY_TARGET_OUT}"/compilation_commands.json
-
-else
-    ${ALCHEMAKE} "$@"
-fi
+${ALCHEMAKE} "$@"

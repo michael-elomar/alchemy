@@ -38,6 +38,8 @@ _PRJ_PATH = os.path.join(os.getcwd(), "prj")
 _SDK_USR_INCLUDE_PATH = os.path.join(os.getcwd(), "sdk", "usr", "include")
 
 
+#===============================================================================
+#===============================================================================
 def _exec_cmd(cmd: str) -> None:
     """
     Execute command in current directory and ignore errors.
@@ -60,6 +62,8 @@ def _exec_cmd(cmd: str) -> None:
         sys.exit(1)
 
 
+#===============================================================================
+#===============================================================================
 def _export_cpath() -> None:
     """
     Export CPATH env variable to include project and SDK directories that contain headers
@@ -98,6 +102,8 @@ def _export_cpath() -> None:
     os.environ["CPATH"] = ":".join(list(set(cpath)))
 
 
+#===============================================================================
+#===============================================================================
 def _validate_jsondb(jsondb_filepath: str) -> None:
     """
     Parse json DB file and override the clang commands containing specific error-prone options.
@@ -136,10 +142,13 @@ def _validate_jsondb(jsondb_filepath: str) -> None:
             json.dump(jsondb_data, f, ensure_ascii=False, indent=4)
 
 
-def main() -> None:
+#===============================================================================
+# Parse command line arguments and return options.
+#===============================================================================
+def _parse_args() -> dict:
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("jsondb", help="compilation_commands.json file")
+    parser.add_argument("jsondb", help="json compilation database file")
     parser.add_argument("-o", "--output", help="output directory", default=".")
     parser.add_argument("-j", "--jobs", help="parallel jobs", default="1")
     parser.add_argument("-n", "--name", help="name of analysis")
@@ -147,8 +156,13 @@ def main() -> None:
     parser.add_argument("-i", "--ignore",
         help="Path to the Skipfile dictating which project files should be omitted from analysis")
 
-    options = parser.parse_args()
+    return parser.parse_args()
 
+
+#===============================================================================
+# Setup logging system with given options.
+#===============================================================================
+def _setup_log(options: dict) -> None:
     logging.basicConfig(level=logging.WARNING, format="[%(levelname)s] %(message)s", stream=sys.stderr)
     logging.addLevelName(logging.CRITICAL, "C")
     logging.addLevelName(logging.ERROR, "E")
@@ -157,13 +171,34 @@ def main() -> None:
     logging.addLevelName(logging.DEBUG, "D")
     logging.getLogger().setLevel(logging.INFO)
 
+
+#===============================================================================
+#===============================================================================
+def main() -> None:
+    options = _parse_args()
+    _setup_log(options)
+    _export_cpath()
+
+    alchemy_home = os.getenv("ALCHEMY_HOME", os.path.join(options.root, "alchemy"))
+    alchemy_target_out = os.getenv("ALCHEMY_TARGET_OUT", os.path.join(options.root, "out"))
+
     analyze_options = " ".join(_ANALYZE_OPTIONS_LIST)
     analyze_disable = "".join([f" --disable {x}" for x in _DISABLE_LIST])
     analyze_ignore  = f" --ignore {options.ignore}" if options.ignore else ""
 
-    _export_cpath()
-    _validate_jsondb(options.jsondb)
+    if not os.path.isfile(options.jsondb):
+        logging.info("Generating Alchemy compilation database in JSON format...")
+        _exec_cmd(
+            f"{alchemy_home}/scripts/genproject/genproject.py"
+            f" jsondb"
+            f" {alchemy_target_out}/alchemy-database.xml"
+            f" prj"
+            f" --merge"
+            f" --name {options.name}"
+            f" --recursive"
+            f" --output {alchemy_target_out}")
 
+    logging.info("Starting 'CodeChecker analyze' command...")
     _exec_cmd(
         f"CodeChecker analyze {options.jsondb}"
         f" --name {options.name}"
@@ -173,6 +208,7 @@ def main() -> None:
         f" --jobs {options.jobs}"
         f" --output {options.output}")
 
+    logging.info("Starting 'CodeChecker parse' command...")
     _exec_cmd(
         f"CodeChecker parse {options.output}"
         f" --trim-path-prefix {options.root}"
@@ -180,5 +216,7 @@ def main() -> None:
         f" --output {options.output}")
 
 
+#===============================================================================
+#===============================================================================
 if __name__ == "__main__":
     main()
