@@ -198,6 +198,8 @@ def main() -> None:
             f" --recursive"
             f" --output {alchemy_target_out}")
 
+    _validate_jsondb(options.jsondb)
+
     logging.info("Starting 'CodeChecker analyze' command...")
     _exec_cmd(
         f"CodeChecker analyze {options.jsondb}"
