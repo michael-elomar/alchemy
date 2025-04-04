@@ -25,8 +25,9 @@ _ANALYZE_OPTIONS_LIST = [
 ]
 
 _CLANG_OPTIONS_REPLACEMENT_MAP = {
-    '-B .* --sysroot': '--sysroot',
-    '-fdump-preamble': ''
+    '--sysroot /': '--sysroot=/',
+    '-include -f': '-f',
+    '-include -Wa,': '-Wa,'
 }
 
 _DISABLE_LIST = []
@@ -36,6 +37,10 @@ _EXCLUDE_SUBDIRS_LIST = [".git", "docs", "host", "linux-sdk"]
 _PRJ_PATH = os.path.join(os.getcwd(), "prj")
 
 _SDK_USR_INCLUDE_PATH = os.path.join(os.getcwd(), "sdk", "usr", "include")
+
+_QCOM_LLVM_BIN_PATH = os.path.join("/", "opt", "qcom", "llvm-arm-toolchain", "10.0", "bin")
+
+_JENKINS_LOCAL_BIN_PATH = os.path.join(os.getenv("HOME"), ".local", "bin")
 
 
 #===============================================================================
@@ -100,6 +105,34 @@ def _export_cpath() -> None:
                     cpath.append(os.path.join(_SDK_USR_INCLUDE_PATH, res.group(1)))
 
     os.environ["CPATH"] = ":".join(list(set(cpath)))
+
+
+#===============================================================================
+#===============================================================================
+def _resolve_clang() -> None:
+    """
+    Determine which 'clang' binary we want to use for the 'CodeChecker analyze'
+    command, depending of the build target and current environment.
+
+    In case of yocto/qrb5165, we want to use the 'clang' binary provided by the
+    qcom toolchain as it supports extra flags that the standard LLVM one doesn't
+    (e.g. -fdump-preamble).
+    """
+    if os.getenv("TARGET_OS_FLAVOUR") == "yocto" \
+            and os.getenv("TARGET_CPU") == "qrb5165" \
+            and os.path.isdir(_QCOM_LLVM_BIN_PATH):
+
+        os.makedirs(_JENKINS_LOCAL_BIN_PATH, exist_ok=True)
+        os.environ["PATH"] = f"{_JENKINS_LOCAL_BIN_PATH}:{os.getenv('PATH')}"
+
+        clang_binaries = [f for f in os.listdir(_QCOM_LLVM_BIN_PATH) if re.match(r'^clang.*', f)]
+
+        for clangbin in clang_binaries:
+            if os.path.islink(os.path.join(_JENKINS_LOCAL_BIN_PATH, clangbin)):
+                os.unlink(os.path.join(_JENKINS_LOCAL_BIN_PATH, clangbin))
+
+            os.symlink(os.path.join(_QCOM_LLVM_BIN_PATH, clangbin),
+                os.path.join(_JENKINS_LOCAL_BIN_PATH, clangbin))
 
 
 #===============================================================================
@@ -177,7 +210,9 @@ def _setup_log(options: dict) -> None:
 def main() -> None:
     options = _parse_args()
     _setup_log(options)
+
     _export_cpath()
+    _resolve_clang()
 
     alchemy_home = os.getenv("ALCHEMY_HOME", os.path.join(options.root, "alchemy"))
     alchemy_target_out = os.getenv("ALCHEMY_TARGET_OUT", os.path.join(options.root, "out"))
