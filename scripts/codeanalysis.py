@@ -27,7 +27,9 @@ _ANALYZE_OPTIONS_LIST = [
 _CLANG_OPTIONS_REPLACEMENT_MAP = {
     '--sysroot /': '--sysroot=/',
     '-include -f': '-f',
-    '-include -Wa,': '-Wa,'
+    '-include -Wa,': '-Wa,',
+    '-include -D': '-D',
+    '-fdump-preamble': ''
 }
 
 _DISABLE_LIST = []
