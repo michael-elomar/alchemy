@@ -29,16 +29,23 @@ _CLANG_OPTIONS_REPLACEMENT_MAP = {
     '-include -f': '-f',
     '-include -Wa,': '-Wa,',
     '-include -D': '-D',
-    '-fdump-preamble': ''
+    '-fdump-preamble': '',
+    '-fexpensive-optimizations': ''
 }
 
 _DISABLE_LIST = []
 
-_EXCLUDE_SUBDIRS_LIST = [".git", "docs", "host", "linux-sdk"]
+_EXCLUDE_SUBDIRS_LIST = [".git", "docs", "host"]
+
 
 _PRJ_PATH = os.path.join(os.getcwd(), "prj")
 
-_SDK_USR_INCLUDE_PATH = os.path.join(os.getcwd(), "sdk", "usr", "include")
+_OUT_PATH = os.path.join(os.getcwd(), "out")
+
+_SDK_USR_PATH = os.path.join(os.getcwd(), "sdk", "usr")
+
+_SDK_HOST_USR_PATH = os.path.join(os.getcwd(), "sdk", "host", "usr")
+
 
 _QCOM_LLVM_BIN_PATH = os.path.join("/", "opt", "qcom", "llvm-arm-toolchain", "10.0", "bin")
 
@@ -79,32 +86,36 @@ def _export_cpath() -> None:
     cpath = os.environ["CPATH"].split(":") if os.getenv("CPATH") else []
     cwd = os.getcwd()
 
-    cpath.append(_SDK_USR_INCLUDE_PATH)
+    cpath.append(os.path.join(_SDK_USR_PATH, "include"))
+    cpath.append(os.path.join(_SDK_HOST_USR_PATH, "include"))
 
-    for subpath in [_PRJ_PATH, _SDK_USR_INCLUDE_PATH]:
+    for subpath in [_PRJ_PATH, _SDK_USR_PATH]:
+
         for root, dirs, files in os.walk(subpath, topdown=True):
             dirs[:] = [d for d in dirs if d not in _EXCLUDE_SUBDIRS_LIST]
             filtered_files = list(filter(lambda v: re.match('^.*(\.h|\.hpp)$', v), files))
             if not filtered_files:
                 continue
 
-            # 'prj' subfolder
+            # add subfolders under prj/
             if subpath == _PRJ_PATH:
                 cpath.append(root)
+                continue
 
-            # 'sdk' subfolder
-            elif subpath == _SDK_USR_INCLUDE_PATH:
+            if subpath != _SDK_USR_PATH:
+                continue
 
-                if os.getenv("JKS_SAST_RUN_NAME_PREFIX") in os.path.basename(root) \
-                        and os.path.basename(os.path.dirname(root)) == "gen":
-                    cpath.append(os.path.dirname(root))
+            # add subfolders containing headers under sdk/usr/
+            if os.path.basename(os.path.dirname(root)) in ["config", "gen", "generated"]:
+                cpath.append(os.path.dirname(root))
+                continue
 
-                if os.path.dirname(root) != _SDK_USR_INCLUDE_PATH:
-                    root_relpath = root.replace(_SDK_USR_INCLUDE_PATH, '')
-                    res = re.match("^/(.*/include)/.*$", root_relpath)
-                    if not res or not res.group(1):
-                        continue
-                    cpath.append(os.path.join(_SDK_USR_INCLUDE_PATH, res.group(1)))
+            root_relpath = root.replace(_SDK_USR_PATH, '')
+
+            res = re.match("^(.*/include).*$", root_relpath)
+            if res and res.group(1):
+                include_path = res.group(1)[1:] if res.group(1).startswith('/') else res.group(1)
+                cpath.append(os.path.join(_SDK_USR_PATH, include_path))
 
     os.environ["CPATH"] = ":".join(list(set(cpath)))
 
@@ -146,6 +157,13 @@ def _validate_jsondb(jsondb_filepath: str) -> None:
     if not jsondb_filepath or not os.path.isfile(jsondb_filepath):
         return
 
+    autoconf_headers = []
+    for root, dirs, files in os.walk(_OUT_PATH, topdown=True):
+        filtered_files = list(filter(lambda v: re.match('^autoconf-.*\.h$', v), files))
+        if filtered_files:
+            autoconf_headers.append(os.path.join(root, filtered_files[0]))
+    autoconf_headers_str = ' '.join([f"-include {h}" for h in autoconf_headers])
+
     jsondb_data = None
     with open(jsondb_filepath, 'r') as f:
         jsondb_data = json.load(f)
@@ -154,10 +172,21 @@ def _validate_jsondb(jsondb_filepath: str) -> None:
             # 'command' attr of current jsondb entry
             if "command" not in entry or not entry["command"]:
                 continue
+
             for option, replacement in _CLANG_OPTIONS_REPLACEMENT_MAP.items():
                 command = entry["command"]
                 if re.search(option, command):
                     entry["command"] = re.sub(option, replacement, command)
+
+            command = entry["command"]
+            if re.findall(r"-D.*=\\\"(.*(\.h|\.hpp))\\\" ", command):
+                # -D variable with header value found: needs proper <> surroundings
+                entry["command"] = re.sub(r"-D(.*)=\\\"(.*(\.h|\.hpp))\\\" ", r'-D\1="<\2>" ', command)
+
+            command = entry["command"]
+            if re.search("--sysroot", command):
+                # adding required autoconf headers
+                entry["command"] = re.sub(r"(.*)(--\bsysroot\b.*)", r"\1 {} \2".format(autoconf_headers_str), command)
 
             # 'file' attr of current jsondb entry
             if "file" not in entry or not entry["file"]:
