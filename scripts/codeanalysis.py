@@ -150,6 +150,67 @@ def _resolve_clang() -> None:
 
 #===============================================================================
 #===============================================================================
+def _get_autoconf_headers() -> list:
+    autoconf_headers = []
+
+    for root, dirs, files in os.walk(_OUT_PATH, topdown=True):
+        filtered_files = list(filter(lambda v: re.match('^autoconf-.*\.h$', v), files))
+        if filtered_files:
+            autoconf_headers.append(os.path.join(root, filtered_files[0]))
+
+    return autoconf_headers
+
+
+#===============================================================================
+#===============================================================================
+def _format_command(command_attr: str) -> str:
+    autoconf_headers_str = ' '.join([f"-include {h}" for h in _get_autoconf_headers()])
+
+    for option, replacement in _CLANG_OPTIONS_REPLACEMENT_MAP.items():
+        command = command_attr
+        if re.search(option, command):
+            # replace error-prone option with a valid substitute or empty string
+            command_attr = re.sub(option, replacement, command)
+
+    command = command_attr
+    if re.findall(r"-D.*=\\\"(.*(\.h|\.hpp))\\\" ", command):
+        # -D variable with header value found: needs proper <> surroundings
+        command_attr = re.sub(r"-D(.*)=\\\"(.*(\.h|\.hpp))\\\" ", r'-D\1="<\2>" ', command)
+
+    command = command_attr
+    if re.search("--sysroot", command):
+        # add required autoconf headers
+        command_attr = re.sub(r"(.*)(--\bsysroot\b.*)", r"\1 {} \2".format(autoconf_headers_str), command)
+
+    command = command_attr
+    std_flags = re.findall(r"-std=(c\++\d(\d|x))", command)
+    if std_flags:
+        # use highest std flag
+        std_flags.sort()
+        highest_std_flag = std_flags[-1]
+        command_attr = re.sub(r"-std=(c\++\d(\d|x))", r"-std={}".format(highest_std_flag[0]), command)
+
+    return command_attr
+
+
+#===============================================================================
+#===============================================================================
+def _format_file(file_attr: str) -> str:
+    files = file_attr.split(' ')
+    if len(files) <= 1:
+        return file_attr
+
+    for filename in files:
+        if filename.endswith('.h'):
+            continue
+        file_attr = filename
+        break
+
+    return file_attr
+
+
+#===============================================================================
+#===============================================================================
 def _validate_jsondb(jsondb_filepath: str) -> None:
     """
     Parse json DB file and override the clang commands containing specific error-prone options.
@@ -157,48 +218,18 @@ def _validate_jsondb(jsondb_filepath: str) -> None:
     if not jsondb_filepath or not os.path.isfile(jsondb_filepath):
         return
 
-    autoconf_headers = []
-    for root, dirs, files in os.walk(_OUT_PATH, topdown=True):
-        filtered_files = list(filter(lambda v: re.match('^autoconf-.*\.h$', v), files))
-        if filtered_files:
-            autoconf_headers.append(os.path.join(root, filtered_files[0]))
-    autoconf_headers_str = ' '.join([f"-include {h}" for h in autoconf_headers])
-
     jsondb_data = None
     with open(jsondb_filepath, 'r') as f:
         jsondb_data = json.load(f)
         for entry in jsondb_data:
 
-            # 'command' attr of current jsondb entry
-            if "command" not in entry or not entry["command"]:
-                continue
+            # format 'command' attr of current jsondb entry
+            if "command" in entry and entry["command"]:
+                entry["command"] = _format_command(entry["command"])
 
-            for option, replacement in _CLANG_OPTIONS_REPLACEMENT_MAP.items():
-                command = entry["command"]
-                if re.search(option, command):
-                    entry["command"] = re.sub(option, replacement, command)
-
-            command = entry["command"]
-            if re.findall(r"-D.*=\\\"(.*(\.h|\.hpp))\\\" ", command):
-                # -D variable with header value found: needs proper <> surroundings
-                entry["command"] = re.sub(r"-D(.*)=\\\"(.*(\.h|\.hpp))\\\" ", r'-D\1="<\2>" ', command)
-
-            command = entry["command"]
-            if re.search("--sysroot", command):
-                # adding required autoconf headers
-                entry["command"] = re.sub(r"(.*)(--\bsysroot\b.*)", r"\1 {} \2".format(autoconf_headers_str), command)
-
-            # 'file' attr of current jsondb entry
-            if "file" not in entry or not entry["file"]:
-                continue
-            files = entry["file"].split(' ')
-            if len(files) <= 1:
-                continue
-            for filename in files:
-                if filename.endswith('.h'):
-                    continue
-                entry["file"] = filename
-                break
+            # format 'file' attr of current jsondb entry
+            if "file" in entry and entry["file"]:
+                entry["file"] = _format_file(entry["file"])
 
     if jsondb_data:
         logging.warning(f"Overriding {jsondb_filepath} file with validated clang commands...")
