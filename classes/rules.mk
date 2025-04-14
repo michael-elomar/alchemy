@@ -416,6 +416,13 @@ all_prerequisites += $(imported_PREREQUISITES)
 LOCAL_CFLAGS := $(strip $(imported_CFLAGS) $(LOCAL_CFLAGS))
 LOCAL_CXXFLAGS := $(strip $(imported_CXXFLAGS) $(LOCAL_CXXFLAGS))
 
+# Harmonize syntax for std=xxx flags
+LOCAL_CXXFLAGS := $(subst --std,-std,$(LOCAL_CXXFLAGS))
+# Keep only higher std=xxx flag
+cxx_std := $(sort $(filter -std=%,$(LOCAL_CXXFLAGS)))
+LOCAL_CXXFLAGS := $(filter-out -std=%,$(LOCAL_CXXFLAGS))
+LOCAL_CXXFLAGS := $(LOCAL_CXXFLAGS) $(lastword $(cxx_std))
+
 # The imported/exported include directories are appended to their LOCAL_XXX value
 # (this allows the module to override them)
 LOCAL_C_INCLUDES := $(strip $(LOCAL_C_INCLUDES) $(imported_C_INCLUDES))
