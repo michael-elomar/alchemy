@@ -29,6 +29,9 @@ _CLANG_OPTIONS_REPLACEMENT_MAP = {
     '-include -f': '-f',
     '-include -Wa,': '-Wa,',
     '-include -D': '-D',
+    '-include -g': '-g',
+    '-include -std': '-std',
+    '-include -o': '',
     '-fdump-preamble': '',
     '-fexpensive-optimizations': ''
 }
