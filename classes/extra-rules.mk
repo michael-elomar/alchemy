@@ -22,7 +22,7 @@ LOCAL_DOXYFILE := \
 
 # If a doxyfile has been defined by the user, we use it
 # Check if the input paths are absolute and if not, correct them
-_module_doc_input := $(shell egrep '^INPUT *=' $(LOCAL_DOXYFILE) | sed 's/^INPUT *=//g')
+_module_doc_input := $(shell grep -E '^INPUT *=' $(LOCAL_DOXYFILE) | sed 's/^INPUT *=//g')
 _module_doc_input += $(LOCAL_DOXYGEN_INPUT)
 _module_doc_input := $(foreach __path,$(_module_doc_input), \
 	$(if $(call is-path-absolute,$(__path)), \
