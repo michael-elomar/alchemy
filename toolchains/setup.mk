@@ -13,6 +13,7 @@ include $(BUILD_SYSTEM)/toolchains/warnings.mk
 
 # Machine targetted by toolchain to be used by autotools and libc installation
 ifndef TARGET_TOOLCHAIN_TRIPLET
+  $(info Detecting toolchain triplet)
   __toolchain_triplet_cmd := $(TARGET_CC) $(TARGET_GLOBAL_CFLAGS)
   ifeq ("$(TARGET_CC_FLAVOUR)","clang")
     ifneq ("$(TARGET_CROSS)","")
@@ -35,7 +36,10 @@ ifndef TARGET_TOOLCHAIN_TRIPLET
 endif
 
 ifeq ("$(TARGET_TOOLCHAIN_TRIPLET)","")
+  $(info __toolchain_triplet_cmd: $(__toolchain_triplet_cmd))
   $(error Unable to determine TARGET_TOOLCHAIN_TRIPLET))
+else
+  $(info Using toolchain triplet $(TARGET_TOOLCHAIN_TRIPLET))
 endif
 
 # Clang uses gcc toochain(libc&binutils) to cross-compile
