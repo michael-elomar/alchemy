@@ -15,10 +15,8 @@ LOCAL_MODULE_CLASS := CMAKE
 LOCAL_MODULE_FILENAME := $(LOCAL_MODULE).done
 LOCAL_DONE_FILES += $(LOCAL_MODULE).done
 
-# If host.cmake is enabled, we're going to use it, hence
-# LOCAL_DEPENDS_HOST_MODULES for proper ordering
-$(if $(call is-module-in-build-config,host.cmake), \
-  $(eval LOCAL_DEPENDS_HOST_MODULES += host.cmake),)
+# Add optional host.cmake dependency
+LOCAL_CONDITIONAL_LIBRARIES += OPTIONAL:host.cmake
 
 # Register in the system
 $(module-add)
