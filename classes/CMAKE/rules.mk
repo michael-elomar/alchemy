@@ -6,7 +6,7 @@
 ## Rules for CMAKE modules.
 ###############################################################################
 
-ifeq ("$(CMAKE)","")
+ifeq ("$(call get-cmake)","")
   $(error $(LOCAL_MODULE): cmake not found)
 endif
 

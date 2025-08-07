@@ -6,6 +6,17 @@
 ## Setup CMAKE modules.
 ###############################################################################
 
+# Find the cmake binary, should be called on configure after optional host.cmake
+# has been compiled if available.
+# if host.cmake is enabled then add host staging dir to search path
+define get-cmake
+$(eval __cmake_search_path := $(strip \
+  $(if $(call is-module-registered,host.cmake), \
+    $(HOST_OUT_STAGING)/bin:$(HOST_OUT_STAGING)/$(HOST_DEFAULT_BIN_DESTDIR):) \
+    $(PATH)))\
+  $(shell PATH="$(__cmake_search_path)" which cmake 2>/dev/null)
+endef
+
 ###############################################################################
 ## Setup some internal stuff.
 ###############################################################################
@@ -14,7 +25,7 @@ define _cmake-def-cmd-configure
 	@mkdir -p $(PRIVATE_OBJ_DIR)
 	$(Q) cd $(PRIVATE_OBJ_DIR) && rm -f CMakeCache.txt && \
 		$($(PRIVATE_MODE)_CMAKE_CONFIGURE_ENV) $(PRIVATE_CONFIGURE_ENV) \
-		$(PKG_CONFIG_ENV) $(CMAKE) \
+		$(PKG_CONFIG_ENV) $(call get-cmake) \
 			-DCMAKE_TOOLCHAIN_FILE="$($(PRIVATE_MODE)_CMAKE_TOOLCHAIN_FILE)" \
 			$($(PRIVATE_MODE)_CMAKE_CONFIGURE_ARGS) $(PRIVATE_CONFIGURE_ARGS) \
 			$(PRIVATE_SRC_DIR)
@@ -45,21 +56,9 @@ define _cmake-def-cmd-clean
 	fi;
 endef
 
-# Update host compilation path
-_cmake_host_path := $(call make-path-list, \
-        $(HOST_OUT_STAGING)/bin \
-        $(HOST_OUT_STAGING)/$(HOST_DEFAULT_BIN_DESTDIR) \
-        $(call split-path-list,$(PATH)) \
-)
-
 ###############################################################################
 ## Variables used for cmake.
 ###############################################################################
-
-
-ifndef CMAKE
-  CMAKE := $(shell PATH="$(_cmake_host_path)" which cmake 2>/dev/null)
-endif
 
 ifeq ("$(TARGET_OS)","linux")
   TARGET_CMAKE_SYSTEM_NAME := Linux
