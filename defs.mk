@@ -1529,6 +1529,8 @@ copy-files-export = \
 ## defined.
 ## If <var> equals 'OPTIONAL', <lib> is added if it is in the build config or if
 ## <lib> is a host module (<lib> matches "host.<host_module_name>")
+## Note: Handle host module first so they will not be added to LIBRARIES list as
+##       prebuilt modules are considered in the build config
 ## $1 : module name.
 ###############################################################################
 conditional-libraries-setup = \
@@ -1537,15 +1539,15 @@ conditional-libraries-setup = \
 		$(eval __w1 := $(word 1,$(__pair2))) \
 		$(eval __w2 := $(word 2,$(__pair2))) \
 		$(if $(call streq,$(__w1),OPTIONAL), \
-			$(if $(call is-module-in-build-config,$(__w2)), \
-				$(eval __modules.$1.LIBRARIES += $(__w2)) \
+			$(if $(and $(call is-module-host,$(__w2)),$(call is-module-registered,$(__w2))), \
+				$(if $(call is-module-host,$1), \
+					$(eval __modules.$1.LIBRARIES += $(__w2)) \
+					, \
+					$(eval __modules.$1.DEPENDS_HOST_MODULES += $(__w2)) \
+				) \
 				, \
-				$(if $(and $(call is-module-host,$(__w2)),$(call is-module-registered,$(__w2))), \
-					$(if $(call is-module-host,$1), \
-						$(eval __modules.$1.LIBRARIES += $(__w2)) \
-						, \
-						$(eval __modules.$1.DEPENDS_HOST_MODULES += $(__w2)) \
-					) \
+				$(if $(call is-module-in-build-config,$(__w2)), \
+					$(eval __modules.$1.LIBRARIES += $(__w2)) \
 				) \
 			) \
 			, \
