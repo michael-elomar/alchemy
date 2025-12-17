@@ -19,5 +19,6 @@ else
   include $(CLEAR_VARS)
     LOCAL_MODULE := zlib
     LOCAL_EXPORT_LDLIBS := -lz
+    LOCAL_COPY_FILES += zlib.pc.in:$(TARGET_OUT_STAGING)/usr/lib/pkgconfig/zlib.pc
     include $(BUILD_PREBUILT)
 endif
