@@ -31,7 +31,7 @@ endif
 ###############################################################################
 
 HOST_MESON_CONFIGURE_ENV := \
-	PATH="$(_meson_host_path)" \
+	PATH="$(_meson_host_path)"
 
 # Only compile static libraries so we don't have to change LD_LIBRARY_PATH
 HOST_MESON_CONFIGURE_ARGS := \
@@ -55,6 +55,10 @@ HOST_MESON_INSTALL_ARGS :=
 ###############################################################################
 # Target variable setup.
 ###############################################################################
+
+TARGET_MESON_CONFIGURE_ENV := \
+	PATH="$(_meson_target_path)" \
+	$(TARGET_PKG_CONFIG_ENV)
 
 TARGET_MESON_CONFIGURE_ARGS := \
 	--prefix="$(TARGET_AUTOTOOLS_CONFIGURE_PREFIX)" \
@@ -207,7 +211,6 @@ define _meson_cross-compile-conf-sed
 	-e "s%@MESON_CPP_LINK_ARGS@%$(call make-sq-comma-list,$(_meson_target_ldflags) $(PRIVATE_LDFLAGS))%g" \
 	\
 	-e "s%@MESON_SYS_ROOT@%$(_meson_sys_root)%g" \
-	-e "s%@TARGET_PKG_CONFIG_PATH@%$(TARGET_PKG_CONFIG_PATH)%g" \
 	\
 	-e "s%@MESON_SYSTEM@%$(_meson_target_system)%g" \
 	-e "s%@MESON_CPU_FAMILY@%$(_meson_target_cpu_family)%g" \
