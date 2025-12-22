@@ -288,6 +288,12 @@ TARGET_PKG_CONFIG_PATH := $(call make-path-list, \
 	$(_target_pkg_config_dirs) \
 )
 
+# PKG_CONFIG_LIBDIR has less priority than PKG_CONFIG_PATH.
+# To ensure we take libs in the staging directory first, prepend
+# the staging pkgconfig directory to PKG_CONFIG_PATH.
+_target_pkg_config_libdir := $(TARGET_OUT_STAGING)/usr/lib/pkgconfig
+TARGET_PKG_CONFIG_PATH := $(_target_pkg_config_libdir):$(TARGET_PKG_CONFIG_PATH)
+
 # Setup pkg-config
 # Prevent use of packages from the host by setting PKG_CONFIG_LIBDIR to the
 # staging dir, assuming no .pc file is present there. Using an empty string
@@ -299,7 +305,7 @@ ifeq ("$(TARGET_OS_FLAVOUR)","native")
   TARGET_PKG_CONFIG_ENV += PKG_CONFIG_SYSROOT_DIR=""
 else
   TARGET_PKG_CONFIG_ENV += PKG_CONFIG_SYSROOT_DIR="$(TARGET_OUT_STAGING)"
-  TARGET_PKG_CONFIG_ENV += PKG_CONFIG_LIBDIR="$(TARGET_OUT_STAGING)"
+  TARGET_PKG_CONFIG_ENV += PKG_CONFIG_LIBDIR="$(_target_pkg_config_libdir)"
 endif
 
 # Environment to use when executing configure script
