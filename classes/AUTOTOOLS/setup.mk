@@ -284,28 +284,24 @@ $(foreach __dir,$(TARGET_OUT_STAGING) $(TARGET_SDK_DIRS), \
 	) \
 )
 TARGET_PKG_CONFIG_PATH := $(call make-path-list, \
-	$(call split-path-list,$(TARGET_PKG_CONFIG_PATH)) \
 	$(_target_pkg_config_dirs) \
+	$(call split-path-list,$(TARGET_PKG_CONFIG_PATH)) \
 )
 
-# PKG_CONFIG_LIBDIR has less priority than PKG_CONFIG_PATH.
-# To ensure we take libs in the staging directory first, prepend
-# the staging pkgconfig directory to PKG_CONFIG_PATH.
-_target_pkg_config_libdir := $(TARGET_OUT_STAGING)/usr/lib/pkgconfig
-TARGET_PKG_CONFIG_PATH := $(_target_pkg_config_libdir):$(TARGET_PKG_CONFIG_PATH)
-
 # Setup pkg-config
-# Prevent use of packages from the host by setting PKG_CONFIG_LIBDIR to the
-# staging dir, assuming no .pc file is present there. Using an empty string
-# does not work with pkgconf.
 TARGET_PKG_CONFIG_ENV := \
 	PKG_CONFIG="$(PKGCONFIG_BIN)" \
 	PKG_CONFIG_PATH="$(TARGET_PKG_CONFIG_PATH)"
 ifeq ("$(TARGET_OS_FLAVOUR)","native")
+  # Native compilation: do not set PKG_CONFIG_LIBDIR to find both our built
+  # dependencies and system packages.
   TARGET_PKG_CONFIG_ENV += PKG_CONFIG_SYSROOT_DIR=""
 else
+  # Cross-compilation: explicitely set PKG_CONFIG_LIBDIR to an invalid value
+  # to ensure we do not use system packages. Using an empty string does not
+  # work with pkgconf.
   TARGET_PKG_CONFIG_ENV += PKG_CONFIG_SYSROOT_DIR="$(TARGET_OUT_STAGING)"
-  TARGET_PKG_CONFIG_ENV += PKG_CONFIG_LIBDIR="$(_target_pkg_config_libdir)"
+  TARGET_PKG_CONFIG_ENV += PKG_CONFIG_LIBDIR="/nodir"
 endif
 
 # Environment to use when executing configure script

@@ -31,7 +31,8 @@ endif
 ###############################################################################
 
 HOST_MESON_CONFIGURE_ENV := \
-	PATH="$(_meson_host_path)"
+	PATH="$(_meson_host_path)" \
+	$(HOST_PKG_CONFIG_ENV)
 
 # Only compile static libraries so we don't have to change LD_LIBRARY_PATH
 HOST_MESON_CONFIGURE_ARGS := \
@@ -123,7 +124,6 @@ define _meson_native-compile-conf-sed
 	-e "s%@MESON_CPP_LINK_ARGS@%$(call make-sq-comma-list,$(_meson_host_ldflags) $(PRIVATE_LDFLAGS))%g" \
 	\
 	-e "s%@HOST_OUT_STAGING@%$(HOST_OUT_STAGING)%g" \
-	-e "s%@HOST_PKG_CONFIG_PATH@%$(HOST_PKG_CONFIG_PATH)%g" \
 	\
 	$(BUILD_SYSTEM)/classes/MESON/native-compile.conf.in
 endef
