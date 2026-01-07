@@ -13,7 +13,7 @@ include $(BUILD_SYSTEM)/toolchains/warnings.mk
 
 # Machine targetted by toolchain to be used by autotools and libc installation
 ifndef TARGET_TOOLCHAIN_TRIPLET
-  $(info Detecting toolchain triplet)
+  $(info Detecting target toolchain triplet)
   __toolchain_triplet_cmd := $(TARGET_CC) $(TARGET_GLOBAL_CFLAGS)
   ifeq ("$(TARGET_CC_FLAVOUR)","clang")
     ifneq ("$(TARGET_CROSS)","")
@@ -39,7 +39,32 @@ ifeq ("$(TARGET_TOOLCHAIN_TRIPLET)","")
   $(info __toolchain_triplet_cmd: $(__toolchain_triplet_cmd))
   $(error Unable to determine TARGET_TOOLCHAIN_TRIPLET))
 else
-  $(info Using toolchain triplet $(TARGET_TOOLCHAIN_TRIPLET))
+  $(info Using target toolchain triplet $(TARGET_TOOLCHAIN_TRIPLET))
+endif
+
+# Machine targetted by host toolchain to be used by autotools and libc installation
+ifndef HOST_TOOLCHAIN_TRIPLET
+  $(info Detecting host toolchain triplet)
+  __toolchain_triplet_cmd := $(HOST_CC) $(HOST_GLOBAL_CFLAGS)
+  # Ignore line with error message indicating LD_PRELOAD issues
+  HOST_TOOLCHAIN_TRIPLET := $(shell $(__toolchain_triplet_cmd) -print-multiarch 2>&1 | grep -v LD_PRELOAD)
+  ifeq ("$(HOST_TOOLCHAIN_TRIPLET)","")
+    HOST_TOOLCHAIN_TRIPLET := $(shell $(__toolchain_triplet_cmd) -dumpmachine)
+  else ifneq ("$(findstring -print-multiarch,$(HOST_TOOLCHAIN_TRIPLET))","")
+    # compiler does not support '-print-multiarch' option
+    HOST_TOOLCHAIN_TRIPLET := $(shell $(__toolchain_triplet_cmd) -dumpmachine)
+  endif
+  # Catch error in compiler invocation
+  ifneq ("$(findstring error,$(HOST_TOOLCHAIN_TRIPLET))","")
+    $(error Unable to determine HOST_TOOLCHAIN_TRIPLET: $(HOST_TOOLCHAIN_TRIPLET)))
+  endif
+endif
+
+ifeq ("$(HOST_TOOLCHAIN_TRIPLET)","")
+  $(info __toolchain_triplet_cmd: $(__toolchain_triplet_cmd))
+  $(error Unable to determine HOST_TOOLCHAIN_TRIPLET))
+else
+  $(info Using host toolchain triplet $(HOST_TOOLCHAIN_TRIPLET))
 endif
 
 # Clang uses gcc toochain(libc&binutils) to cross-compile
