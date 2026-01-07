@@ -167,7 +167,9 @@ HOST_AUTOTOOLS_LDFLAGS := \
 # Setup pkg-config
 # Use packages from both HOST_OUT_STAGING and standard places
 HOST_PKG_CONFIG_PATH := $(call make-path-list, \
+	$(HOST_OUT_STAGING)/lib/$(HOST_TOOLCHAIN_TRIPLET)/pkgconfig \
 	$(HOST_OUT_STAGING)/lib/pkgconfig \
+	$(HOST_OUT_STAGING)/$(HOST_DEFAULT_LIB_DESTDIR)/$(HOST_TOOLCHAIN_TRIPLET)/pkgconfig \
 	$(HOST_OUT_STAGING)/$(HOST_DEFAULT_LIB_DESTDIR)/pkgconfig \
 )
 HOST_PKG_CONFIG_ENV := \
