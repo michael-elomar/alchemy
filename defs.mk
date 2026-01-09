@@ -227,6 +227,16 @@ var-list-foreach = \
 		$(call $2,$(__vlf_w1),$(__vlf_w2)) \
 	)
 
+# $1: env-like
+# $2: variable name
+# e.g, $(call get-var-from-env,FOO=bar,FOO) returns bar
+get-var-from-env = $(shell $1 sh -c 'echo $$$2')
+
+# $1: env-like
+# $2: variable name
+# e.g, $(call get-var-from-env,FOO=bar,FOO) returns $(true), $(false) otherwise
+is-var-set-in-env = $(if $(patsubst $2=%,$(true),$(filter $2=%,$1)),$(true),$(false))
+
 ###############################################################################
 ## Use some colors if requested.
 ###############################################################################

@@ -16,3 +16,7 @@ c_link_args = [@MESON_C_LINK_ARGS@]
 cpp_args = [@MESON_CPP_ARGS@]
 cpp_link_args = [@MESON_CPP_LINK_ARGS@]
 wrap_mode = 'nodownload'
+pkg_config_path = '@PKG_CONFIG_PATH@'
+
+[properties]
+pkg_config_libdir = '@PKG_CONFIG_LIBDIR@'

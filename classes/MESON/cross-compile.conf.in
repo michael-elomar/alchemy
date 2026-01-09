@@ -17,6 +17,7 @@ c_link_args = [@MESON_C_LINK_ARGS@]
 cpp_args = [@MESON_CPP_ARGS@]
 cpp_link_args = [@MESON_CPP_LINK_ARGS@]
 wrap_mode = 'nodownload'
+pkg_config_path = '@PKG_CONFIG_PATH@'
 
 [properties]
 needs_exe_wrapper = true
@@ -25,6 +26,7 @@ sys_root = '@MESON_SYS_ROOT@'
 # enable meson build to pass a toolchain file to cmake
 #cmake_toolchain_file = '@HOST_DIR@/share/buildroot/toolchainfile.cmake'
 #cmake_defaults = false
+pkg_config_libdir='@PKG_CONFIG_LIBDIR@'
 
 [host_machine]
 system = '@MESON_SYSTEM@'

@@ -31,8 +31,7 @@ endif
 ###############################################################################
 
 HOST_MESON_CONFIGURE_ENV := \
-	PATH="$(_meson_host_path)" \
-	$(HOST_PKG_CONFIG_ENV)
+	PATH="$(_meson_host_path)"
 
 # Only compile static libraries so we don't have to change LD_LIBRARY_PATH
 HOST_MESON_CONFIGURE_ARGS := \
@@ -58,8 +57,7 @@ HOST_MESON_INSTALL_ARGS :=
 ###############################################################################
 
 TARGET_MESON_CONFIGURE_ENV := \
-	PATH="$(_meson_target_path)" \
-	$(TARGET_PKG_CONFIG_ENV)
+	PATH="$(_meson_target_path)"
 
 TARGET_MESON_CONFIGURE_ARGS := \
 	--prefix="$(TARGET_AUTOTOOLS_CONFIGURE_PREFIX)" \
@@ -95,6 +93,35 @@ TARGET_MESON_INSTALL_ENV := \
 TARGET_MESON_INSTALL_ARGS :=
 
 ###############################################################################
+# pkg-config handling
+###############################################################################
+
+# PKG_CONFIG_LIBDIR="" has very different semantics to PKG_CONFIG_LIBDIR
+# not being set. If the variable is not set, it is removed from the Meson
+# configuration file.
+
+# $1: pkgconfig env
+# $2: variable name
+gen-sed-for-pkgconfig-var = \
+	$(if $(call is-var-set-in-env,$1,$2), \
+		-e "s%@$2@%$(call get-var-from-env,$1,$2)%g" \
+		, \
+		-e "\%@$2@%d" \
+	)
+
+define meson_sed_native_pkgconfig_options
+	$(call gen-sed-for-pkgconfig-var,$(HOST_PKG_CONFIG_ENV),PKG_CONFIG_PATH) \
+	$(call gen-sed-for-pkgconfig-var,$(HOST_PKG_CONFIG_ENV),PKG_CONFIG_LIBDIR) \
+	$(call gen-sed-for-pkgconfig-var,$(HOST_PKG_CONFIG_ENV),PKG_CONFIG_SYSROOT_DIR)
+endef
+
+define meson_sed_cross_pkgconfig_options
+	$(call gen-sed-for-pkgconfig-var,$(TARGET_PKG_CONFIG_ENV),PKG_CONFIG_PATH) \
+	$(call gen-sed-for-pkgconfig-var,$(TARGET_PKG_CONFIG_ENV),PKG_CONFIG_LIBDIR) \
+	$(call gen-sed-for-pkgconfig-var,$(TARGET_PKG_CONFIG_ENV),PKG_CONFIG_SYSROOT_DIR)
+endef
+
+###############################################################################
 # Host native file generation.
 ###############################################################################
 
@@ -122,6 +149,8 @@ define _meson_native-compile-conf-sed
 	-e "s%@MESON_C_LINK_ARGS@%$(call make-sq-comma-list,$(_meson_host_ldflags) $(PRIVATE_LDFLAGS))%g" \
 	-e "s%@MESON_CPP_ARGS@%$(call make-sq-comma-list,$(_meson_host_cxxflags) $(PRIVATE_CXXFLAGS))%g" \
 	-e "s%@MESON_CPP_LINK_ARGS@%$(call make-sq-comma-list,$(_meson_host_ldflags) $(PRIVATE_LDFLAGS))%g" \
+	\
+	$(meson_sed_native_pkgconfig_options) \
 	\
 	-e "s%@HOST_OUT_STAGING@%$(HOST_OUT_STAGING)%g" \
 	\
@@ -209,6 +238,8 @@ define _meson_cross-compile-conf-sed
 	-e "s%@MESON_C_LINK_ARGS@%$(call make-sq-comma-list,$(_meson_target_ldflags) $(PRIVATE_LDFLAGS))%g" \
 	-e "s%@MESON_CPP_ARGS@%$(call make-sq-comma-list,$(_meson_target_cxxflags) $(PRIVATE_CXXFLAGS))%g" \
 	-e "s%@MESON_CPP_LINK_ARGS@%$(call make-sq-comma-list,$(_meson_target_ldflags) $(PRIVATE_LDFLAGS))%g" \
+	\
+	$(meson_sed_cross_pkgconfig_options) \
 	\
 	-e "s%@MESON_SYS_ROOT@%$(_meson_sys_root)%g" \
 	\
