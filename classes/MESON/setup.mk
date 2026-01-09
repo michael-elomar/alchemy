@@ -257,20 +257,20 @@ endef
 
 # Generate the native/cross compile configuration file from template
 define _meson-gen-conf-file
+	@sed $(_meson_native-compile-conf-sed) > $(PRIVATE_OBJ_DIR)/meson-native.conf
 	$(if $(PRIVATE_MODE_IS_HOST), \
-		@sed $(_meson_native-compile-conf-sed) > $(PRIVATE_OBJ_DIR)/meson.conf \
 		, \
-		@sed $(_meson_cross-compile-conf-sed) > $(PRIVATE_OBJ_DIR)/meson.conf \
+		@sed $(_meson_cross-compile-conf-sed) > $(PRIVATE_OBJ_DIR)/meson-cross.conf \
 	)
 endef
 
 # Get the native/cross compile configuration file opetion to give to meson
 define _meson-get-conf-file-args
 	$(if $(PRIVATE_MODE_IS_HOST), \
-		--native-file=$(PRIVATE_OBJ_DIR)/meson.conf \
 		, \
-		--cross-file=$(PRIVATE_OBJ_DIR)/meson.conf \
-	)
+		--cross-file=$(PRIVATE_OBJ_DIR)/meson-cross.conf \
+	) \
+	--native-file=$(PRIVATE_OBJ_DIR)/meson-native.conf
 endef
 
 define _meson-def-cmd-configure
