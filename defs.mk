@@ -1556,7 +1556,7 @@ conditional-libraries-setup = \
 					$(eval __modules.$1.DEPENDS_HOST_MODULES += $(__w2)) \
 				) \
 				, \
-				$(if $(call is-module-in-build-config,$(__w2)), \
+				$(if $(and $(call is-module-in-build-config,$(__w2)),$(call streq,$(GLOBAL_CONFIG_FILE_AVAILABLE),1)), \
 					$(eval __modules.$1.LIBRARIES += $(__w2)) \
 				) \
 			) \
