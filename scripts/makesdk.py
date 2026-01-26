@@ -936,7 +936,7 @@ def main():
 
     # Copy global config if provided
     if options.globalConfig:
-        ctx.addFile(options.globalConfig, os.path.join(ctx.outDir, "config", "global.config"))
+        ctx.addFile(options.globalConfig, os.path.join(ctx.outDir, "global.config"))
 
     # Add some TARGET_XXX variables checks to make sure that the sdk is used
     # in the correct environment
