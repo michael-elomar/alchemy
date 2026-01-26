@@ -934,6 +934,10 @@ def main():
             and not os.path.exists(os.path.join(ctx.outDir, "host", "usr", "bin", "qt.conf")):
         createQtConf(os.path.join(ctx.outDir, "host", "usr", "bin", "qt.conf"))
 
+    # Copy global config if provided
+    if options.globalConfig:
+        ctx.addFile(options.globalConfig, os.path.join(ctx.outDir, "config", "global.config"))
+
     # Add some TARGET_XXX variables checks to make sure that the sdk is used
     # in the correct environment
     target_elements = [
@@ -1011,6 +1015,11 @@ def parseArgs():
         action="count",
         default=0,
         help="verbose output (more verbose if specified twice)")
+    parser.add_argument("-g",
+        dest="globalConfig",
+        type=str,
+        default=None,
+        help="File to iinuclde as global configuration")
 
     # Parse arguments
     return parser.parse_args()

@@ -16,6 +16,10 @@ ifneq ("$(V)","0")
   MAKESDK_SCRIPT += -v
 endif
 
+ifeq ("$(GLOBAL_CONFIG_FILE_AVAILABLE)","1")
+  MAKESDK_SCRIPT += -g $(TARGET_GLOBAL_CONFIG_FILE)
+endif
+
 # $1 type of output (directory, tar, tar.gz, tar.bz2)
 define sdk-gen
 	$(Q) $(MAKESDK_SCRIPT) $(DUMP_DATABASE_XML_FILE) \
